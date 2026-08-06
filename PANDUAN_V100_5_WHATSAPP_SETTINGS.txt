@@ -1,0 +1,9 @@
+HAPPYLAUNDRY V100.5 PENGATURAN & WHATSAPP
+
+1. Jalankan supabase/005_v100_5_settings_whatsapp.sql di Supabase SQL Editor.
+2. Copy seluruh isi paket ke folder HappyLaundry-V100 dan Replace.
+3. GitHub Desktop: Commit "HappyLaundry V100.5 WhatsApp Settings" lalu Push origin.
+4. Tunggu Netlify Published.
+5. Login sebagai OWNER dan buka menu Pengaturan.
+6. Isi nama usaha, nomor WhatsApp, jam operasional, Maps, footer nota, dan template pesan.
+7. Di Kasir, setelah transaksi berhasil, gunakan tombol Cetak Nota atau Kirim WhatsApp.

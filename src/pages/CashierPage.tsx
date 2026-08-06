@@ -1,8 +1,10 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, CreditCard, Plus, Printer, Search, ShoppingCart, Trash2, UserPlus, WalletCards } from 'lucide-react'
+import { CheckCircle2, MessageCircle, Plus, Printer, Search, ShoppingCart, Trash2, UserPlus } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
+import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
+import type { StoreSettings } from '../types/settings'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft } from '../types/order'
 
@@ -43,21 +45,24 @@ export function CashierPage() {
   const [query,setQuery]=useState('')
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
-  const [success,setSuccess]=useState<{orderNo:string; total:number; paid:number}|null>(null)
+  const [success,setSuccess]=useState<{orderNo:string; total:number; paid:number; customer:string; phone:string; due:string}|null>(null)
+  const [storeSettings,setStoreSettings]=useState<StoreSettings|null>(null)
 
   const load=useCallback(async()=>{
     const start=new Date(); start.setHours(0,0,0,0)
-    const [c,s,o]=await Promise.all([
+    const [c,s,o,settings]=await Promise.all([
       supabase.from('v100_customers').select('*').order('name'),
       supabase.from('v100_services').select('*').eq('is_active',true).order('name'),
-      supabase.from('v100_orders_view').select('id,order_no,customer_name,total,paid_amount,payment_status,created_at').gte('created_at',start.toISOString()).order('created_at',{ascending:false})
+      supabase.from('v100_orders_view').select('id,order_no,customer_name,total,paid_amount,payment_status,created_at').gte('created_at',start.toISOString()).order('created_at',{ascending:false}),
+      supabase.from('v100_store_settings').select('*').eq('id',1).maybeSingle()
     ])
-    const error=c.error||s.error||o.error
+    const error=c.error||s.error||o.error||settings.error
     if(error)setMessage(error.message)
     else{
       setCustomers((c.data as Customer[])||[])
       setServices((s.data as Service[])||[])
       setTodayOrders((o.data as TodayOrder[])||[])
+      setStoreSettings((settings.data as StoreSettings|null)||null)
     }
   },[])
 
@@ -98,9 +103,24 @@ export function CashierPage() {
   }
 
   const printReceipt=(orderNo:string,customer:string,totalValue:number,paid:number)=>{
+    const settings=storeSettings
     const w=window.open('','_blank','width=420,height=700'); if(!w)return
-    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${orderNo}</title><style>body{font-family:Arial;width:58mm;margin:0 auto;padding:4mm;color:#111}h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8px 0}.row{display:flex;justify-content:space-between;font-size:12px;margin:4px 0}.strong{font-weight:700}</style></head><body><h2>HappyLaundry</h2><p>Babakan, Cirebon</p><div class="line"></div><div class="row"><span>No Order</span><b>${orderNo}</b></div><div class="row"><span>Pelanggan</span><b>${customer}</b></div><div class="line"></div><div class="row strong"><span>Total</span><span>${formatIDR(totalValue)}</span></div><div class="row"><span>Dibayar</span><span>${formatIDR(paid)}</span></div><div class="row"><span>Sisa</span><span>${formatIDR(Math.max(0,totalValue-paid))}</span></div><div class="line"></div><p>Terima kasih</p><script>window.onload=()=>window.print()</script></body></html>`)
+    const business=settings?.business_name||'HappyLaundry Babakan'
+    const address=settings?.address||'Babakan, Cirebon'
+    const footer=settings?.receipt_footer||'Terima kasih telah menggunakan HappyLaundry.'
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${orderNo}</title><style>body{font-family:Arial;width:58mm;margin:0 auto;padding:4mm;color:#111}h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8px 0}.row{display:flex;justify-content:space-between;font-size:12px;margin:4px 0}.strong{font-weight:700}.small{font-size:10px}</style></head><body><h2>${business}</h2><p class="small">${address}</p><div class="line"></div><div class="row"><span>No Order</span><b>${orderNo}</b></div><div class="row"><span>Pelanggan</span><b>${customer}</b></div><div class="line"></div><div class="row strong"><span>Total</span><span>${formatIDR(totalValue)}</span></div><div class="row"><span>Dibayar</span><span>${formatIDR(paid)}</span></div><div class="row"><span>Sisa</span><span>${formatIDR(Math.max(0,totalValue-paid))}</span></div><div class="line"></div><p class="small">${footer}</p><script>window.onload=()=>window.print()</script></body></html>`)
     w.document.close()
+  }
+
+  const sendOrderWhatsApp=()=>{
+    if(!success)return
+    try{
+      const template=storeSettings?.whatsapp_order_template||'Halo {{pelanggan}}, cucian Anda sudah kami terima. Nomor order: {{order}}. Total: {{total}}.'
+      openWhatsApp(success.phone,fillTemplate(template,{
+        pelanggan:success.customer,order:success.orderNo,total:formatIDR(success.total),
+        estimasi:success.due||'-',usaha:storeSettings?.business_name||'HappyLaundry Babakan'
+      }))
+    }catch(err){setMessage(err instanceof Error?err.message:'WhatsApp gagal dibuka.')}
   }
 
   const submit=async(e:FormEvent)=>{
@@ -114,10 +134,11 @@ export function CashierPage() {
     try{
       let selectedCustomer=customerId
       let selectedName=customers.find(c=>c.id===customerId)?.name||''
+      let selectedPhone=customers.find(c=>c.id===customerId)?.phone||''
       if(newCustomer){
         const {data,error}=await supabase.from('v100_customers').insert({name:customerName.trim(),phone:customerPhone.trim(),address:customerAddress.trim()||null}).select().single()
         if(error)throw error
-        selectedCustomer=data.id; selectedName=data.name
+        selectedCustomer=data.id; selectedName=data.name; selectedPhone=data.phone
       }
       const paid=Math.min(Number(paymentAmount||0),total)
       const {data,error}=await supabase.rpc('v100_create_order',{
@@ -132,8 +153,7 @@ export function CashierPage() {
         const pay=await supabase.rpc('v100_add_payment',{p_order_id:result.order_id,p_amount:paid,p_method:method,p_notes:'Pembayaran dari Kasir'})
         if(pay.error)throw pay.error
       }
-      setSuccess({orderNo:result.order_no,total,paid})
-      printReceipt(result.order_no,selectedName,total,paid)
+      setSuccess({orderNo:result.order_no,total,paid,customer:selectedName,phone:selectedPhone,due:dueAt?new Date(dueAt).toLocaleString('id-ID'):'-'})
       reset(); await load()
     }catch(err){setMessage(err instanceof Error?err.message:'Transaksi gagal.')}
     finally{setBusy(false)}
@@ -156,7 +176,7 @@ export function CashierPage() {
         <section className="cashier-section"><div className="cashier-section-title"><div><b>3. Pembayaran</b><small>Pilih metode dan nominal yang dibayar sekarang.</small></div></div><div className="form-grid-two"><label>Diskon<input type="number" min="0" value={discount} onChange={e=>setDiscount(Number(e.target.value))}/></label><label>Bayar Sekarang<input type="number" min="0" value={paymentAmount} onChange={e=>setPaymentAmount(Number(e.target.value))}/></label><label>Metode<select value={method} onChange={e=>setMethod(e.target.value as PayMethod)}>{methods.map(m=><option key={m.value} value={m.value}>{m.label}</option>)}</select></label><label>Estimasi Selesai<input type="datetime-local" value={dueAt} onChange={e=>setDueAt(e.target.value)}/></label><label className="full-field">Catatan<input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Contoh: tanpa pewangi kuat"/></label></div></section>
 
         {message&&<div className="error-box">{message}</div>}
-        {success&&<div className="success-box"><CheckCircle2 size={18}/>Order {success.orderNo} berhasil dibuat.</div>}
+        {success&&<div className="cashier-success-panel"><div className="success-box"><CheckCircle2 size={18}/>Order {success.orderNo} berhasil dibuat.</div><div><button type="button" className="secondary-button" onClick={()=>printReceipt(success.orderNo,success.customer,success.total,success.paid)}><Printer size={16}/>Cetak Nota</button><button type="button" className="whatsapp-button" onClick={sendOrderWhatsApp}><MessageCircle size={16}/>Kirim WhatsApp</button></div></div>}
         <div className="cashier-actions"><button type="button" className="secondary-button" onClick={reset}>Bersihkan</button><button className="primary-button" disabled={busy}><Printer size={17}/>{busy?'Menyimpan...':'Simpan & Cetak Nota'}</button></div>
       </form>
 

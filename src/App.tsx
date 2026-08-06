@@ -10,6 +10,7 @@ import { ProductionPage } from './pages/ProductionPage'
 import { PaymentsPage } from './pages/PaymentsPage'
 import { CashPage } from './pages/CashPage'
 import { CashierPage } from './pages/CashierPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { useAuth } from './lib/auth'
 
 function Protected() {
@@ -34,7 +35,7 @@ export default function App() {
         <Route path="suppliers" element={<PlaceholderPage title="Supplier" description="Supplier dan pembelian." />} />
         <Route path="payments" element={<PaymentsPage />} />
         <Route path="cash" element={<CashPage />} />
-        <Route path="settings" element={<PlaceholderPage title="Pengaturan" description="Profil usaha, jam operasional, Maps, WhatsApp, dan user." />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
