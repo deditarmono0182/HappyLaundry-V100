@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V104.2 Dashboard Omzet Period
+# HappyLaundry Enterprise V104.2.2 QR Scanner
 
 ## Jalankan
 ```bash
@@ -78,3 +78,7 @@ Hotfix kompatibilitas schema order_items tanpa membutuhkan line_total.
 
 ## V104.2
 Dashboard omzet multi-periode: 7 Hari, Bulan Ini, 3 Bulan, 6 Bulan, dan 12 Bulan.
+
+
+## V104.2.2
+Menu Scan QR Nota dengan kamera browser dan fallback nomor order manual.

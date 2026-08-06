@@ -19,6 +19,7 @@ const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.S
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
 const PublicTrackingPage=lazy(()=>import('./pages/PublicTrackingPage').then(m=>({default:m.PublicTrackingPage})))
 const BackupPage=lazy(()=>import('./pages/BackupPage').then(m=>({default:m.BackupPage})))
+const QRScannerPage=lazy(()=>import('./pages/QRScannerPage').then(m=>({default:m.QRScannerPage})))
 
 function Protected(){
   const {session,loading}=useAuth()
@@ -37,6 +38,7 @@ export default function App(){
       <Route index element={<DashboardPage/>}/>
       <Route path="cashier" element={<CashierPage/>}/>
       <Route path="orders" element={<OrdersPage/>}/>
+      <Route path="qr-scan" element={<QRScannerPage/>}/>
       <Route path="production" element={<ProductionPage/>}/>
       <Route path="customers" element={<CustomersPage/>}/>
       <Route path="services" element={<ServicesPage/>}/>

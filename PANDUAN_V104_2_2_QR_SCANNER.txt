@@ -1,0 +1,32 @@
+HAPPYLAUNDRY ENTERPRISE V104.2.2 — QR SCANNER
+
+FITUR BARU:
+- Menu baru: Scan QR Nota.
+- Scan QR menggunakan kamera perangkat jika browser mendukung BarcodeDetector.
+- QR nota otomatis diarahkan ke halaman /track/NOMOR-ORDER.
+- Input manual nomor order sebagai fallback.
+- Bisa membaca QR yang berisi link tracking HappyLaundry.
+- Tidak ada SQL baru.
+- Tidak mengubah data transaksi.
+
+CATATAN IPHONE:
+- Safari iPhone belum selalu menyediakan BarcodeDetector untuk scan langsung di halaman.
+- Jika tombol kamera menampilkan pesan tidak didukung:
+  1. Buka Kamera iPhone.
+  2. Arahkan kamera ke QR nota.
+  3. Ketuk link yang muncul.
+  4. Tracking HappyLaundry akan terbuka.
+- Input manual di menu Scan QR juga selalu tersedia.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V104.2.2 QR Scanner
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka menu Scan QR Nota.
+10. Izinkan kamera dan scan QR nota uji.

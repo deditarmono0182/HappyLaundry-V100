@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
-  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup } from 'lucide-react'
+  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { PWAInstallButton } from '../components/PWAInstallButton'
@@ -9,6 +9,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['owner', 'cashier', 'staff'] },
   { to: '/cashier', label: 'Kasir', icon: Calculator, roles: ['owner', 'cashier'] },
   { to: '/orders', label: 'Order', icon: ShoppingBag, roles: ['owner', 'cashier'] },
+  { to: '/qr-scan', label: 'Scan QR Nota', icon: QrCode, roles: ['owner','cashier','production'] },
   { to: '/production', label: 'Produksi', icon: WashingMachine, roles: ['owner', 'staff'] },
   { to: '/customers', label: 'Pelanggan', icon: Users, roles: ['owner', 'cashier'] },
   { to: '/services', label: 'Layanan & Harga', icon: Sparkles, roles: ['owner', 'cashier'] },
@@ -39,7 +40,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V104.2.1 Stable</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V104.2.2 Stable</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

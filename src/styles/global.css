@@ -2201,3 +2201,160 @@ button[type="submit"]:disabled {
     flex:1 1 auto;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V104.2.2 — QR Scanner
+   ========================================================= */
+
+.qr-scan-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(300px,.75fr);
+  gap:18px;
+  align-items:start;
+}
+
+.qr-camera-card,.qr-manual-card{
+  padding:22px!important;
+  border-radius:21px!important;
+}
+
+.qr-camera-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:17px;
+}
+
+.qr-camera-head>div{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.qr-camera-head h2,.qr-manual-card h2{
+  margin:0;
+  font-size:20px;
+}
+
+.qr-camera-head p,.qr-manual-card p{
+  margin:3px 0 0;
+  color:#6c8580;
+}
+
+.qr-camera-box{
+  position:relative;
+  min-height:420px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px dashed #a6cbbd;
+  border-radius:19px;
+  background:linear-gradient(145deg,#eef8f4,#f9fcfb);
+}
+
+.qr-camera-box video{
+  width:100%;
+  height:100%;
+  min-height:420px;
+  object-fit:cover;
+  display:none;
+}
+
+.qr-camera-box.active video{
+  display:block;
+}
+
+.qr-camera-placeholder{
+  display:grid;
+  place-items:center;
+  gap:8px;
+  text-align:center;
+  color:#75908a;
+}
+
+.qr-camera-placeholder svg{
+  color:#168b66;
+}
+
+.qr-camera-placeholder b{
+  color:#17443d;
+}
+
+.qr-target{
+  position:absolute;
+  width:min(56%,280px);
+  aspect-ratio:1;
+  inset:50% auto auto 50%;
+  transform:translate(-50%,-50%);
+}
+
+.qr-target i{
+  position:absolute;
+  width:52px;
+  height:52px;
+  border-color:#1bf09e;
+  border-style:solid;
+}
+
+.qr-target i:nth-child(1){top:0;left:0;border-width:4px 0 0 4px;border-radius:12px 0 0 0}
+.qr-target i:nth-child(2){top:0;right:0;border-width:4px 4px 0 0;border-radius:0 12px 0 0}
+.qr-target i:nth-child(3){bottom:0;left:0;border-width:0 0 4px 4px;border-radius:0 0 0 12px}
+.qr-target i:nth-child(4){bottom:0;right:0;border-width:0 4px 4px 0;border-radius:0 0 12px 0}
+
+.qr-info-box,.qr-browser-note{
+  margin-top:13px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#fff6df;
+  color:#805b13;
+  font-size:12px;
+}
+
+.qr-browser-note{
+  display:grid;
+  gap:4px;
+  background:#edf7ff;
+  color:#315c83;
+}
+
+.qr-manual-card form{
+  display:grid;
+  gap:12px;
+  margin-top:18px;
+}
+
+.qr-manual-card form .primary-button{
+  width:100%;
+}
+
+.qr-help{
+  display:grid;
+  gap:8px;
+  margin-top:20px;
+  padding:15px;
+  border-radius:14px;
+  background:#f0f8f5;
+}
+
+.qr-help code{
+  display:block;
+  overflow-wrap:anywhere;
+  color:#087654;
+  font-size:11px;
+}
+
+.qr-help small{
+  color:#718985;
+}
+
+@media(max-width:1000px){
+  .qr-scan-layout{grid-template-columns:1fr}
+}
+
+@media(max-width:600px){
+  .qr-camera-head{align-items:flex-start;flex-direction:column}
+  .qr-camera-head button{width:100%}
+  .qr-camera-box,.qr-camera-box video{min-height:330px}
+}
