@@ -1,0 +1,35 @@
+HAPPYLAUNDRY ENTERPRISE V104.2 — DASHBOARD OMZET MULTI-PERIODE
+
+PERUBAHAN:
+- Grafik Dashboard tidak lagi hanya Omzet 7 Hari.
+- Pilihan periode:
+  7 Hari
+  Bulan Ini
+  3 Bulan
+  6 Bulan
+  12 Bulan
+
+CARA MEMBACA:
+- 7 Hari: omzet per hari.
+- Bulan Ini: omzet Minggu 1 sampai Minggu 5.
+- 3 Bulan: omzet per bulan untuk 3 bulan terakhir.
+- 6 Bulan: omzet per bulan untuk 6 bulan terakhir.
+- 12 Bulan: omzet per bulan untuk 12 bulan terakhir.
+
+SUMBER DATA:
+- Menggunakan order dan paid_amount yang sudah dipakai Dashboard sebelumnya.
+- Tidak ada SQL baru.
+- Tidak mengubah database atau transaksi.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V104.2 Dashboard Omzet Period
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka Dashboard.
+10. Coba tombol 7 Hari, Bulan Ini, 3 Bulan, 6 Bulan, dan 12 Bulan.

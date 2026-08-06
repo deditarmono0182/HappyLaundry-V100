@@ -2145,3 +2145,59 @@ button[type="submit"]:disabled {
 @media(max-width:1050px){.report-filter{grid-template-columns:1fr 1fr auto auto}.report-filter .primary-button{grid-column:1/-1;width:100%}.report-grid{grid-template-columns:1fr}}
 @media(max-width:650px){.report-filter{grid-template-columns:1fr 1fr}.report-filter button{width:100%}.report-actions{width:100%}.report-actions button{flex:1}.report-bar-row{grid-template-columns:65px 1fr}.report-bar-row b{grid-column:2;text-align:left}}
 @media print{.sidebar,.topbar,.report-actions,.report-filter{display:none!important}.main-content{margin:0!important;width:100%!important}.page-container{padding:0!important}.report-card,.stat-card{box-shadow:none!important;break-inside:avoid}}
+
+
+/* =========================================================
+   HappyLaundry Enterprise V104.2 — Dashboard Omzet Multi-Periode
+   ========================================================= */
+
+.dashboard-revenue-heading{
+  align-items:flex-start!important;
+  gap:14px!important;
+}
+
+.revenue-period-tabs{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.revenue-period-tabs button{
+  min-height:34px;
+  padding:0 11px;
+  border:1px solid #b7d4ca;
+  border-radius:10px;
+  background:#fff;
+  color:#466b64;
+  font-size:11px;
+  font-weight:850;
+  cursor:pointer;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+
+.revenue-period-tabs button:hover{
+  background:#f0faf6;
+  border-color:#85bea9;
+  transform:translateY(-1px);
+}
+
+.revenue-period-tabs button.active{
+  background:#07865a;
+  color:#fff;
+  border-color:#07865a;
+  box-shadow:0 7px 17px rgba(7,134,90,.18);
+}
+
+@media(max-width:760px){
+  .dashboard-revenue-heading{
+    display:grid!important;
+  }
+  .revenue-period-tabs{
+    justify-content:flex-start;
+  }
+  .revenue-period-tabs button{
+    flex:1 1 auto;
+  }
+}

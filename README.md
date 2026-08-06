@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V104.1.1 Reporting Hotfix
+# HappyLaundry Enterprise V104.2 Dashboard Omzet Period
 
 ## Jalankan
 ```bash
@@ -74,3 +74,7 @@ Reporting Fix: omzet, pengeluaran, laba, piutang, order, metode pembayaran, laya
 
 ## V104.1.1
 Hotfix kompatibilitas schema order_items tanpa membutuhkan line_total.
+
+
+## V104.2
+Dashboard omzet multi-periode: 7 Hari, Bulan Ini, 3 Bulan, 6 Bulan, dan 12 Bulan.

@@ -11,6 +11,7 @@ export function DashboardPage() {
   const [orders,setOrders]=useState<OrderRow[]>([])
   const [cash,setCash]=useState<{amount:number;direction:'in'|'out';created_at:string}[]>([])
   const [message,setMessage]=useState('')
+  const [revenuePeriod,setRevenuePeriod]=useState<'7d'|'month'|'3m'|'6m'|'12m'>('7d')
 
   const load=useCallback(async()=>{
     const start=new Date(); start.setHours(0,0,0,0)
@@ -32,12 +33,62 @@ export function DashboardPage() {
   const completed=today.filter(r=>r.status==='completed').length
   const receivable=orders.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)
 
-  const chart=useMemo(()=>Array.from({length:7},(_,i)=>{
-    const d=new Date(); d.setDate(d.getDate()-(6-i)); d.setHours(0,0,0,0)
-    const n=new Date(d); n.setDate(n.getDate()+1)
-    return {label:d.toLocaleDateString('id-ID',{weekday:'short'}),total:orders.filter(r=>{const x=new Date(r.created_at);return x>=d&&x<n}).reduce((s,r)=>s+Number(r.paid_amount),0)}
-  }),[orders])
+  const chart=useMemo(()=>{
+    const now=new Date()
+
+    if(revenuePeriod==='7d'){
+      return Array.from({length:7},(_,i)=>{
+        const d=new Date(now); d.setDate(d.getDate()-(6-i)); d.setHours(0,0,0,0)
+        const n=new Date(d); n.setDate(n.getDate()+1)
+        return {
+          label:d.toLocaleDateString('id-ID',{weekday:'short'}),
+          total:orders
+            .filter(r=>{const x=new Date(r.created_at);return x>=d&&x<n})
+            .reduce((s,r)=>s+Number(r.paid_amount||0),0)
+        }
+      })
+    }
+
+    if(revenuePeriod==='month'){
+      const year=now.getFullYear(),month=now.getMonth()
+      return Array.from({length:5},(_,i)=>{
+        const startDay=i*7+1
+        const endDay=i===4?31:startDay+6
+        const total=orders
+          .filter(r=>{
+            const x=new Date(r.created_at)
+            return x.getFullYear()===year&&x.getMonth()===month&&x.getDate()>=startDay&&x.getDate()<=endDay
+          })
+          .reduce((s,r)=>s+Number(r.paid_amount||0),0)
+        return {label:`M${i+1}`,total}
+      })
+    }
+
+    const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
+    return Array.from({length:count},(_,i)=>{
+      const d=new Date(now.getFullYear(),now.getMonth()-(count-1-i),1)
+      const year=d.getFullYear(),month=d.getMonth()
+      const total=orders
+        .filter(r=>{
+          const x=new Date(r.created_at)
+          return x.getFullYear()===year&&x.getMonth()===month
+        })
+        .reduce((s,r)=>s+Number(r.paid_amount||0),0)
+      return {label:d.toLocaleDateString('id-ID',{month:'short'}),total}
+    })
+  },[orders,revenuePeriod])
+
   const max=Math.max(1,...chart.map(x=>x.total))
+
+  const periodTitle=revenuePeriod==='7d'
+    ?'Omzet 7 Hari'
+    :revenuePeriod==='month'
+      ?'Omzet Bulan Ini'
+      :revenuePeriod==='3m'
+        ?'Omzet 3 Bulan'
+        :revenuePeriod==='6m'
+          ?'Omzet 6 Bulan'
+          :'Omzet 12 Bulan'
 
   return <>
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."/>
@@ -52,7 +103,19 @@ export function DashboardPage() {
     </section>
     <section className="dashboard-grid">
       <article className="panel">
-        <div className="panel-heading"><div><h3>Omzet 7 Hari</h3><p>Berdasarkan pembayaran order.</p></div></div>
+        <div className="panel-heading dashboard-revenue-heading">
+          <div>
+            <h3>{periodTitle}</h3>
+            <p>{revenuePeriod==='month'?'Ringkasan omzet per minggu pada bulan berjalan.':'Berdasarkan pembayaran order.'}</p>
+          </div>
+          <div className="revenue-period-tabs">
+            <button className={revenuePeriod==='7d'?'active':''} onClick={()=>setRevenuePeriod('7d')}>7 Hari</button>
+            <button className={revenuePeriod==='month'?'active':''} onClick={()=>setRevenuePeriod('month')}>Bulan Ini</button>
+            <button className={revenuePeriod==='3m'?'active':''} onClick={()=>setRevenuePeriod('3m')}>3 Bulan</button>
+            <button className={revenuePeriod==='6m'?'active':''} onClick={()=>setRevenuePeriod('6m')}>6 Bulan</button>
+            <button className={revenuePeriod==='12m'?'active':''} onClick={()=>setRevenuePeriod('12m')}>12 Bulan</button>
+          </div>
+        </div>
         <div className="bar-chart">{chart.map(x=><div className="bar-column" key={x.label}><span>{formatIDR(x.total)}</span><div className="bar-track"><div className="bar-value" style={{height:`${Math.max(4,x.total/max*100)}%`}}/></div><b>{x.label}</b></div>)}</div>
       </article>
       <article className="panel">
