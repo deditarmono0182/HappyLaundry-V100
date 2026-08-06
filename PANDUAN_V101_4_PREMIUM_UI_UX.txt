@@ -1,0 +1,27 @@
+HAPPYLAUNDRY ENTERPRISE V101.4 — PREMIUM UI & UX
+
+PERBAIKAN UTAMA:
+- Judul dan tulisan tidak terpotong di sisi kiri
+- Margin halaman otomatis menyesuaikan ukuran monitor
+- Konten memiliki batas lebar yang rapi dan terpusat
+- Sidebar diperlebar dan dibuat lebih premium
+- Logo, menu, akun, dan tombol keluar dirapikan
+- Header dibuat lebih proporsional
+- Layout kasir lebih stabil pada laptop 1366 px
+- Ringkasan kasir otomatis pindah ke bawah pada layar sempit
+- Input tidak dapat mendorong halaman keluar layar
+- Mendukung zoom browser dan tablet
+- Tidak mengubah database, order, atau transaksi
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V101.4 Premium UI UX
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+
+TIDAK ADA SQL BARU.

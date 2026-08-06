@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V101.3 UI Premium
+# HappyLaundry Enterprise V101.4 Premium UI & UX
 
 ## Jalankan
 ```bash
@@ -38,3 +38,7 @@ Modernisasi UI kasir tanpa mengubah database dan alur transaksi.
 
 ## V101.3
 UI premium untuk dashboard, sidebar, kasir, tombol, kartu, tabel, tablet, dan HP.
+
+
+## V101.4
+Perbaikan layout terpotong, sidebar premium, header, margin desktop, laptop, tablet, dan zoom browser.
