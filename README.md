@@ -1,16 +1,19 @@
-# HappyLaundry V100 Foundation
+# HappyLaundry Enterprise V100.1
 
-## Jalankan
+Modul aktif:
+- Supabase Authentication
+- Role Owner/Kasir/Karyawan
+- Dashboard responsif
+- Master Pelanggan
+- Master Layanan & Harga
+
+## Database
+Jalankan berurutan:
+1. `supabase/001_v100_foundation.sql`
+2. `supabase/002_v100_1_master_data.sql`
+
+## Build
 ```bash
 npm install
-copy .env.example .env
-npm run dev
+npm run build
 ```
-
-## Supabase
-Jalankan `supabase/001_v100_foundation.sql`, lalu isi `.env`.
-
-## Netlify
-Build command: `npm run build`
-Publish directory: `dist`
-Environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.

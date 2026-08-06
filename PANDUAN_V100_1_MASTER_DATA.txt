@@ -1,0 +1,24 @@
+HAPPYLAUNDRY V100.1 MASTER DATA
+
+FITUR BARU
+- CRUD Pelanggan: tambah, cari, edit, hapus.
+- CRUD Layanan & Harga: kategori, satuan, harga, estimasi, status aktif.
+- Dashboard membaca jumlah pelanggan dan layanan dari Supabase.
+- Responsive untuk laptop, tablet, dan HP.
+
+CARA PASANG
+1. Supabase > SQL Editor.
+2. Jalankan supabase/002_v100_1_master_data.sql.
+3. Ekstrak ZIP V100.1.
+4. Copy semua file ke folder lokal HappyLaundry-V100.
+5. Pilih Replace files in destination.
+6. GitHub Desktop: Summary "HappyLaundry V100.1 Master Data".
+7. Commit to main lalu Push origin.
+8. Tunggu Netlify Published.
+
+PENGUJIAN
+- Login sebagai owner.
+- Buka Pelanggan > tambah satu pelanggan.
+- Edit lalu cari pelanggan tersebut.
+- Buka Layanan & Harga > pastikan 5 layanan awal muncul.
+- Tambah atau edit harga layanan.
