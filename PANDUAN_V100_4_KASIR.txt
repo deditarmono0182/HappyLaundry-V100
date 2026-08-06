@@ -1,0 +1,19 @@
+HAPPYLAUNDRY V100.4 KASIR
+
+FITUR:
+- Menu Kasir baru
+- Pelanggan lama atau pelanggan baru langsung dari kasir
+- Pilih banyak layanan
+- Hitung total, diskon, pembayaran, kembalian
+- Metode Tunai, QRIS, Transfer, Lainnya
+- Simpan order dan cetak nota 58 mm
+- Transaksi otomatis masuk Order, Produksi, Pembayaran, dan Kas Harian
+
+CARA PASANG:
+1. Tidak ada SQL baru. Pastikan SQL 001-004 sudah pernah dijalankan.
+2. Ekstrak ZIP.
+3. Copy semua isi ke folder HappyLaundry-V100 dan Replace.
+4. GitHub Desktop: Summary HappyLaundry V100.4 Kasir.
+5. Commit to main lalu Push origin.
+6. Tunggu Netlify Published.
+7. Login dan buka menu Kasir.

@@ -18,3 +18,7 @@ Environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
 
 ## V100.2
 Order Laundry, status produksi, pembayaran awal, dan nota 58 mm.
+
+
+## V100.4
+Menu kasir transaksi baru, pembayaran langsung, kembalian, dan nota 58 mm.

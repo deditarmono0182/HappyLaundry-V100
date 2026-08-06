@@ -9,6 +9,7 @@ import { OrdersPage } from './pages/OrdersPage'
 import { ProductionPage } from './pages/ProductionPage'
 import { PaymentsPage } from './pages/PaymentsPage'
 import { CashPage } from './pages/CashPage'
+import { CashierPage } from './pages/CashierPage'
 import { useAuth } from './lib/auth'
 
 function Protected() {
@@ -24,6 +25,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<Protected />}>
         <Route index element={<DashboardPage />} />
+        <Route path="cashier" element={<CashierPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="production" element={<ProductionPage />} />
         <Route path="customers" element={<CustomersPage />} />
