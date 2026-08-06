@@ -5,3 +5,5 @@ export const formatRupiah = (value: number) => new Intl.NumberFormat('id-ID', {
 }).format(value || 0)
 
 export const normalizePhone = (value: string) => value.replace(/[^0-9+]/g, '')
+
+export const formatIDR = formatRupiah

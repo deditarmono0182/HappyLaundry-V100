@@ -1,0 +1,15 @@
+HAPPYLAUNDRY V100.3.1 BUILD FIX
+
+Perbaikan:
+- Memperbaiki menu Pembayaran di AppLayout.tsx.
+- Menambahkan alias formatIDR agar CashPage dan PaymentsPage dapat dibuild.
+
+Cara pasang:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop > Summary: Fix build V100.3.1.
+5. Commit to main lalu Push origin.
+6. Netlify deploy otomatis.
+
+SQL 004 tidak perlu dijalankan ulang jika sebelumnya sudah berhasil.

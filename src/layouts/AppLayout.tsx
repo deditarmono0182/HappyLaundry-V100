@@ -12,8 +12,8 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/services', label: 'Layanan & Harga', icon: Sparkles, roles: ['owner', 'cashier'] },
   { to: '/inventory', label: 'Stok Bahan', icon: Package, roles: ['owner', 'staff'] },
   { to: '/suppliers', label: 'Supplier', icon: Truck, roles: ['owner', 'staff'] },
-  { to: '/cash', label: 'Kas Harian', icon: WalletCards,
-  CreditCard, roles: ['owner', 'cashier'] },
+  { to: '/payments', label: 'Pembayaran', icon: CreditCard, roles: ['owner', 'cashier'] },
+  { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
   { to: '/settings', label: 'Pengaturan', icon: Settings, roles: ['owner'] }
 ]
 
