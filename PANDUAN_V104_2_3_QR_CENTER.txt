@@ -1,0 +1,47 @@
+HAPPYLAUNDRY ENTERPRISE V104.2.3 — QR CENTER
+
+PERUBAHAN UTAMA:
+- Menu Scan QR Nota berubah menjadi QR Center.
+- Scan QR / pencarian manual tidak lagi diarahkan otomatis ke tracking pelanggan.
+- Nomor order dicari langsung di v100_orders_view.
+- Setelah ditemukan, tampil:
+  Nomor order
+  Pelanggan
+  Telepon
+  Status cucian
+  Status pembayaran
+  Total
+  Sudah bayar
+  Sisa tagihan
+  Estimasi selesai
+
+TOMBOL CEPAT:
+- Bayar Sekarang
+  Membuka menu Pembayaran dan langsung memilih order tersebut.
+- Detail Order
+  Membuka menu Order dan langsung membuka detail order.
+- Produksi
+  Membuka menu Produksi dan langsung memfilter order tersebut.
+- Cetak Nota
+  Cetak cepat 58mm dari QR Center.
+- WhatsApp
+  Membuka WhatsApp pelanggan.
+- Tracking Pelanggan
+  Membuka halaman tracking publik di tab baru.
+
+TIDAK ADA SQL BARU.
+Database tidak berubah.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V104.2.3 QR Center
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+9. Buka QR Center.
+10. Ketik nomor order atau scan QR.
+11. Uji tombol Bayar Sekarang, Detail Order, Produksi, Cetak, dan WhatsApp.

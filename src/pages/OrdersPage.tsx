@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Trash2
 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { formatRupiah } from '../lib/format'
@@ -30,6 +31,7 @@ const emptyOrder = {
 const statusFlow: OrderStatus[] = ['received', 'washing', 'drying', 'ironing', 'packing', 'ready', 'completed']
 
 export function OrdersPage() {
+  const [searchParams]=useSearchParams()
   const [rows, setRows] = useState<OrderRow[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [services, setServices] = useState<Service[]>([])
@@ -72,6 +74,13 @@ export function OrdersPage() {
   }, [])
 
   useEffect(() => { void load() }, [load])
+  useEffect(()=>{
+    const orderParam=searchParams.get('order')?.trim()
+    if(!orderParam||rows.length===0)return
+    setQuery(orderParam)
+    const found=rows.find(row=>row.order_no.toLowerCase()===orderParam.toLowerCase())
+    if(found)setDetail(found)
+  },[searchParams,rows])
 
   const filtered = useMemo(() => {
     const keyword = query.trim().toLowerCase()

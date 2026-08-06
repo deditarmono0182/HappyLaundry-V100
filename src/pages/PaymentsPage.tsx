@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { CircleDollarSign, CreditCard, Search, WalletCards } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
@@ -11,6 +12,7 @@ type Method='cash'|'qris'|'transfer'|'other'
 const methodLabels:Record<Method,string>={cash:'Tunai',qris:'QRIS',transfer:'Transfer',other:'Lainnya'}
 
 export function PaymentsPage(){
+  const [searchParams]=useSearchParams()
   const [rows,setRows]=useState<OrderRow[]>([])
   const [query,setQuery]=useState('')
   const [selected,setSelected]=useState<OrderRow|null>(null)
@@ -25,6 +27,13 @@ export function PaymentsPage(){
     else setRows(((data as OrderRow[])||[]).filter(r=>Number(r.paid_amount)<Number(r.total)))
   },[])
   useEffect(()=>{void load()},[load])
+  useEffect(()=>{
+    const orderParam=searchParams.get('order')?.trim()
+    if(!orderParam||rows.length===0)return
+    setQuery(orderParam)
+    const found=rows.find(row=>row.order_no.toLowerCase()===orderParam.toLowerCase())
+    if(found)openPay(found)
+  },[searchParams,rows])
 
   const filtered=useMemo(()=>{const k=query.toLowerCase().trim();return !k?rows:rows.filter(r=>`${r.order_no} ${r.customer_name} ${r.customer_phone}`.toLowerCase().includes(k))},[rows,query])
   const receivable=rows.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)

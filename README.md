@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V104.2.2 QR Scanner
+# HappyLaundry Enterprise V104.2.3 QR Center
 
 ## Jalankan
 ```bash
@@ -82,3 +82,7 @@ Dashboard omzet multi-periode: 7 Hari, Bulan Ini, 3 Bulan, 6 Bulan, dan 12 Bulan
 
 ## V104.2.2
 Menu Scan QR Nota dengan kamera browser dan fallback nomor order manual.
+
+
+## V104.2.3
+QR Center: cari order di aplikasi, pembayaran cepat, detail order, produksi, cetak, WhatsApp, dan tracking.

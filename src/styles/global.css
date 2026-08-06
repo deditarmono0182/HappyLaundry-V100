@@ -2358,3 +2358,157 @@ button[type="submit"]:disabled {
   .qr-camera-head button{width:100%}
   .qr-camera-box,.qr-camera-box video{min-height:330px}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V104.2.3 — QR Center
+   ========================================================= */
+
+.qr-center-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(330px,.75fr);
+  gap:18px;
+  align-items:start;
+}
+
+.qr-search-order{
+  position:sticky;
+  top:90px;
+}
+
+.qr-order-result{
+  margin-top:18px;
+  padding:22px!important;
+  border-radius:22px!important;
+  border:1px solid #afd8c8!important;
+  box-shadow:0 18px 42px rgba(7,91,67,.11)!important;
+}
+
+.qr-order-title{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:flex-start;
+  padding-bottom:17px;
+  border-bottom:1px solid #e1eee9;
+}
+
+.qr-order-title>div:first-child{
+  display:grid;
+  gap:3px;
+}
+
+.qr-order-title>div:first-child>span{
+  color:#07865a;
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:1.3px;
+}
+
+.qr-order-title h2{
+  margin:0;
+  font-size:27px;
+}
+
+.qr-order-title p{
+  margin:0;
+  color:#718985;
+}
+
+.qr-order-badges{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.qr-order-summary{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:11px;
+  margin:18px 0;
+}
+
+.qr-order-summary>div{
+  display:grid;
+  gap:5px;
+  padding:15px;
+  border-radius:15px;
+  background:#f2f9f6;
+  border:1px solid #deebe6;
+}
+
+.qr-order-summary span{
+  color:#6c8580;
+  font-size:11px;
+}
+
+.qr-order-summary b{
+  color:#123f38;
+  font-size:16px;
+}
+
+.qr-order-summary .has-balance{
+  background:#fff7e9;
+  border-color:#f1d39d;
+}
+
+.qr-order-summary .has-balance b{
+  color:#a25e09;
+}
+
+.qr-center-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(150px,1fr));
+  gap:9px;
+}
+
+.qr-center-actions button{
+  min-height:49px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 13px;
+  border:1px solid #add0c3;
+  border-radius:12px;
+  background:#fff;
+  color:#17453e;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.qr-center-actions button:hover{
+  background:#f0faf6;
+}
+
+.qr-center-actions .qr-action-primary{
+  background:#07865a;
+  border-color:#07865a;
+  color:#fff;
+  box-shadow:0 9px 20px rgba(7,134,90,.18);
+}
+
+.qr-center-actions .qr-action-paid{
+  background:#e4f7ed;
+  color:#08734e;
+  border-color:#b9e0d0;
+  cursor:default;
+}
+
+@media(max-width:1050px){
+  .qr-center-grid{grid-template-columns:1fr}
+  .qr-search-order{position:static}
+}
+
+@media(max-width:780px){
+  .qr-order-summary{grid-template-columns:1fr 1fr}
+  .qr-center-actions{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:520px){
+  .qr-order-title{display:grid}
+  .qr-order-badges{justify-content:flex-start}
+  .qr-order-summary{grid-template-columns:1fr}
+  .qr-center-actions{grid-template-columns:1fr}
+}

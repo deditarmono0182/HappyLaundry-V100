@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ChevronRight, MessageCircle, Search, WashingMachine } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
@@ -12,8 +13,13 @@ const phone=(v:string)=>{const x=v.replace(/\D/g,'');return x.startsWith('0')?'6
 const rupiah=(v:number)=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v)
 
 export function ProductionPage(){
+  const [searchParams]=useSearchParams()
   const [rows,setRows]=useState<OrderRow[]>([])
   const [query,setQuery]=useState('')
+  useEffect(()=>{
+    const orderParam=searchParams.get('order')?.trim()
+    if(orderParam)setQuery(orderParam)
+  },[searchParams])
   const [filter,setFilter]=useState<'all'|'overdue'>('all')
   const [message,setMessage]=useState('')
   const [settings,setSettings]=useState({business_name:'HappyLaundry Babakan',whatsapp_ready_template:'Halo {nama}, laundry {order} sudah siap diambil. Terima kasih. {usaha}'})
