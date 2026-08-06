@@ -41,29 +41,360 @@
 .cashier-pro-features ul{margin:0;padding-left:20px;display:grid;gap:6px;color:#365c58}
 @media(max-width:850px){.receipt-actions{grid-template-columns:1fr 1fr!important}}
 @media(max-width:480px){.receipt-actions{grid-template-columns:1fr!important}.quick-pay-row button{flex:1}}
-/* ===== Tombol Utama ===== */
 
-button {
-  font-weight: 700;
+
+/* =========================================================
+   HappyLaundry Enterprise V101.2.1 — UI Modern Kasir
+   ========================================================= */
+
+.cashier-layout {
+  gap: 22px !important;
 }
 
-button[type="submit"],
-.btn-primary,
-.primary-button {
-  background: #0f8f5f !important;
-  color: #ffffff !important;
-  border: 1px solid #0f8f5f !important;
+.cashier-form {
+  gap: 18px !important;
+  padding: 20px !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 45px rgba(7, 74, 54, .09) !important;
 }
 
-button[type="submit"]:hover,
-.btn-primary:hover,
-.primary-button:hover {
-  background: #0b744d !important;
-  color: #ffffff !important;
+.cashier-section {
+  padding: 20px !important;
+  border-radius: 18px !important;
+  border: 1px solid #d4e7e0 !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,252,250,.98)) !important;
+  box-shadow: 0 8px 22px rgba(20, 72, 60, .05) !important;
 }
 
-button[type="submit"] *,
-.btn-primary *,
-.primary-button * {
-  color: #ffffff !important;
+.cashier-section-title {
+  margin-bottom: 17px !important;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #e5efeb;
+}
+
+.cashier-section-title b {
+  font-size: 18px !important;
+  color: #073f37 !important;
+  letter-spacing: -.2px;
+}
+
+.cashier-section-title small {
+  font-size: 13px !important;
+  color: #6a827f !important;
+  margin-top: 4px;
+}
+
+/* Modern form fields */
+.cashier-form label {
+  color: #173f3b !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.cashier-form input,
+.cashier-form select,
+.cashier-form textarea,
+.wide-select,
+.cashier-item input,
+.cashier-item select {
+  min-height: 48px !important;
+  border: 1px solid #b9d2ca !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #123c37 !important;
+  font-size: 15px !important;
+  padding: 0 14px !important;
+  outline: none !important;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease !important;
+}
+
+.cashier-form textarea {
+  padding-top: 12px !important;
+}
+
+.cashier-form input:focus,
+.cashier-form select:focus,
+.cashier-form textarea:focus,
+.wide-select:focus,
+.cashier-item input:focus,
+.cashier-item select:focus {
+  border-color: #079064 !important;
+  box-shadow: 0 0 0 4px rgba(7, 144, 100, .12) !important;
+}
+
+.cashier-search {
+  min-height: 50px !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+}
+
+.cashier-search input {
+  border: 0 !important;
+  min-height: 44px !important;
+  box-shadow: none !important;
+}
+
+/* Service rows */
+.cashier-items {
+  gap: 12px !important;
+}
+
+.cashier-item {
+  grid-template-columns: minmax(220px, 2fr) 110px 145px 48px !important;
+  gap: 12px !important;
+  padding: 13px !important;
+  border: 1px solid #d8e7e2;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 6px 17px rgba(13, 77, 59, .055);
+}
+
+.cashier-item > b {
+  font-size: 16px !important;
+  color: #073f37 !important;
+}
+
+.cashier-item button {
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  border-radius: 12px !important;
+  transition: transform .16s ease, background .16s ease !important;
+}
+
+.cashier-item button:hover {
+  transform: translateY(-1px);
+  background: #ffe5e5 !important;
+}
+
+/* Quick payment */
+.quick-pay-row {
+  padding: 15px !important;
+  border: 1px solid #c5ddd4 !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #f1faf6, #f8fcfa) !important;
+  gap: 10px !important;
+}
+
+.quick-pay-row > span {
+  font-size: 14px !important;
+}
+
+.quick-pay-row button {
+  min-height: 42px;
+  padding: 9px 16px !important;
+  border-radius: 11px !important;
+  background: #fff !important;
+  box-shadow: 0 4px 10px rgba(8, 125, 85, .08);
+}
+
+.quick-pay-row button:hover {
+  background: #087d55 !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+/* Summary card */
+.cashier-summary {
+  gap: 17px !important;
+}
+
+.cashier-total-card {
+  border-radius: 22px !important;
+  padding: 22px !important;
+  background:
+    radial-gradient(circle at 95% 0%, rgba(255,255,255,.16), transparent 33%),
+    linear-gradient(145deg, #087a54 0%, #0aae74 100%) !important;
+  box-shadow: 0 22px 42px rgba(5, 109, 73, .24) !important;
+}
+
+.cashier-total-card > span {
+  font-size: 14px !important;
+  font-weight: 750 !important;
+}
+
+.cashier-total-card > strong {
+  font-size: 42px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -1px;
+}
+
+.cashier-total-card > div {
+  min-height: 43px;
+  align-items: center;
+  font-size: 14px !important;
+}
+
+.cashier-total-card > div b {
+  font-size: 15px !important;
+}
+
+.cashier-change {
+  padding: 13px !important;
+  background: rgba(255,255,255,.18) !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 12px !important;
+}
+
+/* Enterprise note card and today's transactions */
+.cashier-pro-features,
+.cashier-today {
+  border-radius: 18px !important;
+  padding: 19px !important;
+  box-shadow: 0 13px 30px rgba(17, 76, 61, .08) !important;
+}
+
+.cashier-pro-features header,
+.cashier-today header {
+  font-size: 16px !important;
+}
+
+/* Success panel */
+.cashier-success-panel {
+  padding: 17px !important;
+  border: 1px solid #9ed9bd !important;
+  border-radius: 17px !important;
+  background:
+    linear-gradient(135deg, #e9faf2 0%, #f6fdf9 100%) !important;
+  box-shadow: 0 12px 28px rgba(8, 125, 85, .11) !important;
+}
+
+.cashier-success-panel .success-box {
+  font-size: 15px !important;
+  font-weight: 850 !important;
+}
+
+.receipt-actions {
+  gap: 10px !important;
+}
+
+.receipt-actions button {
+  min-height: 46px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+}
+
+/* Main actions */
+.cashier-actions {
+  position: sticky;
+  bottom: 12px;
+  z-index: 8;
+  padding: 13px;
+  border: 1px solid #d4e7e0;
+  border-radius: 16px;
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 32px rgba(12, 71, 57, .13);
+}
+
+.cashier-actions .secondary-button,
+.cashier-actions .primary-button,
+.cashier-actions button[type="submit"] {
+  min-height: 52px !important;
+  border-radius: 13px !important;
+  padding: 0 22px !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+}
+
+.cashier-actions .primary-button,
+.cashier-actions button[type="submit"] {
+  min-width: 240px;
+  background: linear-gradient(135deg, #07865a, #0aae74) !important;
+  color: #fff !important;
+  border-color: #07865a !important;
+  box-shadow: 0 9px 20px rgba(7, 134, 90, .24);
+}
+
+.cashier-actions .primary-button *,
+.cashier-actions button[type="submit"] * {
+  color: #fff !important;
+  stroke: #fff !important;
+}
+
+.cashier-actions .primary-button:hover,
+.cashier-actions button[type="submit"]:hover {
+  background: linear-gradient(135deg, #066e4b, #088f63) !important;
+  transform: translateY(-1px);
+}
+
+/* Buttons throughout cashier */
+.cashier-form .secondary-button {
+  min-height: 45px;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+}
+
+.cashier-empty {
+  min-height: 130px !important;
+  border-radius: 15px !important;
+  background: linear-gradient(180deg, #fbfefd, #f4faf7);
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .cashier-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cashier-summary {
+    position: static !important;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cashier-total-card {
+    grid-row: span 2;
+  }
+}
+
+/* Mobile */
+@media (max-width: 760px) {
+  .cashier-form {
+    padding: 13px !important;
+  }
+
+  .cashier-section {
+    padding: 15px !important;
+  }
+
+  .cashier-item {
+    grid-template-columns: 1fr 100px !important;
+  }
+
+  .cashier-item > b {
+    text-align: left !important;
+  }
+
+  .cashier-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cashier-total-card {
+    grid-row: auto;
+  }
+
+  .cashier-actions {
+    flex-direction: column !important;
+  }
+
+  .cashier-actions button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .cashier-item {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cashier-item button {
+    width: 100% !important;
+  }
+
+  .cashier-total-card > strong {
+    font-size: 35px !important;
+  }
 }

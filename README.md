@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V101.2 Kasir Pro
+# HappyLaundry Enterprise V101.2.1 UI Modern
 
 ## Jalankan
 ```bash
@@ -30,3 +30,7 @@ Pengaturan profil laundry, template WhatsApp, nota dinamis, dan tombol WhatsApp 
 
 ## V101.2
 Kasir Pro dengan nota 58/80 mm, A4/PDF, QR status, barcode, diskon persen, dan pembayaran cepat.
+
+
+## V101.2.1
+Modernisasi UI kasir tanpa mengubah database dan alur transaksi.
