@@ -1,0 +1,18 @@
+HAPPYLAUNDRY V100.0.1 BUILD FIX
+
+Perbaikan:
+- Menambahkan tipe import.meta.env untuk Vite.
+- Memperbaiki konfigurasi TypeScript.
+- Build command sudah diuji dengan npm run build.
+
+CARA UPDATE:
+1. Ekstrak ZIP ini.
+2. Copy seluruh isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop: Summary = Fix build V100.0.1.
+5. Commit to main lalu Push origin.
+6. Netlify akan deploy otomatis.
+
+Environment variables tetap:
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
