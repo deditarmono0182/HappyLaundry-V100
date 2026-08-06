@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CheckCircle2, FileText, MessageCircle, Plus, Printer, QrCode, Search,
   ShoppingCart, Trash2, UserPlus, WalletCards
@@ -72,6 +72,8 @@ export function CashierPage() {
   const [message,setMessage]=useState('')
   const [success,setSuccess]=useState<SuccessData|null>(null)
   const [storeSettings,setStoreSettings]=useState<StoreSettings|null>(null)
+  const formRef=useRef<HTMLFormElement|null>(null)
+  const customerSearchRef=useRef<HTMLInputElement|null>(null)
 
   const load=useCallback(async()=>{
     const start=new Date(); start.setHours(0,0,0,0)
@@ -95,12 +97,40 @@ export function CashierPage() {
 
   useEffect(()=>{void load()},[load])
 
+  // Keyboard shortcuts for faster cashier operation.
+  useEffect(()=>{
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==='F2'){
+        event.preventDefault()
+        customerSearchRef.current?.focus()
+      }
+      if(event.key==='F4'){
+        event.preventDefault()
+        addItem()
+      }
+      if(event.ctrlKey&&event.key==='Enter'){
+        event.preventDefault()
+        if(!busy)formRef.current?.requestSubmit()
+      }
+      if(event.key==='Escape'&&items.length>0&&!busy){
+        event.preventDefault()
+        if(window.confirm('Bersihkan transaksi yang sedang diisi?'))reset()
+      }
+    }
+    window.addEventListener('keydown',onKeyDown)
+    return()=>window.removeEventListener('keydown',onKeyDown)
+  },[busy,items.length,services,total])
+
   const subtotal=useMemo(()=>items.reduce((sum,item)=>sum+item.subtotal,0),[items])
   const discount=discountMode==='percent'
     ? Math.min(subtotal, subtotal*Math.min(100,Math.max(0,Number(discountValue||0)))/100)
     : Math.min(subtotal,Math.max(0,Number(discountValue||0)))
   const total=Math.max(0,subtotal-discount)
   const change=Math.max(0,Number(paymentAmount||0)-total)
+  const hasCustomer=newCustomer
+    ? Boolean(customerName.trim()&&customerPhone.trim())
+    : Boolean(customerId)
+  const canSubmit=hasCustomer&&items.length>0&&total>=0&&!busy
 
   const filteredCustomers=useMemo(()=>{
     const key=query.trim().toLowerCase()
@@ -133,7 +163,12 @@ export function CashierPage() {
   const reset=()=>{
     setCustomerId('');setNewCustomer(false);setCustomerName('');setCustomerPhone('');setCustomerAddress('')
     setItems([]);setDiscountValue(0);setDiscountMode('nominal');setPaymentAmount(0)
-    setMethod('cash');setDueAt('');setNotes('');setQuery('')
+    setMethod('cash');setDueAt('');setNotes('');setQuery('');setMessage('')
+  }
+
+  const confirmReset=()=>{
+    if(items.length===0){reset();return}
+    if(window.confirm('Bersihkan transaksi yang sedang diisi?'))reset()
   }
 
   const quickPay=(mode:'exact'|'50k'|'100k')=>{
@@ -298,8 +333,11 @@ export function CashierPage() {
       title="Kasir / Transaksi Baru"
       description="Buat order, terima pembayaran, cetak nota profesional, dan kirim WhatsApp."
     />
+    {busy&&<div className="saving-overlay" role="status" aria-live="polite">
+      <div className="saving-card"><span className="saving-spinner"/><b>Menyimpan transaksi...</b><small>Jangan tutup halaman.</small></div>
+    </div>}
     <div className="cashier-layout">
-      <form className="panel cashier-form" onSubmit={submit}>
+      <form ref={formRef} className="panel cashier-form" onSubmit={submit} aria-busy={busy}>
         <section className="cashier-section">
           <div className="cashier-section-title">
             <div><b>1. Pelanggan</b><small>Pilih pelanggan lama atau tambah pelanggan baru.</small></div>
@@ -315,7 +353,7 @@ export function CashierPage() {
               </div>
             : <>
                 <label className="search-box cashier-search">
-                  <Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari nama atau WhatsApp"/>
+                  <Search size={18}/><input ref={customerSearchRef} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari nama atau WhatsApp"/>
                 </label>
                 <select className="wide-select" value={customerId} onChange={e=>setCustomerId(e.target.value)}>
                   <option value="">Pilih pelanggan</option>
@@ -387,8 +425,8 @@ export function CashierPage() {
           </div>
         </div>}
         <div className="cashier-actions">
-          <button type="button" className="secondary-button" onClick={reset}>Bersihkan</button>
-          <button className="primary-button" disabled={busy}><WalletCards size={17}/>{busy?'Menyimpan...':'Simpan Transaksi'}</button>
+          <button type="button" className="secondary-button" onClick={confirmReset} disabled={busy}>Bersihkan</button>
+          <button className="primary-button" disabled={!canSubmit} title={!canSubmit?'Pilih pelanggan dan tambahkan layanan terlebih dahulu.':'Ctrl+Enter untuk menyimpan'}><WalletCards size={17}/>{busy?'Menyimpan...':'Simpan Transaksi'}</button>
         </div>
       </form>
 
@@ -400,6 +438,13 @@ export function CashierPage() {
           <div><span>Dibayar</span><b>{formatIDR(Math.min(paymentAmount,total))}</b></div>
           {method==='cash'&&paymentAmount>total&&<div className="cashier-change"><span>Kembalian</span><b>{formatIDR(change)}</b></div>}
           <div><span>Sisa Tagihan</span><b>{formatIDR(Math.max(0,total-paymentAmount))}</b></div>
+        </section>
+        <section className="panel cashier-shortcuts">
+          <header><b>Shortcut Kasir</b><span>V102 Stable</span></header>
+          <div><kbd>F2</kbd><span>Cari pelanggan</span></div>
+          <div><kbd>F4</kbd><span>Tambah layanan</span></div>
+          <div><kbd>Ctrl + Enter</kbd><span>Simpan transaksi</span></div>
+          <div><kbd>Esc</kbd><span>Bersihkan form</span></div>
         </section>
         <section className="panel cashier-pro-features">
           <header><QrCode size={20}/><b>Nota Enterprise</b></header>

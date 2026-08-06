@@ -14,6 +14,7 @@ const rupiah=(v:number)=>new Intl.NumberFormat('id-ID',{style:'currency',currenc
 export function ProductionPage(){
   const [rows,setRows]=useState<OrderRow[]>([])
   const [query,setQuery]=useState('')
+  const [filter,setFilter]=useState<'all'|'overdue'>('all')
   const [message,setMessage]=useState('')
   const [settings,setSettings]=useState({business_name:'HappyLaundry Babakan',whatsapp_ready_template:'Halo {nama}, laundry {order} sudah siap diambil. Terima kasih. {usaha}'})
 
@@ -27,7 +28,14 @@ export function ProductionPage(){
   },[])
   useEffect(()=>{void load()},[load])
 
-  const filtered=useMemo(()=>{const q=query.toLowerCase().trim();return q?rows.filter(r=>`${r.order_no} ${r.customer_name} ${r.customer_phone}`.toLowerCase().includes(q)):rows},[query,rows])
+  const filtered=useMemo(()=>{
+    const q=query.toLowerCase().trim()
+    const searched=q?rows.filter(r=>`${r.order_no} ${r.customer_name} ${r.customer_phone}`.toLowerCase().includes(q)):rows
+    if(filter==='overdue')return searched.filter(r=>r.due_at&&new Date(r.due_at)<new Date())
+    return searched
+  },[query,rows,filter])
+
+  const isOverdue=(row:OrderRow)=>Boolean(row.due_at&&new Date(row.due_at)<new Date()&&row.status!=='ready')
 
   const whatsapp=(r:OrderRow)=>{
     const p=phone(r.customer_phone)
@@ -44,16 +52,25 @@ export function ProductionPage(){
   }
 
   return <>
-    <PageHeader eyebrow="PRODUKSI" title="Papan Proses Cucian" description="Cari dan pindahkan order sesuai tahap proses."
-      action={<label className="search-box production-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari order, nama, atau WhatsApp"/></label>}/>
+    <PageHeader eyebrow="PRODUKSI STABLE" title="Papan Proses Cucian" description="Cari, pantau keterlambatan, dan pindahkan order sesuai tahap proses."
+      action={<div className="production-tools">
+        <select value={filter} onChange={e=>setFilter(e.target.value as 'all'|'overdue')} aria-label="Filter produksi">
+          <option value="all">Semua order aktif</option>
+          <option value="overdue">Terlambat saja</option>
+        </select>
+        <label className="search-box production-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari order, nama, atau WhatsApp"/></label>
+      </div>}/>
     {message&&<div className="error-box inline-message">{message}</div>}
     <div className="production-board">{columns.map(s=>{
       const list=filtered.filter(r=>r.status===s)
       return <section className={`production-column production-${s}`} key={s}>
         <header><div><span className={`status-dot status-${s}`}/><b>{statusLabels[s]}</b></div><span>{list.length}</span></header>
-        <div className="production-cards">{list.map(r=><article className="production-card" key={r.id}>
+        <div className="production-cards">{list.map(r=><article className={`production-card ${isOverdue(r)?'production-overdue':''}`} key={r.id}>
           <div className="production-card-head"><div><b>{r.order_no}</b><small>{r.customer_name}</small></div><span className={`badge payment-${r.payment_status}`}>{r.payment_status==='paid'?'Lunas':r.payment_status==='partial'?'DP':'Belum Bayar'}</span></div>
-          <small>WA: {r.customer_phone||'-'}</small>{r.due_at&&<small>Estimasi: {new Date(r.due_at).toLocaleString('id-ID')}</small>}
+          <small>WA: {r.customer_phone||'-'}</small>
+          {r.due_at&&<small className={isOverdue(r)?'overdue-text':''}>
+            {isOverdue(r)?'⚠ Terlambat: ':'Estimasi: '}{new Date(r.due_at).toLocaleString('id-ID')}
+          </small>}
           <div className="production-card-actions">{s==='ready'&&<button className="whatsapp-button" onClick={()=>whatsapp(r)}><MessageCircle size={15}/>WhatsApp</button>}
           <button onClick={()=>void move(r)}>{s==='ready'?'Selesaikan':'Tahap Berikutnya'}<ChevronRight size={15}/></button></div>
         </article>)}

@@ -1,0 +1,53 @@
+HAPPYLAUNDRY ENTERPRISE V102.0 — PRODUCTION READY
+
+FOKUS VERSI:
+- Menstabilkan alur kasir dan produksi untuk operasional harian.
+- Tidak mengubah database dan tidak menghapus data.
+
+PERBAIKAN KASIR:
+- Tombol Simpan otomatis nonaktif jika pelanggan/layanan belum lengkap.
+- Mencegah klik Simpan berulang saat transaksi sedang diproses.
+- Overlay “Menyimpan transaksi” agar kasir tidak menutup halaman.
+- Konfirmasi sebelum membersihkan transaksi yang sedang diisi.
+- Shortcut keyboard:
+  F2            Cari pelanggan
+  F4            Tambah layanan
+  Ctrl + Enter  Simpan transaksi
+  Esc           Bersihkan form
+- Cetak 58 mm, 80 mm, A4/PDF, QR, barcode, dan WhatsApp tetap tersedia.
+
+PERBAIKAN PRODUKSI:
+- Filter Semua Order / Terlambat Saja.
+- Order melewati estimasi diberi border oranye.
+- Tulisan estimasi berubah menjadi peringatan keterlambatan.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V102.0 Production Ready
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+
+TIDAK ADA SQL BARU.
+
+CHECKLIST UJI SEBELUM DIPAKAI:
+[ ] Login Owner berhasil.
+[ ] Tambah pelanggan berhasil.
+[ ] Tambah layanan berhasil.
+[ ] Buat order tunai berhasil.
+[ ] Buat order DP berhasil.
+[ ] Cetak nota 58 mm berhasil.
+[ ] Status Produksi bisa dipindahkan.
+[ ] WhatsApp Siap Diambil membuka pesan.
+[ ] Pembayaran masuk Kas Harian.
+[ ] Dashboard dan Laporan tidak menampilkan error merah.
+
+SARAN OPERASIONAL:
+- Jangan hapus repository V100 lama.
+- Gunakan akun Owner hanya untuk pengaturan/laporan.
+- Buat akun Kasir dan Produksi terpisah.
+- Backup data Supabase sebelum perubahan besar.
