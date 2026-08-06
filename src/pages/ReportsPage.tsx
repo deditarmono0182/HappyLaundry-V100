@@ -34,10 +34,15 @@ interface CashRow{
 
 interface ItemRow{
   order_id:string
-  service_name:string
-  quantity:number
+  service_name?:string
+  quantity?:number
+  qty?:number
   line_total?:number
   subtotal?:number
+  total?:number
+  price?:number
+  unit_price?:number
+  price_per_unit?:number
 }
 
 interface CustomerRow{
@@ -91,7 +96,7 @@ export function ReportsPage(){
         .select('id,kind,amount,created_at,description')
         .gte('created_at',fromISO).lte('created_at',toISO),
       supabase.from('v100_order_items')
-        .select('order_id,service_name,quantity,line_total,subtotal'),
+        .select('*'),
       supabase.from('v100_customers')
         .select('id,name')
     ])
@@ -134,8 +139,19 @@ export function ReportsPage(){
       if(!orderIds.has(i.order_id))continue
       const key=i.service_name||'Layanan'
       if(!serviceMap[key])serviceMap[key]={qty:0,revenue:0}
-      serviceMap[key].qty+=Number(i.quantity||0)
-      serviceMap[key].revenue+=Number(i.line_total??i.subtotal??0)
+
+      const qty=Number(i.quantity??i.qty??0)
+      const unitPrice=Number(i.price??i.unit_price??i.price_per_unit??0)
+      const revenue=Number(
+        i.line_total ??
+        i.subtotal ??
+        i.total ??
+        (unitPrice*qty) ??
+        0
+      )
+
+      serviceMap[key].qty+=qty
+      serviceMap[key].revenue+=Number.isFinite(revenue)?revenue:0
     }
 
     const customerName=new Map(customers.map(c=>[c.id,c.name]))

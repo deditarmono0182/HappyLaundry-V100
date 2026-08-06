@@ -1,0 +1,38 @@
+HAPPYLAUNDRY ENTERPRISE V104.1.1 — REPORTING HOTFIX
+
+PERBAIKAN:
+- Memperbaiki error:
+  column v100_order_items.line_total does not exist
+- Query v100_order_items sekarang memakai select('*').
+- Laporan otomatis mencoba nilai layanan dari:
+  line_total
+  subtotal
+  total
+  price x quantity
+  unit_price x quantity
+  price_per_unit x quantity
+- Quantity otomatis membaca:
+  quantity
+  atau qty
+- Tidak ada SQL baru.
+- Tidak mengubah database.
+- Data transaksi tetap aman.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V104.1.1 Reporting Hotfix
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka Laporan Owner.
+10. Pilih periode yang mencakup transaksi lalu klik Terapkan.
+
+CATATAN:
+- Jika tabel order_items tidak memiliki nilai total/harga sama sekali,
+  Layanan Terlaris tetap bisa dihitung dari quantity,
+  tetapi omzet per layanan dapat tampil 0.
+- Omzet utama tetap berasal dari v100_payments.

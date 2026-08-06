@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V104.1 Reporting Fix
+# HappyLaundry Enterprise V104.1.1 Reporting Hotfix
 
 ## Jalankan
 ```bash
@@ -70,3 +70,7 @@ Inventory lengkap: bahan, minimum stok, stok masuk/keluar, nilai persediaan, riw
 
 ## V104.1
 Reporting Fix: omzet, pengeluaran, laba, piutang, order, metode pembayaran, layanan, pelanggan, CSV, dan cetak dari data aktual Supabase.
+
+
+## V104.1.1
+Hotfix kompatibilitas schema order_items tanpa membutuhkan line_total.
