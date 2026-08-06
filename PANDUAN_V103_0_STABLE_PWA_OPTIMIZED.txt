@@ -1,0 +1,85 @@
+HAPPYLAUNDRY ENTERPRISE V103.0 STABLE + PWA
+SAMPAI TAHAP 10 OPTIMASI
+
+TAHAP 1 — KASIR
+- Validasi pelanggan dan layanan.
+- Pencegahan klik ganda.
+- Shortcut keyboard.
+- Loading saat simpan.
+- Nota 58 mm, 80 mm, A4/PDF, WhatsApp.
+
+TAHAP 2 — PRODUKSI
+- Status Diterima sampai Selesai.
+- Filter order terlambat.
+- WhatsApp Siap Diambil.
+
+TAHAP 3 — DASHBOARD
+- Omzet, order, proses, selesai, piutang, grafik.
+
+TAHAP 4 — LAPORAN
+- Filter tanggal, omzet, kas, piutang, pelanggan, layanan, CSV/cetak.
+
+TAHAP 5 — NOTA & QR
+- QR nota menuju /track/NOMOR-ORDER.
+- Pelanggan melihat progres tanpa login.
+- Nama pelanggan disamarkan untuk privasi.
+- Barcode invoice tetap tersedia.
+
+TAHAP 6 — PENGATURAN
+- Profil usaha, WA, alamat, jam, Maps, footer nota, template pesan.
+
+TAHAP 7 — BACKUP
+- Menu Backup Data untuk download JSON lengkap.
+- Import aman hanya untuk pelanggan, layanan, dan pengaturan.
+- Transaksi lama tidak ditimpa.
+
+TAHAP 8 — HAK AKSES
+- Owner, Kasir, dan Produksi mengikuti role yang sudah ada.
+- Backup dan Laporan hanya Owner.
+
+TAHAP 9 — PWA
+- Tombol Pasang Aplikasi muncul di Chrome/Edge saat memenuhi syarat.
+- Dapat dipasang di Windows dan Android.
+- App shell tetap dapat terbuka ketika offline.
+- Transaksi tetap memerlukan internet ke Supabase.
+
+TAHAP 10 — OPTIMASI
+- Lazy loading per halaman.
+- Cache aset statis melalui service worker.
+- API Supabase tidak disimpan dalam cache.
+- Header keamanan Netlify.
+- Status Online/Offline.
+- Pembaruan PWA terdeteksi.
+- Cache index dan service worker dikendalikan agar update cepat.
+
+WAJIB JALANKAN SQL BARU:
+supabase/006_v103_public_tracking.sql
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Buka supabase/006_v103_public_tracking.sql.
+3. Copy ke Supabase SQL Editor lalu Run.
+4. Copy seluruh isi ZIP ke HappyLaundry-V100 dan Replace.
+5. GitHub Desktop Summary:
+   HappyLaundry V103.0 Stable PWA Optimized
+6. Commit to main dan Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buat transaksi uji dan cetak nota.
+10. Scan QR nota menggunakan HP.
+
+CARA PASANG PWA:
+ANDROID CHROME:
+- Buka website.
+- Klik menu tiga titik.
+- Pilih Install app / Tambahkan ke layar utama.
+
+WINDOWS CHROME/EDGE:
+- Buka website.
+- Klik ikon Install di sebelah kanan address bar,
+  atau tombol Pasang Aplikasi di header.
+
+CATATAN:
+- PWA bukan mode transaksi offline penuh.
+- Saat internet terputus, aplikasi dapat terbuka tetapi penyimpanan Supabase menunggu internet.
+- Simpan backup JSON minimal seminggu sekali.

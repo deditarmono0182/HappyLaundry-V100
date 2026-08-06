@@ -4,4 +4,13 @@ import{BrowserRouter}from'react-router-dom'
 import App from'./App'
 import{AuthProvider}from'./lib/auth'
 import'./styles/global.css'
-createRoot(document.getElementById('root')!).render(<StrictMode><BrowserRouter><AuthProvider><App/></AuthProvider></BrowserRouter></StrictMode>)
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode><BrowserRouter><AuthProvider><App/></AuthProvider></BrowserRouter></StrictMode>
+)
+
+if('serviceWorker' in navigator&&import.meta.env.PROD){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(error=>console.warn('Service worker gagal:',error))
+  })
+}

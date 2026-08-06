@@ -1,0 +1,27 @@
+CHECKLIST GO-LIVE HAPPYLAUNDRY V103
+
+[ ] SQL 001–006 berhasil dijalankan.
+[ ] Login Owner berhasil.
+[ ] Akun Kasir dan Produksi berhasil login.
+[ ] Pelanggan baru tersimpan.
+[ ] Layanan aktif dapat dipilih.
+[ ] Transaksi tunai berhasil.
+[ ] Transaksi DP berhasil.
+[ ] Diskon nominal dan persen benar.
+[ ] Kembalian benar.
+[ ] Nota 58 mm berhasil.
+[ ] Nota 80 mm berhasil.
+[ ] A4/PDF berhasil.
+[ ] QR membuka /track/NOMOR-ORDER.
+[ ] Tracking menampilkan status yang benar.
+[ ] WhatsApp order diterima berhasil.
+[ ] Produksi berpindah status.
+[ ] WhatsApp siap diambil berhasil.
+[ ] Pembayaran muncul di Kas Harian.
+[ ] Dashboard tanpa error merah.
+[ ] Laporan Owner sesuai transaksi.
+[ ] Backup JSON berhasil diunduh.
+[ ] PWA berhasil dipasang di satu perangkat.
+[ ] Uji 20 transaksi simulasi tanpa error.
+[ ] Printer thermal diuji dengan kertas sebenarnya.
+[ ] File backup disimpan di Google Drive.

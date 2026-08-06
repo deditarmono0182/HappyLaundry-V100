@@ -187,7 +187,7 @@ export function CashierPage() {
     const width=size==='58'?'58mm':size==='80'?'80mm':'190mm'
     const page=size==='a4'?'A4 portrait':`${size}mm auto`
     const title=size==='a4'?'INVOICE LAUNDRY':'NOTA LAUNDRY'
-    const statusUrl=`${window.location.origin}/orders?order=${encodeURIComponent(data.orderNo)}`
+    const statusUrl=`${window.location.origin}/track/${encodeURIComponent(data.orderNo)}`
     const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(statusUrl)}`
     const barcode=data.orderNo.replace(/[^A-Z0-9]/gi,'').split('').map((ch,i)=>{
       const n=ch.charCodeAt(0)

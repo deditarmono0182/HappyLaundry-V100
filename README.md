@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V102.0 Production Ready
+# HappyLaundry Enterprise V103.0 Stable + PWA
 
 ## Jalankan
 ```bash
@@ -50,3 +50,7 @@ Commercial UI untuk layout POS, sidebar compact, dashboard, tabel, tablet, dan H
 
 ## V102.0
 Hardening kasir, shortcut keyboard, validasi, pencegahan klik ganda, loading overlay, dan penanda order terlambat.
+
+
+## V103.0
+Tracking publik via QR, PWA, backup JSON, import master data, lazy loading, offline shell, keamanan Netlify, dan optimasi Tahap 10.

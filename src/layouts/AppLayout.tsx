@@ -1,8 +1,9 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
-  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3 } from 'lucide-react'
-import { useState } from 'react'
+  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../lib/auth'
+import { PWAInstallButton } from '../components/PWAInstallButton'
 
 const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; roles: string[] }> = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['owner', 'cashier', 'staff'] },
@@ -16,11 +17,20 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/payments', label: 'Pembayaran', icon: CreditCard, roles: ['owner', 'cashier'] },
   { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
   { to: '/reports', label: 'Laporan Owner', icon: BarChart3, roles: ['owner'] },
+  { to: '/backup', label: 'Backup Data', icon: DatabaseBackup, roles: ['owner'] },
   { to: '/settings', label: 'Pengaturan', icon: Settings, roles: ['owner'] }
 ]
 
 export function AppLayout() {
-  const [open, setOpen] = useState(false)
+  const [open,setOpen]=useState(false)
+  const [online,setOnline]=useState(navigator.onLine)
+
+  useEffect(()=>{
+    const yes=()=>setOnline(true)
+    const no=()=>setOnline(false)
+    window.addEventListener('online',yes);window.addEventListener('offline',no)
+    return()=>{window.removeEventListener('online',yes);window.removeEventListener('offline',no)}
+  },[])
   const { profile, signOut } = useAuth()
   const role = profile?.role ?? 'staff'
 
@@ -29,7 +39,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V102.0.1 Stable</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V103.0 Stable</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
@@ -47,7 +57,7 @@ export function AppLayout() {
         <header className="topbar">
           <button className="icon-button mobile-only" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={22} /></button>
           <div><span className="eyebrow">HAPPYLAUNDRY BABAKAN</span><h1>Sistem Operasional Laundry</h1></div>
-          <div className="status-chip">● Online</div>
+          <div className="topbar-actions"><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
         </header>
         <div className="page-container"><Outlet /></div>
       </main>
