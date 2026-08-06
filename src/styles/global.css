@@ -2055,3 +2055,44 @@ button[type="submit"]:disabled {
   .tracking-order-head{flex-direction:column;align-items:flex-start!important}
   .tracking-progress{grid-template-columns:repeat(2,1fr)!important}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V103.2.1 — Fix Proses Cucian
+   ========================================================= */
+
+.production-board{
+  gap:14px!important;
+}
+
+.production-column{
+  border-radius:18px!important;
+  box-shadow:0 12px 28px rgba(7,75,57,.08)!important;
+}
+
+.production-card{
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease!important;
+}
+
+.production-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 24px rgba(7,75,57,.12)!important;
+}
+
+.production-tools select,
+.production-search{
+  box-shadow:0 6px 14px rgba(7,75,57,.06);
+}
+
+.production-live-note{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:8px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#e8f8f0;
+  color:#087653;
+  font-size:11px;
+  font-weight:850;
+}

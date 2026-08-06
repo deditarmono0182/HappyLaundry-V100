@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V103.2 Premium Tracking
+# HappyLaundry Enterprise V103.2.1 Fix Proses Cucian
 
 ## Jalankan
 ```bash
@@ -58,3 +58,7 @@ Tracking publik via QR, PWA, backup JSON, import master data, lazy loading, offl
 
 ## V103.2
 Premium tracking: progress %, countdown estimasi, status colors, banner siap diambil, dan optimasi iPhone/Android.
+
+
+## V103.2.1
+Fix tabel settings produksi, auto refresh 15 detik, dan realtime sinkronisasi order.

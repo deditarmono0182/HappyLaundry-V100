@@ -39,7 +39,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V103.2 Stable</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V103.2.1 Stable</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

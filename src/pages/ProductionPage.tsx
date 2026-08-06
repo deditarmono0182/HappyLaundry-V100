@@ -21,12 +21,22 @@ export function ProductionPage(){
   const load=useCallback(async()=>{
     const [o,s]=await Promise.all([
       supabase.from('v100_orders_view').select('*').not('status','in','("completed","cancelled")').order('created_at'),
-      supabase.from('v100_settings').select('business_name,whatsapp_ready_template').limit(1).maybeSingle()
+      supabase.from('v100_store_settings').select('business_name,whatsapp_ready_template').limit(1).maybeSingle()
     ])
     if(o.error||s.error)setMessage((o.error||s.error)?.message||'Gagal memuat')
     else {setRows((o.data as OrderRow[])||[]);if(s.data)setSettings(s.data)}
   },[])
   useEffect(()=>{void load()},[load])
+  useEffect(()=>{
+    const channel=supabase.channel('v103-production-live')
+      .on('postgres_changes',{event:'*',schema:'public',table:'v100_orders'},()=>{void load()})
+      .subscribe()
+    return()=>{void supabase.removeChannel(channel)}
+  },[load])
+  useEffect(()=>{
+    const timer=window.setInterval(()=>{void load()},15000)
+    return()=>window.clearInterval(timer)
+  },[load])
 
   const filtered=useMemo(()=>{
     const q=query.toLowerCase().trim()

@@ -1,0 +1,35 @@
+HAPPYLAUNDRY ENTERPRISE V103.2.1 — FIX PROSES CUCIAN
+
+PERBAIKAN UTAMA:
+- Mengganti referensi tabel lama:
+  public.v100_settings
+  menjadi:
+  public.v100_store_settings
+
+- Halaman Produksi tetap memuat order walau pengaturan tidak terbaca.
+- Auto refresh setiap 15 detik.
+- Realtime refresh saat tabel v100_orders berubah.
+- Tracking pelanggan tetap sinkron karena status order memakai tabel yang sama.
+- Tidak ada SQL baru.
+- Tidak mengubah atau menghapus data transaksi.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V103.2.1 Fix Proses Cucian
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka menu Produksi.
+10. Pastikan order aktif muncul di kolom sesuai status.
+
+UJI:
+- Buat order baru di Kasir.
+- Buka Produksi.
+- Order harus muncul di Diterima.
+- Pindahkan ke Dicuci.
+- Buka URL /track/NOMOR-ORDER.
+- Status pelanggan harus ikut berubah menjadi Dicuci.
