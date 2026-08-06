@@ -1,0 +1,1 @@
+export function PlaceholderPage({title,description}:{title:string;description:string}){return <section className="panel placeholder-page"><div className="empty-state"><span>🚧</span><h2>{title}</h2><p>{description}</p><small>Modul berikutnya.</small></div></section>}

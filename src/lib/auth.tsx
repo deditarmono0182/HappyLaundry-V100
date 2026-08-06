@@ -1,0 +1,8 @@
+import{createContext,useContext,useEffect,useMemo,useState}from'react'
+import type{Session}from'@supabase/supabase-js'
+import{isSupabaseConfigured,supabase}from'./supabase'
+import type{UserProfile}from'../types/auth'
+interface C{session:Session|null;profile:UserProfile|null;loading:boolean;signIn:(e:string,p:string)=>Promise<void>;signOut:()=>Promise<void>}
+const X=createContext<C|null>(null)
+export function AuthProvider({children}:{children:React.ReactNode}){const[session,setSession]=useState<Session|null>(null),[profile,setProfile]=useState<UserProfile|null>(null),[loading,setLoading]=useState(true);useEffect(()=>{if(!isSupabaseConfigured){setLoading(false);return}let mounted=true;const load=async(id:string)=>{const{data}=await supabase.from('profiles').select('id,full_name,role,store_id').eq('id',id).maybeSingle();if(mounted)setProfile((data as UserProfile|null)??null)};supabase.auth.getSession().then(async({data})=>{if(!mounted)return;setSession(data.session);if(data.session?.user.id)await load(data.session.user.id);setLoading(false)});const{data:s}=supabase.auth.onAuthStateChange(async(_e,n)=>{setSession(n);if(n?.user.id)await load(n.user.id);else setProfile(null);setLoading(false)});return()=>{mounted=false;s.subscription.unsubscribe()}},[]);const value=useMemo<C>(()=>({session,profile,loading,signIn:async(email,password)=>{if(!isSupabaseConfigured)throw new Error('Supabase belum dikonfigurasi.');const{error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error},signOut:async()=>{await supabase.auth.signOut()}}),[session,profile,loading]);return <X.Provider value={value}>{children}</X.Provider>}
+export function useAuth(){const v=useContext(X);if(!v)throw new Error('AuthProvider belum aktif');return v}

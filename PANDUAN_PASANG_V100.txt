@@ -1,0 +1,8 @@
+HAPPYLAUNDRY V100 FOUNDATION
+1. Ekstrak ZIP ke repository HappyLaundry-V100.
+2. Commit dan Push lewat GitHub Desktop.
+3. Supabase SQL Editor: jalankan supabase/001_v100_foundation.sql.
+4. Netlify: hubungkan repository baru.
+5. Build command npm run build, publish dist.
+6. Tambahkan VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY.
+7. Uji URL Netlify sementara dahulu. Jangan pindahkan domain utama sebelum login lolos uji.
