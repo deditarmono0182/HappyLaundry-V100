@@ -1,0 +1,31 @@
+HAPPYLAUNDRY ENTERPRISE V101.3 — UI PREMIUM
+
+PERUBAHAN:
+- Sidebar premium dengan gradient dan efek hover
+- Menu aktif lebih jelas
+- Header aplikasi lebih modern
+- Kartu dashboard premium
+- Input kasir lebih besar dan elegan
+- Panel pembayaran premium
+- Tombol pembayaran cepat ditingkatkan
+- Kartu total belanja dengan gradient premium
+- Tombol Simpan, Cetak, dan WhatsApp lebih modern
+- Daftar transaksi hari ini lebih rapi
+- Tabel memiliki hover dan header modern
+- Animasi halaman halus
+- Scrollbar disesuaikan dengan warna HappyLaundry
+- Responsif untuk laptop, tablet, dan HP
+- Tidak mengubah database maupun data transaksi
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V101.3 UI Premium
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+
+TIDAK ADA SQL BARU.

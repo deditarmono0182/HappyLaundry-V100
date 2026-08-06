@@ -398,3 +398,520 @@
     font-size: 35px !important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V101.3 — UI Premium
+   ========================================================= */
+
+:root {
+  --hl-green-950: #053f34;
+  --hl-green-900: #075846;
+  --hl-green-800: #087557;
+  --hl-green-700: #0a8b62;
+  --hl-green-600: #0da66f;
+  --hl-green-500: #18b97e;
+  --hl-mint-100: #eaf8f2;
+  --hl-mint-50: #f5fcf9;
+  --hl-border: #d3e7df;
+  --hl-text: #123d37;
+  --hl-muted: #6d8783;
+  --hl-shadow: 0 18px 50px rgba(6, 70, 54, .11);
+}
+
+/* Global premium surface */
+body {
+  background:
+    radial-gradient(circle at 90% -10%, rgba(18, 184, 124, .08), transparent 34%),
+    linear-gradient(180deg, #f7fcfa 0%, #eff8f4 100%) !important;
+  color: var(--hl-text) !important;
+}
+
+.app-main,
+.main-content {
+  background: transparent !important;
+}
+
+/* Sidebar premium */
+.sidebar,
+.app-sidebar {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255,255,255,.10), transparent 27%),
+    linear-gradient(180deg, #0a8a61 0%, #05704f 52%, #045b43 100%) !important;
+  box-shadow: 14px 0 36px rgba(4, 76, 56, .16);
+}
+
+.sidebar-brand,
+.app-brand {
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+}
+
+.sidebar nav a,
+.app-sidebar nav a,
+.sidebar-link {
+  min-height: 50px !important;
+  margin: 4px 9px !important;
+  padding: 0 15px !important;
+  border-radius: 14px !important;
+  color: rgba(255,255,255,.92) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease !important;
+}
+
+.sidebar nav a:hover,
+.app-sidebar nav a:hover,
+.sidebar-link:hover {
+  transform: translateX(3px);
+  background: rgba(255,255,255,.13) !important;
+}
+
+.sidebar nav a.active,
+.app-sidebar nav a.active,
+.sidebar-link.active {
+  color: #075a43 !important;
+  background: linear-gradient(135deg, #ffffff, #eefaf5) !important;
+  box-shadow: 0 10px 22px rgba(2, 57, 42, .16) !important;
+}
+
+.sidebar nav a svg,
+.app-sidebar nav a svg,
+.sidebar-link svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.sidebar-footer,
+.app-sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,.13) !important;
+}
+
+/* Topbar */
+.topbar,
+.app-topbar {
+  min-height: 70px !important;
+  background: rgba(255,255,255,.88) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(14, 114, 83, .10) !important;
+  box-shadow: 0 6px 20px rgba(7, 65, 51, .05);
+}
+
+.online-badge {
+  border-radius: 999px !important;
+  padding: 7px 13px !important;
+  background: linear-gradient(135deg, #e6faef, #f7fff9) !important;
+  color: #08744f !important;
+  border: 1px solid #bce7d1 !important;
+  box-shadow: 0 6px 16px rgba(7, 116, 79, .09);
+}
+
+/* Page headings */
+.page-header {
+  margin-bottom: 22px !important;
+}
+
+.page-header h1 {
+  font-size: clamp(28px, 3vw, 38px) !important;
+  letter-spacing: -1px !important;
+  color: #073f37 !important;
+}
+
+.page-header p {
+  color: var(--hl-muted) !important;
+  font-size: 15px !important;
+}
+
+.page-header .eyebrow {
+  color: var(--hl-green-700) !important;
+  letter-spacing: 1.4px !important;
+}
+
+/* Premium panels */
+.panel,
+.stat-card,
+.data-panel,
+.cashier-section,
+.cashier-pro-features,
+.cashier-today {
+  border: 1px solid rgba(150, 195, 180, .45) !important;
+  box-shadow: var(--hl-shadow) !important;
+}
+
+.panel,
+.data-panel {
+  border-radius: 22px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,253,252,.98)) !important;
+}
+
+.panel-heading h3 {
+  font-size: 20px !important;
+  color: #073f37 !important;
+}
+
+.panel-heading p {
+  color: var(--hl-muted) !important;
+}
+
+/* Dashboard stat cards */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 21px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(13, 166, 111, .11), transparent 34%),
+    linear-gradient(145deg, #ffffff, #f8fcfa) !important;
+  transition: transform .18s ease, box-shadow .18s ease !important;
+}
+
+.stat-card::after {
+  content: "";
+  position: absolute;
+  right: -22px;
+  bottom: -34px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(13, 166, 111, .055);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 46px rgba(6, 70, 54, .15) !important;
+}
+
+.stat-icon {
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, #dff7ed, #effbf6) !important;
+  box-shadow: inset 0 0 0 1px rgba(13, 166, 111, .08);
+}
+
+.stat-card strong {
+  font-size: 27px !important;
+  color: #073f37 !important;
+}
+
+.stat-card span,
+.stat-card small {
+  color: var(--hl-muted) !important;
+}
+
+/* Cashier premium */
+.cashier-layout {
+  grid-template-columns: minmax(0, 1.65fr) minmax(310px, .72fr) !important;
+}
+
+.cashier-form {
+  border-radius: 25px !important;
+  padding: 23px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.99), rgba(249,253,251,.99)) !important;
+}
+
+.cashier-section {
+  border-radius: 20px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(19, 184, 124, .045), transparent 36%),
+    linear-gradient(180deg, #ffffff, #fbfefd) !important;
+}
+
+.cashier-section-title b {
+  font-size: 19px !important;
+}
+
+.cashier-section-title small {
+  font-size: 13px !important;
+}
+
+/* Premium fields */
+.cashier-form input,
+.cashier-form select,
+.cashier-form textarea,
+.wide-select,
+.search-box,
+.cashier-item input,
+.cashier-item select {
+  border-radius: 14px !important;
+  border-color: #b7d4ca !important;
+  background: linear-gradient(180deg, #ffffff, #fcfefd) !important;
+}
+
+.cashier-form input,
+.cashier-form select,
+.cashier-form textarea,
+.wide-select {
+  min-height: 52px !important;
+  font-size: 15px !important;
+}
+
+.cashier-form input:hover,
+.cashier-form select:hover,
+.wide-select:hover {
+  border-color: #7dbba7 !important;
+}
+
+.cashier-form input:focus,
+.cashier-form select:focus,
+.cashier-form textarea:focus,
+.wide-select:focus {
+  border-color: var(--hl-green-600) !important;
+  box-shadow: 0 0 0 4px rgba(13, 166, 111, .13) !important;
+}
+
+/* Payment grid card */
+.cashier-section:nth-of-type(3) {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(13, 166, 111, .08), transparent 32%),
+    linear-gradient(145deg, #ffffff, #f5fbf8) !important;
+}
+
+.quick-pay-row {
+  border-radius: 16px !important;
+  background:
+    linear-gradient(135deg, #eefaf5, #f9fdfb) !important;
+}
+
+.quick-pay-row button {
+  border-radius: 13px !important;
+  min-height: 46px !important;
+  padding-inline: 20px !important;
+  font-size: 14px !important;
+  box-shadow: 0 8px 18px rgba(6, 112, 78, .08);
+}
+
+.quick-pay-row button:hover {
+  box-shadow: 0 12px 22px rgba(6, 112, 78, .16);
+}
+
+/* Services */
+.cashier-item {
+  border-radius: 17px !important;
+  padding: 14px !important;
+  background:
+    linear-gradient(180deg, #ffffff, #fbfefd) !important;
+}
+
+.cashier-item:hover {
+  border-color: #9ccbb9 !important;
+  box-shadow: 0 12px 26px rgba(7, 88, 65, .09);
+}
+
+/* Total card */
+.cashier-total-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,.20), transparent 32%),
+    linear-gradient(145deg, #087654 0%, #0aae74 58%, #15b97e 100%) !important;
+}
+
+.cashier-total-card::before {
+  content: "";
+  position: absolute;
+  top: -45px;
+  right: -25px;
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+}
+
+.cashier-total-card > strong {
+  font-size: 44px !important;
+  text-shadow: 0 3px 12px rgba(0,0,0,.10);
+}
+
+.cashier-total-card > div {
+  border-color: rgba(255,255,255,.17) !important;
+}
+
+/* Premium buttons */
+.primary-button,
+.cashier-actions .primary-button,
+button[type="submit"] {
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #087b57, #0bb575) !important;
+  box-shadow: 0 12px 25px rgba(8, 123, 87, .24) !important;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease !important;
+}
+
+.primary-button:hover,
+.cashier-actions .primary-button:hover,
+button[type="submit"]:hover {
+  transform: translateY(-2px);
+  filter: brightness(.98);
+  box-shadow: 0 16px 30px rgba(8, 123, 87, .30) !important;
+}
+
+.secondary-button {
+  border-radius: 13px !important;
+  background: linear-gradient(180deg, #ffffff, #f7fbf9) !important;
+  border-color: #a9cfc1 !important;
+  box-shadow: 0 7px 16px rgba(8, 88, 64, .06);
+}
+
+.secondary-button:hover {
+  background: #eef9f4 !important;
+  transform: translateY(-1px);
+}
+
+.whatsapp-button {
+  border-radius: 13px !important;
+  background: linear-gradient(135deg, #20bd5c, #25d366) !important;
+  box-shadow: 0 10px 22px rgba(37, 211, 102, .22);
+}
+
+/* Receipt success */
+.cashier-success-panel {
+  border-radius: 19px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(19, 184, 124, .10), transparent 35%),
+    linear-gradient(135deg, #e8faf2, #f9fefb) !important;
+}
+
+.receipt-actions button {
+  border-radius: 13px !important;
+}
+
+/* Today transactions premium */
+.cashier-today > div {
+  padding: 14px 0 !important;
+  transition: background .16s ease, padding .16s ease !important;
+}
+
+.cashier-today > div:hover {
+  padding-left: 9px !important;
+  padding-right: 9px !important;
+  border-radius: 12px;
+  background: #f2faf6;
+}
+
+.cashier-today > div > span > b {
+  color: #073f37 !important;
+  font-size: 14px !important;
+}
+
+.cashier-today > div > span > small {
+  color: var(--hl-muted) !important;
+}
+
+/* Modern tables */
+table thead th {
+  background: linear-gradient(180deg, #f4faf7, #eef7f3) !important;
+  color: #466b65 !important;
+  letter-spacing: .4px;
+}
+
+table tbody tr {
+  transition: background .14s ease;
+}
+
+table tbody tr:hover {
+  background: #f5fbf8 !important;
+}
+
+/* Badges */
+.badge,
+.record-count {
+  border-radius: 999px !important;
+  padding: 6px 10px !important;
+  font-weight: 850 !important;
+}
+
+/* Sticky cashier action premium */
+.cashier-actions {
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.91) !important;
+  box-shadow: 0 18px 38px rgba(5, 73, 55, .16) !important;
+}
+
+.cashier-actions .primary-button,
+.cashier-actions button[type="submit"] {
+  min-height: 56px !important;
+  font-size: 16px !important;
+}
+
+/* Animations */
+@keyframes hlFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header,
+.stats-grid,
+.cashier-form,
+.cashier-summary,
+.dashboard-grid,
+.data-panel {
+  animation: hlFadeUp .34s ease both;
+}
+
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8dc8b3 #edf7f3;
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #edf7f3;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(#7fc2aa, #4fae8c);
+  border-radius: 999px;
+}
+
+/* Responsive */
+@media (max-width: 1150px) {
+  .cashier-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cashier-summary {
+    grid-template-columns: 1.1fr 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 850px) {
+  .sidebar,
+  .app-sidebar {
+    box-shadow: none;
+  }
+
+  .cashier-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cashier-total-card > strong {
+    font-size: 38px !important;
+  }
+
+  .cashier-form {
+    padding: 15px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-header h1 {
+    font-size: 27px !important;
+  }
+
+  .cashier-section {
+    padding: 15px !important;
+  }
+
+  .quick-pay-row button {
+    width: 100%;
+  }
+
+  .receipt-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
