@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
-  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator } from 'lucide-react'
+  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../lib/auth'
 
@@ -15,6 +15,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/suppliers', label: 'Supplier', icon: Truck, roles: ['owner', 'staff'] },
   { to: '/payments', label: 'Pembayaran', icon: CreditCard, roles: ['owner', 'cashier'] },
   { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
+  { to: '/reports', label: 'Laporan Owner', icon: BarChart3, roles: ['owner'] },
   { to: '/settings', label: 'Pengaturan', icon: Settings, roles: ['owner'] }
 ]
 
@@ -28,7 +29,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V100.6</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V101.1</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

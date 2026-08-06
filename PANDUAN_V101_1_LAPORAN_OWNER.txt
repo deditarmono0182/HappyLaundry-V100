@@ -1,0 +1,22 @@
+HAPPYLAUNDRY ENTERPRISE V101.1 LAPORAN OWNER
+
+FITUR:
+- Menu Laporan Owner
+- Filter tanggal
+- Omzet, pengeluaran, laba bersih, piutang
+- Ringkasan metode pembayaran dan status order
+- Top layanan dan top pelanggan
+- Detail order
+- Cetak laporan
+- Ekspor CSV order dan kas
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke folder HappyLaundry-V100.
+3. Replace files.
+4. GitHub Desktop Summary: HappyLaundry V101.1 Laporan Owner
+5. Commit to main dan Push origin.
+6. Tunggu Netlify Published.
+7. Refresh Ctrl+Shift+R.
+
+Tidak ada SQL baru.

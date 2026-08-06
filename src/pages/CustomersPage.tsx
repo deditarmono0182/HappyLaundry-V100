@@ -85,7 +85,7 @@ export function CustomersPage() {
         eyebrow="MASTER DATA"
         title="Pelanggan"
         description="Simpan kontak pelanggan agar pembuatan order lebih cepat."
-        action={<button className="primary-button customer-add-button" onClick={openCreate}><Plus size={18} /> Tambah Pelanggan</button>}
+        action={<button className="primary-button" onClick={openCreate}><Plus size={18} /> Tambah Pelanggan</button>}
       />
 
       <section className="panel data-panel">
