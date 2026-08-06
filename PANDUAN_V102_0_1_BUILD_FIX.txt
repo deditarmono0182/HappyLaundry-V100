@@ -1,0 +1,19 @@
+HAPPYLAUNDRY ENTERPRISE V102.0.1 — BUILD FIX
+
+PERBAIKAN:
+- Memperbaiki error TypeScript:
+  Block-scoped variable 'total' used before its declaration.
+- Fitur V102.0 tetap sama.
+- Tidak ada SQL baru.
+- Tidak mengubah database atau data transaksi.
+
+CARA PASANG:
+1. Ekstrak ZIP ini.
+2. Copy seluruh isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   Fix build HappyLaundry V102.0.1
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.

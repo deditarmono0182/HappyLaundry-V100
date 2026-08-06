@@ -119,7 +119,7 @@ export function CashierPage() {
     }
     window.addEventListener('keydown',onKeyDown)
     return()=>window.removeEventListener('keydown',onKeyDown)
-  },[busy,items.length,services,total])
+  },[busy,items.length,services])
 
   const subtotal=useMemo(()=>items.reduce((sum,item)=>sum+item.subtotal,0),[items])
   const discount=discountMode==='percent'
