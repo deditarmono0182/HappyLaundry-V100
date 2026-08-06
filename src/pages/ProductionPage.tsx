@@ -1,50 +1,63 @@
-import { useCallback, useEffect, useState } from 'react'
-import { ChevronRight, WashingMachine } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ChevronRight, MessageCircle, Search, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
 import type { OrderRow, OrderStatus } from '../types/order'
 
-const columns: OrderStatus[] = ['received','washing','drying','ironing','packing','ready']
-const nextStatus: Partial<Record<OrderStatus, OrderStatus>> = {
-  received:'washing', washing:'drying', drying:'ironing', ironing:'packing', packing:'ready', ready:'completed'
-}
+const columns:OrderStatus[]=['received','washing','drying','ironing','packing','ready']
+const next:Partial<Record<OrderStatus,OrderStatus>>={received:'washing',washing:'drying',drying:'ironing',ironing:'packing',packing:'ready',ready:'completed'}
 
-export function ProductionPage() {
+const phone=(v:string)=>{const x=v.replace(/\D/g,'');return x.startsWith('0')?'62'+x.slice(1):x}
+const rupiah=(v:number)=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v)
+
+export function ProductionPage(){
   const [rows,setRows]=useState<OrderRow[]>([])
+  const [query,setQuery]=useState('')
   const [message,setMessage]=useState('')
+  const [settings,setSettings]=useState({business_name:'HappyLaundry Babakan',whatsapp_ready_template:'Halo {nama}, laundry {order} sudah siap diambil. Terima kasih. {usaha}'})
 
   const load=useCallback(async()=>{
-    const {data,error}=await supabase.from('v100_orders_view').select('*').not('status','in','("completed","cancelled")').order('created_at')
-    if(error)setMessage(error.message)
-    else setRows((data as OrderRow[])||[])
+    const [o,s]=await Promise.all([
+      supabase.from('v100_orders_view').select('*').not('status','in','("completed","cancelled")').order('created_at'),
+      supabase.from('v100_settings').select('business_name,whatsapp_ready_template').limit(1).maybeSingle()
+    ])
+    if(o.error||s.error)setMessage((o.error||s.error)?.message||'Gagal memuat')
+    else {setRows((o.data as OrderRow[])||[]);if(s.data)setSettings(s.data)}
   },[])
-
   useEffect(()=>{void load()},[load])
 
-  const move=async(row:OrderRow)=>{
-    const next=nextStatus[row.status]
-    if(!next)return
-    const {error}=await supabase.from('v100_orders').update({status:next,updated_at:new Date().toISOString()}).eq('id',row.id)
+  const filtered=useMemo(()=>{const q=query.toLowerCase().trim();return q?rows.filter(r=>`${r.order_no} ${r.customer_name} ${r.customer_phone}`.toLowerCase().includes(q)):rows},[query,rows])
+
+  const whatsapp=(r:OrderRow)=>{
+    const p=phone(r.customer_phone)
+    if(!p){setMessage('Nomor WhatsApp pelanggan tidak tersedia.');return}
+    const text=settings.whatsapp_ready_template.replaceAll('{nama}',r.customer_name).replaceAll('{order}',r.order_no).replaceAll('{total}',rupiah(Number(r.total))).replaceAll('{usaha}',settings.business_name)
+    window.open(`https://wa.me/${p}?text=${encodeURIComponent(text)}`,'_blank')
+  }
+
+  const move=async(r:OrderRow)=>{
+    const n=next[r.status]; if(!n)return
+    const {error}=await supabase.from('v100_orders').update({status:n,updated_at:new Date().toISOString()}).eq('id',r.id)
     if(error)setMessage(error.message)
-    else await load()
+    else {await load();if(n==='ready')whatsapp({...r,status:n})}
   }
 
   return <>
-    <PageHeader eyebrow="PRODUKSI" title="Antrian Cucian" description="Pindahkan order mengikuti tahapan proses laundry." />
+    <PageHeader eyebrow="PRODUKSI" title="Papan Proses Cucian" description="Cari dan pindahkan order sesuai tahap proses."
+      action={<label className="search-box production-search"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari order, nama, atau WhatsApp"/></label>}/>
     {message&&<div className="error-box inline-message">{message}</div>}
-    <div className="production-board">
-      {columns.map(status=><section className="production-column" key={status}>
-        <header><b>{statusLabels[status]}</b><span>{rows.filter(r=>r.status===status).length}</span></header>
-        <div className="production-cards">
-          {rows.filter(r=>r.status===status).map(row=><article className="production-card" key={row.id}>
-            <div><b>{row.order_no}</b><small>{row.customer_name}</small></div>
-            {row.due_at&&<small>Selesai: {new Date(row.due_at).toLocaleString('id-ID')}</small>}
-            <button onClick={()=>void move(row)}>{status==='ready'?'Selesaikan':'Tahap Berikutnya'}<ChevronRight size={15}/></button>
-          </article>)}
-          {rows.filter(r=>r.status===status).length===0&&<div className="production-empty"><WashingMachine size={24}/>Kosong</div>}
-        </div>
-      </section>)}
-    </div>
+    <div className="production-board">{columns.map(s=>{
+      const list=filtered.filter(r=>r.status===s)
+      return <section className={`production-column production-${s}`} key={s}>
+        <header><div><span className={`status-dot status-${s}`}/><b>{statusLabels[s]}</b></div><span>{list.length}</span></header>
+        <div className="production-cards">{list.map(r=><article className="production-card" key={r.id}>
+          <div className="production-card-head"><div><b>{r.order_no}</b><small>{r.customer_name}</small></div><span className={`badge payment-${r.payment_status}`}>{r.payment_status==='paid'?'Lunas':r.payment_status==='partial'?'DP':'Belum Bayar'}</span></div>
+          <small>WA: {r.customer_phone||'-'}</small>{r.due_at&&<small>Estimasi: {new Date(r.due_at).toLocaleString('id-ID')}</small>}
+          <div className="production-card-actions">{s==='ready'&&<button className="whatsapp-button" onClick={()=>whatsapp(r)}><MessageCircle size={15}/>WhatsApp</button>}
+          <button onClick={()=>void move(r)}>{s==='ready'?'Selesaikan':'Tahap Berikutnya'}<ChevronRight size={15}/></button></div>
+        </article>)}
+        {list.length===0&&<div className="production-empty"><WashingMachine size={24}/>Kosong</div>}</div>
+      </section>})}</div>
   </>
 }

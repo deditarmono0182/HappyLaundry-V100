@@ -1,0 +1,21 @@
+HAPPYLAUNDRY V101.0
+
+FITUR:
+- Dashboard omzet, order, proses, siap diambil, selesai, dan piutang
+- Grafik omzet 7 hari
+- Ringkasan status
+- Order terbaru
+- Papan produksi berwarna
+- Pencarian cepat
+- WhatsApp otomatis ketika menjadi Siap Diambil
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Replace files.
+4. GitHub Desktop Summary: HappyLaundry V101.0 Produksi Dashboard
+5. Commit to main dan Push origin.
+6. Tunggu Netlify Published.
+7. Refresh Ctrl+Shift+R.
+
+Tidak ada SQL baru.
