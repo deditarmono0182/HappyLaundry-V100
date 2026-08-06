@@ -1855,3 +1855,203 @@ button[type="submit"]:disabled {
   .tracking-summary{grid-template-columns:1fr}.tracking-actions{grid-template-columns:1fr}.tracking-card{padding:17px}.tracking-search-card form{grid-template-columns:auto 1fr}.tracking-search-card button{grid-column:1/-1;width:100%}
   .backup-grid{grid-template-columns:1fr}.backup-safety{grid-column:auto}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V103.2 — Premium Tracking
+   ========================================================= */
+
+.tracking-premium{
+  padding-top:28px!important;
+  background:
+    radial-gradient(circle at 88% 0%,rgba(17,190,127,.18),transparent 32%),
+    radial-gradient(circle at 10% 40%,rgba(54,171,220,.06),transparent 28%),
+    linear-gradient(180deg,#eefaf5 0%,#f8fcfa 100%)!important;
+}
+
+.tracking-brand-premium{
+  align-items:center!important;
+  margin-bottom:20px!important;
+}
+
+.tracking-brand-premium img{
+  width:72px!important;
+  height:72px!important;
+  border-radius:22px!important;
+  padding:4px;
+  background:#fff;
+  box-shadow:0 16px 34px rgba(5,91,66,.18)!important;
+}
+
+.tracking-brand-premium b{
+  font-size:22px!important;
+  color:#073f37;
+}
+
+.tracking-card{
+  border-radius:25px!important;
+}
+
+.tracking-search-card{
+  padding:27px!important;
+}
+
+.tracking-search-card h1{
+  font-size:33px!important;
+  letter-spacing:-.8px;
+}
+
+.tracking-ready-banner{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin-bottom:20px;
+  padding:17px 18px;
+  border:1px solid #8bd5b5;
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(255,255,255,.28),transparent 38%),
+    linear-gradient(135deg,#07865a,#10b878);
+  color:#fff;
+  box-shadow:0 15px 30px rgba(7,134,90,.20);
+}
+
+.tracking-ready-banner>svg{
+  flex:0 0 auto;
+}
+
+.tracking-ready-banner>div{
+  display:grid;
+  gap:3px;
+}
+
+.tracking-ready-banner b{
+  font-size:17px;
+}
+
+.tracking-ready-banner span{
+  color:rgba(255,255,255,.88);
+  font-size:13px;
+}
+
+.tracking-status{
+  border:1px solid transparent;
+}
+
+.tracking-received{
+  background:#eaf2ff!important;
+  color:#316fc1!important;
+  border-color:#c6dafa!important;
+}
+
+.tracking-washing{
+  background:#e5f8f2!important;
+  color:#07865a!important;
+  border-color:#b9e6d4!important;
+}
+
+.tracking-drying{
+  background:#fff6d9!important;
+  color:#9a6d00!important;
+  border-color:#f1dc91!important;
+}
+
+.tracking-ironing{
+  background:#f2eaff!important;
+  color:#8051b8!important;
+  border-color:#d9c0f6!important;
+}
+
+.tracking-packing{
+  background:#fff0e5!important;
+  color:#b45f1d!important;
+  border-color:#f4cfb3!important;
+}
+
+.tracking-ready,
+.tracking-completed{
+  background:#def8e9!important;
+  color:#087342!important;
+  border-color:#a9dfc0!important;
+}
+
+.tracking-progress-meter{
+  margin:21px 0 4px;
+}
+
+.tracking-progress-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+  color:#617d77;
+  font-size:13px;
+}
+
+.tracking-progress-top b{
+  color:#07865a;
+  font-size:16px;
+}
+
+.tracking-progress-bar{
+  height:10px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#e2eee9;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.05);
+}
+
+.tracking-progress-bar i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#07865a,#16bc80);
+  transition:width .7s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 0 14px rgba(13,166,111,.28);
+}
+
+.tracking-summary-premium>div{
+  min-height:94px;
+  border:1px solid #d9eae4;
+  background:
+    linear-gradient(145deg,#f5fbf8,#eef8f4)!important;
+  box-shadow:0 7px 17px rgba(7,85,64,.05);
+}
+
+.tracking-summary-premium small{
+  color:#79908c;
+  font-size:10px;
+  line-height:1.35;
+}
+
+.tracking-step.active span{
+  box-shadow:0 0 0 5px rgba(13,166,111,.10);
+}
+
+.tracking-actions a,
+.tracking-actions button{
+  min-height:49px!important;
+  font-size:14px;
+}
+
+@media(max-width:640px){
+  .tracking-premium{padding:18px 10px 32px!important}
+  .tracking-brand-premium img{width:60px!important;height:60px!important;border-radius:18px!important}
+  .tracking-brand-premium b{font-size:18px!important}
+  .tracking-search-card{padding:19px!important}
+  .tracking-search-card h1{font-size:27px!important}
+  .tracking-card{border-radius:20px!important}
+  .tracking-order-head{align-items:center}
+  .tracking-order-head strong{font-size:20px!important}
+  .tracking-status{font-size:12px;padding:7px 10px!important}
+  .tracking-progress{grid-template-columns:repeat(3,1fr)!important}
+  .tracking-ready-banner{align-items:flex-start}
+}
+
+@media(max-width:390px){
+  .tracking-brand-premium{gap:9px!important}
+  .tracking-brand-premium img{width:52px!important;height:52px!important}
+  .tracking-search-card h1{font-size:24px!important}
+  .tracking-order-head{flex-direction:column;align-items:flex-start!important}
+  .tracking-progress{grid-template-columns:repeat(2,1fr)!important}
+}

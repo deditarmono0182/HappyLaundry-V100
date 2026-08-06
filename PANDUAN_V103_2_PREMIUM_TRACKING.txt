@@ -1,0 +1,34 @@
+HAPPYLAUNDRY ENTERPRISE V103.2 — PREMIUM TRACKING
+
+FITUR BARU:
+- Progress cucian dalam persen.
+- Progress bar animasi.
+- Countdown estimasi selesai.
+- Tanggal estimasi lengkap.
+- Warna status berbeda untuk setiap tahap.
+- Banner khusus saat status Siap Diambil / Selesai.
+- Logo lebih besar dan premium.
+- WhatsApp dan Maps tetap tersedia.
+- QR nota tetap langsung membuka halaman tracking.
+- Tampilan iPhone dan Android dirapikan.
+
+TIDAK ADA SQL BARU.
+Tetap memakai function:
+public.v103_public_order_tracking(text)
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V103.2 Premium Tracking
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka /track/NOMOR-ORDER untuk menguji.
+10. Ubah status order di Produksi lalu refresh tracking.
+
+CATATAN ESTIMASI:
+- Jika estimasi belum diisi saat transaksi, halaman menampilkan "Hubungi laundry".
+- Jika estimasi sudah diisi, countdown akan muncul otomatis.

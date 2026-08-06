@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V103.0 Stable + PWA
+# HappyLaundry Enterprise V103.2 Premium Tracking
 
 ## Jalankan
 ```bash
@@ -54,3 +54,7 @@ Hardening kasir, shortcut keyboard, validasi, pencegahan klik ganda, loading ove
 
 ## V103.0
 Tracking publik via QR, PWA, backup JSON, import master data, lazy loading, offline shell, keamanan Netlify, dan optimasi Tahap 10.
+
+
+## V103.2
+Premium tracking: progress %, countdown estimasi, status colors, banner siap diambil, dan optimasi iPhone/Android.
