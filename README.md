@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V104.0 Inventory Management
+# HappyLaundry Enterprise V104.1 Reporting Fix
 
 ## Jalankan
 ```bash
@@ -66,3 +66,7 @@ Fix tabel settings produksi, auto refresh 15 detik, dan realtime sinkronisasi or
 
 ## V104.0
 Inventory lengkap: bahan, minimum stok, stok masuk/keluar, nilai persediaan, riwayat, dan supplier.
+
+
+## V104.1
+Reporting Fix: omzet, pengeluaran, laba, piutang, order, metode pembayaran, layanan, pelanggan, CSV, dan cetak dari data aktual Supabase.

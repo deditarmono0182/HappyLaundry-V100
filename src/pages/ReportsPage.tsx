@@ -1,130 +1,292 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Download, FileSpreadsheet, Printer, RefreshCw, TrendingUp, WalletCards, Users, Sparkles } from 'lucide-react'
+import { BarChart3, CalendarDays, CreditCard, FileSpreadsheet, Printer, ReceiptText, TrendingUp, Users, WalletCards } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
-import { formatIDR } from '../lib/format'
-import { paymentLabels, statusLabels } from '../lib/order'
+import { formatRupiah } from '../lib/format'
 import { supabase } from '../lib/supabase'
-import type { OrderRow } from '../types/order'
 
-interface PaymentRow { id:string; order_id:string; amount:number; method:'cash'|'qris'|'transfer'|'other'; created_at:string }
-interface CashRow { id:string; kind:'income'|'expense'; category:string; description:string; amount:number; method:string; created_at:string }
-interface ItemRow { service_name:string; quantity:number; subtotal:number }
-interface Period { start:string; end:string }
-
-const todayText=()=>new Date().toISOString().slice(0,10)
-const firstMonth=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`}
-const endOfDay=(value:string)=>new Date(`${value}T23:59:59.999`).toISOString()
-const startOfDay=(value:string)=>new Date(`${value}T00:00:00`).toISOString()
-
-function csvCell(value:unknown){const text=String(value??'');return `"${text.replaceAll('"','""')}"`}
-function downloadCsv(filename:string, rows:unknown[][]){
-  const csv=rows.map(row=>row.map(csvCell).join(',')).join('\n')
-  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'})
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)
+interface OrderRow{
+  id:string
+  order_no:string
+  customer_id:string
+  total:number
+  paid_amount:number
+  payment_status:string
+  status:string
+  created_at:string
 }
 
+interface PaymentRow{
+  id:string
+  order_id:string
+  amount:number
+  method:string
+  created_at:string
+}
+
+interface CashRow{
+  id:string
+  kind:string
+  amount:number
+  created_at:string
+  description?:string|null
+}
+
+interface ItemRow{
+  order_id:string
+  service_name:string
+  quantity:number
+  line_total?:number
+  subtotal?:number
+}
+
+interface CustomerRow{
+  id:string
+  name:string
+}
+
+const todayISO=()=>{
+  const d=new Date()
+  const y=d.getFullYear()
+  const m=String(d.getMonth()+1).padStart(2,'0')
+  const day=String(d.getDate()).padStart(2,'0')
+  return `${y}-${m}-${day}`
+}
+
+const monthStartISO=()=>{
+  const d=new Date()
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`
+}
+
+const endOfDay=(value:string)=>`${value}T23:59:59.999`
+const startOfDay=(value:string)=>`${value}T00:00:00.000`
+
 export function ReportsPage(){
-  const [period,setPeriod]=useState<Period>({start:firstMonth(),end:todayText()})
+  const [from,setFrom]=useState(monthStartISO())
+  const [to,setTo]=useState(todayISO())
+  const [appliedFrom,setAppliedFrom]=useState(monthStartISO())
+  const [appliedTo,setAppliedTo]=useState(todayISO())
   const [orders,setOrders]=useState<OrderRow[]>([])
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [cash,setCash]=useState<CashRow[]>([])
   const [items,setItems]=useState<ItemRow[]>([])
-  const [loading,setLoading]=useState(false)
+  const [customers,setCustomers]=useState<CustomerRow[]>([])
+  const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
-    const from=startOfDay(period.start),to=endOfDay(period.end)
-    const [o,p,c,i]=await Promise.all([
-      supabase.from('v100_orders_view').select('*').gte('created_at',from).lte('created_at',to).order('created_at',{ascending:false}),
-      supabase.from('v100_payments').select('id,order_id,amount,method,created_at').gte('created_at',from).lte('created_at',to).order('created_at',{ascending:false}),
-      supabase.from('v100_cash_transactions').select('id,kind,category,description,amount,method,created_at').gte('created_at',from).lte('created_at',to).order('created_at',{ascending:false}),
-      supabase.from('v100_order_items').select('service_name,quantity,subtotal,created_at').gte('created_at',from).lte('created_at',to)
+    const fromISO=startOfDay(appliedFrom)
+    const toISO=endOfDay(appliedTo)
+
+    const [orderRes,paymentRes,cashRes,itemRes,customerRes]=await Promise.all([
+      supabase.from('v100_orders')
+        .select('id,order_no,customer_id,total,paid_amount,payment_status,status,created_at')
+        .gte('created_at',fromISO).lte('created_at',toISO)
+        .neq('status','cancelled'),
+      supabase.from('v100_payments')
+        .select('id,order_id,amount,method,created_at')
+        .gte('created_at',fromISO).lte('created_at',toISO),
+      supabase.from('v100_cash_transactions')
+        .select('id,kind,amount,created_at,description')
+        .gte('created_at',fromISO).lte('created_at',toISO),
+      supabase.from('v100_order_items')
+        .select('order_id,service_name,quantity,line_total,subtotal'),
+      supabase.from('v100_customers')
+        .select('id,name')
     ])
-    const error=o.error||p.error||c.error||i.error
-    if(error)setMessage(error.message)
-    else {setOrders((o.data as OrderRow[])||[]);setPayments((p.data as PaymentRow[])||[]);setCash((c.data as CashRow[])||[]);setItems((i.data as ItemRow[])||[])}
+
+    const error=orderRes.error||paymentRes.error||cashRes.error||itemRes.error||customerRes.error
+    if(error){
+      setMessage(error.message)
+      setOrders([]);setPayments([]);setCash([]);setItems([]);setCustomers([])
+    }else{
+      setOrders((orderRes.data as OrderRow[])||[])
+      setPayments((paymentRes.data as PaymentRow[])||[])
+      setCash((cashRes.data as CashRow[])||[])
+      setItems((itemRes.data as ItemRow[])||[])
+      setCustomers((customerRes.data as CustomerRow[])||[])
+    }
     setLoading(false)
-  },[period])
+  },[appliedFrom,appliedTo])
 
   useEffect(()=>{void load()},[load])
 
-  const omzet=payments.reduce((s,r)=>s+Number(r.amount),0)
-  const expense=cash.filter(r=>r.kind==='expense').reduce((s,r)=>s+Number(r.amount),0)
-  const profit=omzet-expense
-  const receivable=orders.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)
-  const completed=orders.filter(r=>r.status==='completed').length
-  const avg=orders.length?orders.reduce((s,r)=>s+Number(r.total),0)/orders.length:0
+  const orderIds=useMemo(()=>new Set(orders.map(o=>o.id)),[orders])
 
-  const paymentSummary=useMemo(()=>['cash','qris','transfer','other'].map(method=>({method,total:payments.filter(r=>r.method===method).reduce((s,r)=>s+Number(r.amount),0),count:payments.filter(r=>r.method===method).length})),[payments])
-  const topServices=useMemo(()=>{
-    const map=new Map<string,{qty:number,total:number}>();items.forEach(r=>{const old=map.get(r.service_name)||{qty:0,total:0};old.qty+=Number(r.quantity);old.total+=Number(r.subtotal);map.set(r.service_name,old)})
-    return [...map.entries()].map(([name,v])=>({name,...v})).sort((a,b)=>b.total-a.total).slice(0,10)
-  },[items])
-  const topCustomers=useMemo(()=>{
-    const map=new Map<string,{phone:string,count:number,total:number}>();orders.forEach(r=>{const old=map.get(r.customer_name)||{phone:r.customer_phone,count:0,total:0};old.count+=1;old.total+=Number(r.total);map.set(r.customer_name,old)})
-    return [...map.entries()].map(([name,v])=>({name,...v})).sort((a,b)=>b.total-a.total).slice(0,10)
-  },[orders])
+  const report=useMemo(()=>{
+    const omzet=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
+    const expense=cash
+      .filter(c=>c.kind==='expense'||c.kind==='out')
+      .reduce((sum,c)=>sum+Number(c.amount||0),0)
+    const receivable=orders.reduce((sum,o)=>sum+Math.max(0,Number(o.total||0)-Number(o.paid_amount||0)),0)
+    const completed=orders.filter(o=>o.status==='completed'||o.status==='ready').length
+    const avg=orders.length?omzet/orders.length:0
 
-  const exportOrders=()=>downloadCsv(`laporan-order-${period.start}-${period.end}.csv`,[
-    ['Nomor Order','Tanggal','Pelanggan','WhatsApp','Status','Pembayaran','Total','Sudah Bayar','Sisa'],
-    ...orders.map(r=>[r.order_no,new Date(r.created_at).toLocaleString('id-ID'),r.customer_name,r.customer_phone,statusLabels[r.status],paymentLabels[r.payment_status],r.total,r.paid_amount,Math.max(0,Number(r.total)-Number(r.paid_amount))])
-  ])
-  const exportCash=()=>downloadCsv(`laporan-kas-${period.start}-${period.end}.csv`,[
-    ['Tanggal','Jenis','Kategori','Keterangan','Metode','Nominal'],
-    ...cash.map(r=>[new Date(r.created_at).toLocaleString('id-ID'),r.kind==='income'?'Masuk':'Keluar',r.category,r.description,r.method,r.amount])
-  ])
+    const paymentMethods:Record<string,number>={}
+    for(const p of payments){
+      const key=(p.method||'lainnya').toLowerCase()
+      paymentMethods[key]=(paymentMethods[key]||0)+Number(p.amount||0)
+    }
+
+    const serviceMap:Record<string,{qty:number,revenue:number}>={}
+    for(const i of items){
+      if(!orderIds.has(i.order_id))continue
+      const key=i.service_name||'Layanan'
+      if(!serviceMap[key])serviceMap[key]={qty:0,revenue:0}
+      serviceMap[key].qty+=Number(i.quantity||0)
+      serviceMap[key].revenue+=Number(i.line_total??i.subtotal??0)
+    }
+
+    const customerName=new Map(customers.map(c=>[c.id,c.name]))
+    const customerMap:Record<string,{name:string,orders:number,total:number}>={}
+    for(const o of orders){
+      const key=o.customer_id
+      if(!customerMap[key])customerMap[key]={name:customerName.get(key)||'Pelanggan',orders:0,total:0}
+      customerMap[key].orders+=1
+      customerMap[key].total+=Number(o.total||0)
+    }
+
+    const dayMap:Record<string,number>={}
+    for(const p of payments){
+      const key=new Date(p.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})
+      dayMap[key]=(dayMap[key]||0)+Number(p.amount||0)
+    }
+
+    return{
+      omzet,
+      expense,
+      net:omzet-expense,
+      receivable,
+      orders:orders.length,
+      completed,
+      avg,
+      paymentMethods:Object.entries(paymentMethods).sort((a,b)=>b[1]-a[1]),
+      services:Object.entries(serviceMap).map(([name,v])=>({name,...v})).sort((a,b)=>b.qty-a.qty).slice(0,8),
+      customers:Object.values(customerMap).sort((a,b)=>b.total-a.total).slice(0,8),
+      daily:Object.entries(dayMap)
+    }
+  },[orders,payments,cash,items,customers,orderIds])
+
+  const maxDaily=Math.max(1,...report.daily.map(([,v])=>v))
+  const maxMethod=Math.max(1,...report.paymentMethods.map(([,v])=>v))
+
+  const setToday=()=>{
+    const t=todayISO()
+    setFrom(t);setTo(t);setAppliedFrom(t);setAppliedTo(t)
+  }
+
+  const setMonth=()=>{
+    const f=monthStartISO(),t=todayISO()
+    setFrom(f);setTo(t);setAppliedFrom(f);setAppliedTo(t)
+  }
+
+  const apply=()=>{
+    if(!from||!to)return
+    setAppliedFrom(from)
+    setAppliedTo(to)
+  }
+
+  const print=()=>window.print()
+
+  const exportCSV=()=>{
+    const rows=[
+      ['HappyLaundry Enterprise V104.1 - Laporan Owner'],
+      ['Periode',`${appliedFrom} s/d ${appliedTo}`],
+      [],
+      ['Ringkasan','Nilai'],
+      ['Omzet',report.omzet],
+      ['Pengeluaran',report.expense],
+      ['Laba Bersih',report.net],
+      ['Piutang',report.receivable],
+      ['Order',report.orders],
+      ['Rata-rata Order',Math.round(report.avg)],
+      [],
+      ['Metode Pembayaran','Jumlah'],
+      ...report.paymentMethods.map(([name,value])=>[name,value]),
+      [],
+      ['Layanan','Qty','Omzet'],
+      ...report.services.map(s=>[s.name,s.qty,s.revenue]),
+      [],
+      ['Pelanggan','Jumlah Order','Total Transaksi'],
+      ...report.customers.map(c=>[c.name,c.orders,c.total])
+    ]
+    const csv=rows.map(row=>row.map(cell=>`"${String(cell??'').replace(/"/g,'""')}"`).join(',')).join('\n')
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'})
+    const url=URL.createObjectURL(blob)
+    const a=document.createElement('a')
+    a.href=url
+    a.download=`laporan-owner-${appliedFrom}-${appliedTo}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return <>
-    <PageHeader eyebrow="ENTERPRISE REPORTING" title="Laporan Owner" description="Analisis omzet, kas, piutang, pelanggan, dan layanan." action={<button className="secondary-button" onClick={()=>window.print()}><Printer size={17}/> Cetak</button>}/>
+    <PageHeader
+      eyebrow="ENTERPRISE REPORTING"
+      title="Laporan Owner"
+      description="Analisis omzet, kas, piutang, pelanggan, dan layanan dari transaksi aktual."
+      action={<div className="report-actions">
+        <button className="secondary-button" onClick={exportCSV}><FileSpreadsheet size={17}/>CSV</button>
+        <button className="secondary-button" onClick={print}><Printer size={17}/>Cetak</button>
+      </div>}
+    />
+
     <section className="panel report-filter">
-      <label>Dari<input type="date" value={period.start} onChange={e=>setPeriod({...period,start:e.target.value})}/></label>
-      <label>Sampai<input type="date" value={period.end} onChange={e=>setPeriod({...period,end:e.target.value})}/></label>
-      <div className="quick-periods">
-        <button onClick={()=>setPeriod({start:todayText(),end:todayText()})}>Hari Ini</button>
-        <button onClick={()=>setPeriod({start:firstMonth(),end:todayText()})}>Bulan Ini</button>
-      </div>
-      <button className="primary-button" onClick={()=>void load()} disabled={loading}><RefreshCw size={17}/>{loading?'Memuat...':'Terapkan'}</button>
+      <label>Dari<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label>
+      <label>Sampai<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label>
+      <button className="secondary-button" onClick={setToday}>Hari Ini</button>
+      <button className="secondary-button" onClick={setMonth}>Bulan Ini</button>
+      <button className="primary-button" onClick={apply}><CalendarDays size={17}/>Terapkan</button>
     </section>
+
     {message&&<div className="error-box inline-message">{message}</div>}
+
     <section className="stats-grid report-stats">
-      <StatCard label="Omzet" value={formatIDR(omzet)} caption={`${payments.length} pembayaran`} icon={TrendingUp}/>
-      <StatCard label="Pengeluaran" value={formatIDR(expense)} caption="Kas keluar" icon={WalletCards}/>
-      <StatCard label="Laba Bersih" value={formatIDR(profit)} caption="Omzet dikurangi pengeluaran" icon={TrendingUp}/>
-      <StatCard label="Piutang" value={formatIDR(receivable)} caption="Sisa tagihan" icon={WalletCards}/>
-      <StatCard label="Order" value={String(orders.length)} caption={`${completed} selesai`} icon={FileSpreadsheet}/>
-      <StatCard label="Rata-rata Order" value={formatIDR(avg)} caption="Nilai rata-rata transaksi" icon={TrendingUp}/>
+      <StatCard icon={TrendingUp} label="Omzet" value={formatRupiah(report.omzet)} caption={`${payments.length} pembayaran`}/>
+      <StatCard icon={WalletCards} label="Pengeluaran" value={formatRupiah(report.expense)} caption="Kas keluar"/>
+      <StatCard icon={TrendingUp} label="Laba Bersih" value={formatRupiah(report.net)} caption="Omzet dikurangi pengeluaran"/>
+      <StatCard icon={ReceiptText} label="Piutang" value={formatRupiah(report.receivable)} caption="Sisa tagihan"/>
+      <StatCard icon={BarChart3} label="Order" value={String(report.orders)} caption={`${report.completed} selesai/siap`}/>
+      <StatCard icon={TrendingUp} label="Rata-rata Order" value={formatRupiah(report.avg)} caption="Nilai rata-rata transaksi"/>
     </section>
 
     <section className="report-grid">
-      <article className="panel">
-        <div className="panel-heading report-heading"><div><h3>Metode Pembayaran</h3><p>Komposisi pembayaran periode terpilih.</p></div></div>
-        <div className="payment-report">{paymentSummary.map(r=><div key={r.method}><span>{r.method==='cash'?'Tunai':r.method==='qris'?'QRIS':r.method==='transfer'?'Transfer':'Lainnya'}</span><b>{formatIDR(r.total)}</b><small>{r.count} transaksi</small></div>)}</div>
+      <article className="panel report-card">
+        <div className="panel-heading"><div><h3>Omzet Harian</h3><p>Pembayaran masuk pada periode terpilih.</p></div></div>
+        {loading?<div className="table-empty">Memuat laporan...</div>:report.daily.length===0?<div className="report-empty">Belum ada pembayaran di periode ini.</div>:
+        <div className="report-bars">
+          {report.daily.map(([label,value])=><div className="report-bar-row" key={label}>
+            <span>{label}</span><div><i style={{width:`${Math.max(4,(value/maxDaily)*100)}%`}}/></div><b>{formatRupiah(value)}</b>
+          </div>)}
+        </div>}
       </article>
-      <article className="panel">
-        <div className="panel-heading report-heading"><div><h3>Ringkasan Order</h3><p>Status order pada periode ini.</p></div></div>
-        <div className="status-summary">{(['received','washing','drying','ironing','packing','ready','completed'] as const).map(s=><div key={s}><span className={`status-dot status-${s}`}/><span>{statusLabels[s]}</span><b>{orders.filter(r=>r.status===s).length}</b></div>)}</div>
-      </article>
-    </section>
 
-    <section className="report-grid">
-      <article className="panel">
-        <div className="panel-heading report-heading"><div><h3><Sparkles size={18}/> Layanan Terlaris</h3><p>Berdasarkan nilai transaksi.</p></div></div>
-        <div className="ranking-list">{topServices.map((r,i)=><div key={r.name}><span className="rank">{i+1}</span><div><b>{r.name}</b><small>{r.qty.toLocaleString('id-ID')} unit</small></div><strong>{formatIDR(r.total)}</strong></div>)}{topServices.length===0&&<div className="table-empty">Belum ada data layanan.</div>}</div>
+      <article className="panel report-card">
+        <div className="panel-heading"><div><h3>Metode Pembayaran</h3><p>Komposisi pembayaran periode terpilih.</p></div></div>
+        {report.paymentMethods.length===0?<div className="report-empty">Belum ada pembayaran.</div>:
+        <div className="report-bars">
+          {report.paymentMethods.map(([method,value])=><div className="report-bar-row" key={method}>
+            <span>{method.toUpperCase()}</span><div><i style={{width:`${Math.max(4,(value/maxMethod)*100)}%`}}/></div><b>{formatRupiah(value)}</b>
+          </div>)}
+        </div>}
       </article>
-      <article className="panel">
-        <div className="panel-heading report-heading"><div><h3><Users size={18}/> Pelanggan Terbaik</h3><p>Berdasarkan total belanja.</p></div></div>
-        <div className="ranking-list">{topCustomers.map((r,i)=><div key={r.name}><span className="rank">{i+1}</span><div><b>{r.name}</b><small>{r.phone} · {r.count} order</small></div><strong>{formatIDR(r.total)}</strong></div>)}{topCustomers.length===0&&<div className="table-empty">Belum ada data pelanggan.</div>}</div>
-      </article>
-    </section>
 
-    <section className="panel report-table">
-      <div className="panel-heading report-heading"><div><h3>Detail Order</h3><p>{period.start} sampai {period.end}</p></div><div className="report-actions"><button onClick={exportOrders}><Download size={16}/> CSV Order</button><button onClick={exportCash}><Download size={16}/> CSV Kas</button></div></div>
-      <div className="table-wrap"><table><thead><tr><th>Order</th><th>Tanggal</th><th>Pelanggan</th><th>Status</th><th>Total</th><th>Bayar</th><th>Sisa</th></tr></thead><tbody>
-        {orders.map(r=><tr key={r.id}><td><b>{r.order_no}</b></td><td>{new Date(r.created_at).toLocaleDateString('id-ID')}</td><td><b>{r.customer_name}</b><small>{r.customer_phone}</small></td><td><span className={`badge status-${r.status}`}>{statusLabels[r.status]}</span></td><td>{formatIDR(r.total)}</td><td>{formatIDR(r.paid_amount)}</td><td>{formatIDR(Math.max(0,Number(r.total)-Number(r.paid_amount)))}</td></tr>)}
-        {orders.length===0&&<tr><td colSpan={7} className="table-empty">Belum ada order pada periode ini.</td></tr>}
-      </tbody></table></div>
+      <article className="panel report-card">
+        <div className="panel-heading"><div><h3>Layanan Terlaris</h3><p>Berdasarkan order pada periode terpilih.</p></div></div>
+        {report.services.length===0?<div className="report-empty">Belum ada data layanan.</div>:
+        <div className="ranking-list">
+          {report.services.map((s,index)=><div key={s.name}><span className="rank-no">{index+1}</span><div><b>{s.name}</b><small>{s.qty.toLocaleString('id-ID')} unit</small></div><strong>{s.revenue>0?formatRupiah(s.revenue):'-'}</strong></div>)}
+        </div>}
+      </article>
+
+      <article className="panel report-card">
+        <div className="panel-heading"><div><h3>Pelanggan Terbaik</h3><p>Berdasarkan total nilai order.</p></div></div>
+        {report.customers.length===0?<div className="report-empty">Belum ada data pelanggan.</div>:
+        <div className="ranking-list">
+          {report.customers.map((c,index)=><div key={`${c.name}-${index}`}><span className="rank-no">{index+1}</span><div><b>{c.name}</b><small>{c.orders} order</small></div><strong>{formatRupiah(c.total)}</strong></div>)}
+        </div>}
+      </article>
     </section>
   </>
 }

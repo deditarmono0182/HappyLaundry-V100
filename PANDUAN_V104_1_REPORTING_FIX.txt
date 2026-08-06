@@ -1,0 +1,34 @@
+HAPPYLAUNDRY ENTERPRISE V104.1 — REPORTING FIX
+
+PERBAIKAN:
+- Laporan Owner sekarang membaca data transaksi aktual.
+- Omzet dari v100_payments.
+- Pengeluaran dari v100_cash_transactions.
+- Piutang dari v100_orders.
+- Jumlah order dan rata-rata order dari v100_orders + pembayaran.
+- Metode pembayaran dari v100_payments.
+- Layanan terlaris dari v100_order_items.
+- Pelanggan terbaik dari v100_orders + v100_customers.
+- Grafik omzet harian berdasarkan pembayaran.
+- Export CSV.
+- Cetak laporan.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V104.1 Reporting Fix
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka Laporan Owner.
+10. Pilih tanggal yang mencakup transaksi uji lalu klik Terapkan.
+
+CATATAN:
+- Omzet dihitung dari pembayaran yang benar-benar masuk.
+- Order yang belum dibayar tidak menambah omzet, tetapi masuk ke Piutang.
+- Jika periode tidak mencakup tanggal transaksi, laporan memang akan 0.
