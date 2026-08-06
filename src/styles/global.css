@@ -41,3 +41,29 @@
 .cashier-pro-features ul{margin:0;padding-left:20px;display:grid;gap:6px;color:#365c58}
 @media(max-width:850px){.receipt-actions{grid-template-columns:1fr 1fr!important}}
 @media(max-width:480px){.receipt-actions{grid-template-columns:1fr!important}.quick-pay-row button{flex:1}}
+/* ===== Tombol Utama ===== */
+
+button {
+  font-weight: 700;
+}
+
+button[type="submit"],
+.btn-primary,
+.primary-button {
+  background: #0f8f5f !important;
+  color: #ffffff !important;
+  border: 1px solid #0f8f5f !important;
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover,
+.primary-button:hover {
+  background: #0b744d !important;
+  color: #ffffff !important;
+}
+
+button[type="submit"] *,
+.btn-primary *,
+.primary-button * {
+  color: #ffffff !important;
+}
