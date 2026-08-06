@@ -1,0 +1,8 @@
+HAPPYLAUNDRY V100.3 KASIR & PEMBAYARAN
+
+1. Jalankan supabase/004_v100_3_kasir_pembayaran.sql di SQL Editor.
+2. Copy semua file ke folder HappyLaundry-V100 dan Replace.
+3. GitHub Desktop: Summary HappyLaundry V100.3 Kasir Pembayaran.
+4. Commit to main lalu Push origin.
+5. Tunggu Netlify Published.
+6. Buka menu Pembayaran dan Kas Harian.
