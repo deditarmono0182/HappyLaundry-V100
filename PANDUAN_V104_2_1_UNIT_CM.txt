@@ -1,0 +1,20 @@
+HAPPYLAUNDRY ENTERPRISE V104.2.1 — UNIT CM
+
+PERUBAHAN:
+- Menambahkan pilihan satuan Centimeter (cm) di menu Layanan & Harga.
+- Cocok untuk layanan yang dihitung berdasarkan ukuran.
+- Data layanan lama tidak berubah.
+- Tidak ada SQL baru.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V104.2.1 Unit CM
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka Layanan & Harga -> Tambah Layanan -> Satuan.
+10. Pilihan Centimeter (cm) harus tampil.

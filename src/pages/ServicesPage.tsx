@@ -90,7 +90,9 @@ export function ServicesPage() {
       </section>
       {modalOpen && <Modal title={editing ? 'Edit Layanan' : 'Tambah Layanan'} onClose={() => setModalOpen(false)}><form className="modal-form" onSubmit={submit}>
         <div className="form-grid-two"><label>Nama layanan<input value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} required /></label><label>Kategori<input value={form.category} onChange={event => setForm({ ...form, category: event.target.value })} required /></label></div>
-        <div className="form-grid-two"><label>Satuan<select value={form.unit} onChange={event => setForm({ ...form, unit: event.target.value as Service['unit'] })}><option value="kg">Kilogram</option><option value="pcs">Pcs</option><option value="item">Item</option></select></label><label>Harga<input type="number" min="0" value={form.price} onChange={event => setForm({ ...form, price: event.target.value })} required /></label></div>
+        <div className="form-grid-two"><label>Satuan<select value={form.unit} onChange={event => setForm({ ...form, unit: event.target.value as Service['unit'] })}><option value="kg">Kilogram</option><option value="pcs">Pcs</option><option value="item">Item</option>
+<option value="cm">Centimeter (cm)</option>
+</select></label><label>Harga<input type="number" min="0" value={form.price} onChange={event => setForm({ ...form, price: event.target.value })} required /></label></div>
         <label>Estimasi pengerjaan (jam)<input type="number" min="1" value={form.duration_hours} onChange={event => setForm({ ...form, duration_hours: event.target.value })} required /></label>
         <label className="checkbox-label"><input type="checkbox" checked={form.is_active} onChange={event => setForm({ ...form, is_active: event.target.checked })} /> Layanan aktif dan dapat dipilih saat membuat order</label>
         {message && <div className="error-box">{message}</div>}
