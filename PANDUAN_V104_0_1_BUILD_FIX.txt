@@ -1,0 +1,22 @@
+HAPPYLAUNDRY ENTERPRISE V104.0.1 — INVENTORY BUILD FIX
+
+PERBAIKAN:
+- Memperbaiki error TypeScript pada StatCard.
+- Prop yang salah:
+  note="..."
+  diganti menjadi:
+  caption="..."
+- Tidak ada SQL baru.
+- SQL 007 yang sudah dijalankan tetap dipakai.
+- Data inventory dan transaksi tidak berubah.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   Fix build HappyLaundry V104.0.1
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.

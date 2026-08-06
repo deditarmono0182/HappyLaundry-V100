@@ -152,10 +152,10 @@ export function InventoryPage(){
     />
 
     <section className="stats-grid inventory-stats">
-      <StatCard icon={Boxes} label="Total Bahan" value={String(stats.total)} note="Bahan aktif"/>
-      <StatCard icon={AlertTriangle} label="Stok Menipis" value={String(stats.low)} note="Mencapai minimum"/>
-      <StatCard icon={Package} label="Stok Habis" value={String(stats.empty)} note="Perlu dibeli"/>
-      <StatCard icon={WalletCards} label="Nilai Persediaan" value={formatRupiah(stats.value)} note="Stok × harga modal"/>
+      <StatCard icon={Boxes} label="Total Bahan" value={String(stats.total)} caption="Bahan aktif"/>
+      <StatCard icon={AlertTriangle} label="Stok Menipis" value={String(stats.low)} caption="Mencapai minimum"/>
+      <StatCard icon={Package} label="Stok Habis" value={String(stats.empty)} caption="Perlu dibeli"/>
+      <StatCard icon={WalletCards} label="Nilai Persediaan" value={formatRupiah(stats.value)} caption="Stok × harga modal"/>
     </section>
 
     <section className="panel data-panel">
