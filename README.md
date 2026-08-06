@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V103.2.1 Fix Proses Cucian
+# HappyLaundry Enterprise V104.0 Inventory Management
 
 ## Jalankan
 ```bash
@@ -62,3 +62,7 @@ Premium tracking: progress %, countdown estimasi, status colors, banner siap dia
 
 ## V103.2.1
 Fix tabel settings produksi, auto refresh 15 detik, dan realtime sinkronisasi order.
+
+
+## V104.0
+Inventory lengkap: bahan, minimum stok, stok masuk/keluar, nilai persediaan, riwayat, dan supplier.

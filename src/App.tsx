@@ -8,6 +8,8 @@ const DashboardPage=lazy(()=>import('./pages/DashboardPage').then(m=>({default:m
 const CustomersPage=lazy(()=>import('./pages/CustomersPage').then(m=>({default:m.CustomersPage})))
 const ServicesPage=lazy(()=>import('./pages/ServicesPage').then(m=>({default:m.ServicesPage})))
 const PlaceholderPage=lazy(()=>import('./pages/PlaceholderPage').then(m=>({default:m.PlaceholderPage})))
+const InventoryPage=lazy(()=>import('./pages/InventoryPage').then(m=>({default:m.InventoryPage})))
+const SuppliersPage=lazy(()=>import('./pages/SuppliersPage').then(m=>({default:m.SuppliersPage})))
 const OrdersPage=lazy(()=>import('./pages/OrdersPage').then(m=>({default:m.OrdersPage})))
 const ProductionPage=lazy(()=>import('./pages/ProductionPage').then(m=>({default:m.ProductionPage})))
 const PaymentsPage=lazy(()=>import('./pages/PaymentsPage').then(m=>({default:m.PaymentsPage})))
@@ -38,8 +40,8 @@ export default function App(){
       <Route path="production" element={<ProductionPage/>}/>
       <Route path="customers" element={<CustomersPage/>}/>
       <Route path="services" element={<ServicesPage/>}/>
-      <Route path="inventory" element={<PlaceholderPage title="Stok Bahan" description="Stok bahan dan minimum stok."/>}/>
-      <Route path="suppliers" element={<PlaceholderPage title="Supplier" description="Supplier dan pembelian."/>}/>
+      <Route path="inventory" element={<InventoryPage/>}/>
+      <Route path="suppliers" element={<SuppliersPage/>}/>
       <Route path="payments" element={<PaymentsPage/>}/>
       <Route path="cash" element={<CashPage/>}/>
       <Route path="reports" element={<ReportsPage/>}/>

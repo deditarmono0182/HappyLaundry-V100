@@ -2096,3 +2096,24 @@ button[type="submit"]:disabled {
   font-size:11px;
   font-weight:850;
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V104.0 — Inventory Management
+   ========================================================= */
+
+.inventory-header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.inventory-stats{margin-bottom:18px}
+.inventory-toolbar select{min-height:44px;padding:0 12px;border:1px solid #b9d5cb;border-radius:11px;background:#fff;color:#17463f;font-weight:800}
+.inventory-row-low{background:#fffaf0!important}
+.inventory-row-empty{background:#fff1ef!important}
+.warning-badge{background:#fff0c9!important;color:#996500!important}
+.danger-badge{background:#ffe4df!important;color:#b7412e!important}
+.table-sub{display:block;margin-top:3px;color:#78908b;font-size:11px}
+.inventory-actions{flex-wrap:nowrap}
+.inventory-history{display:grid;gap:3px;max-height:60vh;overflow:auto}
+.inventory-history-row{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:12px;border-bottom:1px solid #e4efeb}
+.inventory-history-row>div{display:grid;gap:2px}.inventory-history-row small{color:#78908b;font-size:11px}.inventory-history-row strong{color:#113f38}
+.inventory-move-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;font-weight:950}
+.inventory-move-in{background:#e1f8ed;color:#08764f}.inventory-move-out{background:#ffe8e3;color:#bd4935}.inventory-move-adjustment{background:#e9f1ff;color:#3b70bd}
+@media(max-width:800px){.inventory-header-actions{width:100%}.inventory-header-actions button{flex:1}.inventory-toolbar{align-items:stretch!important}.inventory-toolbar select{width:100%}.inventory-actions{flex-wrap:wrap}}

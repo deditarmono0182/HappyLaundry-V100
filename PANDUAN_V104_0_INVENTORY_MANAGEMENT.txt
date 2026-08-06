@@ -1,0 +1,53 @@
+HAPPYLAUNDRY ENTERPRISE V104.0 — INVENTORY MANAGEMENT
+
+FITUR:
+- Dashboard stok bahan.
+- Total bahan aktif.
+- Stok menipis.
+- Stok habis.
+- Nilai persediaan.
+- Tambah/Edit bahan.
+- Minimum stok.
+- Harga modal.
+- Supplier utama.
+- Barang masuk.
+- Barang keluar.
+- Penyesuaian stok.
+- Validasi agar stok tidak menjadi minus.
+- Riwayat 100 transaksi stok terbaru.
+- Supplier sekarang sudah menjadi modul aktif.
+
+WAJIB JALANKAN SQL:
+supabase/007_v104_inventory_management.sql
+
+URUTAN PASANG:
+1. Ekstrak ZIP.
+2. Buka Supabase → SQL Editor.
+3. Copy seluruh isi 007_v104_inventory_management.sql.
+4. Klik Run.
+5. Pastikan Success.
+6. Copy seluruh isi project ke folder lokal HappyLaundry-V100.
+7. Pilih Replace files in destination.
+8. GitHub Desktop Summary:
+   HappyLaundry V104.0 Inventory Management
+9. Commit to main.
+10. Push origin.
+11. Tunggu Netlify Published.
+12. Ctrl + Shift + R.
+
+UJI:
+1. Buka Stok Bahan.
+2. Bahan contoh Deterjen/Pewangi/Plastik/Hanger harus tampil.
+3. Klik Stok Masuk pada Deterjen.
+4. Isi 10 liter.
+5. Simpan.
+6. Stok harus berubah menjadi 10 liter.
+7. Klik Stok Keluar, isi 2 liter.
+8. Stok harus menjadi 8 liter.
+9. Buka Riwayat dan pastikan transaksi tercatat.
+10. Buka Supplier dan tambahkan supplier baru.
+
+CATATAN:
+- V104.0 menggunakan stok manual masuk/keluar yang stabil.
+- Pengurangan stok otomatis berdasarkan setiap layanan belum diaktifkan pada versi ini,
+  karena membutuhkan resep pemakaian bahan per layanan. Itu cocok untuk V104.1.
