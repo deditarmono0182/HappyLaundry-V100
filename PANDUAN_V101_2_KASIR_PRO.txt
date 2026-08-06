@@ -1,0 +1,32 @@
+HAPPYLAUNDRY ENTERPRISE V101.2 — KASIR PRO
+
+FITUR BARU:
+- Diskon nominal dan persen
+- Tombol pembayaran cepat: uang pas, Rp50.000, Rp100.000
+- Hitung kembalian otomatis
+- Nota thermal 58 mm
+- Nota thermal 80 mm
+- Nota A4 / Simpan PDF
+- QR status order
+- Barcode invoice
+- Rincian layanan lengkap di nota
+- Logo, alamat, WhatsApp, Maps, dan footer nota dari Pengaturan
+- WhatsApp setelah transaksi
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ZIP ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. Buka GitHub Desktop.
+5. Summary: HappyLaundry V101.2 Kasir Pro
+6. Commit to main.
+7. Push origin.
+8. Tunggu Netlify Published.
+9. Tekan Ctrl + Shift + R.
+
+TIDAK ADA SQL BARU.
+SQL 001–005 tetap digunakan.
+
+CATATAN QR:
+QR menggunakan layanan gambar online saat nota dibuka. Jika komputer sedang offline,
+nota tetap dapat dicetak tetapi gambar QR mungkin tidak muncul.

@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V100.5 WhatsApp & Settings
+# HappyLaundry Enterprise V101.2 Kasir Pro
 
 ## Jalankan
 ```bash
@@ -26,3 +26,7 @@ Menu kasir transaksi baru, pembayaran langsung, kembalian, dan nota 58 mm.
 
 ## V100.5
 Pengaturan profil laundry, template WhatsApp, nota dinamis, dan tombol WhatsApp setelah transaksi.
+
+
+## V101.2
+Kasir Pro dengan nota 58/80 mm, A4/PDF, QR status, barcode, diskon persen, dan pembayaran cepat.
