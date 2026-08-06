@@ -5,6 +5,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { CustomersPage } from './pages/CustomersPage'
 import { ServicesPage } from './pages/ServicesPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
+import { OrdersPage } from './pages/OrdersPage'
+import { ProductionPage } from './pages/ProductionPage'
 import { useAuth } from './lib/auth'
 
 function Protected() {
@@ -20,8 +22,8 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<Protected />}>
         <Route index element={<DashboardPage />} />
-        <Route path="orders" element={<PlaceholderPage title="Order" description="Order baru, pembayaran, dan nota 58 mm." />} />
-        <Route path="production" element={<PlaceholderPage title="Produksi" description="Cuci, kering, setrika, packing, siap diambil." />} />
+        <Route path="orders" element={<OrdersPage />} />
+        <Route path="production" element={<ProductionPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="services" element={<ServicesPage />} />
         <Route path="inventory" element={<PlaceholderPage title="Stok Bahan" description="Stok bahan dan minimum stok." />} />

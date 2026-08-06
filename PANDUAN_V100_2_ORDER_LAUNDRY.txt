@@ -1,0 +1,29 @@
+HAPPYLAUNDRY V100.2 ORDER LAUNDRY
+
+FITUR:
+- Order baru
+- Pilih pelanggan
+- Pilih banyak layanan
+- Berat/jumlah item
+- Hitung subtotal, diskon, total
+- Pembayaran awal dan status pembayaran
+- Estimasi selesai
+- Cetak nota thermal 58 mm
+- Perubahan status cucian
+- Papan produksi
+
+URUTAN PASANG:
+1. Supabase > SQL Editor.
+2. Jalankan supabase/003_v100_2_order_laundry.sql.
+3. Ekstrak ZIP V100.2.
+4. Copy seluruh isi ke folder lokal HappyLaundry-V100.
+5. Replace files.
+6. GitHub Desktop:
+   Summary: HappyLaundry V100.2 Order Laundry
+   Commit to main
+   Push origin
+7. Tunggu Netlify Published.
+8. Login dan buka menu Order.
+
+CATATAN:
+Sebelum membuat order, minimal harus ada satu pelanggan dan satu layanan aktif.
