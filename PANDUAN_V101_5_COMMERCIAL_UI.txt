@@ -1,0 +1,25 @@
+HAPPYLAUNDRY ENTERPRISE V101.5 — COMMERCIAL UI
+
+PERUBAHAN:
+- Sidebar lebih ringkas agar ruang kasir lebih luas
+- Layout kasir bergaya POS komersial
+- Panel pelanggan, layanan, pembayaran lebih seimbang
+- Ringkasan total lebih compact
+- Tombol transaksi lebih nyaman dipakai
+- Dashboard lebih proporsional
+- Tabel memiliki sticky header
+- Tampilan laptop, tablet, dan HP diperbaiki
+- Tidak mengubah database, order, pembayaran, atau data pelanggan
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V101.5 Commercial UI
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+
+TIDAK ADA SQL BARU.

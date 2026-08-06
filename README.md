@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V101.4 Premium UI & UX
+# HappyLaundry Enterprise V101.5 Commercial UI
 
 ## Jalankan
 ```bash
@@ -42,3 +42,7 @@ UI premium untuk dashboard, sidebar, kasir, tombol, kartu, tabel, tablet, dan HP
 
 ## V101.4
 Perbaikan layout terpotong, sidebar premium, header, margin desktop, laptop, tablet, dan zoom browser.
+
+
+## V101.5
+Commercial UI untuk layout POS, sidebar compact, dashboard, tabel, tablet, dan HP.
