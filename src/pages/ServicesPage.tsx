@@ -73,7 +73,7 @@ export function ServicesPage() {
 
   return (
     <>
-      <PageHeader eyebrow="MASTER DATA" title="Layanan & Harga" description="Atur jenis layanan, satuan, harga, dan estimasi pengerjaan." action={<button className="primary-button" onClick={openCreate}><Plus size={18} /> Tambah Layanan</button>} />
+      <PageHeader eyebrow="MASTER DATA" title="Layanan & Harga" description="Atur jenis layanan, satuan, harga, dan estimasi pengerjaan." action={<button className="primary-button master-add-button" onClick={openCreate}><Plus size={18} /> Tambah Layanan</button>} />
       <section className="panel data-panel">
         <div className="toolbar"><label className="search-box"><Search size={18} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari layanan atau kategori" /></label><span className="record-count">{filtered.length} layanan</span></div>
         {message && <div className="error-box inline-message">{message}</div>}

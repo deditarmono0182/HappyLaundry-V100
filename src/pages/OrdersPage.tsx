@@ -247,7 +247,7 @@ export function OrdersPage() {
         title="Order Laundry"
         description="Buat order, catat pembayaran, dan pantau proses cucian."
         action={
-          <button className="primary-button" onClick={openCreate}>
+          <button className="primary-button master-add-button" onClick={openCreate}>
             <Plus size={18} /> Order Baru
           </button>
         }

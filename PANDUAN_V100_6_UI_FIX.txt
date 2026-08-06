@@ -1,0 +1,19 @@
+HAPPYLAUNDRY V100.6 — PERBAIKAN TAMPILAN
+
+PERBAIKAN:
+- Tombol Tambah Pelanggan hijau, jelas, dan mudah diklik
+- Tombol Tambah Layanan, Order Baru, dan Transaksi Kas diseragamkan
+- Ukuran tulisan halaman, tabel, form, dan menu diperbesar
+- Kontras warna diperkuat
+- Tampilan tombol pada HP/tablet dibuat selebar halaman
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke folder lokal HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary: HappyLaundry V100.6 UI Visibility Fix
+5. Commit to main lalu Push origin.
+6. Tunggu Netlify Published.
+7. Tekan Ctrl+Shift+R.
+
+Tidak ada SQL baru.

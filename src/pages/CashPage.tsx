@@ -64,7 +64,7 @@ export function CashPage(){
   }
 
   return <>
-    <PageHeader eyebrow="KEUANGAN" title="Kas Harian" description="Catat pemasukan dan pengeluaran operasional harian." action={<button className="primary-button" onClick={()=>setOpen(true)}><Plus size={18}/> Transaksi Kas</button>}/>
+    <PageHeader eyebrow="KEUANGAN" title="Kas Harian" description="Catat pemasukan dan pengeluaran operasional harian." action={<button className="primary-button master-add-button" onClick={()=>setOpen(true)}><Plus size={18}/> Transaksi Kas</button>}/>
     <section className="stats-grid compact-stats">
       <article className="stat-card"><div className="stat-icon"><ArrowDownCircle size={22}/></div><div><span>Kas Masuk Hari Ini</span><strong>{formatIDR(income)}</strong><small>Pemasukan tercatat</small></div></article>
       <article className="stat-card"><div className="stat-icon"><ArrowUpCircle size={22}/></div><div><span>Kas Keluar Hari Ini</span><strong>{formatIDR(expense)}</strong><small>Pengeluaran tercatat</small></div></article>
