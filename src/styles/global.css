@@ -4583,3 +4583,111 @@ a{
   background:#90caf9;
   color:#0a2f57;
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V110.1 — Blue Premium Chart
+   ========================================================= */
+
+/* Desktop custom title/header bar */
+.titlebar,
+.title-bar,
+.desktop-titlebar,
+.app-titlebar,
+.window-titlebar{
+  background:linear-gradient(90deg,#1E88E5,#1565C0)!important;
+  color:#fff!important;
+}
+
+.titlebar *,
+.title-bar *,
+.desktop-titlebar *,
+.app-titlebar *,
+.window-titlebar *{
+  color:#fff!important;
+}
+
+/* If older top strip used hard-coded green */
+body::before{
+  background:#1E88E5!important;
+}
+
+/* Hide legacy vertical bar chart where the new premium chart is present */
+.dashboard-premium-line-panel ~ .dashboard-grid .bar-chart,
+.dashboard-premium-line-panel ~ .dashboard-grid .dashboard-bars{
+  display:none!important;
+}
+
+/* Premium line/area revenue chart */
+.dashboard-premium-line-panel{
+  margin-top:12px!important;
+}
+
+.revenue-line-chart{
+  position:relative;
+  padding:8px 6px 2px;
+}
+
+.revenue-line-chart svg{
+  width:100%;
+  height:auto;
+  min-height:220px;
+  overflow:visible;
+}
+
+.revenue-grid-line{
+  stroke:#DCEBF7;
+  stroke-width:1;
+  stroke-dasharray:5 6;
+}
+
+.revenue-point-halo{
+  fill:#90CAF9;
+  opacity:.28;
+}
+
+.revenue-point{
+  fill:#FFFFFF;
+  stroke:#1E88E5;
+  stroke-width:3;
+}
+
+.revenue-chart-labels{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(82px,1fr));
+  gap:7px;
+  margin-top:4px;
+}
+
+.revenue-chart-labels>div{
+  display:grid;
+  gap:2px;
+  justify-items:center;
+  min-width:0;
+}
+
+.revenue-chart-labels b{
+  color:#315F7F!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+
+.revenue-chart-labels span{
+  color:#5F7E95!important;
+  font-size:9px!important;
+  font-weight:750!important;
+  white-space:nowrap;
+}
+
+@media(max-width:700px){
+  .revenue-line-chart{
+    overflow-x:auto;
+  }
+  .revenue-line-chart svg{
+    width:720px;
+    max-width:none;
+  }
+  .revenue-chart-labels{
+    min-width:720px;
+  }
+}

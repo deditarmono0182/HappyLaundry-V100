@@ -1,0 +1,32 @@
+HAPPYLAUNDRY ENTERPRISE V110.1 — BLUE PREMIUM CHART
+
+PERUBAHAN:
+- Tema Blue Edition tetap dipertahankan.
+- Title/header bar aplikasi diarahkan ke warna biru.
+- Grafik omzet Dashboard tidak lagi menggunakan bentuk BAR.
+- Grafik baru menggunakan LINE + AREA CHART:
+  * garis biru halus
+  * area transparan di bawah garis
+  * titik data
+  * grid horizontal lembut
+  * label periode
+  * jumlah Rupiah di setiap periode
+- Omzet per kategori tetap menampilkan Rupiah + Persentase.
+- Warna produksi tetap berbeda per tahap agar mudah dipantau.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke HappyLaundry-V100.
+3. Replace.
+4. Commit:
+   HappyLaundry V110.1 Blue Premium Chart
+5. Push origin.
+6. Tunggu Netlify Published.
+7. Ctrl + Shift + R.
+
+CATATAN TITLE BAR:
+Jika bagian paling atas adalah title bar native Windows/Tauri dan bukan custom HTML,
+warna native titlebar bisa mengikuti pengaturan window/Tauri/Windows.
+V110.1 juga sudah mencoba menyesuaikan file konfigurasi titlebar yang tersedia di project.
