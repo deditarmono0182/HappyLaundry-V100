@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.3 Order Dashboard Enhancement
+# HappyLaundry Enterprise V110.4 Finance Revenue Sharing
 
 ## Jalankan
 ```bash
@@ -154,3 +154,7 @@ Memperbaiki PWA/Windows title bar hijau dengan theme_color biru pada index.html 
 
 ## V110.3
 Halaman Order: kartu Terlambat, kolom Estimasi Selesai, pencarian order/pelanggan/telepon/status/pembayaran, dan font sedikit lebih besar. Tracking publik tetap nomor order.
+
+
+## V110.4
+Bagi hasil per kategori layanan di Dashboard Keuangan dengan persentase editable Owner dan penyimpanan Supabase.

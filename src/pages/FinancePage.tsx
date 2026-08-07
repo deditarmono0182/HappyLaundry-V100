@@ -1,9 +1,13 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, CalendarDays, FileSpreadsheet, Plus, ReceiptText, Search, TrendingDown, TrendingUp, WalletCards } from 'lucide-react'
+import {
+  AlertTriangle, CalendarDays, FileSpreadsheet, Percent, Plus,
+  ReceiptText, Search, Settings2, TrendingDown, TrendingUp, WalletCards
+} from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
+import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { supabase } from '../lib/supabase'
 
@@ -27,14 +31,34 @@ interface ExpenseRow{
 }
 
 interface OrderSummary{
+  id:string
   total:number
   paid_amount:number
   status:string
 }
 
 interface PaymentRow{
+  id:string
+  order_id:string
   amount:number
   created_at:string
+}
+
+interface OrderItemRow{
+  order_id:string
+  service_id:string|null
+  subtotal:number
+}
+
+interface ServiceRow{
+  id:string
+  category:string
+}
+
+interface RevenueShareSetting{
+  id?:string
+  category:string
+  share_percent:number
 }
 
 const today=()=>new Date().toISOString().slice(0,10)
@@ -45,16 +69,28 @@ const monthStart=()=>{
 
 export function FinancePage(){
   const navigate=useNavigate()
+  const{profile}=useAuth()
+  const isOwner=profile?.role==='owner'
+
   const [categories,setCategories]=useState<ExpenseCategory[]>([])
   const [expenses,setExpenses]=useState<ExpenseRow[]>([])
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [orders,setOrders]=useState<OrderSummary[]>([])
+  const [orderItems,setOrderItems]=useState<OrderItemRow[]>([])
+  const [services,setServices]=useState<ServiceRow[]>([])
+  const [shareSettings,setShareSettings]=useState<RevenueShareSetting[]>([])
+
   const [from,setFrom]=useState(monthStart())
   const [to,setTo]=useState(today())
   const [query,setQuery]=useState('')
   const [open,setOpen]=useState(false)
+  const [shareOpen,setShareOpen]=useState(false)
+  const [shareDraft,setShareDraft]=useState<Record<string,string>>({})
   const [busy,setBusy]=useState(false)
+  const [shareBusy,setShareBusy]=useState(false)
   const [message,setMessage]=useState('')
+  const [shareMessage,setShareMessage]=useState('')
+
   const [form,setForm]=useState({
     expense_date:today(),category_id:'',amount:'',payment_method:'cash',
     description:'',reference:''
@@ -62,19 +98,26 @@ export function FinancePage(){
 
   const load=useCallback(async()=>{
     setMessage('')
-    const [c,e,p,o]=await Promise.all([
+    const [c,e,p,o,i,s,rs]=await Promise.all([
       supabase.from('v106_expense_categories').select('*').eq('is_active',true).order('group_name').order('name'),
       supabase.from('v106_expenses_view').select('*').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false}),
-      supabase.from('v100_payments').select('amount,created_at').gte('created_at',`${from}T00:00:00`).lte('created_at',`${to}T23:59:59.999`),
-      supabase.from('v100_orders_view').select('total,paid_amount,status')
+      supabase.from('v100_payments').select('id,order_id,amount,created_at').gte('created_at',`${from}T00:00:00`).lte('created_at',`${to}T23:59:59.999`),
+      supabase.from('v100_orders_view').select('id,total,paid_amount,status'),
+      supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
+      supabase.from('v100_services').select('id,category'),
+      supabase.from('v110_revenue_share_settings').select('id,category,share_percent').order('category')
     ])
-    const error=c.error||e.error||p.error||o.error
+
+    const error=c.error||e.error||p.error||o.error||i.error||s.error||rs.error
     if(error)setMessage(error.message)
     else{
       setCategories((c.data as ExpenseCategory[])||[])
       setExpenses((e.data as ExpenseRow[])||[])
       setPayments((p.data as PaymentRow[])||[])
       setOrders((o.data as OrderSummary[])||[])
+      setOrderItems((i.data as OrderItemRow[])||[])
+      setServices((s.data as ServiceRow[])||[])
+      setShareSettings((rs.data as RevenueShareSetting[])||[])
     }
   },[from,to])
 
@@ -87,7 +130,11 @@ export function FinancePage(){
       .filter(o=>o.status!=='cancelled')
       .reduce((sum,o)=>sum+Math.max(0,Number(o.total||0)-Number(o.paid_amount||0)),0)
     const receivableCount=orders.filter(o=>o.status!=='cancelled'&&Math.max(0,Number(o.total||0)-Number(o.paid_amount||0))>0).length
-    return{omzet,expense,net:omzet-expense,margin:omzet>0?((omzet-expense)/omzet)*100:0,receivable,receivableCount}
+    return{
+      omzet,expense,net:omzet-expense,
+      margin:omzet>0?((omzet-expense)/omzet)*100:0,
+      receivable,receivableCount
+    }
   },[payments,expenses,orders])
 
   const filtered=useMemo(()=>{
@@ -101,6 +148,111 @@ export function FinancePage(){
     for(const e of expenses)map[e.category_name]=(map[e.category_name]||0)+Number(e.amount||0)
     return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10)
   },[expenses])
+
+  const revenueSharing=useMemo(()=>{
+    const serviceCategory=new Map(services.map(service=>[
+      service.id,(service.category||'Reguler').trim()||'Reguler'
+    ]))
+
+    const itemsByOrder=new Map<string,OrderItemRow[]>()
+    for(const item of orderItems){
+      const list=itemsByOrder.get(item.order_id)||[]
+      list.push(item)
+      itemsByOrder.set(item.order_id,list)
+    }
+
+    const groupedRevenue:Record<string,number>={}
+
+    // Allocate each ACTUAL payment in the selected date range
+    // proportionally across the order's item subtotals.
+    for(const payment of payments){
+      const items=itemsByOrder.get(payment.order_id)||[]
+      const itemTotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.subtotal||0)),0)
+      const paymentAmount=Math.max(0,Number(payment.amount||0))
+
+      if(paymentAmount<=0)continue
+
+      if(items.length===0||itemTotal<=0){
+        groupedRevenue['Reguler']=(groupedRevenue['Reguler']||0)+paymentAmount
+        continue
+      }
+
+      for(const item of items){
+        const subtotal=Math.max(0,Number(item.subtotal||0))
+        if(subtotal<=0)continue
+        const category=item.service_id
+          ? serviceCategory.get(item.service_id)||'Reguler'
+          : 'Reguler'
+        const allocated=paymentAmount*(subtotal/itemTotal)
+        groupedRevenue[category]=(groupedRevenue[category]||0)+allocated
+      }
+    }
+
+    const percentMap=new Map(
+      shareSettings.map(setting=>[
+        setting.category.toLowerCase(),
+        Number(setting.share_percent||0)
+      ])
+    )
+
+    const allCategories=Array.from(new Set([
+      ...services.map(s=>(s.category||'Reguler').trim()||'Reguler'),
+      ...shareSettings.map(s=>s.category),
+      ...Object.keys(groupedRevenue)
+    ])).sort((a,b)=>a.localeCompare(b,'id'))
+
+    const rows=allCategories.map(category=>{
+      const revenue=groupedRevenue[category]||0
+      const sharePercent=percentMap.get(category.toLowerCase())||0
+      const shareAmount=revenue*(sharePercent/100)
+      return{category,revenue,sharePercent,shareAmount}
+    }).sort((a,b)=>b.revenue-a.revenue)
+
+    const totalRevenue=rows.reduce((sum,row)=>sum+row.revenue,0)
+    const totalShare=rows.reduce((sum,row)=>sum+row.shareAmount,0)
+    const remaining=totalRevenue-totalShare
+    const effectivePercent=totalRevenue>0?(totalShare/totalRevenue)*100:0
+
+    return{rows,totalRevenue,totalShare,remaining,effectivePercent}
+  },[payments,orderItems,services,shareSettings])
+
+  const openShareSettings=()=>{
+    const draft:Record<string,string>={}
+    for(const row of revenueSharing.rows)draft[row.category]=String(row.sharePercent)
+    setShareDraft(draft)
+    setShareMessage('')
+    setShareOpen(true)
+  }
+
+  const saveShareSettings=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!isOwner){
+      setShareMessage('Hanya Owner yang dapat mengubah persentase bagi hasil.')
+      return
+    }
+
+    const payload=revenueSharing.rows.map(row=>{
+      const raw=Number(shareDraft[row.category]??row.sharePercent)
+      const percent=Math.max(0,Math.min(100,Number.isFinite(raw)?raw:0))
+      return{
+        category:row.category,
+        share_percent:percent,
+        updated_at:new Date().toISOString()
+      }
+    })
+
+    setShareBusy(true);setShareMessage('')
+    const{error}=await supabase
+      .from('v110_revenue_share_settings')
+      .upsert(payload,{onConflict:'category'})
+
+    if(error)setShareMessage(error.message)
+    else{
+      setShareOpen(false)
+      await load()
+    }
+    setShareBusy(false)
+  }
 
   const save=async(event:FormEvent)=>{
     event.preventDefault()
@@ -145,7 +297,7 @@ export function FinancePage(){
     <PageHeader
       eyebrow="FINANCE & ACCOUNTING"
       title="Keuangan"
-      description="Input pengeluaran operasional dan pantau laba bersih berdasarkan pembayaran aktual."
+      description="Pantau pemasukan, pengeluaran, piutang, laba bersih, dan bagi hasil per kategori layanan."
       action={<div className="finance-actions">
         <button className="secondary-button" onClick={exportCSV}><FileSpreadsheet size={17}/>Export CSV</button>
         <button className="primary-button" onClick={()=>setOpen(true)}><Plus size={17}/>Tambah Pengeluaran</button>
@@ -155,7 +307,7 @@ export function FinancePage(){
     <section className="panel finance-filter">
       <label>Dari<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label>
       <label>Sampai<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label>
-      <div><CalendarDays size={18}/><span>Periode laporan keuangan</span></div>
+      <div><CalendarDays size={18}/><span>Periode laporan & bagi hasil</span></div>
     </section>
 
     <section className="stats-grid finance-stats">
@@ -170,6 +322,72 @@ export function FinancePage(){
         <StatCard icon={AlertTriangle} label="Piutang" value={formatRupiah(stats.receivable)} caption={`${stats.receivableCount} order belum lunas • Klik untuk lihat`}/>
       </button>
       <StatCard icon={ReceiptText} label="Margin" value={`${stats.margin.toFixed(1)}%`} caption="Margin laba bersih"/>
+    </section>
+
+    <section className="panel revenue-share-panel">
+      <div className="revenue-share-heading">
+        <div>
+          <span className="eyebrow">REVENUE SHARING</span>
+          <h3>Bagi Hasil per Kategori Layanan</h3>
+          <p>Persentase diterapkan ke omzet pembayaran aktual pada periode yang dipilih.</p>
+        </div>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={openShareSettings}
+          disabled={!isOwner}
+          title={isOwner?'Ubah persentase bagi hasil':'Hanya Owner yang dapat mengubah persentase'}
+        >
+          <Settings2 size={17}/>Atur Persentase
+        </button>
+      </div>
+
+      <div className="revenue-share-summary">
+        <div>
+          <span>Omzet Kategori</span>
+          <strong>{formatRupiah(revenueSharing.totalRevenue)}</strong>
+          <small>Pembayaran aktual periode ini</small>
+        </div>
+        <div className="share-total">
+          <span>Total Bagi Hasil</span>
+          <strong>{formatRupiah(revenueSharing.totalShare)}</strong>
+          <small>Akumulasi seluruh kategori</small>
+        </div>
+        <div>
+          <span>Sisa Setelah Bagi Hasil</span>
+          <strong>{formatRupiah(revenueSharing.remaining)}</strong>
+          <small>Omzet kategori - bagi hasil</small>
+        </div>
+        <div>
+          <span>Persentase Efektif</span>
+          <strong>{revenueSharing.effectivePercent.toFixed(2)}%</strong>
+          <small>Terhadap total omzet kategori</small>
+        </div>
+      </div>
+
+      <div className="table-wrap revenue-share-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Kategori Layanan</th>
+              <th>Omzet</th>
+              <th>Persentase</th>
+              <th>Nilai Bagi Hasil</th>
+              <th>Sisa Omzet</th>
+            </tr>
+          </thead>
+          <tbody>
+            {revenueSharing.rows.map(row=><tr key={row.category}>
+              <td><b>{row.category}</b></td>
+              <td><b>{formatRupiah(row.revenue)}</b></td>
+              <td><span className="share-percent-badge"><Percent size={13}/>{row.sharePercent.toFixed(2)}%</span></td>
+              <td><b className="share-amount">{formatRupiah(row.shareAmount)}</b></td>
+              <td>{formatRupiah(row.revenue-row.shareAmount)}</td>
+            </tr>)}
+            {revenueSharing.rows.length===0&&<tr><td colSpan={5} className="table-empty">Belum ada kategori layanan.</td></tr>}
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section className="finance-grid">
@@ -206,6 +424,41 @@ export function FinancePage(){
         </div>
       </article>
     </section>
+
+    {shareOpen&&<Modal title="Atur Persentase Bagi Hasil" onClose={()=>setShareOpen(false)}>
+      <form className="modal-form share-settings-form" onSubmit={saveShareSettings}>
+        <div className="share-settings-note">
+          <Percent size={20}/>
+          <div>
+            <b>Persentase per kategori layanan</b>
+            <span>Nilai dapat diubah kapan saja oleh Owner. Rentang 0% sampai 100%.</span>
+          </div>
+        </div>
+
+        <div className="share-settings-list">
+          {revenueSharing.rows.map(row=><label key={row.category}>
+            <span><b>{row.category}</b><small>Omzet saat ini {formatRupiah(row.revenue)}</small></span>
+            <div className="share-percent-input">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={shareDraft[row.category]??String(row.sharePercent)}
+                onChange={e=>setShareDraft({...shareDraft,[row.category]:e.target.value})}
+              />
+              <span>%</span>
+            </div>
+          </label>)}
+        </div>
+
+        {shareMessage&&<div className="error-box">{shareMessage}</div>}
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setShareOpen(false)}>Batal</button>
+          <button className="primary-button" disabled={shareBusy}>{shareBusy?'Menyimpan...':'Simpan Persentase'}</button>
+        </div>
+      </form>
+    </Modal>}
 
     {open&&<Modal title="Tambah Pengeluaran" onClose={()=>setOpen(false)}>
       <form className="modal-form" onSubmit={save}>

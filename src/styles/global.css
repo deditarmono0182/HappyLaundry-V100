@@ -4784,3 +4784,221 @@ body{
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V110.4 — Finance Revenue Sharing
+   ========================================================= */
+
+.revenue-share-panel{
+  margin:12px 0!important;
+  padding:18px!important;
+  border-color:#cfe3f3!important;
+  background:linear-gradient(145deg,#ffffff,#f8fbff)!important;
+}
+
+.revenue-share-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding-bottom:14px;
+  border-bottom:1px solid #e0edf6;
+}
+
+.revenue-share-heading h3{
+  margin:4px 0 3px;
+  color:#123f69!important;
+  font-size:18px!important;
+  font-weight:950!important;
+}
+
+.revenue-share-heading p{
+  margin:0;
+  color:#617e94!important;
+  font-size:11px!important;
+  font-weight:700!important;
+}
+
+.revenue-share-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  padding:14px 0;
+}
+
+.revenue-share-summary>div{
+  display:grid;
+  gap:4px;
+  padding:12px;
+  border:1px solid #d8e9f5;
+  border-radius:13px;
+  background:#fff;
+}
+
+.revenue-share-summary span{
+  color:#5c7990!important;
+  font-size:10px!important;
+  font-weight:850!important;
+}
+
+.revenue-share-summary strong{
+  color:#123f69!important;
+  font-size:18px!important;
+  font-weight:950!important;
+}
+
+.revenue-share-summary small{
+  color:#7990a2!important;
+  font-size:9px!important;
+  font-weight:650!important;
+}
+
+.revenue-share-summary .share-total{
+  border-color:#9ccbed!important;
+  background:#eef7ff!important;
+}
+
+.revenue-share-summary .share-total strong{
+  color:#1565c0!important;
+}
+
+.revenue-share-table{
+  border:1px solid #deebf4;
+  border-radius:12px;
+}
+
+.revenue-share-table table{
+  min-width:720px;
+}
+
+.revenue-share-table th{
+  font-size:10.5px!important;
+}
+
+.revenue-share-table td{
+  font-size:12.5px!important;
+}
+
+.share-percent-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-height:28px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#eaf5ff;
+  color:#1565c0!important;
+  font-size:10.5px!important;
+  font-weight:950!important;
+}
+
+.share-amount{
+  color:#1565c0!important;
+}
+
+.share-settings-note{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:11px;
+  border:1px solid #cfe4f4;
+  border-radius:12px;
+  background:#f3f9fe;
+}
+
+.share-settings-note>svg{
+  color:#1e88e5;
+  flex:0 0 auto;
+}
+
+.share-settings-note>div{
+  display:grid;
+  gap:2px;
+}
+
+.share-settings-note b{
+  color:#174f78;
+}
+
+.share-settings-note span{
+  color:#678399;
+  font-size:10px;
+  font-weight:650;
+}
+
+.share-settings-list{
+  display:grid;
+  max-height:430px;
+  overflow:auto;
+  border:1px solid #dbe9f3;
+  border-radius:12px;
+}
+
+.share-settings-list>label{
+  display:grid!important;
+  grid-template-columns:minmax(150px,1fr) 125px;
+  align-items:center;
+  gap:12px!important;
+  padding:10px 12px;
+  border-bottom:1px solid #e5eef5;
+}
+
+.share-settings-list>label:last-child{
+  border-bottom:0;
+}
+
+.share-settings-list>label>span{
+  display:grid;
+  gap:2px;
+}
+
+.share-settings-list b{
+  color:#234f70!important;
+  font-size:11.5px!important;
+  font-weight:900!important;
+}
+
+.share-settings-list small{
+  color:#7890a1!important;
+  font-size:9px!important;
+  font-weight:650!important;
+}
+
+.share-percent-input{
+  position:relative;
+}
+
+.share-percent-input input{
+  padding-right:34px!important;
+  text-align:right;
+  font-weight:900;
+}
+
+.share-percent-input>span{
+  position:absolute;
+  right:11px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#39749e!important;
+  font-weight:900!important;
+}
+
+@media(max-width:900px){
+  .revenue-share-summary{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:600px){
+  .revenue-share-heading{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .revenue-share-heading button{
+    width:100%;
+  }
+  .revenue-share-summary{
+    grid-template-columns:1fr;
+  }
+}

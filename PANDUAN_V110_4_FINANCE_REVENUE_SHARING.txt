@@ -1,0 +1,127 @@
+HAPPYLAUNDRY ENTERPRISE V110.4 — FINANCE REVENUE SHARING
+
+FITUR BARU:
+Dashboard Keuangan memiliki modul:
+BAGI HASIL PER KATEGORI LAYANAN
+
+MENAMPILKAN:
+- Kategori layanan
+- Omzet kategori
+- Persentase bagi hasil
+- Nilai Rupiah bagi hasil
+- Sisa omzet setelah bagi hasil
+
+RINGKASAN:
+- Omzet Kategori
+- Total Bagi Hasil
+- Sisa Setelah Bagi Hasil
+- Persentase Efektif
+
+CONTOH:
+Reguler
+Omzet             Rp10.000.000
+Persentase        10%
+Nilai Bagi Hasil  Rp1.000.000
+Sisa              Rp9.000.000
+
+Express
+Omzet             Rp6.000.000
+Persentase        15%
+Nilai Bagi Hasil  Rp900.000
+Sisa              Rp5.100.000
+
+PERSENTASE:
+Owner klik:
+Atur Persentase
+
+Setiap kategori bisa memiliki persentase berbeda.
+Contoh:
+Reguler       10%
+Express       15%
+Premium       20%
+Satuan        12%
+
+Persentase dapat diubah kapan saja.
+Rentang: 0 sampai 100%.
+
+PENYIMPANAN:
+Persentase disimpan di Supabase.
+Jadi tidak berubah walaupun:
+- pindah laptop
+- buka dari tablet
+- buka dari iPhone
+- install ulang PWA
+
+PERIODE:
+Perhitungan mengikuti filter tanggal yang sudah ada di Keuangan:
+Dari -> Sampai
+
+CARA HITUNG OMZET KATEGORI:
+V110.4 menggunakan pembayaran aktual dari v100_payments pada periode yang dipilih.
+
+Setiap pembayaran dibagi proporsional ke item layanan di order.
+Artinya:
+- pembayaran lunas -> seluruh pembayaran dialokasikan
+- pembayaran sebagian -> hanya uang yang benar-benar masuk yang dihitung
+- total kategori tetap sesuai pemasukan aktual periode
+
+RUMUS:
+Nilai Bagi Hasil = Omzet Kategori x Persentase / 100
+
+Sisa Omzet = Omzet Kategori - Nilai Bagi Hasil
+
+Persentase Efektif =
+Total Bagi Hasil / Total Omzet Kategori x 100
+
+KEAMANAN:
+- Semua akun dengan akses Keuangan dapat melihat hasil.
+- Hanya OWNER yang dapat mengubah persentase.
+
+WAJIB SQL BARU:
+supabase/014_v110_4_finance_revenue_sharing.sql
+
+SQL membuat:
+v110_revenue_share_settings
+
+Kategori awal:
+Reguler
+Express
+Premium
+Same Day
+Super Express
+Bed Cover
+Dry Cleaning
+Sepatu
+Tas
+Boneka
+Hotel
+Restoran
+Corporate
+Satuan
+
+Persentase awal semuanya 0%.
+Owner kemudian mengaturnya dari aplikasi.
+
+CARA PASANG:
+1. Supabase -> SQL Editor.
+2. Jalankan:
+   014_v110_4_finance_revenue_sharing.sql
+3. Ekstrak ZIP.
+4. Replace project ke HappyLaundry-V100.
+5. Commit:
+   HappyLaundry V110.4 Finance Revenue Sharing
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+
+UJI:
+1. Login Owner.
+2. Buka Keuangan.
+3. Pilih periode Bulan Ini.
+4. Klik Atur Persentase.
+5. Contoh:
+   Reguler 10
+   Express 15
+   Premium 20
+6. Simpan.
+7. Pastikan tabel otomatis menghitung jumlah Rupiah bagi hasil.
