@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V105.0.1 Contrast & Readability Fix
+# HappyLaundry Enterprise V106.0 Finance & Service Management
 
 ## Jalankan
 ```bash
@@ -98,3 +98,7 @@ Professional Compact UI dengan pilihan Comfort, Compact, dan Ultra Compact untuk
 
 ## V105.0.1
 Peningkatan kontras dan ketebalan teks di seluruh aplikasi agar tidak terlihat transparan.
+
+
+## V106.0
+Kategori layanan, filter kasir, input pengeluaran, kategori biaya, laba bersih, margin, dan export keuangan.

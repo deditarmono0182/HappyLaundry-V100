@@ -68,6 +68,7 @@ export function CashierPage() {
   const [dueAt,setDueAt]=useState('')
   const [notes,setNotes]=useState('')
   const [query,setQuery]=useState('')
+  const [serviceCategory,setServiceCategory]=useState('Semua')
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
   const [success,setSuccess]=useState<SuccessData|null>(null)
@@ -132,6 +133,9 @@ export function CashierPage() {
     : Boolean(customerId)
   const canSubmit=hasCustomer&&items.length>0&&total>=0&&!busy
 
+  const serviceCategories=useMemo(()=>['Semua',...Array.from(new Set(services.map(s=>(s as any).category||'Reguler')))], [services])
+  const filteredServices=useMemo(()=>serviceCategory==='Semua'?services:services.filter(s=>((s as any).category||'Reguler')===serviceCategory),[services,serviceCategory])
+
   const filteredCustomers=useMemo(()=>{
     const key=query.trim().toLowerCase()
     if(!key)return customers
@@ -139,7 +143,7 @@ export function CashierPage() {
   },[customers,query])
 
   const addItem=(service?:Service)=>{
-    const selected=service||services[0]
+    const selected=service||filteredServices[0]||services[0]
     if(!selected){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
     setItems(current=>[...current,{
       key:crypto.randomUUID(),service_id:selected.id,service_name:selected.name,unit:selected.unit,
@@ -371,11 +375,14 @@ export function CashierPage() {
             <div><b>2. Layanan</b><small>Tambahkan berat atau jumlah cucian.</small></div>
             <button type="button" className="secondary-button" onClick={()=>addItem()}><Plus size={16}/>Tambah Layanan</button>
           </div>
+          <div className="cashier-category-tabs">
+            {serviceCategories.map(category=><button type="button" key={category} className={serviceCategory===category?'active':''} onClick={()=>setServiceCategory(category)}>{category}</button>)}
+          </div>
           <div className="cashier-items">
             {items.length===0&&<div className="cashier-empty"><ShoppingCart size={28}/>Belum ada layanan.</div>}
             {items.map(item=><div className="cashier-item" key={item.key}>
               <select value={item.service_id} onChange={e=>updateService(item.key,e.target.value)}>
-                {services.map(s=><option key={s.id} value={s.id}>{s.name} — {formatIDR(Number(s.price))}/{s.unit}</option>)}
+                {filteredServices.map(s=><option key={s.id} value={s.id}>{s.name} — {formatIDR(Number(s.price))}/{s.unit}</option>)}
               </select>
               <input type="number" min="0.1" step="0.1" value={item.quantity} onChange={e=>updateQty(item.key,Number(e.target.value))}/>
               <b>{formatIDR(item.subtotal)}</b>

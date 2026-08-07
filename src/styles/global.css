@@ -3364,3 +3364,138 @@ button{
   opacity:1!important;
   color:#5b7a74!important;
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V106.0 — Finance & Service Management
+   ========================================================= */
+
+.service-category-badge{
+  background:#e9f6f0!important;
+  color:#087654!important;
+  border:1px solid #c8e5d8!important;
+}
+
+.cashier-category-tabs{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  padding:2px 0 9px;
+  scrollbar-width:thin;
+}
+
+.cashier-category-tabs button{
+  flex:0 0 auto;
+  min-height:34px;
+  padding:0 11px;
+  border:1px solid #b8d4ca;
+  border-radius:999px;
+  background:#fff;
+  color:#416760;
+  font-size:10px;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.cashier-category-tabs button.active{
+  background:#07865a;
+  border-color:#07865a;
+  color:#fff;
+}
+
+.finance-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.finance-filter{
+  display:grid;
+  grid-template-columns:180px 180px 1fr;
+  gap:10px;
+  align-items:end;
+  margin-bottom:12px;
+}
+
+.finance-filter label{
+  display:grid;
+  gap:4px;
+}
+
+.finance-filter>div{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-height:40px;
+  color:#52746e;
+  font-weight:750;
+}
+
+.finance-stats{
+  margin-bottom:12px;
+}
+
+.finance-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.6fr) minmax(280px,.7fr);
+  gap:12px;
+}
+
+.finance-category-card{
+  align-self:start;
+}
+
+.finance-category-card h3{
+  margin:0;
+  font-size:17px;
+}
+
+.finance-category-card p{
+  margin:3px 0 12px;
+}
+
+.finance-category-list{
+  display:grid;
+}
+
+.finance-category-list>div{
+  display:grid;
+  grid-template-columns:30px 1fr;
+  gap:9px;
+  align-items:center;
+  padding:9px 0;
+  border-bottom:1px solid #e2eee9;
+}
+
+.finance-category-list>div>span{
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#e8f8f0;
+  color:#087654;
+  font-size:10px;
+  font-weight:900;
+}
+
+.finance-category-list>div>div{
+  display:grid;
+  gap:2px;
+}
+
+.finance-category-list small{
+  color:#56766f;
+  font-weight:700;
+}
+
+@media(max-width:980px){
+  .finance-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:650px){
+  .finance-actions{width:100%}
+  .finance-actions button{flex:1}
+  .finance-filter{grid-template-columns:1fr 1fr}
+  .finance-filter>div{grid-column:1/-1}
+}

@@ -6,6 +6,9 @@ import { formatRupiah } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import type { Service } from '../types/master'
 
+const serviceCategories=['Reguler','Express','Premium','Same Day','Super Express','Bed Cover','Dry Cleaning','Sepatu','Tas','Boneka','Hotel','Restoran','Corporate','Satuan']
+
+
 const emptyForm = { name: '', category: 'Kiloan', unit: 'kg' as Service['unit'], price: '0', duration_hours: '24', is_active: true }
 
 export function ServicesPage() {
@@ -90,7 +93,10 @@ export function ServicesPage() {
       </section>
       {modalOpen && <Modal title={editing ? 'Edit Layanan' : 'Tambah Layanan'} onClose={() => setModalOpen(false)}><form className="modal-form" onSubmit={submit}>
         <div className="form-grid-two"><label>Nama layanan<input value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} required /></label><label>Kategori<input value={form.category} onChange={event => setForm({ ...form, category: event.target.value })} required /></label></div>
-        <div className="form-grid-two"><label>Satuan<select value={form.unit} onChange={event => setForm({ ...form, unit: event.target.value as Service['unit'] })}><option value="kg">Kilogram</option><option value="pcs">Pcs</option><option value="item">Item</option>
+        <div className="form-grid-two"><label>Kategori Layanan<select value={(form as any).category||'Reguler'} onChange={e=>setForm({...form,category:e.target.value} as any)}>
+          {serviceCategories.map(category=><option key={category} value={category}>{category}</option>)}
+        </select></label>
+        <label>Satuan<select value={form.unit} onChange={event => setForm({ ...form, unit: event.target.value as Service['unit'] })}><option value="kg">Kilogram</option><option value="pcs">Pcs</option><option value="item">Item</option>
 <option value="cm">Centimeter (cm)</option>
 </select></label><label>Harga<input type="number" min="0" value={form.price} onChange={event => setForm({ ...form, price: event.target.value })} required /></label></div>
         <label>Estimasi pengerjaan (jam)<input type="number" min="1" value={form.duration_hours} onChange={event => setForm({ ...form, duration_hours: event.target.value })} required /></label>

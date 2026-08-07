@@ -1,0 +1,60 @@
+HAPPYLAUNDRY ENTERPRISE V106.0 — FINANCE & SERVICE MANAGEMENT
+
+FITUR BARU LAYANAN:
+- Kategori layanan:
+  Reguler
+  Express
+  Premium
+  Same Day
+  Super Express
+  Bed Cover
+  Dry Cleaning
+  Sepatu
+  Tas
+  Boneka
+  Hotel
+  Restoran
+  Corporate
+  Satuan
+
+- Data layanan lama otomatis menjadi kategori Reguler.
+- Kasir memiliki filter kategori layanan.
+
+FITUR BARU KEUANGAN:
+- Menu Keuangan.
+- Tambah Pengeluaran.
+- Kategori pengeluaran:
+  Operasional, Laundry, Kendaraan, Marketing, Lain-lain.
+- Contoh kategori:
+  Gaji, Listrik, Air, Internet, Sewa, Pajak, BPJS,
+  Deterjen, Pewangi, Plastik, Hanger, Perawatan Mesin,
+  BBM, Servis, Facebook Ads, Google Ads, Konsumsi, dll.
+- Metode pembayaran pengeluaran.
+- Pemasukan dari pembayaran order.
+- Laba Bersih = Pemasukan - Pengeluaran.
+- Margin laba.
+- Pengeluaran terbesar per kategori.
+- Export CSV.
+
+WAJIB JALANKAN SQL:
+supabase/008_v106_finance_service_management.sql
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Buka Supabase -> SQL Editor.
+3. Copy semua isi 008_v106_finance_service_management.sql.
+4. Klik Run.
+5. Copy seluruh project ke HappyLaundry-V100.
+6. Replace files in destination.
+7. GitHub Desktop Summary:
+   HappyLaundry V106.0 Finance Service Management
+8. Commit to main.
+9. Push origin.
+10. Tunggu Netlify Published.
+11. Ctrl + Shift + R.
+
+UJI:
+- Buka Layanan & Harga -> tambah layanan -> pilih kategori Express/Premium.
+- Buka Kasir -> filter kategori harus tampil.
+- Buka Keuangan -> Tambah Pengeluaran -> isi Gaji atau Listrik.
+- Pastikan Laba Bersih otomatis berkurang.

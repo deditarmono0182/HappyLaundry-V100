@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
-  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode } from 'lucide-react'
+  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { PWAInstallButton } from '../components/PWAInstallButton'
@@ -17,6 +17,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/suppliers', label: 'Supplier', icon: Truck, roles: ['owner', 'staff'] },
   { to: '/payments', label: 'Pembayaran', icon: CreditCard, roles: ['owner', 'cashier'] },
   { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
+  { to: '/finance', label: 'Keuangan', icon: CircleDollarSign, roles: ['owner','cashier'] },
   { to: '/reports', label: 'Laporan Owner', icon: BarChart3, roles: ['owner'] },
   { to: '/backup', label: 'Backup Data', icon: DatabaseBackup, roles: ['owner'] },
   { to: '/settings', label: 'Pengaturan', icon: Settings, roles: ['owner'] }
@@ -40,7 +41,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V105.0.1 Stable</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V106.0 Stable</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

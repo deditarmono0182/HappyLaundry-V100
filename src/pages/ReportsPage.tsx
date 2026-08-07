@@ -26,9 +26,10 @@ interface PaymentRow{
 
 interface CashRow{
   id:string
-  kind:string
   amount:number
   created_at:string
+  category_name?:string|null
+  group_name?:string|null
   description?:string|null
 }
 
@@ -92,8 +93,8 @@ export function ReportsPage(){
       supabase.from('v100_payments')
         .select('id,order_id,amount,method,created_at')
         .gte('created_at',fromISO).lte('created_at',toISO),
-      supabase.from('v100_cash_transactions')
-        .select('id,kind,amount,created_at,description')
+      supabase.from('v106_expenses_view')
+        .select('id,amount,created_at,category_name,group_name,description')
         .gte('created_at',fromISO).lte('created_at',toISO),
       supabase.from('v100_order_items')
         .select('*'),
@@ -121,9 +122,7 @@ export function ReportsPage(){
 
   const report=useMemo(()=>{
     const omzet=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
-    const expense=cash
-      .filter(c=>c.kind==='expense'||c.kind==='out')
-      .reduce((sum,c)=>sum+Number(c.amount||0),0)
+    const expense=cash.reduce((sum,c)=>sum+Number(c.amount||0),0)
     const receivable=orders.reduce((sum,o)=>sum+Math.max(0,Number(o.total||0)-Number(o.paid_amount||0)),0)
     const completed=orders.filter(o=>o.status==='completed'||o.status==='ready').length
     const avg=orders.length?omzet/orders.length:0
