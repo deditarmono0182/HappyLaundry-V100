@@ -1,0 +1,83 @@
+HAPPYLAUNDRY ENTERPRISE V110.3 — ORDER DASHBOARD ENHANCEMENT
+
+TRACKING PELANGGAN:
+- TIDAK diubah.
+- Tetap seperti V110.1.2.
+- Pencarian tracking tetap menggunakan NOMOR ORDER.
+
+PERUBAHAN HALAMAN ORDER:
+
+1. KARTU TERLAMBAT
+Ditambahkan kartu:
+TERLAMBAT
+Menampilkan jumlah order yang sudah melewati estimasi selesai.
+
+Order dihitung terlambat jika:
+- memiliki due_at / estimasi selesai
+- waktu estimasi sudah lewat
+- status belum Ready / Completed / Cancelled
+
+2. KOLOM ESTIMASI SELESAI
+Tabel Order sekarang memiliki kolom sendiri:
+Estimasi Selesai
+
+Menampilkan:
+- tanggal
+- jam
+- tulisan TERLAMBAT jika sudah melewati estimasi
+
+Jika belum diisi:
+Belum diatur
+
+3. PENCARIAN ORDER
+Kotak pencarian sekarang mencari:
+- Nomor Order
+- Nama Pelanggan
+- Nomor Telepon
+- Status Cucian
+- Status Pembayaran
+
+Contoh:
+HL-260807-00001
+Budi
+0812
+Dicuci
+Packing
+Lunas
+Belum Bayar
+Sebagian
+
+4. HURUF DIPERBESAR SEDIKIT
+- Header tabel
+- Isi tabel
+- Badge status
+- Nomor order
+- Nama pelanggan
+- Keterangan pembayaran
+- Search box
+
+5. DETAIL ORDER
+Estimasi selesai juga tampil pada Detail Order.
+Jika terlambat akan diberi tanda TERLAMBAT.
+
+TIDAK ADA SQL BARU.
+Kolom due_at sudah tersedia pada sistem Order.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Replace seluruh isi ke HappyLaundry-V100.
+3. Commit:
+   HappyLaundry V110.3 Order Dashboard Enhancement
+4. Push origin.
+5. Tunggu Netlify Published.
+6. Ctrl + Shift + R.
+
+UJI:
+- Buka Order.
+- Pastikan ada 4 kartu: Total Order, Siap Diambil, Terlambat, Piutang.
+- Pastikan kolom Estimasi Selesai tampil.
+- Cari nomor order.
+- Cari nama pelanggan.
+- Cari telepon.
+- Cari status seperti Dicuci.
+- Cari pembayaran seperti Lunas.

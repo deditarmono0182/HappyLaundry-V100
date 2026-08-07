@@ -4687,419 +4687,100 @@ body{
 
 
 /* =========================================================
-   HappyLaundry Enterprise V110.2 — Tracking Premium Search
+   HappyLaundry Enterprise V110.3 — Order Dashboard Enhancement
    ========================================================= */
 
-/* Bigger and clearer typography */
-.tracking-v2{
-  font-size:15px!important;
+.order-stats-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
 }
 
-.tracking-v2 .tracking-brand b{
-  font-size:15px!important;
+.order-overdue-card .stat-icon{
+  background:#fff6e8!important;
+  color:#d77a06!important;
+}
+
+.order-overdue-card.has-overdue{
+  border-color:#f1c985!important;
+  background:linear-gradient(145deg,#fff,#fffaf2)!important;
+}
+
+.order-overdue-card.has-overdue strong{
+  color:#bd6500!important;
+}
+
+/* Slightly larger Order page typography */
+.order-panel table th{
+  font-size:11px!important;
+  font-weight:950!important;
+}
+
+.order-panel table td{
+  font-size:13px!important;
+  font-weight:600!important;
+}
+
+.order-panel table td>b{
+  font-size:13px!important;
   font-weight:900!important;
 }
 
-.tracking-v2 .tracking-brand span{
+.order-panel table td small{
+  font-size:10.5px!important;
+  font-weight:700!important;
+  line-height:1.35!important;
+}
+
+.order-panel .badge{
+  font-size:10.5px!important;
+  font-weight:900!important;
+}
+
+.order-panel .search-box input{
+  font-size:13.5px!important;
+  font-weight:650!important;
+}
+
+.order-panel .record-count{
+  font-size:11px!important;
+}
+
+/* Dedicated estimate column */
+.order-due-cell{
+  min-width:145px;
+}
+
+.order-due-cell>b{
+  color:#214e70!important;
+}
+
+.order-due-cell.overdue{
+  background:#fff9ef!important;
+}
+
+.order-due-cell.overdue>b,
+.order-due-cell.overdue small{
+  color:#b86100!important;
+  font-weight:900!important;
+}
+
+.order-no-due{
+  color:#7b8f9f!important;
   font-size:11px!important;
   font-weight:700!important;
 }
 
-.tracking-v2 .tracking-search-card h1{
-  font-size:27px!important;
-  font-weight:950!important;
-  color:#123f69!important;
+.order-detail-overdue{
+  color:#b86100!important;
 }
 
-.tracking-v2 .tracking-search-card p{
-  font-size:13px!important;
-  font-weight:700!important;
-  color:#587891!important;
-}
-
-.tracking-v2 .tracking-search-card input{
-  font-size:14px!important;
-  font-weight:650!important;
-}
-
-.tracking-v2 .tracking-search-card button{
-  font-size:12px!important;
-  font-weight:900!important;
-}
-
-/* White/clean progress area — remove big blue background */
-.tracking-v2 .tracking-progress-meter-clean{
-  background:#fff!important;
-  border:0!important;
-  box-shadow:none!important;
-  padding:8px 0 4px!important;
-}
-
-.tracking-v2 .tracking-progress-clean{
-  background:#fff!important;
-  border:0!important;
-  box-shadow:none!important;
-  padding:16px 0 7px!important;
-}
-
-.tracking-v2 .tracking-progress-bar{
-  height:8px!important;
-  background:#e5edf3!important;
-  border-radius:999px!important;
-  overflow:hidden!important;
-}
-
-.tracking-v2 .tracking-progress-bar i{
-  background:linear-gradient(90deg,#42A5F5,#1565C0)!important;
-  border-radius:999px!important;
-}
-
-.tracking-v2 .tracking-progress-top span{
-  color:#416984!important;
-  font-size:12px!important;
-  font-weight:850!important;
-}
-
-.tracking-v2 .tracking-progress-top b{
-  color:#1565C0!important;
-  font-size:14px!important;
-  font-weight:950!important;
-}
-
-/* Timeline: completed green, active blue, future gray */
-.tracking-v2 .tracking-step{
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-}
-
-.tracking-v2 .tracking-step>span{
-  background:#eef2f5!important;
-  color:#7b8f9d!important;
-  border:2px solid #d6e0e7!important;
-}
-
-.tracking-v2 .tracking-step.done>span{
-  background:#e9f8ef!important;
-  color:#0a8758!important;
-  border-color:#a9dec4!important;
-}
-
-.tracking-v2 .tracking-step.active>span{
-  background:#eaf5ff!important;
-  color:#1976D2!important;
-  border-color:#64B5F6!important;
-  box-shadow:0 0 0 6px rgba(66,165,245,.12)!important;
-  animation:trackingPulse 1.8s ease-in-out infinite;
-}
-
-.tracking-v2 .tracking-step b{
-  font-size:11px!important;
-  font-weight:850!important;
-  color:#718591!important;
-}
-
-.tracking-v2 .tracking-step.done b{
-  color:#25815f!important;
-}
-
-.tracking-v2 .tracking-step.active b{
-  color:#1565C0!important;
-}
-
-@keyframes trackingPulse{
-  0%,100%{box-shadow:0 0 0 4px rgba(66,165,245,.09)}
-  50%{box-shadow:0 0 0 8px rgba(66,165,245,.16)}
-}
-
-/* Order header */
-.tracking-v2 .tracking-order-head span{
-  font-size:11px!important;
-  font-weight:800!important;
-}
-
-.tracking-v2 .tracking-order-head strong{
-  font-size:22px!important;
-  font-weight:950!important;
-  color:#103f69!important;
-}
-
-.tracking-v2 .tracking-order-head small{
-  font-size:13px!important;
-  font-weight:750!important;
-  color:#56748a!important;
-}
-
-.tracking-v2 .tracking-status{
-  font-size:11px!important;
-  font-weight:900!important;
-}
-
-/* Summary cards */
-.tracking-v2 .tracking-summary-premium>div{
-  min-height:98px!important;
-  border:1px solid #d9e8f3!important;
-  border-radius:14px!important;
-  background:#fff!important;
-  box-shadow:0 7px 18px rgba(36,91,133,.06)!important;
-}
-
-.tracking-v2 .tracking-summary-premium>div>svg{
-  color:#1E88E5!important;
-}
-
-.tracking-v2 .tracking-summary-premium span{
-  font-size:12px!important;
-  font-weight:750!important;
-  color:#5a778c!important;
-}
-
-.tracking-v2 .tracking-summary-premium b{
-  font-size:16px!important;
-  font-weight:950!important;
-  color:#153e60!important;
-}
-
-.tracking-v2 .tracking-summary-premium small{
-  font-size:10px!important;
-  font-weight:650!important;
-}
-
-/* Detail */
-.tracking-v2 .tracking-items h2{
-  font-size:17px!important;
-  font-weight:950!important;
-  color:#123f69!important;
-}
-
-.tracking-v2 .tracking-items>div{
-  font-size:13px!important;
-}
-
-.tracking-v2 .tracking-items>div span{
-  font-weight:750!important;
-}
-
-.tracking-v2 .tracking-items>div b{
-  font-weight:900!important;
-}
-
-.tracking-v2 .tracking-business b{
-  font-size:14px!important;
-  font-weight:950!important;
-}
-
-.tracking-v2 .tracking-business span{
-  font-size:12px!important;
-  font-weight:700!important;
-}
-
-.tracking-v2 .tracking-business small{
-  font-size:11px!important;
-  font-weight:650!important;
-}
-
-/* Buttons */
-.tracking-v2 .tracking-actions a,
-.tracking-v2 .tracking-actions button{
-  min-height:44px!important;
-  font-size:12px!important;
-  font-weight:900!important;
-}
-
-.tracking-v2 .tracking-actions a{
-  background:#fff!important;
-  color:#1565C0!important;
-  border:1px solid #9fcbed!important;
-}
-
-.tracking-v2 .tracking-actions button{
-  background:linear-gradient(135deg,#1E88E5,#1565C0)!important;
-  color:#fff!important;
-  border-color:#1976D2!important;
-}
-
-/* Internal multi-field search */
-.tracking-search-hints{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:6px;
-  margin-top:9px;
-}
-
-.tracking-search-hints>span{
-  color:#6a8294!important;
-  font-size:10px!important;
-  font-weight:750!important;
-}
-
-.tracking-search-hints button{
-  min-height:27px!important;
-  padding:0 9px!important;
-  border:1px solid #cbe1f1!important;
-  border-radius:999px!important;
-  background:#f4f9fd!important;
-  color:#286c9d!important;
-  box-shadow:none!important;
-  font-size:9px!important;
-}
-
-.tracking-search-results{
-  margin-top:12px!important;
-}
-
-.tracking-results-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding-bottom:10px;
-  border-bottom:1px solid #e3edf4;
-}
-
-.tracking-results-head>div{
-  display:grid;
-  gap:2px;
-}
-
-.tracking-results-head b{
-  color:#123f69!important;
-  font-size:15px!important;
-  font-weight:950!important;
-}
-
-.tracking-results-head span{
-  color:#688195!important;
-  font-size:11px!important;
-  font-weight:700!important;
-}
-
-.tracking-results-list{
-  display:grid;
-}
-
-.tracking-results-list>button{
-  width:100%;
-  display:grid;
-  grid-template-columns:minmax(180px,1fr) 190px 125px;
-  gap:12px;
-  align-items:center;
-  padding:12px 5px!important;
-  border:0!important;
-  border-bottom:1px solid #e7eff5!important;
-  border-radius:0!important;
-  background:#fff!important;
-  color:inherit!important;
-  text-align:left!important;
-  box-shadow:none!important;
-  cursor:pointer;
-}
-
-.tracking-results-list>button:hover{
-  background:#f5faff!important;
-}
-
-.tracking-result-main{
-  display:grid;
-  gap:2px;
-}
-
-.tracking-result-main b{
-  color:#123f69!important;
-  font-size:13px!important;
-  font-weight:950!important;
-}
-
-.tracking-result-main span{
-  color:#365f7d!important;
-  font-size:12px!important;
-  font-weight:800!important;
-}
-
-.tracking-result-main small{
-  color:#71889a!important;
-  font-size:10px!important;
-  font-weight:650!important;
-}
-
-.tracking-result-status{
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-}
-
-.tracking-mini-status,
-.tracking-mini-payment{
-  display:inline-flex;
-  align-items:center;
-  min-height:26px;
-  padding:0 8px;
-  border-radius:999px;
-  font-size:9px!important;
-  font-weight:900!important;
-}
-
-.tracking-mini-status{
-  background:#eaf5ff;
-  color:#1565C0;
-}
-
-.tracking-mini-payment.payment-paid{
-  background:#e8f8ef!important;
-  color:#087654!important;
-}
-
-.tracking-mini-payment.payment-unpaid{
-  background:#fff0ee!important;
-  color:#bd4438!important;
-}
-
-.tracking-mini-payment.payment-partial{
-  background:#fff7dd!important;
-  color:#9a6a05!important;
-}
-
-.tracking-result-money{
-  display:grid;
-  justify-items:end;
-  gap:2px;
-}
-
-.tracking-result-money b{
-  color:#0f4778!important;
-  font-size:13px!important;
-  font-weight:950!important;
-}
-
-.tracking-result-money small{
-  color:#71889a!important;
-  font-size:9px!important;
-}
-
-/* Mobile */
-@media(max-width:700px){
-  .tracking-v2{
-    font-size:16px!important;
+@media(max-width:1100px){
+  .order-stats-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
+}
 
-  .tracking-v2 .tracking-search-card h1{
-    font-size:24px!important;
-  }
-
-  .tracking-results-list>button{
-    grid-template-columns:1fr;
-    gap:7px;
-  }
-
-  .tracking-result-money{
-    justify-items:start;
-  }
-
-  .tracking-v2 .tracking-progress-clean{
-    overflow-x:auto;
-  }
-
-  .tracking-v2 .tracking-progress-clean .tracking-step{
-    min-width:86px;
+@media(max-width:600px){
+  .order-stats-grid{
+    grid-template-columns:1fr!important;
   }
 }

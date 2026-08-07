@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  AlertTriangle,
   CheckCircle2,
   ChevronRight,
   CircleDollarSign,
@@ -85,12 +86,34 @@ export function OrdersPage() {
   const filtered = useMemo(() => {
     const keyword = query.trim().toLowerCase()
     if (!keyword) return rows
-    return rows.filter(row =>
-      `${row.order_no} ${row.customer_name} ${row.customer_phone} ${statusLabels[row.status]}`
-        .toLowerCase()
-        .includes(keyword)
-    )
+    return rows.filter(row => {
+      const haystack=[
+        row.order_no,
+        row.customer_name,
+        row.customer_phone,
+        statusLabels[row.status],
+        row.status,
+        paymentLabels[row.payment_status],
+        row.payment_status
+      ].join(' ').toLowerCase()
+      return haystack.includes(keyword)
+    })
   }, [query, rows])
+
+  const overdueRows = useMemo(() => {
+    const now = Date.now()
+    return rows.filter(row => {
+      if (!row.due_at) return false
+      if (['ready','completed','cancelled'].includes(row.status)) return false
+      return new Date(row.due_at).getTime() < now
+    })
+  }, [rows])
+
+  const isOverdue = (row: OrderRow) => {
+    if (!row.due_at) return false
+    if (['ready','completed','cancelled'].includes(row.status)) return false
+    return new Date(row.due_at).getTime() < Date.now()
+  }
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.subtotal, 0),
@@ -262,9 +285,10 @@ export function OrdersPage() {
         }
       />
 
-      <section className="stats-grid compact-stats">
+      <section className="stats-grid compact-stats order-stats-grid">
         <article className="stat-card"><div className="stat-icon"><ShoppingBag size={22}/></div><div><span>Total Order</span><strong>{rows.length}</strong><small>Seluruh order</small></div></article>
         <article className="stat-card"><div className="stat-icon"><PackageCheck size={22}/></div><div><span>Siap Diambil</span><strong>{rows.filter(r => r.status === 'ready').length}</strong><small>Menunggu pelanggan</small></div></article>
+        <article className={`stat-card order-overdue-card ${overdueRows.length>0?'has-overdue':''}`}><div className="stat-icon"><AlertTriangle size={22}/></div><div><span>Terlambat</span><strong>{overdueRows.length}</strong><small>Lewat estimasi selesai</small></div></article>
         <article className="stat-card"><div className="stat-icon"><CircleDollarSign size={22}/></div><div><span>Piutang</span><strong>{formatRupiah(rows.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0))}</strong><small>Sisa pembayaran</small></div></article>
       </section>
 
@@ -272,7 +296,7 @@ export function OrdersPage() {
         <div className="toolbar">
           <label className="search-box">
             <Search size={18}/>
-            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari nomor order, pelanggan, telepon, atau status" />
+            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari order, pelanggan, telepon, status, atau pembayaran" />
           </label>
           <span className="record-count">{filtered.length} order</span>
         </div>
@@ -288,22 +312,28 @@ export function OrdersPage() {
                 <th>Status</th>
                 <th>Pembayaran</th>
                 <th>Total</th>
+                <th>Estimasi Selesai</th>
                 <th>Dibuat</th>
                 <th />
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={7} className="table-empty">Memuat order...</td></tr>}
+              {loading && <tr><td colSpan={8} className="table-empty">Memuat order...</td></tr>}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={7} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
+                <tr><td colSpan={8} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
               )}
               {filtered.map(row => (
                 <tr key={row.id}>
-                  <td><b>{row.order_no}</b>{row.due_at && <small>Selesai: {new Date(row.due_at).toLocaleString('id-ID')}</small>}</td>
+                  <td><b>{row.order_no}</b></td>
                   <td><b>{row.customer_name}</b><small>{row.customer_phone}</small></td>
                   <td><span className={`badge status-${row.status}`}>{statusLabels[row.status]}</span></td>
                   <td><span className={`badge payment-${row.payment_status}`}>{paymentLabels[row.payment_status]}</span><small>{formatRupiah(row.paid_amount)} / {formatRupiah(row.total)}</small></td>
                   <td><b>{formatRupiah(row.total)}</b></td>
+                  <td className={isOverdue(row)?'order-due-cell overdue':''}>
+                    {row.due_at
+                      ? <><b>{new Date(row.due_at).toLocaleDateString('id-ID')}</b><small>{new Date(row.due_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}{isOverdue(row)?' • TERLAMBAT':''}</small></>
+                      : <span className="order-no-due">Belum diatur</span>}
+                  </td>
                   <td>{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
                   <td>
                     <div className="row-actions">
@@ -387,6 +417,7 @@ export function OrdersPage() {
             <div><span>WhatsApp</span><b>{detail.customer_phone}</b></div>
             <div><span>Status Cucian</span><b>{statusLabels[detail.status]}</b></div>
             <div><span>Status Pembayaran</span><b>{paymentLabels[detail.payment_status]}</b></div>
+            <div><span>Estimasi Selesai</span><b className={isOverdue(detail)?'order-detail-overdue':''}>{detail.due_at?new Date(detail.due_at).toLocaleString('id-ID'):'Belum diatur'}{isOverdue(detail)?' • TERLAMBAT':''}</b></div>
             <div><span>Total</span><b>{formatRupiah(detail.total)}</b></div>
             <div><span>Sudah Bayar</span><b>{formatRupiah(detail.paid_amount)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(detail.total-detail.paid_amount)}</b></div>

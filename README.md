@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.2 Tracking Premium Search
+# HappyLaundry Enterprise V110.3 Order Dashboard Enhancement
 
 ## Jalankan
 ```bash
@@ -152,5 +152,5 @@ Memperbaiki struktur JSX Dashboard dan mengganti grafik bar dengan line/area tan
 Memperbaiki PWA/Windows title bar hijau dengan theme_color biru pada index.html dan manifest.webmanifest.
 
 
-## V110.2
-Tracking premium putih/bersih, font lebih besar, dan pencarian internal berdasarkan order, pelanggan, telepon, status, atau pembayaran.
+## V110.3
+Halaman Order: kartu Terlambat, kolom Estimasi Selesai, pencarian order/pelanggan/telepon/status/pembayaran, dan font sedikit lebih besar. Tracking publik tetap nomor order.
