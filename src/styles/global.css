@@ -2541,3 +2541,559 @@ button[type="submit"]:disabled {
 @media(max-width:520px){
   .receipt-actions{grid-template-columns:1fr!important}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V105.0 — Professional Compact UI
+   ========================================================= */
+
+/* Default sizing variables */
+:root,
+html[data-density="compact"]{
+  --hl-ui-scale:.88;
+  --hl-row-py:7px;
+  --hl-row-px:11px;
+  --hl-input-h:40px;
+  --hl-button-h:40px;
+  --hl-card-pad:14px;
+  --hl-section-gap:12px;
+  --hl-radius-compact:13px;
+  --hl-sidebar-item-h:39px;
+}
+
+html[data-density="comfort"]{
+  --hl-ui-scale:1;
+  --hl-row-py:11px;
+  --hl-row-px:14px;
+  --hl-input-h:48px;
+  --hl-button-h:46px;
+  --hl-card-pad:19px;
+  --hl-section-gap:17px;
+  --hl-radius-compact:17px;
+  --hl-sidebar-item-h:46px;
+}
+
+html[data-density="ultra"]{
+  --hl-ui-scale:.80;
+  --hl-row-py:4px;
+  --hl-row-px:8px;
+  --hl-input-h:34px;
+  --hl-button-h:34px;
+  --hl-card-pad:10px;
+  --hl-section-gap:8px;
+  --hl-radius-compact:10px;
+  --hl-sidebar-item-h:34px;
+}
+
+/* Page vertical rhythm */
+.page-container{
+  padding-top:clamp(16px,1.8vw,26px)!important;
+  padding-bottom:28px!important;
+}
+
+.page-header{
+  margin-bottom:var(--hl-section-gap)!important;
+}
+
+.page-header h1{
+  font-size:clamp(25px,2.4vw,32px)!important;
+  line-height:1.08!important;
+}
+
+.page-header p{
+  margin-top:4px!important;
+  font-size:13px!important;
+}
+
+.page-header .eyebrow{
+  font-size:9px!important;
+}
+
+/* Panels/cards */
+.panel,
+.data-panel,
+.cashier-section,
+.settings-card,
+.backup-card,
+.report-card,
+.qr-camera-card,
+.qr-manual-card,
+.qr-order-result{
+  padding:var(--hl-card-pad)!important;
+  border-radius:var(--hl-radius-compact)!important;
+}
+
+.stats-grid{
+  gap:10px!important;
+}
+
+.stat-card{
+  min-height:86px!important;
+  padding:12px 13px!important;
+  border-radius:14px!important;
+}
+
+.stat-card strong{
+  font-size:22px!important;
+  line-height:1.05!important;
+}
+
+.stat-card span,
+.stat-card small{
+  font-size:10px!important;
+}
+
+.stat-icon{
+  width:38px!important;
+  height:38px!important;
+  border-radius:11px!important;
+}
+
+.stat-icon svg{
+  width:18px!important;
+  height:18px!important;
+}
+
+/* Global fields */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea{
+  min-height:var(--hl-input-h)!important;
+  font-size:13px!important;
+  border-radius:10px!important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select{
+  padding-top:0!important;
+  padding-bottom:0!important;
+}
+
+textarea{
+  padding:9px 11px!important;
+}
+
+label{
+  gap:4px!important;
+  font-size:12px!important;
+}
+
+/* Buttons */
+.primary-button,
+.secondary-button,
+.whatsapp-button,
+button[type="submit"]{
+  min-height:var(--hl-button-h)!important;
+  padding:0 13px!important;
+  border-radius:10px!important;
+  font-size:12px!important;
+}
+
+/* Tables */
+table th,
+table td{
+  padding:var(--hl-row-py) var(--hl-row-px)!important;
+  line-height:1.2!important;
+}
+
+table th{
+  font-size:10px!important;
+}
+
+table td{
+  font-size:12px!important;
+}
+
+table td small,
+.table-sub{
+  margin-top:2px!important;
+  font-size:9px!important;
+}
+
+.badge,
+.record-count{
+  padding:4px 8px!important;
+  font-size:9px!important;
+}
+
+/* Sidebar compact */
+.sidebar{
+  width:225px!important;
+  padding:8px!important;
+}
+
+.main-content{
+  margin-left:225px!important;
+  width:calc(100% - 225px)!important;
+}
+
+.brand{
+  min-height:54px!important;
+  padding:3px 5px 9px!important;
+}
+
+.brand img{
+  width:42px!important;
+  height:42px!important;
+}
+
+.brand strong{
+  font-size:13px!important;
+}
+
+.brand span{
+  font-size:9px!important;
+}
+
+.sidebar nav{
+  gap:1px!important;
+}
+
+.sidebar nav a{
+  min-height:var(--hl-sidebar-item-h)!important;
+  padding:0 10px!important;
+  margin:1px 0!important;
+  border-radius:10px!important;
+  font-size:12px!important;
+  gap:9px!important;
+}
+
+.sidebar nav a svg{
+  width:16px!important;
+  height:16px!important;
+}
+
+.sidebar-footer{
+  padding-top:7px!important;
+}
+
+.account b{font-size:12px!important}
+.account span{font-size:9px!important}
+.signout-button{min-height:36px!important;font-size:11px!important}
+
+/* Top bar */
+.topbar{
+  min-height:58px!important;
+  padding-top:7px!important;
+  padding-bottom:7px!important;
+}
+
+.topbar h1{
+  font-size:20px!important;
+}
+
+.status-chip,
+.pwa-button{
+  min-height:31px!important;
+  font-size:10px!important;
+}
+
+/* Dashboard */
+.dashboard-grid{
+  gap:12px!important;
+  margin-top:12px!important;
+}
+
+.dashboard-grid .panel{
+  min-height:0!important;
+}
+
+.bar-chart{
+  height:180px!important;
+  padding-top:13px!important;
+}
+
+.status-summary>div{
+  padding:8px 0!important;
+  font-size:11px!important;
+}
+
+.recent-orders{
+  margin-top:12px!important;
+}
+
+/* Cashier */
+.cashier-layout{
+  gap:14px!important;
+}
+
+.cashier-form{
+  padding:14px!important;
+  gap:12px!important;
+}
+
+.cashier-section{
+  padding:13px!important;
+}
+
+.cashier-section-title{
+  margin-bottom:10px!important;
+  padding-bottom:8px!important;
+}
+
+.cashier-section-title b{
+  font-size:15px!important;
+}
+
+.cashier-section-title small{
+  font-size:10px!important;
+}
+
+.cashier-empty{
+  min-height:80px!important;
+  max-height:110px!important;
+}
+
+.cashier-item{
+  padding:8px!important;
+  gap:8px!important;
+  border-radius:11px!important;
+}
+
+.cashier-total-card{
+  padding:15px!important;
+}
+
+.cashier-total-card>strong{
+  font-size:31px!important;
+}
+
+.cashier-total-card>div{
+  min-height:32px!important;
+  font-size:11px!important;
+}
+
+.cashier-pro-features,
+.cashier-today,
+.cashier-shortcuts{
+  padding:13px!important;
+}
+
+.cashier-actions{
+  padding:8px!important;
+  border-radius:12px!important;
+}
+
+.cashier-actions .primary-button,
+.cashier-actions button[type="submit"]{
+  min-height:44px!important;
+}
+
+/* Production */
+.production-board{
+  gap:9px!important;
+}
+
+.production-column{
+  border-radius:13px!important;
+}
+
+.production-column>header{
+  padding:9px 10px!important;
+  font-size:11px!important;
+}
+
+.production-card{
+  padding:9px!important;
+  border-radius:11px!important;
+  gap:5px!important;
+}
+
+.production-card b{font-size:11px!important}
+.production-card small{font-size:9px!important}
+.production-card-actions{gap:5px!important}
+.production-card-actions button{min-height:34px!important;font-size:10px!important}
+
+/* Forms / modals */
+.modal-content,
+.modal-card{
+  max-height:90vh!important;
+  padding:15px!important;
+}
+
+.modal-form{
+  gap:10px!important;
+}
+
+.form-grid-two{
+  gap:10px!important;
+}
+
+.form-actions{
+  margin-top:6px!important;
+  gap:7px!important;
+}
+
+/* Settings */
+.settings-grid{
+  gap:12px!important;
+}
+
+.settings-card{
+  gap:9px!important;
+}
+
+.settings-card header{
+  padding-bottom:8px!important;
+  gap:8px!important;
+}
+
+.settings-card header b{
+  font-size:13px!important;
+}
+
+.settings-card header small{
+  font-size:9px!important;
+}
+
+.settings-template-grid{
+  gap:10px!important;
+}
+
+.settings-template-grid textarea{
+  min-height:125px!important;
+}
+
+.settings-actions{
+  padding-top:2px!important;
+}
+
+/* Inventory / reports / QR */
+.inventory-stats,
+.report-stats{
+  margin-bottom:12px!important;
+}
+
+.report-filter{
+  padding:13px!important;
+  margin-bottom:12px!important;
+  gap:8px!important;
+}
+
+.report-grid{
+  gap:12px!important;
+}
+
+.report-card{
+  min-height:230px!important;
+}
+
+.ranking-list>div{
+  padding:8px 0!important;
+}
+
+.qr-scan-layout,
+.qr-center-grid{
+  gap:12px!important;
+}
+
+.qr-camera-box,
+.qr-camera-box video{
+  min-height:300px!important;
+}
+
+.qr-order-summary{
+  gap:7px!important;
+  margin:12px 0!important;
+}
+
+.qr-order-summary>div{
+  padding:10px!important;
+}
+
+.qr-center-actions{
+  gap:6px!important;
+}
+
+.qr-center-actions button{
+  min-height:39px!important;
+  font-size:11px!important;
+}
+
+/* Density selector */
+.density-settings-card{
+  overflow:hidden;
+}
+
+.density-options{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+
+.density-options button{
+  min-height:72px;
+  display:grid;
+  align-content:center;
+  gap:4px;
+  padding:10px;
+  border:1px solid #bfd8cf;
+  border-radius:12px;
+  background:#fff;
+  color:#234d47;
+  text-align:left;
+  cursor:pointer;
+}
+
+.density-options button b{
+  font-size:13px;
+}
+
+.density-options button span{
+  font-size:10px;
+  color:#78908b;
+}
+
+.density-options button.active{
+  border-color:#07865a;
+  background:#eaf8f2;
+  box-shadow:0 0 0 2px rgba(7,134,90,.08);
+}
+
+.density-options button.active b{
+  color:#087654;
+}
+
+/* Comfort overrides where necessary */
+html[data-density="comfort"] .stat-card{min-height:112px!important;padding:18px!important}
+html[data-density="comfort"] .bar-chart{height:235px!important}
+html[data-density="comfort"] .sidebar{width:245px!important}
+html[data-density="comfort"] .main-content{margin-left:245px!important;width:calc(100% - 245px)!important}
+html[data-density="comfort"] .cashier-empty{min-height:130px!important}
+
+/* Ultra compact extras */
+html[data-density="ultra"] .page-container{padding-top:12px!important;padding-bottom:20px!important}
+html[data-density="ultra"] .page-header h1{font-size:23px!important}
+html[data-density="ultra"] .stat-card{min-height:72px!important;padding:9px!important}
+html[data-density="ultra"] .stat-card strong{font-size:18px!important}
+html[data-density="ultra"] .bar-chart{height:145px!important}
+html[data-density="ultra"] .sidebar{width:205px!important}
+html[data-density="ultra"] .main-content{margin-left:205px!important;width:calc(100% - 205px)!important}
+html[data-density="ultra"] .cashier-empty{min-height:58px!important}
+html[data-density="ultra"] .production-card{padding:6px!important}
+html[data-density="ultra"] .settings-template-grid textarea{min-height:95px!important}
+
+/* Tablet/mobile: retain touch usability */
+@media(max-width:900px){
+  .main-content{
+    margin-left:0!important;
+    width:100%!important;
+  }
+  .sidebar{
+    width:min(82vw,270px)!important;
+  }
+  input:not([type="checkbox"]):not([type="radio"]),
+  select{
+    min-height:42px!important;
+  }
+  .primary-button,.secondary-button,.whatsapp-button,button[type="submit"]{
+    min-height:42px!important;
+  }
+}
+
+@media(max-width:650px){
+  .density-options{grid-template-columns:1fr}
+  .density-options button{min-height:58px}
+  .stat-card{min-height:82px!important}
+  .bar-chart{height:170px!important}
+}

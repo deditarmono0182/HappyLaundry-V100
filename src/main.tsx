@@ -5,6 +5,9 @@ import App from'./App'
 import{AuthProvider}from'./lib/auth'
 import'./styles/global.css'
 
+const savedDensity=localStorage.getItem('happylaundry-density')||'compact'
+document.documentElement.dataset.density=savedDensity
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode><BrowserRouter><AuthProvider><App/></AuthProvider></BrowserRouter></StrictMode>
 )

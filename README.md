@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V104.3 Customer Experience
+# HappyLaundry Enterprise V105.0 Professional Compact UI
 
 ## Jalankan
 ```bash
@@ -90,3 +90,7 @@ QR Center: cari order di aplikasi, pembayaran cepat, detail order, produksi, cet
 
 ## V104.3
 QR pelanggan & kasir, link tracking di nota, WhatsApp tracking otomatis, dan update produksi via WhatsApp.
+
+
+## V105.0
+Professional Compact UI dengan pilihan Comfort, Compact, dan Ultra Compact untuk seluruh aplikasi.

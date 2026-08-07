@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
-import { CheckCircle2, ExternalLink, MapPin, MessageCircle, Save, Store } from 'lucide-react'
+import { CheckCircle2, ExternalLink, MapPin, MessageCircle, Save, SlidersHorizontal, Store } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -25,6 +25,9 @@ export function SettingsPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [success, setSuccess] = useState('')
+  const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
+    (localStorage.getItem('happylaundry-density') as 'comfort'|'compact'|'ultra')||'compact'
+  )
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -44,6 +47,13 @@ export function SettingsPage() {
     if (error) setMessage(error.message)
     else setSuccess('Pengaturan berhasil disimpan.')
     setBusy(false)
+  }
+
+  const applyDensity=(value:'comfort'|'compact'|'ultra')=>{
+    setDensity(value)
+    localStorage.setItem('happylaundry-density',value)
+    document.documentElement.dataset.density=value
+    setSuccess(`Tampilan ${value==='comfort'?'Comfort':value==='compact'?'Compact':'Ultra Compact'} aktif.`)
   }
 
   const testWhatsApp = () => {
@@ -77,6 +87,21 @@ export function SettingsPage() {
         <label>Link Google Maps<input value={form.maps_url} onChange={e=>setForm({...form,maps_url:e.target.value})} placeholder="https://maps.app.goo.gl/..."/></label>
         {form.maps_url && <a className="settings-link" href={form.maps_url} target="_blank" rel="noreferrer"><ExternalLink size={15}/> Buka lokasi</a>}
         <label>Catatan Bawah Nota<textarea value={form.receipt_footer} onChange={e=>setForm({...form,receipt_footer:e.target.value})}/></label>
+      </section>
+
+      <section className="panel settings-card settings-wide density-settings-card">
+        <header><SlidersHorizontal size={21}/><div><b>Kepadatan Tampilan</b><small>Pilih ukuran baris, kartu, input, dan jarak seluruh aplikasi.</small></div></header>
+        <div className="density-options">
+          <button type="button" className={density==='comfort'?'active':''} onClick={()=>applyDensity('comfort')}>
+            <b>Comfort</b><span>Lebih besar dan lega</span>
+          </button>
+          <button type="button" className={density==='compact'?'active':''} onClick={()=>applyDensity('compact')}>
+            <b>Compact</b><span>Rekomendasi operasional</span>
+          </button>
+          <button type="button" className={density==='ultra'?'active':''} onClick={()=>applyDensity('ultra')}>
+            <b>Ultra Compact</b><span>Maksimal data per layar</span>
+          </button>
+        </div>
       </section>
 
       <section className="panel settings-card settings-wide">

@@ -1,0 +1,47 @@
+HAPPYLAUNDRY ENTERPRISE V105.0 — PROFESSIONAL COMPACT UI
+
+TUJUAN:
+Mengurangi panjang halaman dan kebutuhan scroll tanpa menghilangkan informasi.
+
+PERUBAHAN SELURUH APLIKASI:
+- Dashboard card lebih pendek.
+- Grafik lebih ringkas.
+- Row tabel lebih pendek.
+- Input pelanggan, layanan, order, pembayaran, inventory, laporan, dan pengaturan lebih pendek.
+- Jarak antar field diperkecil.
+- Sidebar lebih ramping.
+- Header lebih pendek.
+- Kasir lebih padat.
+- Card Produksi lebih pendek.
+- Modal/popup lebih ringkas.
+- QR Center dan laporan lebih padat.
+- Tampilan mobile tetap menjaga ukuran tombol agar nyaman disentuh.
+
+PENGATURAN BARU:
+Pengaturan -> Kepadatan Tampilan
+
+Pilihan:
+1. Comfort
+   Tampilan lebih besar dan lega.
+2. Compact
+   Default dan rekomendasi untuk operasional.
+3. Ultra Compact
+   Maksimal data dalam satu layar.
+
+Pilihan disimpan di browser sehingga tetap aktif setelah aplikasi ditutup.
+
+TIDAK ADA SQL BARU.
+Tidak mengubah database atau data transaksi.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V105.0 Professional Compact UI
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.
+9. Buka Pengaturan -> Kepadatan Tampilan.
+10. Coba Compact dan Ultra Compact.
