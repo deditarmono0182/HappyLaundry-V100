@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V106.2 Piutang & Category Revenue
+# HappyLaundry Enterprise V106.3 Clickable Finance Details
 
 ## Jalankan
 ```bash
@@ -106,3 +106,7 @@ Kategori layanan, filter kasir, input pengeluaran, kategori biaya, laba bersih, 
 
 ## V106.2
 Daftar Piutang klik dari Dashboard/Keuangan serta Omzet per Kategori berupa jumlah Rupiah + persentase.
+
+
+## V106.3
+Kartu Pemasukan, Pengeluaran, dan Piutang pada Keuangan dapat diklik untuk membuka daftar rincian masing-masing.

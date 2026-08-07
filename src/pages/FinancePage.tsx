@@ -159,8 +159,12 @@ export function FinancePage(){
     </section>
 
     <section className="stats-grid finance-stats">
-      <StatCard icon={TrendingUp} label="Pemasukan" value={formatRupiah(stats.omzet)} caption={`${payments.length} pembayaran`}/>
-      <StatCard icon={TrendingDown} label="Pengeluaran" value={formatRupiah(stats.expense)} caption={`${expenses.length} transaksi`}/>
+      <button type="button" className="finance-click-stat finance-income-click" onClick={()=>navigate('/finance/income')} title="Buka daftar pemasukan">
+        <StatCard icon={TrendingUp} label="Pemasukan" value={formatRupiah(stats.omzet)} caption={`${payments.length} pembayaran • Klik untuk lihat`}/>
+      </button>
+      <button type="button" className="finance-click-stat finance-expense-click" onClick={()=>navigate('/finance/expenses')} title="Buka daftar pengeluaran">
+        <StatCard icon={TrendingDown} label="Pengeluaran" value={formatRupiah(stats.expense)} caption={`${expenses.length} transaksi • Klik untuk lihat`}/>
+      </button>
       <StatCard icon={WalletCards} label="Laba Bersih" value={formatRupiah(stats.net)} caption="Pemasukan - pengeluaran"/>
       <button type="button" className="finance-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
         <StatCard icon={AlertTriangle} label="Piutang" value={formatRupiah(stats.receivable)} caption={`${stats.receivableCount} order belum lunas • Klik untuk lihat`}/>

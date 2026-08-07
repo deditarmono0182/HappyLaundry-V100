@@ -1,0 +1,54 @@
+HAPPYLAUNDRY ENTERPRISE V106.3 — CLICKABLE FINANCE DETAILS
+
+PERUBAHAN DASHBOARD KEUANGAN:
+- Pemasukan sekarang bisa diklik.
+- Pengeluaran sekarang bisa diklik.
+- Piutang tetap bisa diklik.
+
+KLIK PEMASUKAN:
+Membuka Daftar Pemasukan:
+- Tanggal & jam pembayaran
+- Nomor order
+- Pelanggan
+- Metode pembayaran
+- Jumlah Rupiah
+- Tombol Detail Order
+- Filter periode
+- Pencarian
+- Total pemasukan
+- Jumlah pembayaran
+- Rata-rata pembayaran
+
+KLIK PENGELUARAN:
+Membuka Daftar Pengeluaran:
+- Tanggal
+- Kategori
+- Grup
+- Keterangan
+- Referensi
+- Metode
+- Jumlah Rupiah
+- Filter periode
+- Pencarian
+- Total pengeluaran
+- Jumlah transaksi
+- Rata-rata pengeluaran
+
+PIUTANG:
+Tetap membuka Daftar Piutang seperti V106.2.
+
+TIDAK ADA SQL BARU.
+Tetap menggunakan SQL 008 V106.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke HappyLaundry-V100.
+3. Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V106.3 Clickable Finance Details
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+9. Buka Keuangan.
+10. Klik Pemasukan, Pengeluaran, dan Piutang satu per satu.

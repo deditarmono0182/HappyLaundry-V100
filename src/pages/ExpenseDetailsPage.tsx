@@ -1,0 +1,101 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Search, TrendingDown, WalletCards } from 'lucide-react'
+import { PageHeader } from '../components/PageHeader'
+import { StatCard } from '../components/StatCard'
+import { formatRupiah } from '../lib/format'
+import { supabase } from '../lib/supabase'
+
+interface ExpenseRow{
+  id:string
+  expense_date:string
+  category_name:string
+  group_name:string|null
+  amount:number
+  payment_method:string
+  description:string|null
+  reference:string|null
+  created_at:string
+}
+
+export function ExpenseDetailsPage(){
+  const [rows,setRows]=useState<ExpenseRow[]>([])
+  const [query,setQuery]=useState('')
+  const [from,setFrom]=useState(()=>{
+    const d=new Date()
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`
+  })
+  const [to,setTo]=useState(()=>new Date().toISOString().slice(0,10))
+  const [loading,setLoading]=useState(true)
+  const [message,setMessage]=useState('')
+
+  const load=useCallback(async()=>{
+    setLoading(true);setMessage('')
+    const {data,error}=await supabase
+      .from('v106_expenses_view')
+      .select('*')
+      .gte('expense_date',from)
+      .lte('expense_date',to)
+      .order('expense_date',{ascending:false})
+    if(error)setMessage(error.message)
+    else setRows((data as ExpenseRow[])||[])
+    setLoading(false)
+  },[from,to])
+
+  useEffect(()=>{void load()},[load])
+
+  const filtered=useMemo(()=>{
+    const key=query.toLowerCase().trim()
+    if(!key)return rows
+    return rows.filter(r=>
+      `${r.category_name} ${r.group_name||''} ${r.description||''} ${r.reference||''} ${r.payment_method}`.toLowerCase().includes(key)
+    )
+  },[rows,query])
+
+  const total=rows.reduce((sum,r)=>sum+Number(r.amount||0),0)
+  const avg=rows.length?total/rows.length:0
+
+  return <>
+    <PageHeader
+      eyebrow="FINANCE & ACCOUNTING"
+      title="Daftar Pengeluaran"
+      description="Rincian biaya operasional, gaji, pajak, laundry, kendaraan, marketing, dan lainnya."
+    />
+
+    <section className="panel finance-filter">
+      <label>Dari<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label>
+      <label>Sampai<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label>
+      <div><span>Periode daftar pengeluaran</span></div>
+    </section>
+
+    <section className="stats-grid finance-detail-stats">
+      <StatCard icon={TrendingDown} label="Total Pengeluaran" value={formatRupiah(total)} caption={`${rows.length} transaksi`}/>
+      <StatCard icon={WalletCards} label="Jumlah Transaksi" value={String(rows.length)} caption="Transaksi pengeluaran"/>
+      <StatCard icon={TrendingDown} label="Rata-rata Pengeluaran" value={formatRupiah(avg)} caption="Rata-rata biaya per transaksi"/>
+    </section>
+
+    <section className="panel data-panel">
+      <div className="toolbar">
+        <label className="search-box"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari kategori, keterangan, referensi, atau metode"/></label>
+        <span className="record-count">{filtered.length} pengeluaran</span>
+      </div>
+      {message&&<div className="error-box inline-message">{message}</div>}
+      <div className="table-wrap">
+        <table>
+          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Nominal</th></tr></thead>
+          <tbody>
+            {loading&&<tr><td colSpan={6} className="table-empty">Memuat pengeluaran...</td></tr>}
+            {!loading&&filtered.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
+            {filtered.map(r=><tr key={r.id}>
+              <td>{new Date(`${r.expense_date}T00:00:00`).toLocaleDateString('id-ID')}</td>
+              <td><b>{r.category_name}</b></td>
+              <td>{r.group_name||'-'}</td>
+              <td>{r.description||'-'}{r.reference&&<small className="table-sub">Ref: {r.reference}</small>}</td>
+              <td><span className="badge">{r.payment_method.toUpperCase()}</span></td>
+              <td><b className="expense-amount">{formatRupiah(Number(r.amount))}</b></td>
+            </tr>)}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </>
+}
