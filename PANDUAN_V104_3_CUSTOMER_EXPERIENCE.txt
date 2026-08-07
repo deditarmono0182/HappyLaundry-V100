@@ -1,0 +1,47 @@
+HAPPYLAUNDRY ENTERPRISE V104.3 — CUSTOMER EXPERIENCE
+
+PERUBAHAN:
+1. QR di nota pelanggan tetap mengarah ke:
+   /track/NOMOR-ORDER
+
+2. QR yang sama bisa dipakai dua sisi:
+   - Pelanggan scan dengan kamera HP -> Tracking pelanggan.
+   - Kasir scan lewat QR Center -> Order dicari langsung di aplikasi.
+
+3. WhatsApp order diterima:
+   - Pesan otomatis diberi link tracking order.
+
+4. WhatsApp update produksi:
+   - Semua status produksi bisa kirim update WhatsApp.
+   - Pesan berisi link tracking.
+
+5. Nota:
+   - 58mm / 80mm / A4 tetap memakai QR tracking.
+   - URL tracking ditulis juga di bawah QR.
+
+6. Setelah transaksi:
+   - Tombol Copy Link Tracking ditambahkan jika panel sukses tampil.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V104.3 Customer Experience
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+
+UJI WAJIB:
+1. Buat order baru.
+2. Klik WhatsApp.
+3. Pastikan pesan ada link:
+   https://happylaundrybabakancrb.com/track/NOMOR-ORDER
+4. Cetak nota 58mm.
+5. Pastikan QR dan URL tracking tampil.
+6. Scan QR dengan HP -> halaman tracking.
+7. Scan QR dari QR Center -> detail order di aplikasi.
+8. Ubah status Produksi lalu klik Kirim Update WA.

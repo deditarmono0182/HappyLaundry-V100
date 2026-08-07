@@ -178,7 +178,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
     <PageHeader
       eyebrow="ENTERPRISE QR CENTER"
       title="QR Center"
-      description="Scan atau cari nomor order lalu akses pembayaran, detail order, produksi, tracking, dan WhatsApp."
+      description="Scan QR yang sama dari nota pelanggan untuk membuka order di aplikasi; pelanggan memakai QR itu untuk tracking."
     />
 
     <section className="qr-center-grid">
@@ -226,7 +226,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
         {message&&<div className="qr-info-box">{message}</div>}
 
         <div className="qr-help">
-          <b>Fungsi QR Center</b>
+          <b>QR pelanggan & kasir</b>
           <small>Setelah order ditemukan, kasir dapat langsung menerima pembayaran, melihat detail, mencetak nota, membuka produksi, atau menghubungi pelanggan.</small>
         </div>
       </article>

@@ -2512,3 +2512,32 @@ button[type="submit"]:disabled {
   .qr-order-summary{grid-template-columns:1fr}
   .qr-center-actions{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V104.3 — Customer Experience
+   ========================================================= */
+
+.receipt-actions{
+  grid-template-columns:repeat(5,minmax(110px,1fr))!important;
+}
+
+.qr-help{
+  border:1px solid #c9e2d8;
+}
+
+.qr-help b{
+  color:#087654;
+}
+
+.production-card-actions .whatsapp-button{
+  background:linear-gradient(135deg,#20bd5c,#25d366)!important;
+  color:#fff!important;
+}
+
+@media(max-width:980px){
+  .receipt-actions{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:520px){
+  .receipt-actions{grid-template-columns:1fr!important}
+}

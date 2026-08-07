@@ -56,7 +56,9 @@ export function ProductionPage(){
   const whatsapp=(r:OrderRow)=>{
     const p=phone(r.customer_phone)
     if(!p){setMessage('Nomor WhatsApp pelanggan tidak tersedia.');return}
-    const text=settings.whatsapp_ready_template.replaceAll('{nama}',r.customer_name).replaceAll('{order}',r.order_no).replaceAll('{total}',rupiah(Number(r.total))).replaceAll('{usaha}',settings.business_name)
+    const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(r.order_no)}`
+    const baseText=settings.whatsapp_ready_template.replaceAll('{nama}',r.customer_name).replaceAll('{order}',r.order_no).replaceAll('{total}',rupiah(Number(r.total))).replaceAll('{usaha}',settings.business_name)
+    const text=`${baseText}\n\nCek status laundry:\n${trackingUrl}`
     window.open(`https://wa.me/${p}?text=${encodeURIComponent(text)}`,'_blank')
   }
 
@@ -87,7 +89,8 @@ export function ProductionPage(){
           {r.due_at&&<small className={isOverdue(r)?'overdue-text':''}>
             {isOverdue(r)?'⚠ Terlambat: ':'Estimasi: '}{new Date(r.due_at).toLocaleString('id-ID')}
           </small>}
-          <div className="production-card-actions">{s==='ready'&&<button className="whatsapp-button" onClick={()=>whatsapp(r)}><MessageCircle size={15}/>WhatsApp</button>}
+          <div className="production-card-actions">
+          <button className="whatsapp-button" onClick={()=>whatsapp(r)}><MessageCircle size={15}/>Kirim Update WA</button>
           <button onClick={()=>void move(r)}>{s==='ready'?'Selesaikan':'Tahap Berikutnya'}<ChevronRight size={15}/></button></div>
         </article>)}
         {list.length===0&&<div className="production-empty"><WashingMachine size={24}/>Kosong</div>}</div>

@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V104.2.3 QR Center
+# HappyLaundry Enterprise V104.3 Customer Experience
 
 ## Jalankan
 ```bash
@@ -86,3 +86,7 @@ Menu Scan QR Nota dengan kamera browser dan fallback nomor order manual.
 
 ## V104.2.3
 QR Center: cari order di aplikasi, pembayaran cepat, detail order, produksi, cetak, WhatsApp, dan tracking.
+
+
+## V104.3
+QR pelanggan & kasir, link tracking di nota, WhatsApp tracking otomatis, dan update produksi via WhatsApp.

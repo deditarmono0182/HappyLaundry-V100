@@ -245,7 +245,7 @@ export function CashierPage() {
       </div>
       <div>
         <img class="qr" src="${qrUrl}" alt="QR status order">
-        <p class="center small">Scan untuk membuka status order</p>
+        <p class="center small"><b>Scan untuk melihat status laundry</b></p><p class="center small">${statusUrl}</p>
         <div class="barcode">${barcode}</div>
         <p class="order-code">${data.orderNo}</p>
         ${maps?`<p class="center small">${maps}</p>`:''}
@@ -267,10 +267,13 @@ export function CashierPage() {
     try{
       const template=storeSettings?.whatsapp_order_template||
         'Halo {{pelanggan}}, cucian Anda sudah kami terima. Nomor order: {{order}}. Total: {{total}}.'
-      openWhatsApp(success.phone,fillTemplate(template,{
+      const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(success.orderNo)}`
+      const baseText=fillTemplate(template,{
         pelanggan:success.customer,order:success.orderNo,total:formatIDR(success.total),
         estimasi:success.due||'-',usaha:storeSettings?.business_name||'HappyLaundry Babakan'
-      }))
+      })
+      const text=`${baseText}\n\nCek status laundry Anda:\n${trackingUrl}`
+      openWhatsApp(success.phone,text)
     }catch(err){setMessage(err instanceof Error?err.message:'WhatsApp gagal dibuka.')}
   }
 
@@ -422,6 +425,11 @@ export function CashierPage() {
             <button type="button" className="secondary-button" onClick={()=>printReceipt(success,'80')}><Printer size={16}/>80 mm</button>
             <button type="button" className="secondary-button" onClick={()=>printReceipt(success,'a4')}><FileText size={16}/>A4 / PDF</button>
             <button type="button" className="whatsapp-button" onClick={sendOrderWhatsApp}><MessageCircle size={16}/>WhatsApp</button>
+            <button type="button" className="secondary-button" onClick={async()=>{
+              if(!success)return
+              const url=`${window.location.origin}/track/${encodeURIComponent(success.orderNo)}`
+              try{await navigator.clipboard.writeText(url);setMessage('Link tracking berhasil disalin.')}catch{setMessage(url)}
+            }}>Copy Link Tracking</button>
           </div>
         </div>}
         <div className="cashier-actions">
