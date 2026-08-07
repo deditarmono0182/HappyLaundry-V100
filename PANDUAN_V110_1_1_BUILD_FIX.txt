@@ -1,0 +1,31 @@
+HAPPYLAUNDRY ENTERPRISE V110.1.1 — BUILD FIX
+
+ERROR YANG DIPERBAIKI:
+DashboardPage.tsx:
+JSX element 'article' has no corresponding closing tag.
+
+PENYEBAB:
+Penggantian grafik BAR ke LINE pada V110.1 memotong penutup <article>
+dan bagian Dashboard setelah grafik.
+
+PERBAIKAN:
+- Dashboard dikembalikan dari V110 Blue Edition yang stabil.
+- Hanya komponen grafik BAR yang diganti.
+- Grafik sekarang LINE + AREA modern.
+- Status Order tetap ada.
+- Omzet per Kategori tetap ada.
+- Order Terbaru tetap ada.
+- Jumlah Rupiah tetap tampil di bawah titik/periode.
+- Title bar/custom header tetap diarahkan ke biru.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke HappyLaundry-V100.
+3. Replace files.
+4. Commit:
+   HappyLaundry V110.1.1 Build Fix
+5. Push origin.
+6. Tunggu Netlify Published.
+7. Ctrl + Shift + R.

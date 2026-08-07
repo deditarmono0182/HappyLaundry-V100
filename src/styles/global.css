@@ -4586,10 +4586,9 @@ a{
 
 
 /* =========================================================
-   HappyLaundry Enterprise V110.1 — Blue Premium Chart
+   HappyLaundry Enterprise V110.1.1 — Premium Line Chart Fix
    ========================================================= */
 
-/* Desktop custom title/header bar */
 .titlebar,
 .title-bar,
 .desktop-titlebar,
@@ -4607,32 +4606,18 @@ a{
   color:#fff!important;
 }
 
-/* If older top strip used hard-coded green */
-body::before{
-  background:#1E88E5!important;
-}
-
-/* Hide legacy vertical bar chart where the new premium chart is present */
-.dashboard-premium-line-panel ~ .dashboard-grid .bar-chart,
-.dashboard-premium-line-panel ~ .dashboard-grid .dashboard-bars{
-  display:none!important;
-}
-
-/* Premium line/area revenue chart */
-.dashboard-premium-line-panel{
-  margin-top:12px!important;
-}
-
 .revenue-line-chart{
   position:relative;
-  padding:8px 6px 2px;
+  width:100%;
+  padding:8px 6px 4px;
+  overflow:hidden;
 }
 
 .revenue-line-chart svg{
+  display:block;
   width:100%;
-  height:auto;
   min-height:220px;
-  overflow:visible;
+  height:auto;
 }
 
 .revenue-grid-line{
@@ -4643,7 +4628,7 @@ body::before{
 
 .revenue-point-halo{
   fill:#90CAF9;
-  opacity:.28;
+  opacity:.30;
 }
 
 .revenue-point{
@@ -4654,8 +4639,8 @@ body::before{
 
 .revenue-chart-labels{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(82px,1fr));
-  gap:7px;
+  grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
+  gap:6px;
   margin-top:4px;
 }
 
@@ -4663,7 +4648,6 @@ body::before{
   display:grid;
   gap:2px;
   justify-items:center;
-  min-width:0;
 }
 
 .revenue-chart-labels b{

@@ -102,6 +102,25 @@ export function DashboardPage() {
 
   const max=Math.max(1,...chart.map(x=>x.total))
 
+  const revenueLinePoints=useMemo(()=>{
+    const width=720
+    const height=220
+    const padX=28
+    const padY=26
+    const innerW=width-padX*2
+    const innerH=height-padY*2
+    const points=chart.map((item,index)=>{
+      const x=padX+(chart.length<=1?innerW/2:(index/(chart.length-1))*innerW)
+      const y=padY+innerH-(Number(item.total||0)/max)*innerH
+      return{x,y,value:Number(item.total||0),label:item.label}
+    })
+    const line=points.map(point=>`${point.x},${point.y}`).join(' ')
+    const area=points.length
+      ? `${points[0].x},${height-padY} ${line} ${points[points.length-1].x},${height-padY}`
+      : ''
+    return{points,line,area,width,height}
+  },[chart,max])
+
   const periodTitle=revenuePeriod==='7d'
     ?'Omzet 7 Hari'
     :revenuePeriod==='month'
@@ -147,28 +166,6 @@ export function DashboardPage() {
   },[orders,orderItems,services,revenuePeriod])
 
 
-  const revenueLinePoints=useMemo(()=>{
-    const values=revenueSeries.map(item=>Number(item.value||0))
-    const max=Math.max(...values,1)
-    const width=720
-    const height=220
-    const padX=28
-    const padY=26
-    const innerW=width-padX*2
-    const innerH=height-padY*2
-    const points=values.map((value,index)=>{
-      const x=padX+(values.length<=1?innerW/2:(index/(values.length-1))*innerW)
-      const y=padY+innerH-(value/max)*innerH
-      return{x,y,value,label:revenueSeries[index]?.label||''}
-    })
-    const line=points.map(p=>`${p.x},${p.y}`).join(' ')
-    const area=points.length
-      ? `${padX},${height-padY} ${line} ${padX+innerW},${height-padY}`
-      : ''
-    return{points,line,area,width,height,max}
-  },[revenueSeries])
-
-
   return <>
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."/>
     {message&&<div className="error-box inline-message">{message}</div>}
@@ -198,39 +195,71 @@ export function DashboardPage() {
           </div>
         </div>
         <div className="revenue-line-chart">
-        <svg viewBox={`0 0 ${revenueLinePoints.width} ${revenueLinePoints.height}`} role="img" aria-label="Grafik omzet">
-          <defs>
-            <linearGradient id="revenueAreaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#42A5F5" stopOpacity=".34"/>
-              <stop offset="100%" stopColor="#42A5F5" stopOpacity=".03"/>
-            </linearGradient>
-            <linearGradient id="revenueLineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#42A5F5"/>
-              <stop offset="100%" stopColor="#1565C0"/>
-            </linearGradient>
-          </defs>
+          <svg viewBox={`0 0 ${revenueLinePoints.width} ${revenueLinePoints.height}`} role="img" aria-label={periodTitle}>
+            <defs>
+              <linearGradient id="revenueAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#42A5F5" stopOpacity=".34"/>
+                <stop offset="100%" stopColor="#42A5F5" stopOpacity=".03"/>
+              </linearGradient>
+              <linearGradient id="revenueLineGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#42A5F5"/>
+                <stop offset="100%" stopColor="#1565C0"/>
+              </linearGradient>
+            </defs>
 
-          {[0,1,2,3,4].map(level=>{
-            const y=26+((revenueLinePoints.height-52)/4)*level
-            return <line key={level} x1="28" x2={revenueLinePoints.width-28} y1={y} y2={y} className="revenue-grid-line"/>
-          })}
+            {[0,1,2,3,4].map(level=>{
+              const y=26+((revenueLinePoints.height-52)/4)*level
+              return <line key={level} x1="28" x2={revenueLinePoints.width-28} y1={y} y2={y} className="revenue-grid-line"/>
+            })}
 
-          {revenueLinePoints.area&&<polygon points={revenueLinePoints.area} fill="url(#revenueAreaGradient)"/>}
-          {revenueLinePoints.line&&<polyline points={revenueLinePoints.line} fill="none" stroke="url(#revenueLineGradient)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>}
+            {revenueLinePoints.area&&<polygon points={revenueLinePoints.area} fill="url(#revenueAreaGradient)"/>}
+            {revenueLinePoints.line&&<polyline points={revenueLinePoints.line} fill="none" stroke="url(#revenueLineGradient)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>}
 
-          {revenueLinePoints.points.map((point,index)=><g key={index}>
-            <circle cx={point.x} cy={point.y} r="7" className="revenue-point-halo"/>
-            <circle cx={point.x} cy={point.y} r="4" className="revenue-point"/>
-          </g>)}
-        </svg>
+            {revenueLinePoints.points.map((point,index)=><g key={`${point.label}-${index}`}>
+              <circle cx={point.x} cy={point.y} r="7" className="revenue-point-halo"/>
+              <circle cx={point.x} cy={point.y} r="4" className="revenue-point"/>
+            </g>)}
+          </svg>
 
-        <div className="revenue-chart-labels">
-          {revenueLinePoints.points.map((point,index)=><div key={index}>
-            <b>{point.label}</b>
-            <span>{formatIDR(point.value)}</span>
-          </div>)}
+          <div className="revenue-chart-labels">
+            {revenueLinePoints.points.map((point,index)=><div key={`${point.label}-label-${index}`}>
+              <b>{point.label}</b>
+              <span>{formatIDR(point.value)}</span>
+            </div>)}
+          </div>
+        </div>
+      </article>
+      <article className="panel">
+        <div className="panel-heading"><div><h3>Status Order</h3><p>Order aktif saat ini.</p></div></div>
+        <div className="status-summary">{(['received','washing','drying','ironing','packing','ready'] as const).map(s=><div key={s}><span className={`status-dot status-${s}`}/><span>{statusLabels[s]}</span><b>{orders.filter(r=>r.status===s).length}</b></div>)}</div>
+      </article>
+    </section>
+    <section className="panel dashboard-category-revenue">
+      <div className="panel-heading">
+        <div>
+          <h3>Omzet per Kategori Layanan</h3>
+          <p>Jumlah rupiah dan persentase kontribusi berdasarkan periode grafik omzet di atas.</p>
         </div>
       </div>
+      {categoryRevenue.length===0
+        ? <div className="table-empty">Belum ada omzet kategori pada periode ini.</div>
+        : <div className="category-revenue-list">
+            {categoryRevenue.map((item,index)=><div className="category-revenue-row" key={item.category}>
+              <span className="category-rank">{index+1}</span>
+              <div className="category-revenue-name">
+                <b>{item.category}</b>
+                <div className="category-progress"><i style={{width:`${Math.max(2,item.percentage)}%`}}/></div>
+              </div>
+              <strong>{formatIDR(item.amount)}</strong>
+              <span className="category-percent">{item.percentage.toFixed(1)}%</span>
+            </div>)}
+          </div>}
+    </section>
+    <section className="panel recent-orders">
+      <div className="panel-heading"><div><h3>Order Terbaru</h3><p>10 transaksi terbaru.</p></div></div>
+      <div className="table-wrap"><table><thead><tr><th>Order</th><th>Pelanggan</th><th>Status</th><th>Total</th><th>Sisa</th><th>Dibuat</th></tr></thead>
+      <tbody>{orders.slice(0,10).map(r=><tr key={r.id}><td><b>{r.order_no}</b></td><td><b>{r.customer_name}</b><small>{r.customer_phone}</small></td><td><span className={`badge status-${r.status}`}>{statusLabels[r.status]}</span></td><td>{formatIDR(r.total)}</td><td>{formatIDR(Math.max(0,Number(r.total)-Number(r.paid_amount)))}</td><td>{new Date(r.created_at).toLocaleString('id-ID')}</td></tr>)}
+      {orders.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada order.</td></tr>}</tbody></table></div>
     </section>
   </>
 }

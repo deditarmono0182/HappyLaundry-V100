@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.1 Blue Premium Chart
+# HappyLaundry Enterprise V110.1.1 Blue Premium Chart Build Fix
 
 ## Jalankan
 ```bash
@@ -144,5 +144,5 @@ Internal employee ID login stored in Supabase, extended permissions, login histo
 Tema biru premium di seluruh aplikasi: sidebar, tombol, dashboard, kasir, QR, tracking, login, laporan, dan pengaturan.
 
 
-## V110.1
-Blue Premium UI dengan grafik omzet line/area modern menggantikan tampilan bar.
+## V110.1.1
+Memperbaiki struktur JSX Dashboard dan mengganti grafik bar dengan line/area tanpa menghapus panel Dashboard lainnya.
