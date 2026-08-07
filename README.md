@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.7 Backup Reset Data
+# HappyLaundry Enterprise V110.7.1 Reset Order Fix
 
 ## Jalankan
 ```bash
@@ -170,3 +170,7 @@ QR Center memakai permission-safe SECURITY DEFINER RPC untuk mencari satu order,
 
 ## V110.7
 Backup Data kini memiliki Owner-only Reset Data untuk Order, Pelanggan, Layanan, dan ALL DATA dengan konfirmasi dua tahap.
+
+
+## V110.7.1
+Reset Order fix: direct RPC after typed confirmation, explicit child deletes, remaining-order verification, success count, auto refresh.

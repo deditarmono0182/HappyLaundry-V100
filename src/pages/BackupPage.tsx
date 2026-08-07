@@ -142,11 +142,6 @@ export function BackupPage(){
       return
     }
 
-    const finalConfirm=window.confirm(
-      `${info.title}\n\nTindakan ini TIDAK DAPAT dibatalkan.\nPastikan Anda sudah Download Backup.\n\nLanjutkan?`
-    )
-    if(!finalConfirm)return
-
     setResetBusy(true);setMessage('');setSuccess('')
     const{data,error}=await supabase.rpc('v110_reset_data',{
       p_reset_type:resetType,
@@ -154,14 +149,32 @@ export function BackupPage(){
     })
 
     if(error){
-      setMessage(error.message)
-    }else{
-      const result=(Array.isArray(data)?data[0]:data) as {message?:string}|null
-      setResetType(null)
-      setConfirmation('')
-      setSuccess(result?.message||`${info.title} berhasil.`)
+      setMessage(`Reset gagal: ${error.message}`)
+      setResetBusy(false)
+      return
     }
+
+    const result=(Array.isArray(data)?data[0]:data) as {
+      message?:string
+      orders_deleted?:number
+      customers_deleted?:number
+      services_deleted?:number
+      remaining_orders?:number
+    }|null
+
+    const deleted=Number(result?.orders_deleted||0)
+    const remaining=Number(result?.remaining_orders||0)
+
+    setResetType(null)
+    setConfirmation('')
     setResetBusy(false)
+    setSuccess(
+      result?.message
+        ? `${result.message} Order dihapus: ${deleted}. Sisa order: ${remaining}.`
+        : `${info.title} berhasil.`
+    )
+
+    window.setTimeout(()=>window.location.reload(),1200)
   }
 
   return <>
@@ -255,7 +268,7 @@ export function BackupPage(){
 
         <div className="reset-backup-reminder">
           <DatabaseBackup size={18}/>
-          <span>Pastikan backup terbaru sudah disimpan sebelum melanjutkan.</span>
+          <span>Setelah kode konfirmasi benar, tombol Reset Sekarang akan langsung menjalankan reset.</span>
         </div>
 
         <label>

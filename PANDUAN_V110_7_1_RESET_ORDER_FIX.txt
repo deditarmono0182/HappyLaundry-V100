@@ -1,0 +1,29 @@
+HAPPYLAUNDRY ENTERPRISE V110.7.1 — RESET ORDER FIX
+
+PERBAIKAN:
+- Popup konfirmasi browser kedua untuk Reset Data dihapus.
+- Setelah mengetik RESET ORDER, tombol Reset Sekarang langsung memanggil Supabase.
+- SQL menghapus dependency secara eksplisit:
+  1. v100_payments
+  2. v100_order_items
+  3. v100_cash_transactions yang terkait order
+  4. v100_orders
+- SQL mengecek ulang jumlah order setelah reset.
+- Jika masih ada order, RPC mengembalikan error.
+- Jika berhasil, aplikasi menampilkan jumlah order yang dihapus dan sisa order.
+- Halaman otomatis refresh setelah berhasil.
+
+WAJIB SQL:
+supabase/018_v110_7_1_reset_order_fix.sql
+
+LANGKAH:
+1. Supabase -> SQL Editor.
+2. Jalankan 018_v110_7_1_reset_order_fix.sql.
+3. Pastikan Success.
+4. Deploy V110.7.1.
+5. Backup Data -> Reset Data -> Data Order.
+6. Ketik RESET ORDER.
+7. Klik Reset Sekarang.
+
+HASIL YANG DIHARAPKAN:
+Reset Data Order berhasil. Order dihapus: X. Sisa order: 0.
