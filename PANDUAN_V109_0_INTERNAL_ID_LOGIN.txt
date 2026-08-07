@@ -1,0 +1,97 @@
+HAPPYLAUNDRY ENTERPRISE V109.0 — INTERNAL ID LOGIN
+
+FITUR UTAMA:
+- Karyawan login dengan ID Akun + Password.
+- Tidak ada email karyawan.
+- Tidak ada Email Confirmation.
+- Tidak ada OTP.
+- Tidak ada email rate limit.
+- Tidak ada Edge Function.
+- Tidak ada Service Role Key di frontend.
+- Tidak ada shift kerja.
+- ID Akun ditentukan manual Owner.
+
+PASSWORD:
+- Password tidak disimpan sebagai teks.
+- PostgreSQL pgcrypto membuat bcrypt hash melalui crypt().
+- Owner hanya bisa membuat/reset password, tidak bisa membaca password lama.
+- Minimal 8 karakter.
+
+KEAMANAN LOGIN:
+- 5 kali password salah -> akun terkunci 15 menit.
+- Akun dapat dinonaktifkan Owner.
+- One-time login token berlaku 2 menit.
+- Token disimpan dalam bentuk SHA-256 hash.
+- Login/logout terakhir dicatat.
+
+HAK AKSES:
+Dashboard
+Kasir
+Order
+QR Center
+Produksi
+Pelanggan
+Layanan
+
+PENTING: ANONYMOUS SIGN-IN
+HappyLaundry tidak membuat akun email karyawan.
+Tetapi existing database HappyLaundry menggunakan RLS untuk role authenticated.
+
+Karena itu V109 memakai Supabase Anonymous Authentication HANYA sebagai transport session.
+Karyawan tetap login memakai ID + Password HappyLaundry.
+
+AKTIFKAN SEKALI:
+Supabase -> Authentication -> Providers -> Anonymous
+Aktifkan "Allow anonymous sign-ins".
+
+Tidak perlu email.
+Tidak perlu Confirm Email.
+Tidak perlu membuat user Authentication manual.
+
+WAJIB JALANKAN SQL:
+supabase/012_v109_internal_id_login.sql
+
+SQL ini:
+- Membuat tabel v109_users.
+- Memigrasikan daftar karyawan V108.
+- Membuat password hash.
+- Membuat RPC login.
+- Membuat lockout setelah 5 password salah.
+- Membuat binding ke anonymous authenticated session.
+- Membuat reset password Owner.
+
+KARYAWAN LAMA:
+Data V108 dimigrasikan, tetapi password lama tidak dapat dipindahkan karena sebelumnya dikelola Auth.
+Owner perlu klik Reset Password pada akun lama sebelum karyawan bisa login V109.
+
+CARA PASANG:
+1. Supabase -> SQL Editor.
+2. Jalankan supabase/012_v109_internal_id_login.sql.
+3. Supabase -> Authentication -> Providers -> Anonymous.
+4. Aktifkan Allow anonymous sign-ins.
+5. Copy project V109 ke HappyLaundry-V100.
+6. Replace.
+7. Commit:
+   HappyLaundry V109.0 Internal ID Login
+8. Push origin.
+9. Tunggu Netlify Published.
+10. Ctrl + Shift + R.
+
+UJI:
+1. Login Owner.
+2. Pengaturan -> Karyawan & Hak Akses.
+3. Tambah karyawan:
+   Nama: Budi
+   ID Akun: KASIR1
+   Password: minimal 8 karakter
+4. Pilih hak akses.
+5. Simpan.
+6. Logout Owner.
+7. Login:
+   ID Akun: KASIR1
+   Password: password yang dibuat.
+8. Pastikan hanya menu yang diberi izin yang terlihat.
+
+OWNER:
+Akun Owner lama tetap memakai Supabase Auth.
+Di halaman login, Owner dapat memasukkan email Owner pada kolom ID Akun.

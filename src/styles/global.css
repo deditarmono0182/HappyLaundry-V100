@@ -3993,3 +3993,93 @@ button{
   font-weight:900!important;
   letter-spacing:.3px;
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V109.0 — Internal ID Login
+   ========================================================= */
+
+.login-card-v109 p{
+  color:#4e716a!important;
+  font-weight:700!important;
+}
+
+.employee-auth-ready{
+  background:#edf9f3!important;
+  border-color:#b9dfcf!important;
+}
+
+.employee-auth-ready b{
+  color:#0b5949!important;
+}
+
+.employee-login-id{
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#e8f7f0;
+  color:#087654!important;
+  font-size:10px!important;
+  font-weight:950!important;
+  letter-spacing:.35px;
+}
+
+
+/* =========================================================
+   HappyLaundry Enterprise V109 Final Stable
+   ========================================================= */
+
+.permission-mini-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  max-width:440px;
+}
+
+.permission-mini-list span{
+  padding:3px 7px;
+  border-radius:999px;
+  background:#eaf7f1;
+  color:#087654!important;
+  font-size:9px!important;
+  font-weight:850!important;
+}
+
+.employee-permission-grid-final{
+  grid-template-columns:repeat(4,minmax(120px,1fr))!important;
+}
+
+.audit-tabs{
+  display:flex;
+  gap:7px;
+  margin-bottom:12px;
+}
+
+.audit-tabs button{
+  min-height:38px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 12px;
+  border:1px solid #bfd8cf;
+  border-radius:10px;
+  background:#fff;
+  color:#315e56;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.audit-tabs button.active{
+  background:#07865a;
+  border-color:#07865a;
+  color:#fff;
+}
+
+@media(max-width:900px){
+  .employee-permission-grid-final{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:520px){
+  .employee-permission-grid-final{grid-template-columns:1fr!important}
+}

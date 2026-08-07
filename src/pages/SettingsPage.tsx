@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, ExternalLink, MapPin, MessageCircle, Save, SlidersHorizontal, Store, UsersRound } from 'lucide-react'
+import { Activity, CheckCircle2, ExternalLink, MapPin, MessageCircle, Save, SlidersHorizontal, Store, UsersRound } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -94,6 +94,11 @@ export function SettingsPage() {
       <section className="panel settings-card settings-wide employee-settings-link">
         <header><UsersRound size={21}/><div><b>Karyawan & Hak Akses</b><small>Tambah karyawan dan tentukan akses Dashboard, Kasir, Order, QR Center, Produksi, Pelanggan, dan Layanan.</small></div></header>
         <button type="button" className="primary-button" onClick={()=>navigate('/settings/employees')}><UsersRound size={17}/>Kelola Karyawan</button>
+      </section>
+
+      <section className="panel settings-card settings-wide employee-settings-link">
+        <header><Activity size={21}/><div><b>Riwayat & Audit Karyawan</b><small>Lihat login berhasil/gagal dan aktivitas akun internal HappyLaundry.</small></div></header>
+        <button type="button" className="secondary-button" onClick={()=>navigate('/settings/audit')}><Activity size={17}/>Buka Riwayat</button>
       </section>
 
       <section className="panel settings-card settings-wide density-settings-card">

@@ -1,0 +1,89 @@
+HAPPYLAUNDRY ENTERPRISE V109 FINAL STABLE
+
+FONDASI LOGIN:
+- Akun karyawan tersimpan di Supabase.
+- Login dengan ID Akun + Password.
+- Tidak ada email karyawan.
+- Tidak ada OTP.
+- Tidak ada Confirm Email.
+- Tidak ada shift kerja.
+- ID dibuat manual oleh Owner.
+- Password disimpan sebagai bcrypt hash PostgreSQL.
+- Ganti laptop/tablet/iPhone tidak menghapus akun.
+- Perangkat baru hanya perlu login kembali.
+
+HAK AKSES:
+Dashboard
+Kasir
+Order
+QR Center
+Produksi
+Pelanggan
+Layanan
+Pembayaran
+Piutang
+Keuangan
+Kas Harian
+Laporan
+Backup
+Pengaturan
+
+KEAMANAN:
+- 5 login password salah -> lock 15 menit.
+- Owner bisa reset password.
+- Owner bisa nonaktifkan akun.
+- Login berhasil/gagal dicatat.
+- Perangkat dicatat: Windows, Mac, iPhone, iPad, Android.
+- Login terakhir ditampilkan.
+
+RIWAYAT:
+Pengaturan -> Riwayat & Audit Karyawan
+
+Berisi:
+1. Riwayat Login
+2. Audit Aktivitas
+
+AUDIT:
+Framework audit sudah tersedia melalui:
+src/lib/audit.ts
+dan RPC:
+v109_log_activity
+
+Aksi employee-management langsung tercatat.
+Modul operasional lain dapat menggunakan auditActivity() saat aksi penting dilakukan.
+
+SUPABASE:
+V109 tetap memakai Anonymous Auth hanya untuk session authenticated ke database.
+Akun karyawan sendiri TIDAK dibuat di Authentication Users.
+
+AKTIFKAN SEKALI:
+Supabase -> Authentication -> Sign In / Providers -> Anonymous
+Aktifkan Allow anonymous sign-ins.
+
+SQL WAJIB:
+1. Pastikan 012_v109_internal_id_login.sql sudah dijalankan.
+2. Jalankan:
+   supabase/013_v109_final_stable.sql
+
+KARYAWAN LAMA:
+Jika berasal dari V108/V109 awal dan password_hash kosong,
+Owner perlu Reset Password sekali.
+
+DEPLOY:
+1. Jalankan SQL 013.
+2. Aktifkan Anonymous Sign-In jika belum.
+3. Copy project ke HappyLaundry-V100.
+4. Replace.
+5. Commit:
+   HappyLaundry V109 Final Stable
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+
+UJI:
+- Tambah karyawan.
+- Login ID + password.
+- Coba menu yang diizinkan.
+- Pastikan menu tanpa izin tidak tampil.
+- Coba pindah perangkat/browser -> login ulang dengan akun yang sama.
+- Buka Pengaturan -> Riwayat & Audit Karyawan.

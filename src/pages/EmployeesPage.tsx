@@ -1,7 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import {
-  Copy, Eye, EyeOff, KeyRound, MessageCircle, Pencil, Plus,
+  Eye, EyeOff, KeyRound, Pencil, Plus, RefreshCw,
   ShieldCheck, Trash2, UserRound, WandSparkles
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
@@ -12,7 +11,6 @@ interface EmployeeRow{
   id:string
   full_name:string
   login_id:string
-  email:string
   phone:string|null
   is_active:boolean
   dashboard:boolean
@@ -22,20 +20,18 @@ interface EmployeeRow{
   production:boolean
   customers:boolean
   services:boolean
+  payments:boolean
+  receivables:boolean
+  finance:boolean
+  cash:boolean
+  reports:boolean
+  backup:boolean
+  settings:boolean
+  failed_login_count:number
+  locked_until:string|null
+  last_login_at:string|null
   created_at:string
 }
-
-const employeeAuthClient=createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  {
-    auth:{
-      persistSession:false,
-      autoRefreshToken:false,
-      detectSessionInUrl:false
-    }
-  }
-)
 
 const permissionOptions=[
   ['dashboard','Dashboard'],
@@ -44,13 +40,21 @@ const permissionOptions=[
   ['qr_center','QR Center'],
   ['production','Produksi'],
   ['customers','Pelanggan'],
-  ['services','Layanan']
+  ['services','Layanan'],
+  ['payments','Pembayaran'],
+  ['receivables','Piutang'],
+  ['finance','Keuangan'],
+  ['cash','Kas Harian'],
+  ['reports','Laporan'],
+  ['backup','Backup'],
+  ['settings','Pengaturan']
 ] as const
 
 const emptyForm={
   full_name:'',login_id:'',phone:'',is_active:true,
   dashboard:true,cashier:true,orders:true,qr_center:true,
   production:false,customers:true,services:true,
+  payments:true,receivables:false,finance:false,cash:false,reports:false,backup:false,settings:false,
   password:'',confirm_password:''
 }
 
@@ -76,12 +80,14 @@ export function EmployeesPage(){
   const[message,setMessage]=useState('')
   const[success,setSuccess]=useState('')
   const[showPassword,setShowPassword]=useState(false)
-  const[createdLogin,setCreatedLogin]=useState<{name:string;login_id:string;password:string;phone:string|null}|null>(null)
+  const[resetEmployee,setResetEmployee]=useState<EmployeeRow|null>(null)
+  const[resetPassword,setResetPassword]=useState('')
+  const[resetConfirm,setResetConfirm]=useState('')
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
     const{data,error}=await supabase
-      .from('v107_employee_access')
+      .from('v109_users')
       .select('*')
       .order('full_name')
     if(error)setMessage(error.message)
@@ -95,82 +101,59 @@ export function EmployeesPage(){
     const password=generatePassword()
     setEditing(null)
     setForm({...emptyForm,password,confirm_password:password})
-    setShowPassword(false);setMessage('');setSuccess('');setCreatedLogin(null);setOpen(true)
+    setShowPassword(false);setMessage('');setSuccess('');setOpen(true)
   }
 
   const edit=(row:EmployeeRow)=>{
     setEditing(row)
     setForm({
-      full_name:row.full_name,login_id:row.login_id||'',phone:row.phone||'',
+      full_name:row.full_name,login_id:row.login_id,phone:row.phone||'',
       is_active:row.is_active,dashboard:row.dashboard,cashier:row.cashier,
       orders:row.orders,qr_center:row.qr_center,production:row.production,
-      customers:row.customers,services:row.services,
+      customers:row.customers,services:row.services,payments:row.payments,
+      receivables:row.receivables,finance:row.finance,cash:row.cash,
+      reports:row.reports,backup:row.backup,settings:row.settings,
       password:'',confirm_password:''
     })
-    setMessage('');setSuccess('');setCreatedLogin(null);setOpen(true)
+    setMessage('');setSuccess('');setOpen(true)
   }
 
+  const permissionPayload=(source:typeof form)=>({
+    p_dashboard:source.dashboard,p_cashier:source.cashier,p_orders:source.orders,
+    p_qr_center:source.qr_center,p_production:source.production,p_customers:source.customers,
+    p_services:source.services,p_payments:source.payments,p_receivables:source.receivables,
+    p_finance:source.finance,p_cash:source.cash,p_reports:source.reports,
+    p_backup:source.backup,p_settings:source.settings
+  })
 
   const save=async(event:FormEvent)=>{
     event.preventDefault();setBusy(true);setMessage('');setSuccess('')
     try{
       const loginId=form.login_id.trim().toUpperCase().replace(/[^A-Z0-9._-]/g,'')
-      if(!loginId)throw new Error('ID Akun wajib diisi.')
       if(loginId.length<3)throw new Error('ID Akun minimal 3 karakter.')
-      const internalEmail=`${loginId.toLowerCase()}@employee.happylaundry.app`
 
-      const payload={
-        full_name:form.full_name.trim(),
-        login_id:loginId,
-        email:internalEmail,
-        phone:form.phone.trim()||null,
-        is_active:form.is_active,
-        dashboard:form.dashboard,cashier:form.cashier,orders:form.orders,
-        qr_center:form.qr_center,production:form.production,
-        customers:form.customers,services:form.services,
-        updated_at:new Date().toISOString()
+      const common={
+        p_full_name:form.full_name.trim(),
+        p_login_id:loginId,
+        p_phone:form.phone.trim()||null,
+        p_is_active:form.is_active,
+        ...permissionPayload(form)
       }
 
       if(editing){
-        const{error}=await supabase.from('v107_employee_access').update(payload).eq('id',editing.id)
+        const{error}=await supabase.rpc('v109_update_employee',{p_id:editing.id,...common})
         if(error)throw error
-        setOpen(false)
         setSuccess('Data karyawan dan hak akses berhasil diperbarui.')
       }else{
         if(form.password.length<8)throw new Error('Password minimal 8 karakter.')
         if(form.password!==form.confirm_password)throw new Error('Konfirmasi password tidak sama.')
 
-        // Buat akun memakai client Auth terpisah agar sesi Owner tidak berubah.
-        const{data:signUpData,error:signUpError}=await employeeAuthClient.auth.signUp({
-          email:payload.email,
-          password:form.password,
-          options:{
-            data:{
-              full_name:payload.full_name,
-              login_id:payload.login_id
-            }
-          }
-        })
-        if(signUpError)throw signUpError
-
-        // Simpan hak akses setelah akun Auth berhasil dibuat.
-        const{error:accessError}=await supabase.from('v107_employee_access').insert({
-          ...payload
-        })
-        if(accessError)throw accessError
-
-        setCreatedLogin({
-          name:payload.full_name,
-          login_id:payload.login_id,
-          password:form.password,
-          phone:payload.phone
-        })
-        setOpen(false)
-        setSuccess(signUpData.session
-          ? 'Karyawan dan ID Akun berhasil dibuat. Akun sudah bisa dipakai.'
-          : 'ID Akun berhasil disiapkan, tetapi Supabase Email Confirmation masih aktif. Matikan Confirm Email agar login ID dapat langsung digunakan.')
+        const{error}=await supabase.rpc('v109_create_employee',{...common,p_password:form.password})
+        if(error)throw error
+        setSuccess(`Akun ${loginId} berhasil dibuat.`)
       }
 
+      setOpen(false)
       await load()
     }catch(error){
       setMessage(error instanceof Error?error.message:'Gagal menyimpan karyawan.')
@@ -179,89 +162,79 @@ export function EmployeesPage(){
     }
   }
 
-  const remove=async(row:EmployeeRow)=>{
-    if(!window.confirm(`Nonaktifkan karyawan ${row.full_name}? Karyawan tidak dapat memakai menu HappyLaundry.`))return
-    const{error}=await supabase.from('v107_employee_access').update({
-      is_active:false,updated_at:new Date().toISOString()
-    }).eq('id',row.id)
-    if(error)setMessage(error.message)
-    else await load()
+  const openReset=(row:EmployeeRow)=>{
+    const password=generatePassword()
+    setResetEmployee(row);setResetPassword(password);setResetConfirm(password);setMessage('')
   }
 
-
-  const copyLogin=async()=>{
-    if(!createdLogin)return
-    const text=`Login HappyLaundry\nNama: ${createdLogin.name}\nID Akun: ${createdLogin.login_id}\nPassword: ${createdLogin.password}`
+  const submitReset=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!resetEmployee)return
+    if(resetPassword.length<8){setMessage('Password minimal 8 karakter.');return}
+    if(resetPassword!==resetConfirm){setMessage('Konfirmasi password tidak sama.');return}
+    setBusy(true);setMessage('')
     try{
-      await navigator.clipboard.writeText(text)
-      setSuccess('Informasi login berhasil disalin.')
-    }catch{
-      setMessage(text)
+      const{error}=await supabase.rpc('v109_owner_reset_employee_password',{
+        p_employee_id:resetEmployee.id,p_new_password:resetPassword
+      })
+      if(error)throw error
+      setResetEmployee(null)
+      setSuccess(`Password ${resetEmployee.login_id} berhasil diubah.`)
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Reset password gagal.')
+    }finally{
+      setBusy(false)
     }
   }
 
-  const sendLoginWA=()=>{
-    if(!createdLogin?.phone){setMessage('Nomor WhatsApp karyawan belum diisi.');return}
-    const phone=createdLogin.phone.replace(/\D/g,'').replace(/^0/,'62')
-    const text=`Halo ${createdLogin.name}.\n\nAkun HappyLaundry Anda sudah dibuat.\n\nID Akun: ${createdLogin.login_id}\nPassword: ${createdLogin.password}\n\nSilakan login ke aplikasi HappyLaundry. Simpan informasi ini dengan aman dan jangan bagikan password kepada orang lain.`
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`,'_blank')
+  const deactivate=async(row:EmployeeRow)=>{
+    if(!window.confirm(`Nonaktifkan akun ${row.login_id}?`))return
+    const{error}=await supabase.rpc('v109_set_employee_active',{p_id:row.id,p_active:false})
+    if(error)setMessage(error.message)
+    else{setSuccess(`Akun ${row.login_id} dinonaktifkan.`);await load()}
   }
 
   return <>
     <PageHeader
-      eyebrow="EMPLOYEE ACCESS CONTROL"
+      eyebrow="ENTERPRISE USER MANAGEMENT"
       title="Karyawan & Hak Akses"
-      description="Owner membuat akun login dan menentukan menu yang boleh digunakan setiap karyawan."
+      description="Kelola ID Akun, password, status, dan hak akses seluruh modul."
       action={<button className="primary-button" onClick={create}><Plus size={17}/>Tambah Karyawan</button>}
     />
 
     <section className="panel employee-auth-note employee-auth-ready">
       <KeyRound size={22}/>
       <div>
-        <b>Akun login dibuat otomatis</b>
-        <span>Karyawan login memakai ID Akun + Password. ID ditentukan manual oleh Owner. Password tidak disimpan di tabel HappyLaundry.</span>
+        <b>Akun tersimpan di Supabase</b>
+        <span>ID Akun dan hak akses tetap sama saat pindah laptop, tablet, atau iPhone. Password disimpan dalam bentuk hash.</span>
       </div>
     </section>
 
     {message&&<div className="error-box inline-message">{message}</div>}
     {success&&<div className="success-box inline-message">{success}</div>}
 
-    {createdLogin&&<section className="panel employee-login-result">
-      <div className="employee-login-result-head">
-        <div><b>Informasi Login Karyawan</b><span>Kirim sekali ke karyawan lalu simpan dengan aman.</span></div>
-        <div className="employee-login-result-actions">
-          <button className="secondary-button" onClick={()=>void copyLogin()}><Copy size={16}/>Copy Login</button>
-          <button className="whatsapp-button" onClick={sendLoginWA}><MessageCircle size={16}/>Kirim WhatsApp</button>
-        </div>
-      </div>
-      <div className="employee-login-credentials">
-        <div><span>Nama</span><b>{createdLogin.name}</b></div>
-        <div><span>ID Akun</span><b>{createdLogin.login_id}</b></div>
-        <div><span>Password</span><b>{createdLogin.password}</b></div>
-      </div>
-    </section>}
-
     <section className="panel data-panel">
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Karyawan</th><th>ID Akun</th><th>Status</th>
-              <th>Dashboard</th><th>Kasir</th><th>Order</th><th>QR</th>
-              <th>Produksi</th><th>Pelanggan</th><th>Layanan</th><th>Aksi</th>
+              <th>Karyawan</th><th>ID Akun</th><th>Status</th><th>Login Terakhir</th>
+              <th>Hak Akses</th><th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            {loading&&<tr><td colSpan={11} className="table-empty">Memuat karyawan...</td></tr>}
-            {!loading&&rows.length===0&&<tr><td colSpan={11} className="table-empty">Belum ada karyawan.</td></tr>}
+            {loading&&<tr><td colSpan={6} className="table-empty">Memuat karyawan...</td></tr>}
+            {!loading&&rows.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada karyawan.</td></tr>}
             {rows.map(row=><tr key={row.id}>
               <td><b>{row.full_name}</b>{row.phone&&<small>{row.phone}</small>}</td>
-              <td><b className="employee-login-id">{row.login_id||'-'}</b></td>
+              <td><b className="employee-login-id">{row.login_id}</b></td>
               <td><span className={`badge ${row.is_active?'success-badge':'danger-badge'}`}>{row.is_active?'Aktif':'Nonaktif'}</span></td>
-              {permissionOptions.map(([key])=><td key={key}><span className={`permission-dot ${row[key]?'on':'off'}`}>{row[key]?'✓':'—'}</span></td>)}
+              <td>{row.last_login_at?new Date(row.last_login_at).toLocaleString('id-ID'):'Belum pernah'}</td>
+              <td><div className="permission-mini-list">{permissionOptions.filter(([key])=>row[key]).map(([key,label])=><span key={key}>{label}</span>)}</div></td>
               <td><div className="row-actions employee-row-actions">
                 <button title="Edit" onClick={()=>edit(row)}><Pencil size={16}/></button>
-                <button className="danger-icon" title="Nonaktifkan" onClick={()=>void remove(row)}><Trash2 size={16}/></button>
+                <button title="Reset Password" onClick={()=>openReset(row)}><RefreshCw size={16}/></button>
+                <button className="danger-icon" title="Nonaktifkan" onClick={()=>void deactivate(row)}><Trash2 size={16}/></button>
               </div></td>
             </tr>)}
           </tbody>
@@ -269,13 +242,13 @@ export function EmployeesPage(){
       </div>
     </section>
 
-    {open&&<Modal title={editing?'Edit Karyawan':'Tambah Karyawan & Login'} onClose={()=>setOpen(false)}>
+    {open&&<Modal title={editing?'Edit Karyawan':'Tambah Karyawan'} onClose={()=>setOpen(false)}>
       <form className="modal-form" onSubmit={save}>
-        <div className="employee-form-head"><UserRound size={22}/><div><b>{editing?'Data Karyawan':'Data Login Karyawan'}</b><span>{editing?'Edit profil dan akses. Gunakan Reset Password untuk mengganti password.':'ID Akun Authentication dibuat otomatis saat disimpan.'}</span></div></div>
+        <div className="employee-form-head"><UserRound size={22}/><div><b>Data Karyawan</b><span>ID Akun dibuat manual Owner dan harus unik.</span></div></div>
 
         <div className="form-grid-two">
           <label>Nama Karyawan<input value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})} required/></label>
-          <label>ID Akun<input value={form.login_id} onChange={e=>setForm({...form,login_id:e.target.value.toUpperCase()})} placeholder="Contoh: KASIR1" required disabled={Boolean(editing)}/></label>
+          <label>ID Akun<input value={form.login_id} onChange={e=>setForm({...form,login_id:e.target.value.toUpperCase()})} placeholder="Contoh: KASIR1" required/></label>
         </div>
         <label>No. WhatsApp<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="08..."/></label>
 
@@ -288,9 +261,7 @@ export function EmployeesPage(){
                 <button type="button" onClick={()=>setShowPassword(v=>!v)}>{showPassword?<EyeOff size={16}/>:<Eye size={16}/>}</button>
               </div>
             </label>
-            <label>Konfirmasi Password
-              <input type={showPassword?'text':'password'} value={form.confirm_password} onChange={e=>setForm({...form,confirm_password:e.target.value})} minLength={8} required/>
-            </label>
+            <label>Konfirmasi Password<input type={showPassword?'text':'password'} value={form.confirm_password} onChange={e=>setForm({...form,confirm_password:e.target.value})} minLength={8} required/></label>
           </div>
           <button type="button" className="secondary-button employee-generate-password" onClick={()=>{
             const password=generatePassword()
@@ -300,8 +271,8 @@ export function EmployeesPage(){
         </div>}
 
         <div className="employee-permission-box">
-          <header><ShieldCheck size={19}/><div><b>Hak Akses Menu</b><small>Centang hanya menu yang dibutuhkan karyawan.</small></div></header>
-          <div className="employee-permission-grid">
+          <header><ShieldCheck size={19}/><div><b>Hak Akses Menu</b><small>Pilih modul yang boleh dipakai karyawan.</small></div></header>
+          <div className="employee-permission-grid employee-permission-grid-final">
             {permissionOptions.map(([key,label])=><label className="permission-check" key={key}>
               <input type="checkbox" checked={form[key]} onChange={e=>setForm({...form,[key]:e.target.checked})}/>
               <span>{label}</span>
@@ -315,6 +286,27 @@ export function EmployeesPage(){
         <div className="form-actions">
           <button type="button" className="secondary-button" onClick={()=>setOpen(false)}>Batal</button>
           <button className="primary-button" disabled={busy}>{busy?'Menyimpan...':editing?'Simpan Perubahan':'Buat Akun Karyawan'}</button>
+        </div>
+      </form>
+    </Modal>}
+
+    {resetEmployee&&<Modal title={`Reset Password — ${resetEmployee.login_id}`} onClose={()=>setResetEmployee(null)}>
+      <form className="modal-form" onSubmit={submitReset}>
+        <div className="employee-password-box">
+          <div className="employee-password-title"><RefreshCw size={18}/><div><b>Password Baru</b><small>{resetEmployee.full_name}</small></div></div>
+          <div className="form-grid-two">
+            <label>Password Baru<input type="text" value={resetPassword} onChange={e=>setResetPassword(e.target.value)} minLength={8} required/></label>
+            <label>Konfirmasi<input type="text" value={resetConfirm} onChange={e=>setResetConfirm(e.target.value)} minLength={8} required/></label>
+          </div>
+          <button type="button" className="secondary-button" onClick={()=>{
+            const password=generatePassword()
+            setResetPassword(password);setResetConfirm(password)
+          }}><WandSparkles size={16}/>Generate Password Baru</button>
+        </div>
+        {message&&<div className="error-box">{message}</div>}
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setResetEmployee(null)}>Batal</button>
+          <button className="primary-button" disabled={busy}>{busy?'Memproses...':'Reset Password'}</button>
         </div>
       </form>
     </Modal>}

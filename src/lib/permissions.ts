@@ -3,7 +3,7 @@ import type { EmployeePermissions, UserProfile } from '../types/auth'
 export type PermissionKey=keyof EmployeePermissions
 
 const legacyRolePermissions:Record<string,PermissionKey[]>={
-  cashier:['dashboard','cashier','orders','qr_center','customers','services'],
+  cashier:['dashboard','cashier','orders','qr_center','customers','services','payments'],
   staff:['dashboard','production'],
   production:['qr_center','production']
 }

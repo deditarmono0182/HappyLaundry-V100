@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V108.0.2 Internal Email Fix
+# HappyLaundry Enterprise V109 Final Stable
 
 ## Jalankan
 ```bash
@@ -130,3 +130,11 @@ Login karyawan memakai ID Akun manual + Password. Tanpa ID otomatis dan tanpa sh
 
 ## V108.0.2
 Memperbaiki email internal login ID dari domain .local menjadi domain valid .app agar Supabase Auth menerima pembuatan akun.
+
+
+## V109.0
+Sistem karyawan internal ID Akun + password hash tanpa email. Supabase Anonymous Auth hanya digunakan untuk transport sesi authenticated agar RLS existing tetap berjalan.
+
+
+## V109 Final Stable
+Internal employee ID login stored in Supabase, extended permissions, login history, device tracking, and audit framework.

@@ -3,24 +3,79 @@ import type{Session}from'@supabase/supabase-js'
 import{isSupabaseConfigured,supabase}from'./supabase'
 import type{EmployeePermissions,UserProfile}from'../types/auth'
 
+interface EmployeeSessionRow{
+  id:string
+  full_name:string
+  login_id:string
+  is_active:boolean
+  dashboard:boolean
+  cashier:boolean
+  orders:boolean
+  qr_center:boolean
+  production:boolean
+  customers:boolean
+  services:boolean
+  payments:boolean
+  receivables:boolean
+  finance:boolean
+  cash:boolean
+  reports:boolean
+  backup:boolean
+  settings:boolean
+}
+
+interface EmployeeLoginResult{
+  ok:boolean
+  login_token?:string
+  message?:string
+}
+
 interface C{
   session:Session|null
   profile:UserProfile|null
   loading:boolean
-  signIn:(login:string,p:string)=>Promise<void>
+  signIn:(login:string,password:string)=>Promise<void>
   signOut:()=>Promise<void>
 }
 
 const X=createContext<C|null>(null)
 
-const defaultEmployeePermissions:EmployeePermissions={
-  dashboard:false,
-  cashier:false,
-  orders:false,
-  qr_center:false,
-  production:false,
-  customers:false,
-  services:false
+function employeeToProfile(row:EmployeeSessionRow):UserProfile{
+  const permissions:EmployeePermissions={
+    dashboard:Boolean(row.dashboard),
+    cashier:Boolean(row.cashier),
+    orders:Boolean(row.orders),
+    qr_center:Boolean(row.qr_center),
+    production:Boolean(row.production),
+    customers:Boolean(row.customers),
+    services:Boolean(row.services),
+    payments:Boolean(row.payments),
+    receivables:Boolean(row.receivables),
+    finance:Boolean(row.finance),
+    cash:Boolean(row.cash),
+    reports:Boolean(row.reports),
+    backup:Boolean(row.backup),
+    settings:Boolean(row.settings)
+  }
+  return{
+    id:row.id,
+    full_name:row.full_name,
+    login_id:row.login_id,
+    role:'employee',
+    store_id:null,
+    permissions,
+    employee_active:Boolean(row.is_active)
+  }
+}
+
+function deviceLabel(){
+  const ua=navigator.userAgent||''
+  if(/iPhone/i.test(ua))return 'iPhone'
+  if(/iPad/i.test(ua))return 'iPad'
+  if(/Android/i.test(ua))return 'Android'
+  if(/Windows/i.test(ua))return 'Windows'
+  if(/Macintosh/i.test(ua))return 'Mac'
+  return 'Browser'
 }
 
 export function AuthProvider({children}:{children:React.ReactNode}){
@@ -32,66 +87,46 @@ export function AuthProvider({children}:{children:React.ReactNode}){
     if(!isSupabaseConfigured){setLoading(false);return}
     let mounted=true
 
-    const load=async(id:string,email?:string|null)=>{
-      const{data:base}=await supabase
-        .from('profiles')
-        .select('id,full_name,role,store_id')
-        .eq('id',id)
-        .maybeSingle()
-
-      let next=(base as UserProfile|null)??null
-
-      // Owner follows the profile table and always keeps full access.
-      if(next?.role==='owner'){
-        if(mounted)setProfile(next)
+    const loadProfile=async(current:Session|null)=>{
+      if(!current){
+        if(mounted)setProfile(null)
         return
       }
 
-      if(email){
-        const{data:employee}=await supabase
-          .from('v107_employee_access')
-          .select('full_name,is_active,dashboard,cashier,orders,qr_center,production,customers,services')
-          .eq('email',email.toLowerCase())
+      if(!current.user.is_anonymous){
+        const{data:base}=await supabase
+          .from('profiles')
+          .select('id,full_name,role,store_id')
+          .eq('id',current.user.id)
           .maybeSingle()
-
-        if(employee){
-          const permissions:EmployeePermissions={
-            dashboard:Boolean(employee.dashboard),
-            cashier:Boolean(employee.cashier),
-            orders:Boolean(employee.orders),
-            qr_center:Boolean(employee.qr_center),
-            production:Boolean(employee.production),
-            customers:Boolean(employee.customers),
-            services:Boolean(employee.services)
-          }
-          next={
-            id,
-            full_name:employee.full_name||next?.full_name||email,
-            role:'employee',
-            store_id:next?.store_id??null,
-            permissions,
-            employee_active:Boolean(employee.is_active)
-          }
-        }else if(next){
-          // Existing legacy cashier/staff accounts keep their former role behavior.
-          next={...next,permissions:defaultEmployeePermissions,employee_active:true}
+        if(base){
+          if(mounted)setProfile(base as UserProfile)
+          return
         }
       }
 
-      if(mounted)setProfile(next)
+      const{data,error}=await supabase.rpc('v109_current_employee')
+      if(!error&&data){
+        const row=(Array.isArray(data)?data[0]:data) as EmployeeSessionRow|undefined
+        if(row&&mounted){
+          setProfile(employeeToProfile(row))
+          return
+        }
+      }
+
+      if(mounted)setProfile(null)
     }
 
     supabase.auth.getSession().then(async({data})=>{
       if(!mounted)return
       setSession(data.session)
-      if(data.session?.user.id)await load(data.session.user.id,data.session.user.email)
+      await loadProfile(data.session)
       setLoading(false)
     })
 
-    const{data:s}=supabase.auth.onAuthStateChange(async(_e,n)=>{
-      setSession(n)
-      if(n?.user.id)await load(n.user.id,n.user.email)
-      else setProfile(null)
+    const{data:s}=supabase.auth.onAuthStateChange(async(_event,next)=>{
+      setSession(next)
+      await loadProfile(next)
       setLoading(false)
     })
 
@@ -99,19 +134,54 @@ export function AuthProvider({children}:{children:React.ReactNode}){
   },[])
 
   const value=useMemo<C>(()=>({
-    session,profile,loading,
+    session,
+    profile,
+    loading,
     signIn:async(login,password)=>{
       if(!isSupabaseConfigured)throw new Error('Supabase belum dikonfigurasi.')
       const raw=login.trim()
       if(!raw)throw new Error('ID Akun wajib diisi.')
-      const normalizedId=raw.toUpperCase().replace(/[^A-Z0-9._-]/g,'')
-      const email=raw.includes('@')
-        ? raw.toLowerCase()
-        : `${normalizedId.toLowerCase()}@employee.happylaundry.app`
-      const{error}=await supabase.auth.signInWithPassword({email,password})
-      if(error)throw new Error('ID Akun atau password salah.')
+
+      if(raw.includes('@')){
+        const{error}=await supabase.auth.signInWithPassword({email:raw.toLowerCase(),password})
+        if(error)throw new Error('Email Owner atau password salah.')
+        return
+      }
+
+      const current=(await supabase.auth.getSession()).data.session
+      if(current)await supabase.auth.signOut()
+
+      const{data:loginData,error:loginError}=await supabase.rpc('v109_employee_login',{
+        p_login_id:raw.toUpperCase(),
+        p_password:password,
+        p_device:deviceLabel()
+      })
+      if(loginError)throw new Error(loginError.message)
+
+      const result=(Array.isArray(loginData)?loginData[0]:loginData) as EmployeeLoginResult|undefined
+      if(!result?.ok||!result.login_token)throw new Error(result?.message||'ID Akun atau password salah.')
+
+      const{error:anonymousError}=await supabase.auth.signInAnonymously({
+        options:{data:{happylaundry_employee:true}}
+      })
+      if(anonymousError){
+        throw new Error('Anonymous Sign-In Supabase belum aktif. Aktifkan Authentication → Sign In / Providers → Anonymous.')
+      }
+
+      const{data:bindData,error:bindError}=await supabase.rpc('v109_bind_employee_session',{
+        p_login_token:result.login_token
+      })
+      if(bindError||bindData!==true){
+        await supabase.auth.signOut()
+        throw new Error(bindError?.message||'Gagal mengaktifkan sesi karyawan.')
+      }
+
+      await supabase.auth.refreshSession()
     },
-    signOut:async()=>{await supabase.auth.signOut()}
+    signOut:async()=>{
+      try{await supabase.rpc('v109_employee_logout')}catch{}
+      await supabase.auth.signOut()
+    }
   }),[session,profile,loading])
 
   return <X.Provider value={value}>{children}</X.Provider>

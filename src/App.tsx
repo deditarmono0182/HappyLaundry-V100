@@ -18,6 +18,7 @@ const CashPage=lazy(()=>import('./pages/CashPage').then(m=>({default:m.CashPage}
 const CashierPage=lazy(()=>import('./pages/CashierPage').then(m=>({default:m.CashierPage})))
 const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.SettingsPage})))
 const EmployeesPage=lazy(()=>import('./pages/EmployeesPage').then(m=>({default:m.EmployeesPage})))
+const UserAuditPage=lazy(()=>import('./pages/UserAuditPage').then(m=>({default:m.UserAuditPage})))
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
 const FinancePage=lazy(()=>import('./pages/FinancePage').then(m=>({default:m.FinancePage})))
 const IncomeDetailsPage=lazy(()=>import('./pages/IncomeDetailsPage').then(m=>({default:m.IncomeDetailsPage})))
@@ -50,16 +51,17 @@ export default function App(){
       <Route path="services" element={<PermissionRoute permission="services"><ServicesPage/></PermissionRoute>}/>
       <Route path="inventory" element={<InventoryPage/>}/>
       <Route path="suppliers" element={<SuppliersPage/>}/>
-      <Route path="payments" element={<PaymentsPage/>}/>
-      <Route path="cash" element={<CashPage/>}/>
-      <Route path="finance" element={<FinancePage/>}/>
+      <Route path="payments" element={<PermissionRoute permission="payments"><PaymentsPage/></PermissionRoute>}/>
+      <Route path="cash" element={<PermissionRoute permission="cash"><CashPage/></PermissionRoute>}/>
+      <Route path="finance" element={<PermissionRoute permission="finance"><FinancePage/></PermissionRoute>}/>
       <Route path="finance/income" element={<IncomeDetailsPage/>}/>
       <Route path="finance/expenses" element={<ExpenseDetailsPage/>}/>
-      <Route path="receivables" element={<ReceivablesPage/>}/>
-      <Route path="reports" element={<ReportsPage/>}/>
-      <Route path="backup" element={<BackupPage/>}/>
-      <Route path="settings" element={<SettingsPage/>}/>
+      <Route path="receivables" element={<PermissionRoute permission="receivables"><ReceivablesPage/></PermissionRoute>}/>
+      <Route path="reports" element={<PermissionRoute permission="reports"><ReportsPage/></PermissionRoute>}/>
+      <Route path="backup" element={<PermissionRoute permission="backup"><BackupPage/></PermissionRoute>}/>
+      <Route path="settings" element={<PermissionRoute permission="settings"><SettingsPage/></PermissionRoute>}/>
       <Route path="settings/employees" element={<EmployeesPage/>}/>
+      <Route path="settings/audit" element={<UserAuditPage/>}/>
     </Route>
     <Route path="*" element={<Navigate to="/" replace/>}/>
   </Routes></Suspense>

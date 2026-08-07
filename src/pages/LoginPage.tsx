@@ -4,13 +4,13 @@ import{useAuth}from'../lib/auth'
 import{isSupabaseConfigured}from'../lib/supabase'
 
 export function LoginPage(){
-  const{session,signIn}=useAuth()
+  const{session,profile,signIn}=useAuth()
   const[loginId,setLoginId]=useState('')
   const[password,setPassword]=useState('')
   const[error,setError]=useState('')
   const[busy,setBusy]=useState(false)
 
-  if(session)return <Navigate to="/" replace/>
+  if(session&&profile)return <Navigate to="/" replace/>
 
   const submit=async(e:FormEvent)=>{
     e.preventDefault()
@@ -26,12 +26,14 @@ export function LoginPage(){
   }
 
   return <div className="login-page">
-    <div className="login-card login-card-v108">
+    <div className="login-card login-card-v109">
       <img src="/logo-happylaundry.jpg" className="login-logo" alt="HappyLaundry"/>
       <span className="eyebrow">HAPPYLAUNDRY BABAKAN</span>
-      <h1>Masuk ke HappyLaundry</h1>
-      <p>Karyawan gunakan ID Akun. Owner tetap dapat menggunakan email Owner.</p>
+      <h1>Login HappyLaundry</h1>
+      <p>Karyawan masuk menggunakan ID Akun dan Password.</p>
+
       {!isSupabaseConfigured&&<div className="warning-box">Supabase belum dikonfigurasi.</div>}
+
       <form onSubmit={submit}>
         <label>ID Akun
           <input
@@ -39,6 +41,7 @@ export function LoginPage(){
             onChange={e=>setLoginId(e.target.value)}
             placeholder="Contoh: KASIR1"
             autoComplete="username"
+            autoCapitalize="characters"
             required
           />
         </label>
@@ -54,7 +57,8 @@ export function LoginPage(){
         {error&&<div className="error-box">{error}</div>}
         <button disabled={busy||!isSupabaseConfigured}>{busy?'Memproses...':'Login'}</button>
       </form>
-      <small className="login-owner-note">Untuk Owner lama: email Owner tetap bisa digunakan pada kolom ID Akun.</small>
+
+      <small className="login-owner-note">Owner lama tetap dapat login menggunakan email Owner pada kolom ID Akun.</small>
     </div>
   </div>
 }

@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
-  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign } from 'lucide-react'
+  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign, AlertTriangle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { canAccess, type PermissionKey } from '../lib/permissions'
@@ -16,12 +16,13 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/services', label: 'Layanan & Harga', icon: Sparkles, permission: 'services' },
   { to: '/inventory', label: 'Stok Bahan', icon: Package, roles: ['owner', 'staff'] },
   { to: '/suppliers', label: 'Supplier', icon: Truck, roles: ['owner', 'staff'] },
-  { to: '/payments', label: 'Pembayaran', icon: CreditCard, roles: ['owner', 'cashier'] },
+  { to: '/payments', label: 'Pembayaran', icon: CreditCard, permission: 'payments' },
   { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
-  { to: '/finance', label: 'Keuangan', icon: CircleDollarSign, roles: ['owner','cashier'] },
-  { to: '/reports', label: 'Laporan Owner', icon: BarChart3, roles: ['owner'] },
-  { to: '/backup', label: 'Backup Data', icon: DatabaseBackup, roles: ['owner'] },
-  { to: '/settings', label: 'Pengaturan', icon: Settings, roles: ['owner'] }
+  { to: '/finance', label: 'Keuangan', icon: CircleDollarSign, permission: 'finance' },
+  { to: '/receivables', label: 'Piutang', icon: AlertTriangle, permission: 'receivables' },
+  { to: '/reports', label: 'Laporan Owner', icon: BarChart3, permission: 'reports' },
+  { to: '/backup', label: 'Backup Data', icon: DatabaseBackup, permission: 'backup' },
+  { to: '/settings', label: 'Pengaturan', icon: Settings, permission: 'settings' }
 ]
 
 export function AppLayout() {
@@ -42,7 +43,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V108.0.2 Stable</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V109 Final Stable</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
