@@ -1,0 +1,62 @@
+HAPPYLAUNDRY ENTERPRISE V110.7.3 — HARD RESET + DIAGNOSTIC
+
+SEKARANG CACHE SUDAH TERBUKTI BENAR.
+Screenshot V110.7.2 menunjukkan build baru sudah aktif.
+
+V110.7.3 menambahkan DIAGNOSTIC DATABASE langsung.
+
+WAJIB SQL:
+supabase/020_v110_7_3_hard_reset_diagnostic.sql
+
+SETELAH DEPLOY:
+Backup Data harus menunjukkan:
+Versi Reset Aktif: V110.7.3
+
+Ada tombol baru:
+CEK JUMLAH ORDER
+
+Tombol ini membaca langsung Supabase:
+- public.v100_orders
+- public.v100_orders_view
+
+Sebelum reset, contoh:
+Tabel v100_orders: 7
+View v100_orders_view: 7
+
+RESET ORDER V110.7.3:
+- RPC khusus v110_reset_orders_hard_v3
+- lock tabel selama reset
+- hapus payments
+- hapus order_items
+- hapus cash terkait
+- hapus orders
+- cek tabel DAN view sesudah delete
+
+RESET hanya dianggap sukses jika:
+v100_orders = 0
+DAN
+v100_orders_view = 0
+
+Jika salah satu masih memiliki data, Supabase mengembalikan ERROR.
+
+LANGKAH TEST:
+1. Jalankan SQL 020 dan pastikan Success.
+2. Deploy V110.7.3.
+3. Buka Backup Data.
+4. Pastikan Versi Reset Aktif = V110.7.3.
+5. Klik Cek Jumlah Order.
+6. Catat:
+   Tabel v100_orders = ?
+   View v100_orders_view = ?
+7. Reset Data -> Data Order.
+8. Ketik RESET ORDER.
+9. Reset Sekarang.
+10. Klik Cek Jumlah Order lagi.
+
+HASIL BERHASIL:
+Tabel v100_orders = 0
+View v100_orders_view = 0
+RPC = 110.7.3
+
+Jika bukan 0, kirim screenshot diagnostic tersebut.
+Dengan angka itu kita bisa mengetahui persis titik masalahnya.

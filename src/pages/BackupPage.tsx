@@ -64,6 +64,11 @@ export function BackupPage(){
   const [confirmation,setConfirmation]=useState('')
   const [resetBusy,setResetBusy]=useState(false)
   const [resetStatus,setResetStatus]=useState('')
+  const [orderDiagnostic,setOrderDiagnostic]=useState<{
+    table_count:number
+    view_count:number
+    rpc_version?:string
+  }|null>(null)
 
   const exportBackup=async()=>{
     setBusy(true);setMessage('');setSuccess('')
@@ -134,6 +139,28 @@ export function BackupPage(){
     setResetType(type)
   }
 
+  const checkOrderCount=async()=>{
+    setMessage('')
+    setSuccess('')
+    setResetStatus('Memeriksa jumlah order di Supabase...')
+    const{data,error}=await supabase.rpc('v110_order_reset_diagnostic')
+    setResetStatus('')
+    if(error){
+      setMessage(`Cek data gagal: ${error.message}`)
+      return
+    }
+    const result=(Array.isArray(data)?data[0]:data) as {
+      table_count?:number
+      view_count?:number
+      rpc_version?:string
+    }|null
+    setOrderDiagnostic({
+      table_count:Number(result?.table_count||0),
+      view_count:Number(result?.view_count||0),
+      rpc_version:result?.rpc_version
+    })
+  }
+
   const executeReset=async(event:FormEvent)=>{
     event.preventDefault()
     if(!resetType)return
@@ -147,7 +174,7 @@ export function BackupPage(){
     setResetStatus(`Menjalankan ${info.title}...`)
 
     const request=resetType==='orders'
-      ? supabase.rpc('v110_reset_orders_force',{p_confirmation:info.confirm})
+      ? supabase.rpc('v110_reset_orders_hard_v3',{p_confirmation:info.confirm})
       : supabase.rpc('v110_reset_data',{
           p_reset_type:resetType,
           p_confirmation:info.confirm
@@ -168,6 +195,9 @@ export function BackupPage(){
       customers_deleted?:number
       services_deleted?:number
       remaining_orders?:number
+      table_count?:number
+      view_count?:number
+      rpc_version?:string
     }|null
 
     const deleted=Number(result?.orders_deleted||0)
@@ -177,13 +207,20 @@ export function BackupPage(){
     setConfirmation('')
     setResetBusy(false)
     setResetStatus('')
+
+    if(resetType==='orders'){
+      setOrderDiagnostic({
+        table_count:Number(result?.table_count??result?.remaining_orders??0),
+        view_count:Number(result?.view_count??0),
+        rpc_version:result?.rpc_version
+      })
+    }
+
     setSuccess(
       result?.message
-        ? `${result.message} Order dihapus: ${deleted}. Sisa order: ${remaining}.`
+        ? `${result.message} Order dihapus: ${deleted}. Sisa tabel: ${Number(result?.table_count??remaining)}. Sisa view: ${Number(result?.view_count??0)}.`
         : `${info.title} berhasil.`
     )
-
-    window.setTimeout(()=>window.location.reload(),3000)
   }
 
   return <>
@@ -193,7 +230,7 @@ export function BackupPage(){
       description="Unduh salinan data, pulihkan master data, dan kelola reset data dengan aman."
     />
 
-    <div className="backup-version-badge">Versi Reset Aktif: <b>V110.7.2</b></div>
+    <div className="backup-version-badge">Versi Reset Aktif: <b>V110.7.3</b></div>
 
     <section className="backup-grid">
       <article className="panel backup-card">
@@ -225,6 +262,21 @@ export function BackupPage(){
           <li>Jangan membagikan file backup kepada orang lain.</li>
         </ul>
       </article>
+    </section>
+
+    <section className="panel reset-diagnostic-panel">
+      <div>
+        <b>Diagnostic Reset Order</b>
+        <span>Cek jumlah order langsung dari database sebelum atau sesudah reset.</span>
+      </div>
+      <button type="button" className="secondary-button" onClick={()=>void checkOrderCount()}>
+        Cek Jumlah Order
+      </button>
+      {orderDiagnostic&&<div className="reset-diagnostic-values">
+        <span>Tabel v100_orders <b>{orderDiagnostic.table_count}</b></span>
+        <span>View v100_orders_view <b>{orderDiagnostic.view_count}</b></span>
+        <span>RPC <b>{orderDiagnostic.rpc_version||'-'}</b></span>
+      </div>}
     </section>
 
     <section className="panel reset-data-panel">
