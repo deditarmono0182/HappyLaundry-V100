@@ -1,14 +1,14 @@
 {
   "id": "/",
-  "name": "HappyLaundry Enterprise V103",
+  "name": "HappyLaundry Enterprise V110.1.2 Blue Edition",
   "short_name": "HappyLaundry",
   "description": "Kasir, produksi, pembayaran, laporan, dan tracking HappyLaundry Babakan.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f5fcf9",
-  "theme_color": "#07865a",
+  "background_color": "#F5FAFF",
+  "theme_color": "#1E88E5",
   "categories": [
     "business",
     "productivity"

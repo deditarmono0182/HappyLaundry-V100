@@ -1,4 +1,4 @@
-const CACHE_NAME='happylaundry-v103-shell';
+const CACHE_NAME='happylaundry-v110-1-2';
 const APP_SHELL=[
   '/',
   '/index.html',

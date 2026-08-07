@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.1.1 Blue Premium Chart Build Fix
+# HappyLaundry Enterprise V110.1.2 PWA Titlebar Blue Fix
 
 ## Jalankan
 ```bash
@@ -146,3 +146,7 @@ Tema biru premium di seluruh aplikasi: sidebar, tombol, dashboard, kasir, QR, tr
 
 ## V110.1.1
 Memperbaiki struktur JSX Dashboard dan mengganti grafik bar dengan line/area tanpa menghapus panel Dashboard lainnya.
+
+
+## V110.1.2
+Memperbaiki PWA/Windows title bar hijau dengan theme_color biru pada index.html dan manifest.webmanifest.

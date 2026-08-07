@@ -1,0 +1,45 @@
+HAPPYLAUNDRY ENTERPRISE V110.1.2 — PWA TITLEBAR BLUE FIX
+
+MASALAH:
+Bagian paling atas aplikasi Windows/PWA masih hijau.
+
+PENYEBAB:
+Bukan CSS halaman.
+PWA menggunakan:
+1. index.html -> meta theme-color
+2. public/manifest.webmanifest -> theme_color
+
+Keduanya masih #07865a (hijau).
+
+PERBAIKAN:
+- index.html theme-color -> #1E88E5
+- manifest.webmanifest theme_color -> #1E88E5
+- manifest background_color -> #F5FAFF
+- Duplicate meta theme-color dihapus.
+- Nama PWA diperbarui ke V110.1.2.
+
+TIDAK ADA SQL BARU.
+
+SETELAH DEPLOY:
+Karena Windows/Chrome dapat menyimpan manifest PWA lama, lakukan:
+
+1. Push sampai Netlify Published.
+2. Tutup HappyLaundry yang ter-install.
+3. Buka website di Chrome lalu Ctrl + Shift + R.
+
+Jika title bar masih hijau karena PWA lama tersimpan:
+4. Uninstall HappyLaundry dari Windows/Chrome.
+5. Buka website terbaru.
+6. Install App / Add to Home Screen kembali.
+
+DATA TIDAK HILANG karena data HappyLaundry tersimpan di Supabase.
+Uninstall PWA hanya menghapus instalasi aplikasi di perangkat.
+
+CARA DEPLOY:
+1. Ekstrak ZIP.
+2. Replace ke HappyLaundry-V100.
+3. Commit:
+   HappyLaundry V110.1.2 PWA Titlebar Blue Fix
+4. Push origin.
+5. Tunggu Netlify Published.
+6. Refresh / reinstall PWA bila diperlukan.

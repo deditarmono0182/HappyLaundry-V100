@@ -4675,3 +4675,12 @@ a{
     min-width:720px;
   }
 }
+
+
+/* V110.1.2 PWA frame alignment */
+html{
+  background:#1E88E5!important;
+}
+body{
+  background:#F5FAFF!important;
+}
