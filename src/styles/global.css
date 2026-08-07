@@ -5002,3 +5002,242 @@ body{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V110.6 — QR Permission Fix
+   ========================================================= */
+
+.qr-info-box{
+  margin-top:10px!important;
+  padding:11px 12px!important;
+  border:1px solid #cfe2f1!important;
+  border-radius:11px!important;
+  background:#f6fbff!important;
+  color:#335f7d!important;
+  font-size:11.5px!important;
+  font-weight:750!important;
+  line-height:1.45!important;
+}
+
+.qr-search-order form .primary-button{
+  min-height:46px!important;
+}
+
+
+/* =========================================================
+   HappyLaundry Enterprise V110.7 — Backup Reset Data
+   ========================================================= */
+
+.reset-data-panel{
+  margin-top:16px!important;
+  padding:18px!important;
+  border-color:#f0c9c3!important;
+  background:linear-gradient(145deg,#fff,#fffafa)!important;
+}
+
+.reset-data-heading{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding-bottom:14px;
+  border-bottom:1px solid #f2dddd;
+}
+
+.reset-danger-icon{
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border-radius:13px;
+  background:#fff0ee;
+  color:#c04438;
+}
+
+.reset-data-heading h2{
+  margin:3px 0 4px;
+  color:#66352f!important;
+  font-size:20px!important;
+  font-weight:950!important;
+}
+
+.reset-data-heading p{
+  margin:0;
+  color:#7a625f!important;
+  font-size:11.5px!important;
+  font-weight:650!important;
+}
+
+.reset-data-heading .eyebrow{
+  color:#bf463b!important;
+}
+
+.reset-data-options{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  padding-top:14px;
+}
+
+.reset-data-options>button{
+  min-height:86px;
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:13px;
+  text-align:left;
+  border:1px solid #e7d9d6;
+  border-radius:13px;
+  background:#fff;
+  color:#73463f;
+  cursor:pointer;
+}
+
+.reset-data-options>button:hover:not(:disabled){
+  border-color:#e8a89f;
+  background:#fff7f5;
+  box-shadow:0 8px 18px rgba(165,67,54,.08);
+}
+
+.reset-data-options>button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.reset-data-options>button>svg{
+  color:#c44a3e;
+  flex:0 0 auto;
+}
+
+.reset-data-options>button>span{
+  display:grid;
+  gap:4px;
+}
+
+.reset-data-options b{
+  font-size:12px!important;
+  font-weight:950!important;
+}
+
+.reset-data-options small{
+  color:#846f6b!important;
+  font-size:9.5px!important;
+  font-weight:650!important;
+  line-height:1.35;
+}
+
+.reset-data-options .reset-all-button{
+  border-color:#e7aaa2!important;
+  background:#fff3f1!important;
+}
+
+.reset-data-options .reset-all-button b{
+  color:#ad3228!important;
+}
+
+.reset-owner-note{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 11px;
+  border-radius:10px;
+  background:#fff5e6;
+  color:#9c6508;
+  font-size:10.5px;
+  font-weight:800;
+}
+
+.reset-confirm-warning{
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+  padding:13px;
+  border:1px solid #efc9c4;
+  border-radius:12px;
+  background:#fff5f3;
+  color:#86433b;
+}
+
+.reset-confirm-warning.critical{
+  background:#fff0ee;
+  border-color:#e9aaa2;
+}
+
+.reset-confirm-warning>svg{
+  flex:0 0 auto;
+  color:#c54438;
+}
+
+.reset-confirm-warning>div{
+  display:grid;
+  gap:5px;
+}
+
+.reset-confirm-warning b{
+  font-size:11.5px!important;
+  line-height:1.4;
+}
+
+.reset-confirm-warning span{
+  font-size:10px!important;
+  font-weight:650!important;
+  line-height:1.4;
+}
+
+.reset-backup-reminder{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 11px;
+  border:1px solid #d5e6f2;
+  border-radius:10px;
+  background:#f4f9fd;
+  color:#416b87;
+  font-size:10.5px;
+  font-weight:750;
+}
+
+.reset-confirm-code{
+  display:inline-flex;
+  width:max-content;
+  padding:5px 8px;
+  border-radius:7px;
+  background:#fff0ee;
+  color:#b43b31!important;
+  font-size:11px!important;
+  letter-spacing:.4px;
+}
+
+.reset-confirm-button{
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 15px;
+  border:1px solid #b93b31!important;
+  border-radius:11px;
+  background:linear-gradient(135deg,#d74c40,#b7332a)!important;
+  color:#fff!important;
+  font-weight:900!important;
+  cursor:pointer;
+}
+
+.reset-confirm-button:disabled{
+  opacity:.42;
+  cursor:not-allowed;
+}
+
+@media(max-width:1050px){
+  .reset-data-options{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:600px){
+  .reset-data-options{
+    grid-template-columns:1fr;
+  }
+}

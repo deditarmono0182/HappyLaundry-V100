@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.5 Revenue Sharing Save Fix
+# HappyLaundry Enterprise V110.7 Backup Reset Data
 
 ## Jalankan
 ```bash
@@ -162,3 +162,11 @@ Bagi hasil per kategori layanan di Dashboard Keuangan dengan persentase editable
 
 ## V110.5
 Memperbaiki ON CONFLICT pada penyimpanan persentase bagi hasil dengan UNIQUE(category) yang kompatibel dengan Supabase upsert.
+
+
+## V110.6
+QR Center memakai permission-safe SECURITY DEFINER RPC untuk mencari satu order, sehingga akun Owner/karyawan berizin QR tidak terkena RLS Permission denied.
+
+
+## V110.7
+Backup Data kini memiliki Owner-only Reset Data untuk Order, Pelanggan, Layanan, dan ALL DATA dengan konfirmasi dua tahap.

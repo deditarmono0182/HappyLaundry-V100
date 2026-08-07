@@ -1,0 +1,84 @@
+HAPPYLAUNDRY ENTERPRISE V110.6 — QR CENTER PERMISSION FIX
+
+MASALAH:
+Saat QR Center melakukan scan atau Cari Order muncul:
+Permission denied
+
+PENYEBAB:
+QR Center sebelumnya membaca langsung:
+v100_orders_view
+
+Untuk akun karyawan V109 yang memakai session internal/anonymous authenticated,
+RLS/policy tabel/view lama dapat menolak SELECT langsung.
+
+PERBAIKAN:
+QR Center V110.6 tidak lagi SELECT langsung ke v100_orders_view.
+
+Sekarang menggunakan RPC:
+v110_qr_find_order(order_no)
+
+RPC:
+- berjalan SECURITY DEFINER
+- tetap memeriksa user sudah login
+- Owner diizinkan
+- Karyawan hanya diizinkan jika:
+  is_active = true
+  qr_center = true
+- hanya mencari SATU nomor order yang diberikan
+- tidak membuka daftar seluruh order ke publik
+
+HASIL:
+- Scan QR nota -> cari order di QR Center
+- Cari manual -> cari order di QR Center
+- Jika tidak ditemukan:
+  Order ... tidak ditemukan di aplikasi.
+- Jika akun tidak punya QR Center:
+  Akun ini tidak memiliki akses QR Center.
+- Error teknis Permission denied tidak lagi ditampilkan mentah.
+
+KAMERA:
+Jika browser menolak kamera, pesan dibuat lebih jelas:
+Izinkan akses Kamera untuk HappyLaundry, lalu coba lagi.
+
+WAJIB SQL BARU:
+supabase/016_v110_6_qr_center_permission_fix.sql
+
+CARA PASANG:
+1. Supabase -> SQL Editor.
+2. Jalankan:
+   016_v110_6_qr_center_permission_fix.sql
+3. Pastikan Success.
+4. Ekstrak ZIP.
+5. Replace project ke HappyLaundry-V100.
+6. Commit:
+   HappyLaundry V110.6 QR Center Permission Fix
+7. Push origin.
+8. Tunggu Netlify Published.
+9. Ctrl + Shift + R.
+
+UJI OWNER:
+1. Login Owner.
+2. QR Center.
+3. Ketik nomor order yang ada.
+4. Klik Cari Order.
+5. Detail order harus muncul.
+
+UJI KARYAWAN:
+1. Pengaturan -> Karyawan.
+2. Pastikan QR Center dicentang.
+3. Login dengan ID karyawan.
+4. Buka QR Center.
+5. Cari nomor order / scan nota.
+6. Order harus muncul.
+
+JIKA CAMERA IPHONE DITOLAK:
+iPhone Settings -> Safari (atau browser yang dipakai) -> Camera -> Allow,
+atau tekan pengaturan situs di Safari lalu Camera -> Allow.
+
+TIDAK MENGUBAH:
+- QR tracking pelanggan
+- URL /track/...
+- data order
+- data pembayaran
+- sistem login
+- database transaksi

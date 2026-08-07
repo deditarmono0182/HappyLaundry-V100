@@ -69,15 +69,22 @@ export function QRScannerPage(){
     setOrder(null)
     setManual(orderNo)
 
-    const {data,error}=await supabase
-      .from('v100_orders_view')
-      .select('*')
-      .eq('order_no',orderNo)
-      .maybeSingle()
+    const {data,error}=await supabase.rpc('v110_qr_find_order',{
+      p_order_no:orderNo
+    })
 
-    if(error)setMessage(error.message)
-    else if(!data)setMessage(`Order ${orderNo} tidak ditemukan di aplikasi.`)
-    else setOrder(data as OrderRow)
+    if(error){
+      const text=error.message||''
+      if(/permission|not allowed|akses/i.test(text)){
+        setMessage('Akun ini tidak memiliki akses QR Center.')
+      }else{
+        setMessage('Order tidak dapat dibuka. Coba ulangi atau hubungi Owner.')
+      }
+    }else{
+      const row=(Array.isArray(data)?data[0]:data) as OrderRow|undefined|null
+      if(!row)setMessage(`Order ${orderNo} tidak ditemukan di aplikasi.`)
+      else setOrder(row)
+    }
 
     setLoading(false)
   }
@@ -125,7 +132,12 @@ export function QRScannerPage(){
       setScanning(true)
       frameRef.current=requestAnimationFrame(scanFrame)
     }catch(error){
-      setMessage(error instanceof Error?error.message:'Kamera tidak dapat dibuka.')
+      const text=error instanceof Error?error.message:''
+      if(/permission|denied|notallowed/i.test(text)){
+        setMessage('Izin kamera ditolak. Izinkan akses Kamera untuk HappyLaundry, lalu coba Mulai Scan lagi.')
+      }else{
+        setMessage(text||'Kamera tidak dapat dibuka. Gunakan pencarian manual.')
+      }
       setScanning(false)
     }
   }

@@ -1,0 +1,102 @@
+HAPPYLAUNDRY ENTERPRISE V110.7 — BACKUP RESET DATA
+
+FITUR BARU:
+Menu Backup Data sekarang memiliki DANGER ZONE:
+RESET DATA
+
+PILIHAN:
+1. DATA ORDER
+   Menghapus:
+   - semua order
+   - item order
+   - pembayaran
+   - transaksi kas yang terhubung ke order
+
+   Tetap menyimpan:
+   - pelanggan
+   - layanan
+
+2. DATA PELANGGAN
+   Menghapus:
+   - seluruh pelanggan
+   - seluruh order milik pelanggan
+   - item order
+   - pembayaran
+   - kas terkait order
+
+   Kenapa order ikut dihapus?
+   Karena order memiliki relasi wajib ke pelanggan dan tidak boleh menjadi data yatim.
+
+3. DATA LAYANAN
+   Menghapus:
+   - seluruh master layanan
+
+   Order lama tetap ada.
+   Referensi service pada item order dapat menjadi kosong karena FK menggunakan ON DELETE SET NULL.
+
+4. ALL DATA
+   Menghapus data OPERASIONAL:
+   - order
+   - pembayaran
+   - item order
+   - kas terkait order
+   - pelanggan
+   - layanan
+   - pengeluaran
+   - pergerakan stok
+   - stok bahan
+   - supplier
+
+ALL DATA TETAP MENYIMPAN:
+- akun Owner
+- akun Karyawan
+- password / login
+- pengaturan toko
+- kategori pengeluaran
+- konfigurasi persentase bagi hasil
+- riwayat login/audit
+
+Ini disengaja supaya setelah reset Owner tetap dapat login dan tidak kehilangan konfigurasi inti.
+
+KEAMANAN:
+- Hanya OWNER yang dapat melakukan reset.
+- Hak akses Backup pada karyawan TIDAK cukup untuk reset.
+- Harus mengetik kode konfirmasi:
+  RESET ORDER
+  RESET PELANGGAN
+  RESET LAYANAN
+  RESET ALL DATA
+- Setelah itu masih ada konfirmasi kedua.
+- UI mengingatkan Download Backup terlebih dahulu.
+
+WAJIB SQL:
+supabase/017_v110_7_backup_reset_data.sql
+
+CARA PASANG:
+1. Supabase -> SQL Editor.
+2. Jalankan:
+   017_v110_7_backup_reset_data.sql
+3. Pastikan Success.
+4. Ekstrak ZIP.
+5. Replace ke HappyLaundry-V100.
+6. Commit:
+   HappyLaundry V110.7 Backup Reset Data
+7. Push origin.
+8. Tunggu Netlify Published.
+9. Ctrl + Shift + R.
+
+UJI AMAN:
+Sebaiknya Download Backup terlebih dahulu.
+
+Contoh test:
+Backup Data -> Reset Data -> Data Order
+Ketik:
+RESET ORDER
+
+Klik Reset Sekarang.
+Konfirmasi sekali lagi.
+
+Setelah berhasil:
+- Order harus 0
+- Pelanggan tetap ada
+- Layanan tetap ada
