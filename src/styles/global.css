@@ -3818,3 +3818,178 @@ button{
 @media(max-width:500px){
   .employee-permission-grid{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V107.1 — Employee Login Password
+   ========================================================= */
+
+.employee-auth-ready{
+  background:#edf9f3!important;
+  border-color:#bfe2d2!important;
+}
+
+.employee-auth-ready>svg{color:#087654!important}
+.employee-auth-ready b{color:#0d5749!important}
+
+.employee-password-box{
+  display:grid;
+  gap:10px;
+  padding:12px;
+  border:1px solid #c9ded6;
+  border-radius:13px;
+  background:#f8fcfa;
+}
+
+.employee-password-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#174d44;
+}
+
+.employee-password-title>div{
+  display:grid;
+  gap:2px;
+}
+
+.employee-password-title small{
+  color:#5d7a74;
+}
+
+.password-field{
+  position:relative;
+}
+
+.password-field input{
+  width:100%;
+  padding-right:42px!important;
+}
+
+.password-field button{
+  position:absolute;
+  right:4px;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  padding:0!important;
+  border:0;
+  background:transparent;
+  color:#54746d;
+  cursor:pointer;
+}
+
+.employee-generate-password{
+  justify-self:start;
+}
+
+.employee-login-result{
+  display:grid;
+  gap:12px;
+  margin-bottom:12px;
+  border-color:#9dd3bd!important;
+  background:linear-gradient(145deg,#f2fbf7,#fff)!important;
+}
+
+.employee-login-result-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.employee-login-result-head>div:first-child{
+  display:grid;
+  gap:3px;
+}
+
+.employee-login-result-head>div:first-child b{
+  color:#0d5749;
+  font-size:14px;
+}
+
+.employee-login-result-head>div:first-child span{
+  color:#587871;
+  font-size:10px;
+}
+
+.employee-login-result-actions{
+  display:flex;
+  gap:7px;
+}
+
+.employee-login-credentials{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+
+.employee-login-credentials>div{
+  display:grid;
+  gap:3px;
+  padding:10px;
+  border:1px solid #cfe3db;
+  border-radius:11px;
+  background:#fff;
+}
+
+.employee-login-credentials span{
+  color:#5f7b75;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.employee-login-credentials b{
+  color:#123f38;
+  font-size:12px;
+  overflow-wrap:anywhere;
+}
+
+.employee-row-actions{
+  flex-wrap:nowrap!important;
+}
+
+@media(max-width:700px){
+  .employee-login-result-head{display:grid}
+  .employee-login-result-actions{width:100%}
+  .employee-login-result-actions button{flex:1}
+  .employee-login-credentials{grid-template-columns:1fr}
+}
+
+
+/* =========================================================
+   HappyLaundry Enterprise V108.0 — Login ID Akun
+   ========================================================= */
+
+.login-card-v108 p{
+  color:#4f716b!important;
+  font-weight:650!important;
+}
+
+.login-owner-note{
+  display:block;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid #dceae5;
+  color:#627f79!important;
+  font-size:10px!important;
+  font-weight:650!important;
+  text-align:center;
+}
+
+.employee-login-id{
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#e9f7f1;
+  color:#087654!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  letter-spacing:.3px;
+}

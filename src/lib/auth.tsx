@@ -7,7 +7,7 @@ interface C{
   session:Session|null
   profile:UserProfile|null
   loading:boolean
-  signIn:(e:string,p:string)=>Promise<void>
+  signIn:(login:string,p:string)=>Promise<void>
   signOut:()=>Promise<void>
 }
 
@@ -100,10 +100,16 @@ export function AuthProvider({children}:{children:React.ReactNode}){
 
   const value=useMemo<C>(()=>({
     session,profile,loading,
-    signIn:async(email,password)=>{
+    signIn:async(login,password)=>{
       if(!isSupabaseConfigured)throw new Error('Supabase belum dikonfigurasi.')
+      const raw=login.trim()
+      if(!raw)throw new Error('ID Akun wajib diisi.')
+      const normalizedId=raw.toUpperCase().replace(/[^A-Z0-9._-]/g,'')
+      const email=raw.includes('@')
+        ? raw.toLowerCase()
+        : `${normalizedId.toLowerCase()}@employee.happylaundry.local`
       const{error}=await supabase.auth.signInWithPassword({email,password})
-      if(error)throw error
+      if(error)throw new Error('ID Akun atau password salah.')
     },
     signOut:async()=>{await supabase.auth.signOut()}
   }),[session,profile,loading])

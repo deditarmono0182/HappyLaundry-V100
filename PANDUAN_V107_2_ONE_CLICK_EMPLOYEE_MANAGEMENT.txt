@@ -1,0 +1,65 @@
+HAPPYLAUNDRY ENTERPRISE V107.2 — ONE CLICK EMPLOYEE MANAGEMENT
+
+TUJUAN:
+Owner tidak perlu lagi:
+- Supabase CLI
+- Deploy Edge Function
+- Membuka Supabase Authentication untuk setiap karyawan
+
+CARA PAKAI:
+1. Pengaturan -> Karyawan & Hak Akses.
+2. Klik Tambah Karyawan.
+3. Isi Nama, Email, WhatsApp.
+4. Isi Password / Generate Password.
+5. Pilih hak akses:
+   Dashboard
+   Kasir
+   Order
+   QR Center
+   Produksi
+   Pelanggan
+   Layanan
+6. Klik Buat Akun Karyawan.
+
+Aplikasi akan:
+- Membuat akun Supabase Authentication menggunakan client terpisah.
+- Menjaga sesi Owner tetap login.
+- Menyimpan hak akses karyawan.
+- Menampilkan informasi login.
+- Bisa copy login dan kirim ke WhatsApp.
+
+PENTING TENTANG EMAIL CONFIRMATION:
+Jika Supabase -> Authentication -> Providers -> Email mengaktifkan Confirm Email,
+karyawan perlu klik email konfirmasi sebelum login pertama.
+
+Jika Confirm Email dimatikan, akun biasanya bisa login langsung setelah dibuat.
+
+RESET PASSWORD:
+Karena V107.2 tidak memakai Service Role Key / backend admin,
+reset password dilakukan dengan cara aman:
+- Owner klik Reset Password.
+- Aplikasi mengirim link reset ke email karyawan.
+- Karyawan menentukan password baru melalui link tersebut.
+
+KEAMANAN:
+- Service Role Key TIDAK dipakai.
+- Password TIDAK disimpan di tabel HappyLaundry.
+- Password hanya dikirim ke Supabase Auth pada saat pembuatan akun.
+- Sesi Owner tidak diganti karena pembuatan akun memakai Supabase client terpisah.
+
+SQL:
+Tidak ada SQL baru.
+Cukup pastikan SQL berikut pernah dijalankan:
+supabase/009_v107_employee_access_control.sql
+
+CARA DEPLOY:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke HappyLaundry-V100.
+3. Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V107.2 One Click Employee Management
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+9. Uji dengan membuat satu akun karyawan.

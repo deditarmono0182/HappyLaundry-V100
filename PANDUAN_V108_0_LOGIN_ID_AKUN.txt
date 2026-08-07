@@ -1,0 +1,77 @@
+HAPPYLAUNDRY ENTERPRISE V108.0 — LOGIN ID AKUN
+
+SESUAI PERMINTAAN:
+- Tidak ada ID otomatis.
+- Owner menentukan sendiri ID Akun.
+- Tidak ada fitur shift kerja.
+- Karyawan login dengan:
+  ID Akun + Password
+- Email tidak ditampilkan kepada karyawan.
+
+CONTOH:
+Nama      : Budi
+ID Akun   : KASIR1
+Password  : Laundry@123
+
+LOGIN:
+ID Akun   : KASIR1
+Password  : Laundry@123
+
+HAK AKSES:
+Dashboard
+Kasir
+Order
+QR Center
+Produksi
+Pelanggan
+Layanan
+
+CARA TEKNIS:
+Supabase Auth native menggunakan email di belakang layar.
+HappyLaundry otomatis membuat email internal seperti:
+kasir1@employee.happylaundry.local
+
+Karyawan TIDAK perlu mengetahui email internal tersebut.
+Saat login KASIR1, aplikasi otomatis mengubahnya ke email internal.
+
+PENTING — SUPABASE EMAIL CONFIRMATION:
+Karena email internal tidak memiliki inbox, buka:
+Supabase -> Authentication -> Providers -> Email
+
+Pastikan opsi "Confirm email" / email confirmation DIMATIKAN.
+Jika masih aktif, akun ID baru tidak dapat login langsung.
+
+OWNER:
+Login Owner lama tetap aman.
+Owner masih dapat mengetik EMAIL OWNER di kolom ID Akun pada halaman login.
+
+WAJIB SQL BARU:
+supabase/010_v108_login_id_akun.sql
+
+SQL ini:
+- Menambahkan kolom login_id.
+- Memigrasikan data karyawan lama.
+- Membuat login_id unik.
+- Tidak menghapus data karyawan.
+
+CARA PASANG:
+1. Jalankan SQL 010_v108_login_id_akun.sql di Supabase SQL Editor.
+2. Pastikan Email Confirmation Supabase dimatikan.
+3. Copy project ke HappyLaundry-V100.
+4. Replace files.
+5. Commit:
+   HappyLaundry V108.0 Login ID Akun
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+9. Buka Pengaturan -> Karyawan & Hak Akses.
+10. Tambah karyawan dengan ID manual.
+11. Logout Owner.
+12. Uji login memakai ID Akun + Password.
+
+CATATAN:
+- ID Akun minimal 3 karakter.
+- Karakter yang aman: A-Z, 0-9, titik, underscore, dan minus.
+- ID Akun harus unik.
+- Password minimal 8 karakter.
+- Password tidak disimpan di tabel HappyLaundry.

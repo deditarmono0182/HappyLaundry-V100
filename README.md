@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V107.0 Employee Access Control
+# HappyLaundry Enterprise V108.0 Login ID Akun
 
 ## Jalankan
 ```bash
@@ -114,3 +114,15 @@ Kartu Pemasukan, Pengeluaran, dan Piutang pada Keuangan dapat diklik untuk membu
 
 ## V107.0
 Manajemen karyawan dan hak akses individual untuk Dashboard, Kasir, Order, QR Center, Produksi, Pelanggan, dan Layanan.
+
+
+## V107.1
+Pembuatan akun karyawan otomatis via Supabase Edge Function, password login, generate/reset password, dan kirim login WhatsApp.
+
+
+## V107.2
+Tambah karyawan dan akun login langsung dari aplikasi tanpa Edge Function atau Supabase CLI. Reset password via email Supabase.
+
+
+## V108.0
+Login karyawan memakai ID Akun manual + Password. Tanpa ID otomatis dan tanpa shift kerja.
