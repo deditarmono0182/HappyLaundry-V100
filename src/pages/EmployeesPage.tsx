@@ -117,7 +117,7 @@ export function EmployeesPage(){
       const loginId=form.login_id.trim().toUpperCase().replace(/[^A-Z0-9._-]/g,'')
       if(!loginId)throw new Error('ID Akun wajib diisi.')
       if(loginId.length<3)throw new Error('ID Akun minimal 3 karakter.')
-      const internalEmail=`${loginId.toLowerCase()}@employee.happylaundry.local`
+      const internalEmail=`${loginId.toLowerCase()}@employee.happylaundry.app`
 
       const payload={
         full_name:form.full_name.trim(),

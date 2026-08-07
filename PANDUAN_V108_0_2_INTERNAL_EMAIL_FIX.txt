@@ -1,0 +1,41 @@
+HAPPYLAUNDRY ENTERPRISE V108.0.2 — INTERNAL EMAIL FIX
+
+MASALAH YANG DIPERBAIKI:
+Supabase menolak alamat internal:
+cece@employee.happylaundry.local
+
+Pesan:
+Email address "...@employee.happylaundry.local" is invalid
+
+PERBAIKAN:
+Email internal sekarang:
+cece@employee.happylaundry.app
+
+Karyawan tetap TIDAK melihat email internal.
+Karyawan tetap login:
+ID Akun + Password
+
+CONTOH:
+ID Akun : CECE
+Password : ********
+
+Di belakang layar aplikasi memakai:
+cece@employee.happylaundry.app
+
+WAJIB:
+1. SQL 010 V108 harus sudah dijalankan.
+2. Jalankan:
+   supabase/011_v108_0_2_internal_email_fix.sql
+3. Pastikan Supabase Authentication -> Email -> Confirm Email dimatikan.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Jalankan SQL 011.
+3. Copy seluruh project ke HappyLaundry-V100.
+4. Replace files.
+5. Commit:
+   HappyLaundry V108.0.2 Internal Email Fix
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+9. Coba tambah karyawan lagi.

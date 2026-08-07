@@ -107,7 +107,7 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       const normalizedId=raw.toUpperCase().replace(/[^A-Z0-9._-]/g,'')
       const email=raw.includes('@')
         ? raw.toLowerCase()
-        : `${normalizedId.toLowerCase()}@employee.happylaundry.local`
+        : `${normalizedId.toLowerCase()}@employee.happylaundry.app`
       const{error}=await supabase.auth.signInWithPassword({email,password})
       if(error)throw new Error('ID Akun atau password salah.')
     },

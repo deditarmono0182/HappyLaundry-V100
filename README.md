@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V108.0 Login ID Akun
+# HappyLaundry Enterprise V108.0.2 Internal Email Fix
 
 ## Jalankan
 ```bash
@@ -126,3 +126,7 @@ Tambah karyawan dan akun login langsung dari aplikasi tanpa Edge Function atau S
 
 ## V108.0
 Login karyawan memakai ID Akun manual + Password. Tanpa ID otomatis dan tanpa shift kerja.
+
+
+## V108.0.2
+Memperbaiki email internal login ID dari domain .local menjadi domain valid .app agar Supabase Auth menerima pembuatan akun.

@@ -29,7 +29,7 @@ Layanan
 CARA TEKNIS:
 Supabase Auth native menggunakan email di belakang layar.
 HappyLaundry otomatis membuat email internal seperti:
-kasir1@employee.happylaundry.local
+kasir1@employee.happylaundry.app
 
 Karyawan TIDAK perlu mengetahui email internal tersebut.
 Saat login KASIR1, aplikasi otomatis mengubahnya ke email internal.
