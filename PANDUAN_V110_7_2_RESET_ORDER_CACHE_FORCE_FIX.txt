@@ -1,0 +1,49 @@
+HAPPYLAUNDRY ENTERPRISE V110.7.2 — RESET ORDER CACHE FORCE FIX
+
+MASALAH UTAMA DITEMUKAN:
+Service Worker masih memakai cache lama:
+happylaundry-v110-1-2
+
+Karena itu aplikasi/PWA bisa tetap menjalankan JavaScript lama walaupun Netlify sudah deploy versi baru.
+
+PERBAIKAN V110.7.2:
+- Cache baru: happylaundry-v110-7-2
+- Cache lama dihapus otomatis.
+- JS/CSS/navigation memakai network-first.
+- Service worker didaftarkan dengan ?v=110.7.2 dan updateViaCache:'none'.
+- Halaman Backup menampilkan:
+  Versi Reset Aktif: V110.7.2
+
+RESET ORDER:
+- Memakai RPC khusus: v110_reset_orders_force
+- Hapus payments -> order items -> cash terkait -> orders
+- Setelah itu jumlah order dicek ulang.
+- Jika sisa bukan 0, RPC ERROR.
+- Jika berhasil, tampil jumlah order dihapus dan sisa order.
+
+WAJIB SQL:
+supabase/019_v110_7_2_reset_orders_force.sql
+
+LANGKAH:
+1. Jalankan SQL 019 di Supabase dan pastikan Success.
+2. Deploy V110.7.2 ke Netlify.
+3. Buka website biasa dahulu.
+4. Ctrl + Shift + R.
+5. Buka Backup Data.
+6. Pastikan terlihat tulisan:
+   Versi Reset Aktif: V110.7.2
+
+JIKA TULISAN V110.7.2 TIDAK ADA:
+Perangkat masih memakai build/cache lama.
+Uninstall PWA HappyLaundry lalu buka website dan install ulang.
+
+TEST:
+Reset Data -> Data Order
+Ketik RESET ORDER
+Klik Reset Sekarang
+
+Saat berjalan akan terlihat:
+Menjalankan Reset Data Order...
+
+Jika sukses:
+Reset Data Order berhasil. Order dihapus: X. Sisa order: 0.

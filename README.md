@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.7.1 Reset Order Fix
+# HappyLaundry Enterprise V110.7.2 Reset Order Cache Force Fix
 
 ## Jalankan
 ```bash
@@ -174,3 +174,7 @@ Backup Data kini memiliki Owner-only Reset Data untuk Order, Pelanggan, Layanan,
 
 ## V110.7.1
 Reset Order fix: direct RPC after typed confirmation, explicit child deletes, remaining-order verification, success count, auto refresh.
+
+
+## V110.7.2
+Force refresh PWA cache, visible reset version, and dedicated reset-order RPC.

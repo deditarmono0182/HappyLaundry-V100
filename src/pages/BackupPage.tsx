@@ -63,6 +63,7 @@ export function BackupPage(){
   const [resetType,setResetType]=useState<ResetType|null>(null)
   const [confirmation,setConfirmation]=useState('')
   const [resetBusy,setResetBusy]=useState(false)
+  const [resetStatus,setResetStatus]=useState('')
 
   const exportBackup=async()=>{
     setBusy(true);setMessage('');setSuccess('')
@@ -143,12 +144,19 @@ export function BackupPage(){
     }
 
     setResetBusy(true);setMessage('');setSuccess('')
-    const{data,error}=await supabase.rpc('v110_reset_data',{
-      p_reset_type:resetType,
-      p_confirmation:info.confirm
-    })
+    setResetStatus(`Menjalankan ${info.title}...`)
+
+    const request=resetType==='orders'
+      ? supabase.rpc('v110_reset_orders_force',{p_confirmation:info.confirm})
+      : supabase.rpc('v110_reset_data',{
+          p_reset_type:resetType,
+          p_confirmation:info.confirm
+        })
+
+    const{data,error}=await request
 
     if(error){
+      setResetStatus('')
       setMessage(`Reset gagal: ${error.message}`)
       setResetBusy(false)
       return
@@ -168,13 +176,14 @@ export function BackupPage(){
     setResetType(null)
     setConfirmation('')
     setResetBusy(false)
+    setResetStatus('')
     setSuccess(
       result?.message
         ? `${result.message} Order dihapus: ${deleted}. Sisa order: ${remaining}.`
         : `${info.title} berhasil.`
     )
 
-    window.setTimeout(()=>window.location.reload(),1200)
+    window.setTimeout(()=>window.location.reload(),3000)
   }
 
   return <>
@@ -183,6 +192,8 @@ export function BackupPage(){
       title="Backup & Pemulihan"
       description="Unduh salinan data, pulihkan master data, dan kelola reset data dengan aman."
     />
+
+    <div className="backup-version-badge">Versi Reset Aktif: <b>V110.7.2</b></div>
 
     <section className="backup-grid">
       <article className="panel backup-card">
@@ -282,6 +293,8 @@ export function BackupPage(){
             disabled={resetBusy}
           />
         </label>
+
+        {resetStatus&&<div className="reset-running-status">{resetStatus}</div>}
 
         <div className="form-actions">
           <button type="button" className="secondary-button" onClick={()=>setResetType(null)} disabled={resetBusy}>Batal</button>
