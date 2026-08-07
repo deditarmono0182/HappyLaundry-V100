@@ -142,10 +142,13 @@ export function EmployeesPage(){
 
         // Buat akun memakai client Auth terpisah agar sesi Owner tidak berubah.
         const{data:signUpData,error:signUpError}=await employeeAuthClient.auth.signUp({
-          login_id:payload.login_id,
+          email:payload.email,
           password:form.password,
           options:{
-            data:{full_name:payload.full_name,login_id:payload.login_id}
+            data:{
+              full_name:payload.full_name,
+              login_id:payload.login_id
+            }
           }
         })
         if(signUpError)throw signUpError

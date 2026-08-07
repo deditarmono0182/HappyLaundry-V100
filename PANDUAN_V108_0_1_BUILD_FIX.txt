@@ -1,0 +1,26 @@
+HAPPYLAUNDRY ENTERPRISE V108.0.1 — BUILD FIX
+
+PERBAIKAN:
+- Memperbaiki TypeScript TS2353 pada EmployeesPage.tsx.
+- login_id tidak lagi diletakkan sebagai properti langsung SignUpWithPasswordCredentials.
+- login_id sekarang hanya disimpan di options.data (user metadata), sesuai API Supabase Auth.
+- Fitur Login ID Akun tetap sama.
+
+ERROR YANG DIPERBAIKI:
+Object literal may only specify known properties,
+'login_id' does not exist in type 'SignUpWithPasswordCredentials'.
+
+TIDAK ADA SQL BARU.
+Tetap gunakan:
+supabase/010_v108_login_id_akun.sql
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke HappyLaundry-V100.
+3. Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V108.0.1 Build Fix
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
