@@ -6,7 +6,8 @@ import {
 import { useParams } from 'react-router-dom'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
-import type { OrderStatus } from '../types/order'
+import { useAuth } from '../lib/auth'
+import type { OrderStatus, PaymentStatus } from '../types/order'
 
 interface TrackingItem {
   service_name: string
@@ -31,6 +32,18 @@ interface TrackingData {
   operational_hours: string
 }
 
+interface SearchOrder {
+  id:string
+  order_no:string
+  customer_name:string
+  customer_phone:string
+  status:OrderStatus
+  payment_status:PaymentStatus
+  total:number
+  paid_amount:number
+  created_at:string
+}
+
 const stages:Array<{key:OrderStatus;label:string}>=[
   {key:'received',label:'Diterima'},
   {key:'washing',label:'Dicuci'},
@@ -51,22 +64,79 @@ const statusLabel:Record<string,string>={
   cancelled:'Dibatalkan'
 }
 
+const paymentLabel:Record<string,string>={
+  unpaid:'Belum Bayar',
+  partial:'Sebagian',
+  paid:'Lunas'
+}
+
+function normalizeSearch(value:string){
+  return value.trim().toLowerCase()
+}
+
 export function PublicTrackingPage(){
   const {orderNo=''}=useParams()
+  const {profile}=useAuth()
   const [input,setInput]=useState(orderNo)
   const [data,setData]=useState<TrackingData|null>(null)
+  const [searchRows,setSearchRows]=useState<SearchOrder[]>([])
   const [loading,setLoading]=useState(false)
   const [message,setMessage]=useState('')
   const [now,setNow]=useState(Date.now())
 
+  const isInternal=Boolean(profile)
+
   const load=async(value:string)=>{
     const normalized=value.trim().toUpperCase()
     if(!normalized)return
-    setLoading(true);setMessage('');setData(null)
+    setLoading(true);setMessage('');setData(null);setSearchRows([])
     const {data:result,error}=await supabase.rpc('v103_public_order_tracking',{p_order_no:normalized})
-    if(error)setMessage('Status order belum tersedia. Pastikan SQL V103 sudah dijalankan.')
+    if(error)setMessage('Status order belum tersedia. Pastikan SQL tracking sudah dijalankan.')
     else if(!result)setMessage('Nomor order tidak ditemukan.')
     else setData(result as TrackingData)
+    setLoading(false)
+  }
+
+  const internalSearch=async(value:string)=>{
+    const key=normalizeSearch(value)
+    if(!key)return
+    setLoading(true);setMessage('');setData(null);setSearchRows([])
+
+    const{data:orders,error}=await supabase
+      .from('v100_orders_view')
+      .select('id,order_no,customer_name,customer_phone,status,payment_status,total,paid_amount,created_at')
+      .order('created_at',{ascending:false})
+      .limit(500)
+
+    if(error){
+      setMessage(error.message)
+      setLoading(false)
+      return
+    }
+
+    const filtered=((orders as SearchOrder[])||[]).filter(row=>{
+      const values=[
+        row.order_no,
+        row.customer_name,
+        row.customer_phone,
+        statusLabel[row.status]||row.status,
+        row.status,
+        paymentLabel[row.payment_status]||row.payment_status,
+        row.payment_status
+      ].map(v=>String(v||'').toLowerCase())
+
+      return values.some(v=>v.includes(key))
+    }).slice(0,50)
+
+    if(filtered.length===0){
+      setMessage('Data tidak ditemukan.')
+    }else if(filtered.length===1){
+      await load(filtered[0].order_no)
+      setLoading(false)
+      return
+    }else{
+      setSearchRows(filtered)
+    }
     setLoading(false)
   }
 
@@ -115,8 +185,21 @@ export function PublicTrackingPage(){
     event.preventDefault()
     const value=input.trim()
     if(!value)return
+
+    if(isInternal){
+      void internalSearch(value)
+      return
+    }
+
     window.history.replaceState(null,'',`/track/${encodeURIComponent(value)}`)
     void load(value)
+  }
+
+  const chooseResult=(row:SearchOrder)=>{
+    setInput(row.order_no)
+    setSearchRows([])
+    window.history.replaceState(null,'',`/track/${encodeURIComponent(row.order_no)}`)
+    void load(row.order_no)
   }
 
   const wa=()=>{
@@ -130,26 +213,64 @@ export function PublicTrackingPage(){
 
   const isReady=data?.status==='ready'||data?.status==='completed'
 
-  return <main className="tracking-page tracking-premium">
+  return <main className="tracking-page tracking-premium tracking-v2">
     <header className="tracking-brand tracking-brand-premium">
       <img src="/logo-happylaundry.jpg" alt="HappyLaundry"/>
       <div><b>{data?.business_name||'HappyLaundry Babakan'}</b><span>Status Laundry Online</span></div>
     </header>
 
     <section className="tracking-card tracking-search-card">
-      <h1>Lacak Status Cucian</h1>
-      <p>Masukkan nomor order yang tertera pada nota.</p>
+      <h1>{isInternal?'Cari & Tracking Order':'Lacak Status Cucian'}</h1>
+      <p>{isInternal
+        ? 'Cari nomor order, pelanggan, telepon, status cucian, atau status pembayaran.'
+        : 'Masukkan nomor order yang tertera pada nota.'}</p>
+
       <form onSubmit={search}>
-        <Search size={19}/>
-        <input value={input} onChange={e=>setInput(e.target.value)} placeholder="Contoh: HL-260807-00001"/>
-        <button disabled={loading}>{loading?'Memeriksa...':'Lacak'}</button>
+        <Search size={20}/>
+        <input
+          value={input}
+          onChange={e=>setInput(e.target.value)}
+          placeholder={isInternal?'Order / pelanggan / telepon / status / pembayaran':'Contoh: HL-260807-00001'}
+        />
+        <button disabled={loading}>{loading?'Mencari...':'Cari'}</button>
       </form>
+
+      {isInternal&&<div className="tracking-search-hints">
+        <span>Contoh:</span>
+        <button type="button" onClick={()=>setInput('Dicuci')}>Dicuci</button>
+        <button type="button" onClick={()=>setInput('Lunas')}>Lunas</button>
+        <button type="button" onClick={()=>setInput('Belum Bayar')}>Belum Bayar</button>
+      </div>}
+
       {message&&<div className="tracking-error">{message}</div>}
     </section>
 
+    {searchRows.length>0&&<section className="tracking-card tracking-search-results">
+      <div className="tracking-results-head">
+        <div><b>Hasil Pencarian</b><span>{searchRows.length} data ditemukan</span></div>
+      </div>
+      <div className="tracking-results-list">
+        {searchRows.map(row=><button type="button" key={row.id} onClick={()=>chooseResult(row)}>
+          <div className="tracking-result-main">
+            <b>{row.order_no}</b>
+            <span>{row.customer_name}</span>
+            <small>{row.customer_phone||'-'}</small>
+          </div>
+          <div className="tracking-result-status">
+            <span className={`tracking-mini-status tracking-${row.status}`}>{statusLabel[row.status]||row.status}</span>
+            <span className={`tracking-mini-payment payment-${row.payment_status}`}>{paymentLabel[row.payment_status]||row.payment_status}</span>
+          </div>
+          <div className="tracking-result-money">
+            <b>{formatIDR(Number(row.total))}</b>
+            <small>{new Date(row.created_at).toLocaleDateString('id-ID')}</small>
+          </div>
+        </button>)}
+      </div>
+    </section>}
+
     {data&&<section className="tracking-card tracking-result">
       {isReady&&<div className="tracking-ready-banner">
-        <Sparkles size={26}/>
+        <Sparkles size={27}/>
         <div>
           <b>{data.status==='completed'?'Laundry Anda sudah selesai':'Laundry Anda siap diambil!'}</b>
           <span>{data.status==='completed'?'Terima kasih telah menggunakan HappyLaundry.':'Silakan datang ke outlet untuk mengambil cucian Anda.'}</span>
@@ -165,7 +286,7 @@ export function PublicTrackingPage(){
         <span className={`tracking-status tracking-${data.status}`}>{statusLabel[data.status]||data.status}</span>
       </div>
 
-      <div className="tracking-progress-meter">
+      <div className="tracking-progress-meter tracking-progress-meter-clean">
         <div className="tracking-progress-top">
           <span>Progress Cucian</span>
           <b>{progress}%</b>
@@ -173,12 +294,12 @@ export function PublicTrackingPage(){
         <div className="tracking-progress-bar"><i style={{width:`${progress}%`}}/></div>
       </div>
 
-      <div className="tracking-progress">
+      <div className="tracking-progress tracking-progress-clean">
         {stages.map((stage,index)=>{
           const done=index<currentIndex||data.status==='completed'
           const active=index===currentIndex&&data.status!=='completed'
           return <div className={`tracking-step ${done?'done':''} ${active?'active':''}`} key={stage.key}>
-            <span>{done?<Check size={17}/>:active?<WashingMachine size={17}/>:index+1}</span>
+            <span>{done?<Check size={18}/>:active?<WashingMachine size={18}/>:index+1}</span>
             <b>{stage.label}</b>
           </div>
         })}
@@ -186,18 +307,18 @@ export function PublicTrackingPage(){
 
       <div className="tracking-summary tracking-summary-premium">
         <div>
-          <Clock3 size={20}/>
+          <Clock3 size={22}/>
           <span>Estimasi selesai
             <b>{countdown}</b>
             {dueLabel&&<small>{dueLabel}</small>}
           </span>
         </div>
         <div>
-          <PackageCheck size={20}/>
+          <PackageCheck size={22}/>
           <span>Total<b>{formatIDR(Number(data.total))}</b></span>
         </div>
         <div>
-          <MessageCircle size={20}/>
+          <MessageCircle size={22}/>
           <span>Pembayaran
             <b>{Number(data.paid_amount)>=Number(data.total)?'Lunas':`Sisa ${formatIDR(Number(data.total)-Number(data.paid_amount))}`}</b>
           </span>
@@ -213,7 +334,7 @@ export function PublicTrackingPage(){
       </div>
 
       <div className="tracking-business">
-        <MapPin size={18}/>
+        <MapPin size={20}/>
         <div>
           <b>{data.business_name}</b>
           <span>{data.address}</span>
@@ -222,8 +343,8 @@ export function PublicTrackingPage(){
       </div>
 
       <div className="tracking-actions">
-        {data.maps_url&&<a href={data.maps_url} target="_blank" rel="noreferrer"><MapPin size={16}/>Buka Maps</a>}
-        <button onClick={wa}><MessageCircle size={16}/>Hubungi WhatsApp</button>
+        {data.maps_url&&<a href={data.maps_url} target="_blank" rel="noreferrer"><MapPin size={17}/>Buka Maps</a>}
+        <button onClick={wa}><MessageCircle size={17}/>Hubungi WhatsApp</button>
       </div>
     </section>}
 

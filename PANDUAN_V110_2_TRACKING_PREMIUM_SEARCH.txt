@@ -1,0 +1,66 @@
+HAPPYLAUNDRY ENTERPRISE V110.2 — TRACKING PREMIUM SEARCH
+
+PERUBAHAN TRACKING:
+- Background biru besar pada area progress DIHILANGKAN.
+- Area progress sekarang putih dan bersih.
+- Progress bar kecil/rounded tetap biru.
+- Tahap selesai = hijau.
+- Tahap aktif = biru + pulse halus.
+- Tahap berikutnya = abu-abu.
+- Card informasi lebih premium.
+- WhatsApp pada tracking dibuat biru agar konsisten dengan Blue Edition.
+- Huruf tracking diperbesar sedikit agar lebih mudah dibaca di HP/tablet.
+
+PENCARIAN:
+Jika halaman dibuka pelanggan umum:
+- Tetap hanya pencarian NOMOR ORDER.
+
+Jika Owner/Karyawan sedang login:
+- Bisa mencari:
+  Nomor Order
+  Nama Pelanggan
+  Nomor Telepon
+  Status Cucian
+  Status Pembayaran
+
+Contoh pencarian:
+HL-260807-00001
+Budi
+0812
+Dicuci
+Packing
+Lunas
+Belum Bayar
+Sebagian
+
+Jika hasil lebih dari satu:
+- Aplikasi menampilkan daftar hasil.
+- Klik salah satu order untuk membuka tracking detail.
+
+PRIVASI:
+Pencarian nama/telepon/status/pembayaran tidak dibuka untuk publik.
+Fitur lengkap hanya tersedia bagi akun Owner/Karyawan yang sedang login.
+
+TIDAK ADA SQL BARU.
+Menggunakan v100_orders_view dan RPC tracking yang sudah ada.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Replace seluruh project ke HappyLaundry-V100.
+3. Commit:
+   HappyLaundry V110.2 Tracking Premium Search
+4. Push origin.
+5. Tunggu Netlify Published.
+6. Ctrl + Shift + R.
+
+UJI:
+1. Login Owner.
+2. Buka tracking.
+3. Cari nama pelanggan.
+4. Cari nomor telepon.
+5. Cari "Dicuci".
+6. Cari "Lunas".
+7. Klik hasil order.
+8. Pastikan progress tampil putih, tanpa blok biru besar.
+9. Uji tracking dari QR pelanggan tanpa login:
+   pencarian harus tetap nomor order.

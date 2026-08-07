@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.2 Tracking Premium
+# HappyLaundry Enterprise V110.2 Tracking Premium Search
 
 ## Jalankan
 ```bash
@@ -153,4 +153,4 @@ Memperbaiki PWA/Windows title bar hijau dengan theme_color biru pada index.html 
 
 
 ## V110.2
-Tracking customer premium tanpa blok biru pada timeline; selesai hijau, aktif biru, pending abu-abu.
+Tracking premium putih/bersih, font lebih besar, dan pencarian internal berdasarkan order, pelanggan, telepon, status, atau pembayaran.
