@@ -235,7 +235,7 @@ export function FinancePage(){
       const raw=Number(shareDraft[row.category]??row.sharePercent)
       const percent=Math.max(0,Math.min(100,Number.isFinite(raw)?raw:0))
       return{
-        category:row.category,
+        category:row.category.trim(),
         share_percent:percent,
         updated_at:new Date().toISOString()
       }
@@ -246,8 +246,9 @@ export function FinancePage(){
       .from('v110_revenue_share_settings')
       .upsert(payload,{onConflict:'category'})
 
-    if(error)setShareMessage(error.message)
-    else{
+    if(error){
+      setShareMessage(error.message)
+    }else{
       setShareOpen(false)
       await load()
     }

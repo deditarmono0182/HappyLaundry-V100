@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.4 Finance Revenue Sharing
+# HappyLaundry Enterprise V110.5 Revenue Sharing Save Fix
 
 ## Jalankan
 ```bash
@@ -158,3 +158,7 @@ Halaman Order: kartu Terlambat, kolom Estimasi Selesai, pencarian order/pelangga
 
 ## V110.4
 Bagi hasil per kategori layanan di Dashboard Keuangan dengan persentase editable Owner dan penyimpanan Supabase.
+
+
+## V110.5
+Memperbaiki ON CONFLICT pada penyimpanan persentase bagi hasil dengan UNIQUE(category) yang kompatibel dengan Supabase upsert.

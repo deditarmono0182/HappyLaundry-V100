@@ -1,0 +1,48 @@
+HAPPYLAUNDRY ENTERPRISE V110.5 — REVENUE SHARING SAVE FIX
+
+ERROR YANG DIPERBAIKI:
+there is no unique or exclusion constraint matching the ON CONFLICT specification
+
+PENYEBAB:
+V110.4 membuat unique index pada lower(category).
+Sedangkan frontend menggunakan:
+upsert(...,{onConflict:'category'})
+
+Supabase membutuhkan UNIQUE CONSTRAINT / UNIQUE INDEX yang cocok langsung
+dengan kolom category untuk ON CONFLICT(category).
+
+PERBAIKAN V110.5:
+1. Membersihkan kategori duplikat.
+2. Menormalisasi spasi kategori.
+3. Menghapus expression index lama.
+4. Membuat UNIQUE CONSTRAINT:
+   UNIQUE(category)
+5. Menjaga seed kategori tetap aman dengan ON CONFLICT(category).
+6. Frontend tetap menggunakan upsert category yang sekarang cocok dengan constraint.
+
+WAJIB JALANKAN SQL:
+supabase/015_v110_5_revenue_sharing_save_fix.sql
+
+URUTAN:
+1. SQL 014 V110.4 harus sudah pernah dijalankan.
+2. Jalankan SQL 015 V110.5.
+3. Pastikan hasil SQL Success.
+4. Deploy project V110.5.
+5. Ctrl + Shift + R.
+6. Buka Keuangan.
+7. Klik Atur Persentase.
+8. Ubah persentase.
+9. Klik Simpan Persentase.
+
+HASIL YANG DIHARAPKAN:
+- Tidak ada lagi error ON CONFLICT.
+- Persentase tersimpan.
+- Saat halaman direfresh, persentase tetap sama.
+- Data tetap tersimpan di Supabase sehingga aman saat ganti laptop/tablet/iPhone.
+
+TIDAK MENGUBAH:
+- Perhitungan omzet kategori
+- Formula bagi hasil
+- Data order
+- Data pembayaran
+- Data pengeluaran
