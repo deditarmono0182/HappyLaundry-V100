@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.1.2 PWA Titlebar Blue Fix
+# HappyLaundry Enterprise V110.2 Tracking Premium
 
 ## Jalankan
 ```bash
@@ -150,3 +150,7 @@ Memperbaiki struktur JSX Dashboard dan mengganti grafik bar dengan line/area tan
 
 ## V110.1.2
 Memperbaiki PWA/Windows title bar hijau dengan theme_color biru pada index.html dan manifest.webmanifest.
+
+
+## V110.2
+Tracking customer premium tanpa blok biru pada timeline; selesai hijau, aktif biru, pending abu-abu.

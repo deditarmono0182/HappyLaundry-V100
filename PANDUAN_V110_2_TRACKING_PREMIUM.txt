@@ -1,0 +1,28 @@
+HAPPYLAUNDRY ENTERPRISE V110.2 — TRACKING CUSTOMER PREMIUM
+
+PERUBAHAN:
+- Background biru besar pada tahapan progress dihilangkan.
+- Area timeline putih/transparent.
+- Tahap selesai hijau.
+- Tahap aktif biru.
+- Tahap berikutnya abu-abu.
+- Progress bar tipis biru.
+- Card Estimasi / Total / Pembayaran lebih premium.
+- Card alamat/outlet dibuat biru muda.
+- Tombol Maps outline biru.
+- Tombol WhatsApp menjadi gradient biru sesuai desain acuan.
+- Responsive untuk HP, tablet, dan desktop.
+- Footer tracking diperbarui ke V110.2.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke HappyLaundry-V100.
+3. Replace files.
+4. Commit:
+   HappyLaundry V110.2 Tracking Premium
+5. Push origin.
+6. Tunggu Netlify Published.
+7. Ctrl + Shift + R.
+8. Buka link tracking pelanggan.
