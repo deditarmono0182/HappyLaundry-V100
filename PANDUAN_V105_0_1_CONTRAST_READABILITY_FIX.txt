@@ -1,0 +1,23 @@
+HAPPYLAUNDRY ENTERPRISE V105.0.1 — CONTRAST & READABILITY FIX
+
+PERUBAHAN:
+- Tulisan Dashboard seperti "Omzet Hari Ini" dibuat lebih gelap dan tebal.
+- Caption kartu statistik dibuat lebih jelas.
+- Teks kecil tabel tidak lagi terlihat transparan.
+- Label form pelanggan, layanan, kasir, pembayaran, inventory, dan pengaturan dibuat lebih jelas.
+- Placeholder input dibuat lebih gelap.
+- Teks sidebar, header, laporan, produksi, QR Center, dan tracking diperkuat.
+- Compact dan Ultra Compact tetap ringkas tetapi lebih mudah dibaca.
+- Tidak ada SQL baru.
+- Tidak mengubah database atau data transaksi.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Pilih Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V105.0.1 Contrast Readability Fix
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Tekan Ctrl + Shift + R.

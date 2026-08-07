@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V105.0 Professional Compact UI
+# HappyLaundry Enterprise V105.0.1 Contrast & Readability Fix
 
 ## Jalankan
 ```bash
@@ -94,3 +94,7 @@ QR pelanggan & kasir, link tracking di nota, WhatsApp tracking otomatis, dan upd
 
 ## V105.0
 Professional Compact UI dengan pilihan Comfort, Compact, dan Ultra Compact untuk seluruh aplikasi.
+
+
+## V105.0.1
+Peningkatan kontras dan ketebalan teks di seluruh aplikasi agar tidak terlihat transparan.

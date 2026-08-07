@@ -3097,3 +3097,270 @@ html[data-density="ultra"] .settings-template-grid textarea{min-height:95px!impo
   .stat-card{min-height:82px!important}
   .bar-chart{height:170px!important}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V105.0.1 — Contrast & Readability Fix
+   ========================================================= */
+
+:root{
+  --hl-text-strong:#123f39;
+  --hl-text-normal:#2f5751;
+  --hl-text-muted:#4f716b;
+  --hl-text-soft:#607f79;
+}
+
+/* General text contrast */
+body{
+  color:var(--hl-text-strong)!important;
+}
+
+p,
+small,
+span,
+label,
+td,
+th{
+  opacity:1!important;
+}
+
+/* Dashboard stat cards */
+.stat-card > div > span,
+.stat-card .stat-label,
+.stat-card span:first-of-type{
+  color:#315d56!important;
+  font-weight:800!important;
+  font-size:11px!important;
+  letter-spacing:.1px;
+}
+
+.stat-card strong{
+  color:#073f37!important;
+  font-weight:900!important;
+}
+
+.stat-card small,
+.stat-card .caption,
+.stat-card .stat-caption{
+  color:#52746e!important;
+  font-weight:700!important;
+  font-size:10px!important;
+}
+
+/* Page headings / descriptions */
+.page-header .eyebrow{
+  color:#087654!important;
+  font-weight:900!important;
+}
+
+.page-header p,
+.page-heading p{
+  color:#4f716b!important;
+  font-weight:650!important;
+}
+
+/* Panel descriptions */
+.panel-heading p,
+.panel p,
+.data-panel p{
+  color:#56766f!important;
+}
+
+/* Table readability */
+table th{
+  color:#385f58!important;
+  font-weight:900!important;
+}
+
+table td{
+  color:#234a44!important;
+  font-weight:550!important;
+}
+
+table td b,
+table td strong{
+  color:#0d3f38!important;
+  font-weight:850!important;
+}
+
+table td small,
+.table-sub{
+  color:#5c7a74!important;
+  font-weight:650!important;
+}
+
+/* Form labels and help text */
+label{
+  color:#244e48!important;
+  font-weight:800!important;
+}
+
+label small,
+.form-help,
+.form-hint{
+  color:#587a73!important;
+  font-weight:650!important;
+}
+
+input::placeholder,
+textarea::placeholder{
+  color:#78908b!important;
+  opacity:1!important;
+  font-weight:550!important;
+}
+
+/* Sidebar */
+.sidebar nav a{
+  font-weight:800!important;
+}
+
+.sidebar nav a:not(.active){
+  color:rgba(255,255,255,.96)!important;
+}
+
+.brand span,
+.account span{
+  color:rgba(255,255,255,.88)!important;
+  font-weight:700!important;
+}
+
+/* Topbar */
+.topbar .eyebrow{
+  color:#56766f!important;
+  font-weight:850!important;
+}
+
+/* Dashboard chart */
+.bar-column > span{
+  color:#355f58!important;
+  font-weight:800!important;
+}
+
+.bar-column > b{
+  color:#264f49!important;
+  font-weight:850!important;
+}
+
+.status-summary span{
+  color:#355e57!important;
+  font-weight:750!important;
+}
+
+.status-summary b{
+  color:#0c3f38!important;
+  font-weight:900!important;
+}
+
+/* Cashier */
+.cashier-section-title small,
+.cashier-pro-features p,
+.cashier-today p{
+  color:#55766f!important;
+  font-weight:650!important;
+}
+
+.cashier-total-card > span{
+  color:rgba(255,255,255,.96)!important;
+  font-weight:800!important;
+}
+
+.cashier-total-card > div span{
+  color:rgba(255,255,255,.92)!important;
+  font-weight:700!important;
+}
+
+/* Production */
+.production-card small{
+  color:#4d716a!important;
+  font-weight:650!important;
+}
+
+.production-column>header{
+  color:#244d47!important;
+  font-weight:900!important;
+}
+
+/* Reports */
+.report-bar-row>span,
+.ranking-list small{
+  color:#4c7069!important;
+  font-weight:700!important;
+}
+
+.report-bar-row b,
+.ranking-list strong{
+  color:#123f38!important;
+  font-weight:850!important;
+}
+
+/* Inventory */
+.record-count{
+  color:#365f58!important;
+  font-weight:850!important;
+}
+
+.inventory-history-row small{
+  color:#54766f!important;
+  font-weight:650!important;
+}
+
+/* Settings */
+.settings-card header small,
+.density-options button span{
+  color:#56766f!important;
+  font-weight:650!important;
+}
+
+.settings-card header b{
+  color:#123f38!important;
+  font-weight:900!important;
+}
+
+/* QR Center / Tracking */
+.qr-camera-head p,
+.qr-manual-card p,
+.qr-help small,
+.tracking-brand span,
+.tracking-order-head span,
+.tracking-business span,
+.tracking-business small{
+  color:#55766f!important;
+  font-weight:650!important;
+}
+
+.tracking-order-head small{
+  color:#345e57!important;
+  font-weight:750!important;
+}
+
+/* Compact mode still readable */
+html[data-density="compact"] .stat-card > div > span,
+html[data-density="ultra"] .stat-card > div > span{
+  font-size:10px!important;
+  font-weight:850!important;
+}
+
+html[data-density="compact"] table td,
+html[data-density="ultra"] table td{
+  font-weight:600!important;
+}
+
+html[data-density="ultra"] small,
+html[data-density="ultra"] .table-sub{
+  font-weight:700!important;
+}
+
+/* Buttons */
+button{
+  font-weight:800!important;
+}
+
+/* Prevent accidental faded text from inherited opacity */
+.muted,
+.text-muted,
+.subtle,
+.caption,
+.description{
+  opacity:1!important;
+  color:#5b7a74!important;
+}
