@@ -1,0 +1,60 @@
+HAPPYLAUNDRY ENTERPRISE V110 — BLUE EDITION
+
+PERUBAHAN TEMA:
+- Seluruh tema utama berubah dari hijau menjadi biru premium.
+- Sidebar memakai gradient biru.
+- Tombol utama biru.
+- Dashboard icon dan chart biru.
+- Input focus biru.
+- QR Center biru.
+- Tracking pelanggan biru.
+- Login biru.
+- Laporan dan kartu statistik disesuaikan.
+- Keuangan tetap memakai warna semantik:
+  Pemasukan hijau
+  Pengeluaran merah/oranye
+  Piutang oranye
+  Laba bersih hijau
+- WhatsApp tetap hijau agar mudah dikenali.
+- Produksi memakai warna tahap:
+  Diterima biru
+  Dicuci biru muda
+  Dikeringkan kuning
+  Disetrika ungu
+  Packing oranye
+  Siap Diambil hijau
+
+TEMA WARNA:
+Primary    #1E88E5
+Secondary  #42A5F5
+Hover      #1976D2
+Background #F5FAFF
+Border     #D6EAF8
+
+TIDAK ADA SQL BARU.
+Tidak mengubah database.
+Tidak mengubah login, transaksi, laporan, atau hak akses.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy seluruh isi ke HappyLaundry-V100.
+3. Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V110 Blue Edition
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+
+UJI:
+- Login
+- Dashboard
+- Kasir
+- Order
+- QR Center
+- Produksi
+- Keuangan
+- Laporan
+- Pengaturan
+- Tracking Customer
+- Tampilan iPhone / tablet / desktop

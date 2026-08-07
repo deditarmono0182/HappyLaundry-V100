@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V109 Final Stable
+# HappyLaundry Enterprise V110 Blue Edition
 
 ## Jalankan
 ```bash
@@ -138,3 +138,7 @@ Sistem karyawan internal ID Akun + password hash tanpa email. Supabase Anonymous
 
 ## V109 Final Stable
 Internal employee ID login stored in Supabase, extended permissions, login history, device tracking, and audit framework.
+
+
+## V110 Blue Edition
+Tema biru premium di seluruh aplikasi: sidebar, tombol, dashboard, kasir, QR, tracking, login, laporan, dan pengaturan.

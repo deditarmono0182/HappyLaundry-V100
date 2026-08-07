@@ -4083,3 +4083,503 @@ button{
 @media(max-width:520px){
   .employee-permission-grid-final{grid-template-columns:1fr!important}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V110 — Blue Edition
+   ========================================================= */
+
+:root{
+  --blue-950:#0a2f57;
+  --blue-900:#0f4778;
+  --blue-800:#125f9e;
+  --blue-700:#1976d2;
+  --blue-600:#1e88e5;
+  --blue-500:#42a5f5;
+  --blue-400:#64b5f6;
+  --blue-300:#90caf9;
+  --blue-200:#bbdefb;
+  --blue-100:#e3f2fd;
+  --blue-050:#f5faff;
+  --blue-border:#d6eaf8;
+  --blue-shadow:rgba(30,136,229,.16);
+
+  --hl-text-strong:#123a5a;
+  --hl-text-normal:#2f5877;
+  --hl-text-muted:#54738d;
+  --hl-text-soft:#6f8799;
+}
+
+/* Main app background */
+body,
+.app-shell,
+.main-content{
+  background:#f5faff!important;
+}
+
+/* Sidebar */
+.sidebar{
+  background:linear-gradient(180deg,#1e88e5 0%,#1565c0 58%,#0f4c9a 100%)!important;
+  box-shadow:8px 0 28px rgba(19,86,155,.16)!important;
+}
+
+.brand{
+  border-bottom-color:rgba(255,255,255,.16)!important;
+}
+
+.brand strong,
+.sidebar nav a,
+.account b{
+  color:#fff!important;
+}
+
+.brand span,
+.account span{
+  color:rgba(255,255,255,.86)!important;
+}
+
+.sidebar nav a{
+  border:1px solid transparent!important;
+}
+
+.sidebar nav a:hover{
+  background:rgba(255,255,255,.12)!important;
+  border-color:rgba(255,255,255,.12)!important;
+}
+
+.sidebar nav a.active{
+  background:#fff!important;
+  color:#1565c0!important;
+  box-shadow:0 8px 18px rgba(7,54,106,.18)!important;
+}
+
+.sidebar nav a.active svg{
+  color:#1e88e5!important;
+}
+
+.signout-button{
+  background:rgba(255,255,255,.10)!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.18)!important;
+}
+
+.signout-button:hover{
+  background:rgba(255,255,255,.18)!important;
+}
+
+/* Topbar */
+.topbar{
+  background:rgba(255,255,255,.96)!important;
+  border-bottom:1px solid #dcebf6!important;
+  box-shadow:0 5px 18px rgba(52,101,145,.06)!important;
+}
+
+.topbar .eyebrow{
+  color:#1e88e5!important;
+}
+
+.status-chip{
+  background:#edf7ff!important;
+  color:#1767a6!important;
+  border-color:#cde5f7!important;
+}
+
+.status-chip.offline{
+  background:#fff4ed!important;
+  color:#a85e1c!important;
+  border-color:#f1cfb2!important;
+}
+
+/* Page header */
+.page-header .eyebrow{
+  color:#1e88e5!important;
+}
+
+.page-header h1{
+  color:#123a5a!important;
+}
+
+.page-header p{
+  color:#56758f!important;
+}
+
+/* Cards */
+.panel,
+.data-panel,
+.stat-card,
+.settings-card,
+.report-card,
+.backup-card,
+.qr-camera-card,
+.qr-manual-card,
+.qr-order-result{
+  border-color:#d6eaf8!important;
+  box-shadow:0 9px 24px rgba(30,89,135,.07)!important;
+}
+
+/* Primary actions */
+.primary-button,
+button[type="submit"],
+.qr-action-primary{
+  background:linear-gradient(135deg,#1e88e5,#1565c0)!important;
+  border-color:#1976d2!important;
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(30,136,229,.20)!important;
+}
+
+.primary-button:hover,
+button[type="submit"]:hover,
+.qr-action-primary:hover{
+  background:linear-gradient(135deg,#1976d2,#0f5ca8)!important;
+}
+
+.secondary-button{
+  background:#fff!important;
+  color:#1565c0!important;
+  border-color:#b9d9ef!important;
+}
+
+.secondary-button:hover{
+  background:#eef7ff!important;
+  border-color:#82bfe9!important;
+}
+
+/* Input focus */
+input:focus,
+select:focus,
+textarea:focus{
+  outline:none!important;
+  border-color:#42a5f5!important;
+  box-shadow:0 0 0 3px rgba(66,165,245,.12)!important;
+}
+
+/* Stat cards */
+.stat-card{
+  background:linear-gradient(145deg,#fff,#f7fbff)!important;
+}
+
+.stat-card strong{
+  color:#0e4778!important;
+}
+
+.stat-card span:first-of-type,
+.stat-card .stat-label{
+  color:#426b8d!important;
+}
+
+.stat-card small{
+  color:#67839a!important;
+}
+
+.stat-icon{
+  background:#e8f4ff!important;
+  color:#1e88e5!important;
+}
+
+/* Dashboard chart */
+.bar-chart{
+  background:linear-gradient(180deg,#fbfdff,#f3f9ff)!important;
+}
+
+.bar-fill,
+.chart-bar,
+.category-progress i{
+  background:linear-gradient(180deg,#42a5f5,#1565c0)!important;
+}
+
+.category-progress{
+  background:#e3eff8!important;
+}
+
+.category-rank{
+  background:#e3f2fd!important;
+  color:#1976d2!important;
+}
+
+.category-percent{
+  background:#eaf5ff!important;
+  color:#1565c0!important;
+}
+
+/* Badges */
+.badge{
+  border-color:#cfe2f0!important;
+}
+
+.success-badge,
+.status-ready,
+.payment-paid{
+  background:#e8f8ef!important;
+  color:#08754f!important;
+  border-color:#bfe6d1!important;
+}
+
+.danger-badge{
+  background:#fff0ee!important;
+  color:#bd3e32!important;
+  border-color:#f0c8c3!important;
+}
+
+/* Tables */
+table th{
+  background:#f3f8fc!important;
+  color:#3b6380!important;
+  border-bottom-color:#d8e8f4!important;
+}
+
+table td{
+  border-bottom-color:#e6f0f7!important;
+}
+
+/* Search and record count */
+.search-box{
+  border-color:#cde2f1!important;
+}
+
+.record-count{
+  background:#eaf5ff!important;
+  color:#1767a6!important;
+  border-color:#c8e2f4!important;
+}
+
+/* Cashier */
+.cashier-section,
+.cashier-total-card,
+.cashier-pro-features,
+.cashier-today,
+.cashier-shortcuts{
+  border-color:#d6eaf8!important;
+}
+
+.cashier-total-card{
+  background:linear-gradient(135deg,#1976d2,#0f5ca8)!important;
+  color:#fff!important;
+}
+
+.cashier-category-tabs button{
+  border-color:#bcd8ea!important;
+  color:#416b86!important;
+}
+
+.cashier-category-tabs button.active{
+  background:#1e88e5!important;
+  border-color:#1e88e5!important;
+  color:#fff!important;
+}
+
+/* Finance */
+.finance-click-stat:hover .stat-card,
+.dashboard-click-stat:hover .stat-card{
+  border-color:#7fbbe4!important;
+  box-shadow:0 12px 25px rgba(30,136,229,.14)!important;
+}
+
+.income-amount{
+  color:#087654!important;
+}
+
+.expense-amount{
+  color:#c65345!important;
+}
+
+.receivable-amount{
+  color:#b76a0b!important;
+}
+
+.finance-row-action{
+  border-color:#b8d8ed!important;
+  color:#1767a6!important;
+}
+
+.finance-row-action:hover{
+  background:#eef7ff!important;
+}
+
+/* QR Center */
+.qr-camera-placeholder svg{
+  color:#1e88e5!important;
+}
+
+.qr-camera-box{
+  background:linear-gradient(145deg,#eef7ff,#fbfdff)!important;
+  border-color:#a9cde6!important;
+}
+
+.qr-target i{
+  border-color:#42a5f5!important;
+}
+
+.qr-help{
+  background:#eef7ff!important;
+  border-color:#c8e2f4!important;
+}
+
+.qr-help b,
+.qr-help code{
+  color:#1565c0!important;
+}
+
+/* Tracking customer */
+.tracking-page,
+.tracking-shell{
+  background:linear-gradient(180deg,#f5faff,#eef7ff)!important;
+}
+
+.tracking-card,
+.tracking-panel{
+  border-color:#d4e7f5!important;
+}
+
+.tracking-brand strong,
+.tracking-order-head h1,
+.tracking-business b{
+  color:#0f4778!important;
+}
+
+.tracking-timeline .done,
+.tracking-step.done{
+  color:#1976d2!important;
+}
+
+.tracking-progress,
+.tracking-progress-fill{
+  background:#42a5f5!important;
+}
+
+/* Production stage colors */
+.status-received,
+.production-column[data-status="received"]>header{
+  color:#1976d2!important;
+}
+
+.status-washing,
+.production-column[data-status="washing"]>header{
+  color:#0288d1!important;
+}
+
+.status-drying,
+.production-column[data-status="drying"]>header{
+  color:#e6a700!important;
+}
+
+.status-ironing,
+.production-column[data-status="ironing"]>header{
+  color:#8e44ad!important;
+}
+
+.status-packing,
+.production-column[data-status="packing"]>header{
+  color:#ef6c00!important;
+}
+
+.status-ready,
+.production-column[data-status="ready"]>header{
+  color:#0f8b5d!important;
+}
+
+/* Settings */
+.density-options button.active{
+  border-color:#1e88e5!important;
+  background:#eaf5ff!important;
+  box-shadow:0 0 0 2px rgba(30,136,229,.08)!important;
+}
+
+.density-options button.active b{
+  color:#1565c0!important;
+}
+
+/* Employee access */
+.permission-dot.on,
+.permission-mini-list span,
+.employee-login-id{
+  background:#eaf5ff!important;
+  color:#1565c0!important;
+}
+
+.employee-auth-ready{
+  background:#eef7ff!important;
+  border-color:#c8e2f4!important;
+}
+
+.employee-auth-ready b{
+  color:#1767a6!important;
+}
+
+/* Audit tabs */
+.audit-tabs button{
+  border-color:#bcd8ea!important;
+  color:#356785!important;
+}
+
+.audit-tabs button.active{
+  background:#1e88e5!important;
+  border-color:#1e88e5!important;
+  color:#fff!important;
+}
+
+/* Login */
+.login-page{
+  background:
+    radial-gradient(circle at top right,rgba(66,165,245,.18),transparent 34%),
+    linear-gradient(135deg,#f6fbff,#eaf5ff)!important;
+}
+
+.login-card{
+  border:1px solid #d4e8f6!important;
+  box-shadow:0 24px 60px rgba(32,89,135,.16)!important;
+}
+
+.login-card .eyebrow{
+  color:#1e88e5!important;
+}
+
+.login-card h1{
+  color:#103f69!important;
+}
+
+.login-card button{
+  background:linear-gradient(135deg,#1e88e5,#1565c0)!important;
+  box-shadow:0 9px 20px rgba(30,136,229,.22)!important;
+}
+
+/* Buttons that should remain semantic */
+.whatsapp-button{
+  background:linear-gradient(135deg,#20bd5c,#25d366)!important;
+  border-color:#20bd5c!important;
+  color:#fff!important;
+}
+
+.danger-icon,
+button.danger{
+  color:#c4473b!important;
+}
+
+/* PWA button */
+.pwa-button{
+  background:#eaf5ff!important;
+  color:#1767a6!important;
+  border-color:#cbe3f4!important;
+}
+
+/* Mobile overlay */
+.overlay{
+  background:rgba(9,46,77,.36)!important;
+}
+
+/* Hover polish */
+.panel,
+.stat-card,
+button,
+.sidebar nav a{
+  transition:all .16s ease!important;
+}
+
+/* Stronger blue readability */
+a{
+  color:#1565c0;
+}
+
+::selection{
+  background:#90caf9;
+  color:#0a2f57;
+}
