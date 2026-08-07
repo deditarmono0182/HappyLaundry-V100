@@ -1,0 +1,71 @@
+HAPPYLAUNDRY ENTERPRISE V107.0 — KARYAWAN & HAK AKSES
+
+FITUR:
+Pengaturan -> Karyawan & Hak Akses
+
+OWNER BISA:
+- Tambah nama karyawan.
+- Isi email login.
+- Isi nomor WhatsApp.
+- Aktif / nonaktifkan karyawan.
+- Edit hak akses satu per satu.
+
+HAK AKSES YANG DAPAT DIPILIH:
+[ ] Dashboard
+[ ] Kasir
+[ ] Order
+[ ] QR Center
+[ ] Produksi
+[ ] Pelanggan
+[ ] Layanan
+
+CARA KERJA:
+- Menu yang tidak diberi izin tidak tampil di sidebar karyawan.
+- Jika karyawan mencoba membuka URL menu tanpa izin, aplikasi menolak dan mengarahkan kembali.
+- Owner selalu memiliki akses penuh.
+- Akun legacy Cashier/Staff tetap kompatibel.
+
+KEAMANAN LOGIN:
+Password TIDAK disimpan di v107_employee_access.
+
+Agar karyawan bisa login:
+1. Owner menambahkan karyawan di HappyLaundry dan memasukkan email.
+2. Buka Supabase -> Authentication -> Users.
+3. Buat/Invite user dengan EMAIL YANG SAMA.
+4. Karyawan login ke HappyLaundry menggunakan akun Supabase tersebut.
+5. HappyLaundry otomatis membaca hak akses berdasarkan email.
+
+WAJIB JALANKAN SQL:
+supabase/009_v107_employee_access_control.sql
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Jalankan SQL 009 di Supabase SQL Editor.
+3. Copy seluruh isi project ke HappyLaundry-V100.
+4. Replace files in destination.
+5. GitHub Desktop Summary:
+   HappyLaundry V107.0 Employee Access Control
+6. Commit to main.
+7. Push origin.
+8. Tunggu Netlify Published.
+9. Ctrl + Shift + R.
+10. Buka Pengaturan -> Karyawan & Hak Akses.
+
+CONTOH:
+Kasir 1:
+Dashboard ✓
+Kasir ✓
+Order ✓
+QR Center ✓
+Produksi -
+Pelanggan ✓
+Layanan ✓
+
+Petugas Produksi:
+Dashboard ✓
+Kasir -
+Order -
+QR Center ✓
+Produksi ✓
+Pelanggan -
+Layanan -

@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V106.3 Clickable Finance Details
+# HappyLaundry Enterprise V107.0 Employee Access Control
 
 ## Jalankan
 ```bash
@@ -110,3 +110,7 @@ Daftar Piutang klik dari Dashboard/Keuangan serta Omzet per Kategori berupa juml
 
 ## V106.3
 Kartu Pemasukan, Pengeluaran, dan Piutang pada Keuangan dapat diklik untuk membuka daftar rincian masing-masing.
+
+
+## V107.0
+Manajemen karyawan dan hak akses individual untuk Dashboard, Kasir, Order, QR Center, Produksi, Pelanggan, dan Layanan.

@@ -3670,3 +3670,151 @@ button{
 .finance-row-action:hover{
   background:#eef9f5;
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V107.0 — Employee Access Control
+   ========================================================= */
+
+.employee-settings-link{
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px!important;
+}
+
+.employee-settings-link header{
+  flex:1;
+  border-bottom:0!important;
+  padding-bottom:0!important;
+}
+
+.employee-auth-note{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:12px;
+  background:#eef8ff!important;
+  border-color:#c7dfef!important;
+}
+
+.employee-auth-note>svg{
+  color:#3475a6;
+  flex:0 0 auto;
+}
+
+.employee-auth-note>div{
+  display:grid;
+  gap:3px;
+}
+
+.employee-auth-note b{
+  color:#254e6c;
+}
+
+.employee-auth-note span{
+  color:#4f7187;
+  font-size:11px;
+  font-weight:650;
+}
+
+.permission-dot{
+  display:inline-grid;
+  place-items:center;
+  min-width:25px;
+  height:25px;
+  border-radius:50%;
+  font-size:11px;
+  font-weight:900;
+}
+
+.permission-dot.on{
+  background:#e5f8ef;
+  color:#087654;
+}
+
+.permission-dot.off{
+  background:#f0f3f2;
+  color:#8b9d99;
+}
+
+.employee-form-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-radius:12px;
+  background:#f0f8f5;
+}
+
+.employee-form-head>div{
+  display:grid;
+  gap:2px;
+}
+
+.employee-form-head span{
+  color:#587770;
+  font-size:10px;
+}
+
+.employee-permission-box{
+  padding:12px;
+  border:1px solid #c9ded6;
+  border-radius:13px;
+  background:#fbfefd;
+}
+
+.employee-permission-box header{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding-bottom:10px;
+}
+
+.employee-permission-box header>div{
+  display:grid;
+}
+
+.employee-permission-box small{
+  color:#5d7a74;
+}
+
+.employee-permission-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+}
+
+.permission-check{
+  min-height:42px;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center;
+  gap:8px!important;
+  padding:8px 10px;
+  border:1px solid #d5e6df;
+  border-radius:10px;
+  background:#fff;
+  cursor:pointer;
+}
+
+.permission-check input{
+  width:17px;
+  height:17px;
+  accent-color:#07865a;
+}
+
+.permission-check span{
+  color:#274f48;
+  font-size:11px;
+  font-weight:800;
+}
+
+@media(max-width:850px){
+  .employee-permission-grid{grid-template-columns:1fr 1fr}
+  .employee-settings-link{display:grid!important}
+}
+
+@media(max-width:500px){
+  .employee-permission-grid{grid-template-columns:1fr}
+}

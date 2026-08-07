@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './layouts/AppLayout'
+import { PermissionRoute } from './components/PermissionRoute'
 import { useAuth } from './lib/auth'
 
 const LoginPage=lazy(()=>import('./pages/LoginPage').then(m=>({default:m.LoginPage})))
@@ -16,6 +17,7 @@ const PaymentsPage=lazy(()=>import('./pages/PaymentsPage').then(m=>({default:m.P
 const CashPage=lazy(()=>import('./pages/CashPage').then(m=>({default:m.CashPage})))
 const CashierPage=lazy(()=>import('./pages/CashierPage').then(m=>({default:m.CashierPage})))
 const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.SettingsPage})))
+const EmployeesPage=lazy(()=>import('./pages/EmployeesPage').then(m=>({default:m.EmployeesPage})))
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
 const FinancePage=lazy(()=>import('./pages/FinancePage').then(m=>({default:m.FinancePage})))
 const IncomeDetailsPage=lazy(()=>import('./pages/IncomeDetailsPage').then(m=>({default:m.IncomeDetailsPage})))
@@ -39,13 +41,13 @@ export default function App(){
     <Route path="/login" element={<LoginPage/>}/>
     <Route path="/track/:orderNo?" element={<PublicTrackingPage/>}/>
     <Route element={<Protected/>}>
-      <Route index element={<DashboardPage/>}/>
-      <Route path="cashier" element={<CashierPage/>}/>
-      <Route path="orders" element={<OrdersPage/>}/>
-      <Route path="qr-scan" element={<QRScannerPage/>}/>
-      <Route path="production" element={<ProductionPage/>}/>
-      <Route path="customers" element={<CustomersPage/>}/>
-      <Route path="services" element={<ServicesPage/>}/>
+      <Route index element={<PermissionRoute permission="dashboard"><DashboardPage/></PermissionRoute>}/>
+      <Route path="cashier" element={<PermissionRoute permission="cashier"><CashierPage/></PermissionRoute>}/>
+      <Route path="orders" element={<PermissionRoute permission="orders"><OrdersPage/></PermissionRoute>}/>
+      <Route path="qr-scan" element={<PermissionRoute permission="qr_center"><QRScannerPage/></PermissionRoute>}/>
+      <Route path="production" element={<PermissionRoute permission="production"><ProductionPage/></PermissionRoute>}/>
+      <Route path="customers" element={<PermissionRoute permission="customers"><CustomersPage/></PermissionRoute>}/>
+      <Route path="services" element={<PermissionRoute permission="services"><ServicesPage/></PermissionRoute>}/>
       <Route path="inventory" element={<InventoryPage/>}/>
       <Route path="suppliers" element={<SuppliersPage/>}/>
       <Route path="payments" element={<PaymentsPage/>}/>
@@ -57,6 +59,7 @@ export default function App(){
       <Route path="reports" element={<ReportsPage/>}/>
       <Route path="backup" element={<BackupPage/>}/>
       <Route path="settings" element={<SettingsPage/>}/>
+      <Route path="settings/employees" element={<EmployeesPage/>}/>
     </Route>
     <Route path="*" element={<Navigate to="/" replace/>}/>
   </Routes></Suspense>

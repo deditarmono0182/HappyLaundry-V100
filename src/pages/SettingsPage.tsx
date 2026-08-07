@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
-import { CheckCircle2, ExternalLink, MapPin, MessageCircle, Save, SlidersHorizontal, Store } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { CheckCircle2, ExternalLink, MapPin, MessageCircle, Save, SlidersHorizontal, Store, UsersRound } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -20,6 +21,7 @@ const defaults: StoreSettings = {
 }
 
 export function SettingsPage() {
+  const navigate=useNavigate()
   const [form, setForm] = useState<StoreSettings>(defaults)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -87,6 +89,11 @@ export function SettingsPage() {
         <label>Link Google Maps<input value={form.maps_url} onChange={e=>setForm({...form,maps_url:e.target.value})} placeholder="https://maps.app.goo.gl/..."/></label>
         {form.maps_url && <a className="settings-link" href={form.maps_url} target="_blank" rel="noreferrer"><ExternalLink size={15}/> Buka lokasi</a>}
         <label>Catatan Bawah Nota<textarea value={form.receipt_footer} onChange={e=>setForm({...form,receipt_footer:e.target.value})}/></label>
+      </section>
+
+      <section className="panel settings-card settings-wide employee-settings-link">
+        <header><UsersRound size={21}/><div><b>Karyawan & Hak Akses</b><small>Tambah karyawan dan tentukan akses Dashboard, Kasir, Order, QR Center, Produksi, Pelanggan, dan Layanan.</small></div></header>
+        <button type="button" className="primary-button" onClick={()=>navigate('/settings/employees')}><UsersRound size={17}/>Kelola Karyawan</button>
       </section>
 
       <section className="panel settings-card settings-wide density-settings-card">

@@ -3,16 +3,17 @@ import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, Wa
   CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../lib/auth'
+import { canAccess, type PermissionKey } from '../lib/permissions'
 import { PWAInstallButton } from '../components/PWAInstallButton'
 
-const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; roles: string[] }> = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['owner', 'cashier', 'staff'] },
-  { to: '/cashier', label: 'Kasir', icon: Calculator, roles: ['owner', 'cashier'] },
-  { to: '/orders', label: 'Order', icon: ShoppingBag, roles: ['owner', 'cashier'] },
-  { to: '/qr-scan', label: 'QR Center', icon: QrCode, roles: ['owner','cashier','production'] },
-  { to: '/production', label: 'Produksi', icon: WashingMachine, roles: ['owner', 'staff'] },
-  { to: '/customers', label: 'Pelanggan', icon: Users, roles: ['owner', 'cashier'] },
-  { to: '/services', label: 'Layanan & Harga', icon: Sparkles, roles: ['owner', 'cashier'] },
+const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; roles?: string[]; permission?: PermissionKey }> = [
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard' },
+  { to: '/cashier', label: 'Kasir', icon: Calculator, permission: 'cashier' },
+  { to: '/orders', label: 'Order', icon: ShoppingBag, permission: 'orders' },
+  { to: '/qr-scan', label: 'QR Center', icon: QrCode, permission: 'qr_center' },
+  { to: '/production', label: 'Produksi', icon: WashingMachine, permission: 'production' },
+  { to: '/customers', label: 'Pelanggan', icon: Users, permission: 'customers' },
+  { to: '/services', label: 'Layanan & Harga', icon: Sparkles, permission: 'services' },
   { to: '/inventory', label: 'Stok Bahan', icon: Package, roles: ['owner', 'staff'] },
   { to: '/suppliers', label: 'Supplier', icon: Truck, roles: ['owner', 'staff'] },
   { to: '/payments', label: 'Pembayaran', icon: CreditCard, roles: ['owner', 'cashier'] },
@@ -41,11 +42,11 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V106.3 Stable</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V107.0 Stable</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
-          {items.filter(item => item.roles.includes(role)).map(({ to, label, icon: Icon }) => (
+          {items.filter(item => item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)).map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} onClick={() => setOpen(false)}><Icon size={19} /><span>{label}</span></NavLink>
           ))}
         </nav>
