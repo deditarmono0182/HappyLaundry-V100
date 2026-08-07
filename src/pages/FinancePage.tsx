@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { CalendarDays, FileSpreadsheet, Plus, ReceiptText, Search, TrendingDown, TrendingUp, WalletCards } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { AlertTriangle, CalendarDays, FileSpreadsheet, Plus, ReceiptText, Search, TrendingDown, TrendingUp, WalletCards } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
@@ -25,6 +26,12 @@ interface ExpenseRow{
   created_at:string
 }
 
+interface OrderSummary{
+  total:number
+  paid_amount:number
+  status:string
+}
+
 interface PaymentRow{
   amount:number
   created_at:string
@@ -37,9 +44,11 @@ const monthStart=()=>{
 }
 
 export function FinancePage(){
+  const navigate=useNavigate()
   const [categories,setCategories]=useState<ExpenseCategory[]>([])
   const [expenses,setExpenses]=useState<ExpenseRow[]>([])
   const [payments,setPayments]=useState<PaymentRow[]>([])
+  const [orders,setOrders]=useState<OrderSummary[]>([])
   const [from,setFrom]=useState(monthStart())
   const [to,setTo]=useState(today())
   const [query,setQuery]=useState('')
@@ -53,17 +62,19 @@ export function FinancePage(){
 
   const load=useCallback(async()=>{
     setMessage('')
-    const [c,e,p]=await Promise.all([
+    const [c,e,p,o]=await Promise.all([
       supabase.from('v106_expense_categories').select('*').eq('is_active',true).order('group_name').order('name'),
       supabase.from('v106_expenses_view').select('*').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false}),
-      supabase.from('v100_payments').select('amount,created_at').gte('created_at',`${from}T00:00:00`).lte('created_at',`${to}T23:59:59.999`)
+      supabase.from('v100_payments').select('amount,created_at').gte('created_at',`${from}T00:00:00`).lte('created_at',`${to}T23:59:59.999`),
+      supabase.from('v100_orders_view').select('total,paid_amount,status')
     ])
-    const error=c.error||e.error||p.error
+    const error=c.error||e.error||p.error||o.error
     if(error)setMessage(error.message)
     else{
       setCategories((c.data as ExpenseCategory[])||[])
       setExpenses((e.data as ExpenseRow[])||[])
       setPayments((p.data as PaymentRow[])||[])
+      setOrders((o.data as OrderSummary[])||[])
     }
   },[from,to])
 
@@ -72,8 +83,12 @@ export function FinancePage(){
   const stats=useMemo(()=>{
     const omzet=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
     const expense=expenses.reduce((sum,e)=>sum+Number(e.amount||0),0)
-    return{omzet,expense,net:omzet-expense,margin:omzet>0?((omzet-expense)/omzet)*100:0}
-  },[payments,expenses])
+    const receivable=orders
+      .filter(o=>o.status!=='cancelled')
+      .reduce((sum,o)=>sum+Math.max(0,Number(o.total||0)-Number(o.paid_amount||0)),0)
+    const receivableCount=orders.filter(o=>o.status!=='cancelled'&&Math.max(0,Number(o.total||0)-Number(o.paid_amount||0))>0).length
+    return{omzet,expense,net:omzet-expense,margin:omzet>0?((omzet-expense)/omzet)*100:0,receivable,receivableCount}
+  },[payments,expenses,orders])
 
   const filtered=useMemo(()=>{
     const key=query.toLowerCase().trim()
@@ -147,6 +162,9 @@ export function FinancePage(){
       <StatCard icon={TrendingUp} label="Pemasukan" value={formatRupiah(stats.omzet)} caption={`${payments.length} pembayaran`}/>
       <StatCard icon={TrendingDown} label="Pengeluaran" value={formatRupiah(stats.expense)} caption={`${expenses.length} transaksi`}/>
       <StatCard icon={WalletCards} label="Laba Bersih" value={formatRupiah(stats.net)} caption="Pemasukan - pengeluaran"/>
+      <button type="button" className="finance-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
+        <StatCard icon={AlertTriangle} label="Piutang" value={formatRupiah(stats.receivable)} caption={`${stats.receivableCount} order belum lunas • Klik untuk lihat`}/>
+      </button>
       <StatCard icon={ReceiptText} label="Margin" value={`${stats.margin.toFixed(1)}%`} caption="Margin laba bersih"/>
     </section>
 

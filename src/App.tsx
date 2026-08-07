@@ -18,6 +18,7 @@ const CashierPage=lazy(()=>import('./pages/CashierPage').then(m=>({default:m.Cas
 const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.SettingsPage})))
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
 const FinancePage=lazy(()=>import('./pages/FinancePage').then(m=>({default:m.FinancePage})))
+const ReceivablesPage=lazy(()=>import('./pages/ReceivablesPage').then(m=>({default:m.ReceivablesPage})))
 const PublicTrackingPage=lazy(()=>import('./pages/PublicTrackingPage').then(m=>({default:m.PublicTrackingPage})))
 const BackupPage=lazy(()=>import('./pages/BackupPage').then(m=>({default:m.BackupPage})))
 const QRScannerPage=lazy(()=>import('./pages/QRScannerPage').then(m=>({default:m.QRScannerPage})))
@@ -48,6 +49,7 @@ export default function App(){
       <Route path="payments" element={<PaymentsPage/>}/>
       <Route path="cash" element={<CashPage/>}/>
       <Route path="finance" element={<FinancePage/>}/>
+      <Route path="receivables" element={<ReceivablesPage/>}/>
       <Route path="reports" element={<ReportsPage/>}/>
       <Route path="backup" element={<BackupPage/>}/>
       <Route path="settings" element={<SettingsPage/>}/>

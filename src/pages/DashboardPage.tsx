@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Banknote, CheckCircle2, PackageCheck, ShoppingBag, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
@@ -7,20 +8,41 @@ import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
 import type { OrderRow } from '../types/order'
 
+interface DashboardOrderItem{
+  order_id:string
+  service_id:string|null
+  subtotal:number
+}
+
+interface DashboardService{
+  id:string
+  category:string
+}
+
 export function DashboardPage() {
+  const navigate=useNavigate()
   const [orders,setOrders]=useState<OrderRow[]>([])
   const [cash,setCash]=useState<{amount:number;direction:'in'|'out';created_at:string}[]>([])
+  const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>([])
+  const [services,setServices]=useState<DashboardService[]>([])
   const [message,setMessage]=useState('')
   const [revenuePeriod,setRevenuePeriod]=useState<'7d'|'month'|'3m'|'6m'|'12m'>('7d')
 
   const load=useCallback(async()=>{
     const start=new Date(); start.setHours(0,0,0,0)
-    const [o,c]=await Promise.all([
+    const [o,c,i,s]=await Promise.all([
       supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
-      supabase.from('v100_cash_entries').select('amount,direction,created_at').gte('created_at',start.toISOString())
+      supabase.from('v100_cash_entries').select('amount,direction,created_at').gte('created_at',start.toISOString()),
+      supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
+      supabase.from('v100_services').select('id,category')
     ])
-    if(o.error||c.error)setMessage((o.error||c.error)?.message||'Gagal memuat data')
-    else { setOrders((o.data as OrderRow[])||[]); setCash(c.data||[]) }
+    if(o.error||c.error||i.error||s.error)setMessage((o.error||c.error||i.error||s.error)?.message||'Gagal memuat data')
+    else {
+      setOrders((o.data as OrderRow[])||[])
+      setCash(c.data||[])
+      setOrderItems((i.data as DashboardOrderItem[])||[])
+      setServices((s.data as DashboardService[])||[])
+    }
   },[])
 
   useEffect(()=>{void load()},[load])
@@ -90,6 +112,41 @@ export function DashboardPage() {
           ?'Omzet 6 Bulan'
           :'Omzet 12 Bulan'
 
+  const categoryRevenue=useMemo(()=>{
+    const now=new Date()
+    const periodStart=(()=>{
+      if(revenuePeriod==='7d'){const d=new Date(now);d.setDate(d.getDate()-6);d.setHours(0,0,0,0);return d}
+      if(revenuePeriod==='month')return new Date(now.getFullYear(),now.getMonth(),1)
+      const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
+      return new Date(now.getFullYear(),now.getMonth()-(count-1),1)
+    })()
+
+    const relevantOrders=orders.filter(o=>new Date(o.created_at)>=periodStart&&o.status!=='cancelled')
+    const orderMap=new Map(relevantOrders.map(o=>[o.id,o]))
+    const serviceCategory=new Map(services.map(s=>[s.id,s.category||'Reguler']))
+    const grouped:Record<string,number>={}
+
+    for(const item of orderItems){
+      const order=orderMap.get(item.order_id)
+      if(!order)continue
+      const orderTotal=Math.max(0,Number(order.total||0))
+      const paid=Math.max(0,Number(order.paid_amount||0))
+      if(orderTotal<=0||paid<=0)continue
+
+      // Omzet kategori mengikuti pembayaran aktual.
+      // Jika order baru dibayar sebagian, subtotal item dialokasikan proporsional.
+      const paidRatio=Math.min(1,paid/orderTotal)
+      const category=item.service_id?serviceCategory.get(item.service_id)||'Reguler':'Reguler'
+      grouped[category]=(grouped[category]||0)+(Number(item.subtotal||0)*paidRatio)
+    }
+
+    const total=Object.values(grouped).reduce((sum,v)=>sum+v,0)
+    return Object.entries(grouped)
+      .map(([category,amount])=>({category,amount,percentage:total>0?(amount/total)*100:0}))
+      .sort((a,b)=>b.amount-a.amount)
+  },[orders,orderItems,services,revenuePeriod])
+
+
   return <>
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."/>
     {message&&<div className="error-box inline-message">{message}</div>}
@@ -99,7 +156,9 @@ export function DashboardPage() {
       <StatCard label="Sedang Diproses" value={String(processing)} caption="Belum siap diambil" icon={WashingMachine}/>
       <StatCard label="Siap Diambil" value={String(ready)} caption="Menunggu pelanggan" icon={PackageCheck}/>
       <StatCard label="Selesai Hari Ini" value={String(completed)} caption="Order selesai" icon={CheckCircle2}/>
-      <StatCard label="Total Piutang" value={formatIDR(receivable)} caption="Sisa tagihan" icon={AlertTriangle}/>
+      <button type="button" className="dashboard-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
+        <StatCard label="Total Piutang" value={formatIDR(receivable)} caption="Sisa tagihan • Klik untuk lihat" icon={AlertTriangle}/>
+      </button>
     </section>
     <section className="dashboard-grid">
       <article className="panel">
@@ -122,6 +181,27 @@ export function DashboardPage() {
         <div className="panel-heading"><div><h3>Status Order</h3><p>Order aktif saat ini.</p></div></div>
         <div className="status-summary">{(['received','washing','drying','ironing','packing','ready'] as const).map(s=><div key={s}><span className={`status-dot status-${s}`}/><span>{statusLabels[s]}</span><b>{orders.filter(r=>r.status===s).length}</b></div>)}</div>
       </article>
+    </section>
+    <section className="panel dashboard-category-revenue">
+      <div className="panel-heading">
+        <div>
+          <h3>Omzet per Kategori Layanan</h3>
+          <p>Jumlah rupiah dan persentase kontribusi berdasarkan periode grafik omzet di atas.</p>
+        </div>
+      </div>
+      {categoryRevenue.length===0
+        ? <div className="table-empty">Belum ada omzet kategori pada periode ini.</div>
+        : <div className="category-revenue-list">
+            {categoryRevenue.map((item,index)=><div className="category-revenue-row" key={item.category}>
+              <span className="category-rank">{index+1}</span>
+              <div className="category-revenue-name">
+                <b>{item.category}</b>
+                <div className="category-progress"><i style={{width:`${Math.max(2,item.percentage)}%`}}/></div>
+              </div>
+              <strong>{formatIDR(item.amount)}</strong>
+              <span className="category-percent">{item.percentage.toFixed(1)}%</span>
+            </div>)}
+          </div>}
     </section>
     <section className="panel recent-orders">
       <div className="panel-heading"><div><h3>Order Terbaru</h3><p>10 transaksi terbaru.</p></div></div>

@@ -13,7 +13,7 @@ export interface Service {
   store_id: string | null
   name: string
   category: string
-  unit: 'kg' | 'pcs' | 'item'
+  unit: 'kg' | 'pcs' | 'item' | 'cm'
   price: number
   duration_hours: number
   is_active: boolean

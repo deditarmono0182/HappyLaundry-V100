@@ -1,0 +1,47 @@
+HAPPYLAUNDRY ENTERPRISE V106.2 — PIUTANG & CATEGORY REVENUE
+
+FITUR PIUTANG:
+- Kartu Total Piutang di Dashboard dapat diklik.
+- Kartu Piutang di menu Keuangan dapat diklik.
+- Klik membuka Daftar Piutang.
+- Daftar Piutang menampilkan:
+  Order, pelanggan, WhatsApp, total, sudah bayar, sisa piutang,
+  status, tanggal, tombol Bayar, Detail, WhatsApp.
+
+DASHBOARD OMZET PER KATEGORI:
+- Menampilkan setiap kategori layanan.
+- Menampilkan JUMLAH RUPIAH.
+- Menampilkan PERSENTASE omzet.
+- Menampilkan progress bar kontribusi.
+- Mengikuti periode grafik Dashboard:
+  7 Hari / Bulan Ini / 3 Bulan / 6 Bulan / 12 Bulan.
+
+CONTOH:
+Reguler      Rp 2.500.000   45.0%
+Express      Rp 1.700.000   30.6%
+Premium      Rp 1.100.000   19.8%
+Satuan       Rp   250.000    4.5%
+
+CARA HITUNG:
+- Berdasarkan order_items dan kategori pada layanan.
+- Omzet mengikuti paid_amount aktual.
+- Jika order baru dibayar sebagian, omzet kategori dialokasikan
+  secara proporsional terhadap subtotal item.
+
+TIDAK ADA SQL BARU.
+Tetap memakai SQL 008 V106 yang sudah dijalankan.
+
+CARA PASANG:
+1. Ekstrak ZIP.
+2. Copy semua isi ke folder HappyLaundry-V100.
+3. Replace files in destination.
+4. GitHub Desktop Summary:
+   HappyLaundry V106.2 Piutang Category Revenue
+5. Commit to main.
+6. Push origin.
+7. Tunggu Netlify Published.
+8. Ctrl + Shift + R.
+9. Buka Dashboard.
+10. Coba periode 7 Hari / Bulan Ini / 3 / 6 / 12 Bulan.
+11. Pastikan Omzet per Kategori menampilkan Rupiah dan Persentase.
+12. Klik Total Piutang untuk membuka Daftar Piutang.

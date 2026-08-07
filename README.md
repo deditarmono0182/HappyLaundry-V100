@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V106.0 Finance & Service Management
+# HappyLaundry Enterprise V106.2 Piutang & Category Revenue
 
 ## Jalankan
 ```bash
@@ -102,3 +102,7 @@ Peningkatan kontras dan ketebalan teks di seluruh aplikasi agar tidak terlihat t
 
 ## V106.0
 Kategori layanan, filter kasir, input pengeluaran, kategori biaya, laba bersih, margin, dan export keuangan.
+
+
+## V106.2
+Daftar Piutang klik dari Dashboard/Keuangan serta Omzet per Kategori berupa jumlah Rupiah + persentase.
