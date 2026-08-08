@@ -31,11 +31,19 @@ const emptyOrder = {
 
 const statusFlow: OrderStatus[] = ['received', 'washing', 'drying', 'ironing', 'packing', 'ready', 'completed']
 
+type OrderServiceItem={
+  order_id:string
+  service_name:string
+  unit:string
+  quantity:number
+}
+
 export function OrdersPage() {
   const [searchParams]=useSearchParams()
   const [rows, setRows] = useState<OrderRow[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [services, setServices] = useState<Service[]>([])
+  const [orderServiceItems, setOrderServiceItems] = useState<OrderServiceItem[]>([])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -49,7 +57,7 @@ export function OrdersPage() {
   const load = useCallback(async () => {
     setLoading(true)
     setMessage('')
-    const [ordersResult, customersResult, servicesResult] = await Promise.all([
+    const [ordersResult, customersResult, servicesResult, orderItemsResult] = await Promise.all([
       supabase
         .from('v100_orders_view')
         .select('*')
@@ -62,15 +70,20 @@ export function OrdersPage() {
         .from('v100_services')
         .select('id, store_id, name, category, unit, price, duration_hours, is_active, created_at')
         .eq('is_active', true)
-        .order('name')
+        .order('name'),
+      supabase
+        .from('v100_order_items')
+        .select('order_id,service_name,unit,quantity')
+        .order('created_at')
     ])
 
-    const error = ordersResult.error || customersResult.error || servicesResult.error
+    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error
     if (error) setMessage(error.message)
     else {
       setRows((ordersResult.data as OrderRow[]) || [])
       setCustomers((customersResult.data as Customer[]) || [])
       setServices((servicesResult.data as Service[]) || [])
+      setOrderServiceItems((orderItemsResult.data as OrderServiceItem[]) || [])
     }
     setLoading(false)
   }, [])
@@ -84,6 +97,28 @@ export function OrdersPage() {
     if(found)setDetail(found)
   },[searchParams,rows])
 
+  const serviceItemsByOrder=useMemo(()=>{
+    const map=new Map<string,OrderServiceItem[]>()
+    for(const item of orderServiceItems){
+      const list=map.get(item.order_id)||[]
+      list.push(item)
+      map.set(item.order_id,list)
+    }
+    return map
+  },[orderServiceItems])
+
+  const serviceSummary=(orderId:string)=>{
+    const list=serviceItemsByOrder.get(orderId)||[]
+    if(!list.length)return 'Belum ada layanan'
+    return list.map(item=>{
+      const qty=Number(item.quantity||0)
+      const formattedQty=Number.isInteger(qty)
+        ? String(qty)
+        : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
+      return `${item.service_name} ${formattedQty} ${item.unit}`
+    }).join(' • ')
+  }
+
   const filtered = useMemo(() => {
     const keyword = query.trim().toLowerCase()
     if (!keyword) return rows
@@ -95,11 +130,12 @@ export function OrdersPage() {
         statusLabels[row.status],
         row.status,
         paymentLabels[row.payment_status],
-        row.payment_status
+        row.payment_status,
+        serviceSummary(row.id)
       ].join(' ').toLowerCase()
       return haystack.includes(keyword)
     })
-  }, [query, rows])
+  }, [query, rows, serviceItemsByOrder])
 
   const overdueRows = useMemo(() => {
     const now = Date.now()
@@ -322,7 +358,7 @@ export function OrdersPage() {
         <div className="toolbar">
           <label className="search-box">
             <Search size={18}/>
-            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari order, pelanggan, telepon, status, atau pembayaran" />
+            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari order, pelanggan, telepon, layanan, status, atau pembayaran" />
           </label>
           <span className="record-count">{filtered.length} order</span>
         </div>
@@ -335,6 +371,7 @@ export function OrdersPage() {
               <tr>
                 <th>Order</th>
                 <th>Pelanggan</th>
+                <th>Layanan</th>
                 <th>Status</th>
                 <th>Pembayaran</th>
                 <th>Total</th>
@@ -344,14 +381,30 @@ export function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={8} className="table-empty">Memuat order...</td></tr>}
+              {loading && <tr><td colSpan={9} className="table-empty">Memuat order...</td></tr>}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={8} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
+                <tr><td colSpan={9} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
               )}
               {filtered.map(row => (
                 <tr key={row.id}>
                   <td><b>{row.order_no}</b></td>
                   <td><b>{row.customer_name}</b><small>{row.customer_phone}</small></td>
+                  <td className="order-service-cell">
+                    {(serviceItemsByOrder.get(row.id)||[]).length
+                      ? <div className="order-service-list">
+                          {(serviceItemsByOrder.get(row.id)||[]).map((item,index)=>{
+                            const qty=Number(item.quantity||0)
+                            const formattedQty=Number.isInteger(qty)
+                              ? String(qty)
+                              : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
+                            return <span className="order-service-chip" key={`${row.id}-${index}`}>
+                              <b>{item.service_name}</b>
+                              <small>{formattedQty} {item.unit}</small>
+                            </span>
+                          })}
+                        </div>
+                      : <span className="order-service-empty">-</span>}
+                  </td>
                   <td><span className={`badge status-${row.status}`}>{statusLabels[row.status]}</span></td>
                   <td><span className={`badge payment-${row.payment_status}`}>{paymentLabels[row.payment_status]}</span><small>{formatRupiah(row.paid_amount)} / {formatRupiah(row.total)}</small></td>
                   <td><b>{formatRupiah(row.total)}</b></td>
@@ -451,6 +504,20 @@ export function OrdersPage() {
           <div className="order-detail">
             <div><span>Pelanggan</span><b>{detail.customer_name}</b></div>
             <div><span>WhatsApp</span><b>{detail.customer_phone}</b></div>
+            <div className="order-detail-services">
+              <span>Layanan</span>
+              <div>
+                {(serviceItemsByOrder.get(detail.id)||[]).length
+                  ? (serviceItemsByOrder.get(detail.id)||[]).map((item,index)=>{
+                      const qty=Number(item.quantity||0)
+                      const formattedQty=Number.isInteger(qty)
+                        ? String(qty)
+                        : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
+                      return <b key={`${detail.id}-detail-${index}`}>{item.service_name} — {formattedQty} {item.unit}</b>
+                    })
+                  : <b>-</b>}
+              </div>
+            </div>
             <div><span>Status Cucian</span><b>{statusLabels[detail.status]}</b></div>
             <div><span>Status Pembayaran</span><b>{paymentLabels[detail.payment_status]}</b></div>
             <div><span>Estimasi Selesai</span><b className={isOverdue(detail)?'order-detail-overdue':''}>{detail.due_at?new Date(detail.due_at).toLocaleString('id-ID'):'Belum diatur'}{isOverdue(detail)?' • TERLAMBAT':''}</b></div>

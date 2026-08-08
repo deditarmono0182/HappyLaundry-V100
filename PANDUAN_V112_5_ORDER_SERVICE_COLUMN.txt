@@ -1,0 +1,48 @@
+HAPPYLAUNDRY ENTERPRISE V112.5 — JENIS LAYANAN DI DASHBOARD ORDER
+
+PERUBAHAN:
+Tabel Order sekarang mempunyai kolom:
+LAYANAN
+
+CONTOH:
+HL-260808-00011
+Puspa
+Cuci Setrika 1,5 kg
+Dicuci
+Lunas
+Rp105.000
+
+JIKA SATU ORDER PUNYA BANYAK LAYANAN:
+Semua ditampilkan dalam chip ringkas.
+
+Contoh:
+Cuci Setrika 1,5 kg
+Bed Cover 2 pcs
+Express 1 kg
+
+PENCARIAN:
+Kotak pencarian sekarang juga mencari berdasarkan nama layanan.
+
+Contoh ketik:
+Cuci Setrika
+
+Maka order yang mengandung layanan tersebut akan muncul.
+
+DETAIL ORDER:
+Saat klik icon mata / Detail, rincian Layanan juga ikut ditampilkan beserta jumlah/berat.
+
+SUMBER DATA:
+Menggunakan tabel v100_order_items yang sudah ada.
+Tidak membuat tabel baru.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.5.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Order.
+5. Kolom Layanan langsung terlihat.
+
+CACHE:
+happylaundry-v112-5-0

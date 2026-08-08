@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.4.1 Flexible Number Inputs
+# HappyLaundry Enterprise V112.5 Order Service Column
 
 ## Jalankan
 ```bash
@@ -258,3 +258,7 @@ Produksi dapat scan QR nota tracking untuk menemukan order, menyorot kartu, dan 
 
 ## V112.4.1
 Input angka global auto-select dan decimal keyboard; berat/jumlah Kasir serta Order mendukung edit kosong sementara dan koma/titik desimal.
+
+
+## V112.5
+Dashboard Order menampilkan jenis layanan + jumlah/berat, pencarian berdasarkan layanan, dan rincian layanan pada Detail Order.

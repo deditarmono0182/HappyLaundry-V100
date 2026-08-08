@@ -6933,3 +6933,63 @@ body{
     appearance:textfield;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.5 — Order Service Column
+   ========================================================= */
+.order-service-cell{
+  min-width:220px;
+}
+.order-service-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+.order-service-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 8px;
+  border:1px solid #cfe3ef;
+  border-radius:9px;
+  background:#f4faff;
+  white-space:nowrap;
+}
+.order-service-chip b{
+  color:#174f74!important;
+  font-size:9px!important;
+}
+.order-service-chip small{
+  display:inline!important;
+  margin:0!important;
+  color:#718a9b!important;
+  font-size:8.5px!important;
+}
+.order-service-empty{
+  color:#8da0ad;
+}
+.order-detail-services{
+  align-items:flex-start!important;
+}
+.order-detail-services>div{
+  display:grid!important;
+  gap:4px;
+  text-align:right;
+}
+.order-detail-services>div b{
+  font-size:10.5px;
+}
+
+@media(max-width:700px){
+  .order-service-cell{
+    min-width:190px;
+  }
+  .order-service-list{
+    display:grid;
+    gap:4px;
+  }
+  .order-service-chip{
+    justify-content:space-between;
+  }
+}

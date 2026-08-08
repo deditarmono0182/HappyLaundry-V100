@@ -1,7 +1,7 @@
 {
   "name": "happylaundry-v100",
   "private": true,
-  "version": "112.4.1",
+  "version": "112.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
