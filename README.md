@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.6 Order Export Filter Click Status
+# HappyLaundry Enterprise V112.7 Top Customers Dashboard
 
 ## Jalankan
 ```bash
@@ -266,3 +266,7 @@ Dashboard Order menampilkan jenis layanan + jumlah/berat, pencarian berdasarkan 
 
 ## V112.6
 Order mendapat Export All/XLS Filter/PDF Filter, filter status pembayaran + cucian, dan badge status dapat diklik untuk proses berikutnya.
+
+
+## V112.7
+Dashboard menampilkan Top 5 pelanggan berdasarkan jumlah transaksi, total belanja, dan transaksi terakhir.

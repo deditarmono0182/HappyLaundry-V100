@@ -1,0 +1,41 @@
+HAPPYLAUNDRY ENTERPRISE V112.7 — PELANGGAN TRANSAKSI TERBANYAK
+
+FITUR BARU DI DASHBOARD:
+Pelanggan dengan Transaksi Terbanyak
+
+Menampilkan TOP 5 pelanggan berdasarkan:
+1. Jumlah order terbanyak
+2. Jika jumlah sama, diurutkan dari total belanja terbesar
+
+DATA YANG DITAMPILKAN:
+- Ranking
+- Nama pelanggan
+- Nomor telepon
+- Jumlah transaksi
+- Total belanja
+- Tanggal transaksi terakhir
+
+ORDER DIBATALKAN:
+Tidak dihitung.
+
+RANKING #1:
+Ditandai icon Crown.
+
+KLIK PELANGGAN:
+Langsung membuka Dashboard Order dan pencarian otomatis memakai nomor telepon/nama pelanggan.
+
+TOMBOL:
+Lihat Pelanggan
+membuka Dashboard Pelanggan.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.7.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Dashboard.
+5. Scroll ke bagian Pelanggan dengan Transaksi Terbanyak.
+
+CACHE:
+happylaundry-v112-7-0

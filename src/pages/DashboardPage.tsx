@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Banknote, CheckCircle2, MonitorCog, PackageCheck, ShoppingBag, WashingMachine } from 'lucide-react'
+import { AlertTriangle, Banknote, CheckCircle2, Crown, MonitorCog, PackageCheck, ShoppingBag, Users, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
@@ -179,6 +179,44 @@ export function DashboardPage() {
   },[orders,orderItems,services,revenuePeriod])
 
 
+  const topCustomers=useMemo(()=>{
+    const grouped=new Map<string,{
+      name:string
+      phone:string
+      count:number
+      total:number
+      paid:number
+      lastOrder:string
+    }>()
+
+    for(const order of orders){
+      if(order.status==='cancelled')continue
+      const key=(order.customer_phone||order.customer_name||order.id).trim().toLowerCase()
+      const current=grouped.get(key)||{
+        name:order.customer_name||'Pelanggan',
+        phone:order.customer_phone||'',
+        count:0,
+        total:0,
+        paid:0,
+        lastOrder:order.created_at
+      }
+
+      current.count+=1
+      current.total+=Number(order.total||0)
+      current.paid+=Number(order.paid_amount||0)
+      if(new Date(order.created_at)>new Date(current.lastOrder)){
+        current.lastOrder=order.created_at
+      }
+
+      grouped.set(key,current)
+    }
+
+    return Array.from(grouped.values())
+      .sort((a,b)=>b.count-a.count||b.total-a.total)
+      .slice(0,5)
+  },[orders])
+
+
   return <>
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."      hideBack
     />
@@ -290,6 +328,48 @@ export function DashboardPage() {
             </div>)}
           </div>}
     </section>
+    <section className="panel dashboard-top-customers">
+      <div className="panel-heading dashboard-top-customers-heading">
+        <div>
+          <h3><Users size={18}/> Pelanggan dengan Transaksi Terbanyak</h3>
+          <p>5 pelanggan paling aktif berdasarkan jumlah order. Order dibatalkan tidak dihitung.</p>
+        </div>
+        <button type="button" className="secondary-button" onClick={()=>navigate('/customers')}>Lihat Pelanggan</button>
+      </div>
+
+      {topCustomers.length===0
+        ? <div className="table-empty">Belum ada transaksi pelanggan.</div>
+        : <div className="top-customer-list">
+            {topCustomers.map((customer,index)=><button
+              type="button"
+              className="top-customer-row"
+              key={`${customer.phone}-${customer.name}-${index}`}
+              onClick={()=>navigate(`/orders?customer=${encodeURIComponent(customer.phone||customer.name)}`)}
+              title="Klik untuk lihat order pelanggan"
+            >
+              <span className={`top-customer-rank rank-${index+1}`}>
+                {index===0?<Crown size={16}/>:index+1}
+              </span>
+              <div className="top-customer-info">
+                <b>{customer.name}</b>
+                <small>{customer.phone||'Tanpa nomor telepon'}</small>
+              </div>
+              <div className="top-customer-stat">
+                <span>Transaksi</span>
+                <strong>{customer.count}</strong>
+              </div>
+              <div className="top-customer-stat">
+                <span>Total Belanja</span>
+                <strong>{formatIDR(customer.total)}</strong>
+              </div>
+              <div className="top-customer-stat">
+                <span>Terakhir</span>
+                <strong>{new Date(customer.lastOrder).toLocaleDateString('id-ID')}</strong>
+              </div>
+            </button>)}
+          </div>}
+    </section>
+
     <section className="panel recent-orders">
       <div className="panel-heading"><div><h3>Order Terbaru</h3><p>10 transaksi terbaru.</p></div></div>
       <div className="table-wrap"><table><thead><tr><th>Order</th><th>Pelanggan</th><th>Status</th><th>Total</th><th>Sisa</th><th>Dibuat</th></tr></thead>

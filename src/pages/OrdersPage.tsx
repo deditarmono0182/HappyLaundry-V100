@@ -97,10 +97,20 @@ export function OrdersPage() {
   useEffect(() => { void load() }, [load])
   useEffect(()=>{
     const orderParam=searchParams.get('order')?.trim()
-    if(!orderParam||rows.length===0)return
-    setQuery(orderParam)
-    const found=rows.find(row=>row.order_no.toLowerCase()===orderParam.toLowerCase())
-    if(found)setDetail(found)
+    const customerParam=searchParams.get('customer')?.trim()
+
+    if(orderParam){
+      setQuery(orderParam)
+      if(rows.length){
+        const found=rows.find(row=>row.order_no.toLowerCase()===orderParam.toLowerCase())
+        if(found)setDetail(found)
+      }
+      return
+    }
+
+    if(customerParam){
+      setQuery(customerParam)
+    }
   },[searchParams,rows])
 
   const serviceItemsByOrder=useMemo(()=>{

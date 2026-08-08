@@ -7090,3 +7090,94 @@ body{
     width:max-content;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.7 — Top Customers Dashboard
+   ========================================================= */
+.dashboard-top-customers{
+  margin-top:18px!important;
+}
+.dashboard-top-customers-heading h3{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.dashboard-top-customers-heading h3 svg{
+  color:#1e88e5;
+}
+.top-customer-list{
+  display:grid;
+  gap:7px;
+  margin-top:10px;
+}
+.top-customer-row{
+  width:100%;
+  display:grid;
+  grid-template-columns:42px minmax(180px,1.4fr) 110px 160px 110px;
+  align-items:center;
+  gap:10px;
+  padding:11px 12px;
+  border:1px solid #dce9f2;
+  border-radius:12px;
+  background:#fff;
+  text-align:left;
+  cursor:pointer;
+}
+.top-customer-row:hover{
+  border-color:#8fc5e7;
+  background:#f7fbff;
+  box-shadow:0 7px 18px rgba(30,112,169,.08);
+}
+.top-customer-rank{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:#edf6fc;
+  color:#1c74ad;
+  font-weight:950;
+  font-size:11px;
+}
+.top-customer-rank.rank-1{
+  background:#fff4cf;
+  color:#a87400;
+}
+.top-customer-info{
+  display:grid;
+  gap:2px;
+}
+.top-customer-info b{
+  color:#164d73;
+  font-size:11px;
+}
+.top-customer-info small{
+  color:#7b909f;
+  font-size:8.8px;
+}
+.top-customer-stat{
+  display:grid;
+  gap:2px;
+}
+.top-customer-stat span{
+  color:#7b909f;
+  font-size:8px;
+  font-weight:750;
+}
+.top-customer-stat strong{
+  color:#164d73;
+  font-size:10.5px;
+}
+@media(max-width:850px){
+  .top-customer-row{
+    grid-template-columns:38px 1fr auto;
+  }
+  .top-customer-stat:nth-of-type(2),
+  .top-customer-stat:nth-of-type(3){
+    grid-column:2/-1;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+}
