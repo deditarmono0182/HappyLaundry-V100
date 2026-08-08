@@ -257,10 +257,32 @@ export function CashierPage() {
         display:grid;place-items:center;background:#fff;color:#185f8d;
         font:900 23px/1 Arial;box-shadow:0 8px 24px rgba(20,75,112,.16);cursor:pointer
       }
-      @media(max-width:600px){
-        body{padding-top:${size==='a4'?'10mm':'14mm'}}
-        .no-print{display:grid}
-        .no-print button{width:100%;min-height:44px}
+      @media screen and (max-width:700px){
+        body{
+          width:min(94vw,430px)!important;
+          max-width:94vw!important;
+          padding:22px 18px 28px!important;
+          padding-top:calc(22px + env(safe-area-inset-top))!important;
+          font-size:14px!important;
+          line-height:1.35!important;
+        }
+        .title{font-size:22px!important;margin-top:8px!important}
+        .meta td,.summary td{padding:5px 0!important;font-size:13px!important}
+        .items th{font-size:13px!important;padding:7px 0!important}
+        .items td{font-size:13px!important;padding:8px 0!important}
+        .items small{font-size:11px!important}
+        .grand{font-size:18px!important}
+        .small{font-size:11px!important;line-height:1.35!important}
+        .qr{width:122px!important;height:122px!important;margin:10px auto!important}
+        .barcode{height:56px!important;margin-top:10px!important}
+        .barcode i{height:54px!important}
+        .order-code{font-size:11px!important}
+        .footer{font-size:12px!important;margin-top:12px!important}
+        .line{margin:11px 0!important}
+        .no-print{display:grid!important;gap:9px!important;margin-top:18px!important}
+        .no-print button{width:100%!important;min-height:48px!important;font-size:13px!important}
+        .preview-top-close{width:48px!important;height:48px!important;right:14px!important;top:max(12px,env(safe-area-inset-top))!important}
+        .logo{max-height:105px!important}
       }
       @media print{.no-print,.preview-top-close{display:none!important}}
     </style>

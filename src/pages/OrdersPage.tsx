@@ -458,6 +458,25 @@ export function OrdersPage() {
             box-shadow:0 8px 24px rgba(20,75,112,.16);
             cursor:pointer
           }
+          @media screen and (max-width:700px){
+            body{
+              width:min(94vw,430px)!important;
+              max-width:94vw!important;
+              padding:22px 18px 28px!important;
+              padding-top:calc(22px + env(safe-area-inset-top))!important;
+              font-size:14px!important;
+              line-height:1.35!important;
+            }
+            h2{font-size:22px!important}
+            .row,.service-row{font-size:13px!important;margin:7px 0!important}
+            .strong{font-size:17px!important}
+            .small{font-size:11px!important}
+            .line{margin:11px 0!important}
+            .reprint-label{font-size:10px!important;padding:5px 9px!important}
+            .preview-actions{margin-top:18px!important}
+            .preview-actions button{min-height:48px!important;font-size:13px!important}
+            .top-close{width:48px!important;height:48px!important;right:14px!important;top:max(12px,env(safe-area-inset-top))!important}
+          }
           @media print{
             .preview-actions,.top-close{display:none!important}
           }

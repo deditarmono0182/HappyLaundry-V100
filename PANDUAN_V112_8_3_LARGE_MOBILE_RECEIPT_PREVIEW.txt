@@ -1,0 +1,31 @@
+HAPPYLAUNDRY ENTERPRISE V112.8.3 — PREVIEW NOTA BESAR DI IPHONE
+
+Preview nota Kasir sekarang diperbesar di layar HP/iPhone:
+- lebar sekitar 94% layar
+- huruf lebih besar
+- QR lebih besar
+- barcode lebih besar
+- tombol Cetak / Simpan PDF lebih besar
+- tombol Tutup Preview dan X lebih besar
+
+PENTING:
+Ukuran hasil CETAK tidak berubah.
+Thermal 58 mm tetap 58 mm.
+Thermal 80 mm tetap 80 mm.
+A4 tetap A4.
+
+Perubahan hanya untuk tampilan layar menggunakan @media screen.
+
+Cetak Ulang Nota dari halaman Order juga ikut diperbesar.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.8.3.
+2. Tunggu Netlify Published.
+3. Refresh aplikasi di iPhone.
+4. Buat transaksi Kasir.
+5. Preview nota akan tampil jauh lebih besar.
+
+CACHE:
+happylaundry-v112-8-3

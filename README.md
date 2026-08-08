@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.8.2 Reprint Receipt
+# HappyLaundry Enterprise V112.8.3 Large Mobile Receipt Preview
 
 ## Jalankan
 ```bash
@@ -282,3 +282,7 @@ Preview nota mempunyai tombol X kanan atas dan ← Tutup Preview Nota dengan fal
 
 ## V112.8.2
 Tombol Cetak Ulang Nota dibuat jelas di Order dan Detail Order, dengan preview, layanan, Cetak/PDF, X, dan Tutup Preview untuk iPhone.
+
+
+## V112.8.3
+Preview nota Kasir dan Cetak Ulang diperbesar di iPhone/HP tanpa mengubah ukuran hasil print thermal/A4.
