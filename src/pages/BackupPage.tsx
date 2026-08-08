@@ -1,9 +1,8 @@
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import {
   AlertTriangle, CheckCircle2, DatabaseBackup, Download, FileUp,
   RotateCcw, ShieldAlert, ShieldCheck, Trash2
 } from 'lucide-react'
-import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
@@ -60,18 +59,17 @@ export function BackupPage(){
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
   const [success,setSuccess]=useState('')
-  const [resetType,setResetType]=useState<ResetType|null>(null)
+  const [selectedReset,setSelectedReset]=useState<ResetType|null>(null)
   const [confirmation,setConfirmation]=useState('')
   const [resetBusy,setResetBusy]=useState(false)
   const [resetStatus,setResetStatus]=useState('')
+  const [resetResult,setResetResult]=useState('')
   const [orderDiagnostic,setOrderDiagnostic]=useState<{
     table_count:number
     view_count:number
     rpc_version?:string
   }|null>(null)
-  const [directResetCode,setDirectResetCode]=useState('')
-  const [directResetBusy,setDirectResetBusy]=useState(false)
-  const [directResetMessage,setDirectResetMessage]=useState('')
+
 
   const exportBackup=async()=>{
     setBusy(true);setMessage('');setSuccess('')
@@ -136,10 +134,11 @@ export function BackupPage(){
       setMessage('Hanya Owner yang dapat melakukan Reset Data.')
       return
     }
+    setSelectedReset(type)
+    setConfirmation('')
+    setResetResult('')
     setMessage('')
     setSuccess('')
-    setConfirmation('')
-    setResetType(type)
   }
 
   const checkOrderCount=async()=>{
@@ -164,76 +163,36 @@ export function BackupPage(){
     })
   }
 
-  const directResetOrders=async()=>{
+  const executeSelectedReset=async()=>{
+    if(!selectedReset)return
+    const info=resetInfo[selectedReset]
+
     if(!isOwner){
-      setDirectResetMessage('Hanya Owner yang dapat Reset Order.')
-      return
-    }
-    if(directResetCode.trim().toUpperCase()!=='RESET ORDER'){
-      setDirectResetMessage('Ketik tepat: RESET ORDER')
+      setResetResult('Hanya Owner yang dapat melakukan Reset Data.')
       return
     }
 
-    setDirectResetBusy(true)
-    setDirectResetMessage('Menghapus seluruh data order...')
+    if(confirmation.trim().toUpperCase()!==info.confirm){
+      setResetResult(`Ketik tepat: ${info.confirm}`)
+      return
+    }
+
+    setResetBusy(true)
+    setResetStatus(`Menjalankan ${info.title}...`)
+    setResetResult('')
     setMessage('')
     setSuccess('')
 
-    const{data,error}=await supabase.rpc('v110_reset_orders_v4',{
-      p_confirmation:'RESET ORDER'
+    const{data,error}=await supabase.rpc('v110_reset_data_v5',{
+      p_reset_type:selectedReset,
+      p_confirmation:info.confirm
     })
 
-    if(error){
-      setDirectResetBusy(false)
-      setDirectResetMessage(`RESET GAGAL: ${error.message}`)
-      return
-    }
-
-    const result=(Array.isArray(data)?data[0]:data) as {
-      before_count?:number
-      after_count?:number
-      view_count?:number
-      rpc_version?:string
-      message?:string
-    }|null
-
-    setOrderDiagnostic({
-      table_count:Number(result?.after_count||0),
-      view_count:Number(result?.view_count||0),
-      rpc_version:result?.rpc_version||'110.7.4'
-    })
-    setDirectResetCode('')
-    setDirectResetBusy(false)
-    setDirectResetMessage(
-      `${result?.message||'Reset selesai.'} Sebelum: ${Number(result?.before_count||0)}. Sesudah: ${Number(result?.after_count||0)}.`
-    )
-  }
-
-  const executeReset=async(event:FormEvent)=>{
-    event.preventDefault()
-    if(!resetType)return
-    const info=resetInfo[resetType]
-    if(confirmation.trim().toUpperCase()!==info.confirm){
-      setMessage(`Ketik tepat: ${info.confirm}`)
-      return
-    }
-
-    setResetBusy(true);setMessage('');setSuccess('')
-    setResetStatus(`Menjalankan ${info.title}...`)
-
-    const request=resetType==='orders'
-      ? supabase.rpc('v110_reset_orders_hard_v3',{p_confirmation:info.confirm})
-      : supabase.rpc('v110_reset_data',{
-          p_reset_type:resetType,
-          p_confirmation:info.confirm
-        })
-
-    const{data,error}=await request
+    setResetStatus('')
 
     if(error){
-      setResetStatus('')
-      setMessage(`Reset gagal: ${error.message}`)
       setResetBusy(false)
+      setResetResult(`RESET GAGAL: ${error.message}`)
       return
     }
 
@@ -242,34 +201,31 @@ export function BackupPage(){
       orders_deleted?:number
       customers_deleted?:number
       services_deleted?:number
-      remaining_orders?:number
       table_count?:number
       view_count?:number
       rpc_version?:string
     }|null
 
-    const deleted=Number(result?.orders_deleted||0)
-    const remaining=Number(result?.remaining_orders||0)
-
-    setResetType(null)
-    setConfirmation('')
-    setResetBusy(false)
-    setResetStatus('')
-
-    if(resetType==='orders'){
+    if(selectedReset==='orders'||selectedReset==='customers'||selectedReset==='all'){
       setOrderDiagnostic({
-        table_count:Number(result?.table_count??result?.remaining_orders??0),
-        view_count:Number(result?.view_count??0),
-        rpc_version:result?.rpc_version
+        table_count:Number(result?.table_count||0),
+        view_count:Number(result?.view_count||0),
+        rpc_version:result?.rpc_version||'110.7.5'
       })
     }
 
-    setSuccess(
-      result?.message
-        ? `${result.message} Order dihapus: ${deleted}. Sisa tabel: ${Number(result?.table_count??remaining)}. Sisa view: ${Number(result?.view_count??0)}.`
-        : `${info.title} berhasil.`
-    )
+    const parts=[
+      result?.message||'Reset berhasil.',
+      Number(result?.orders_deleted||0)>0?`Order: ${Number(result?.orders_deleted||0)}`:'',
+      Number(result?.customers_deleted||0)>0?`Pelanggan: ${Number(result?.customers_deleted||0)}`:'',
+      Number(result?.services_deleted||0)>0?`Layanan: ${Number(result?.services_deleted||0)}`:''
+    ].filter(Boolean)
+
+    setResetBusy(false)
+    setResetResult(parts.join(' • '))
+    setConfirmation('')
   }
+
 
   return <>
     <PageHeader
@@ -278,7 +234,7 @@ export function BackupPage(){
       description="Unduh salinan data, pulihkan master data, dan kelola reset data dengan aman."
     />
 
-    <div className="backup-version-badge">Versi Reset Aktif: <b>V110.7.4</b></div>
+    <div className="backup-version-badge">Versi Reset Aktif: <b>V110.7.5</b></div>
 
     <section className="backup-grid">
       <article className="panel backup-card">
@@ -312,14 +268,13 @@ export function BackupPage(){
       </article>
     </section>
 
-    <section className="panel reset-diagnostic-panel reset-direct-panel">
+    <section className="panel reset-diagnostic-panel">
       <div>
-        <b>Diagnostic & Reset Order Langsung</b>
-        <span>Cek jumlah order langsung dari database dan reset tanpa melalui modal lama.</span>
+        <b>Diagnostic Order</b>
+        <span>Cek jumlah order langsung dari database sebelum atau sesudah reset.</span>
       </div>
-
       <div className="reset-diagnostic-actions">
-        <button type="button" className="secondary-button" onClick={()=>void checkOrderCount()} disabled={directResetBusy}>
+        <button type="button" className="secondary-button" onClick={()=>void checkOrderCount()} disabled={resetBusy}>
           Cek Jumlah Order
         </button>
       </div>
@@ -329,39 +284,6 @@ export function BackupPage(){
         <span>View v100_orders_view <b>{orderDiagnostic.view_count}</b></span>
         <span>RPC <b>{orderDiagnostic.rpc_version||'-'}</b></span>
       </div>}
-
-      <div className="direct-reset-box">
-        <div>
-          <AlertTriangle size={20}/>
-          <span>
-            <b>Reset seluruh data Order</b>
-            <small>Order, item order, dan pembayaran akan dihapus. Pelanggan dan Layanan tetap ada.</small>
-          </span>
-        </div>
-
-        <label>
-          Ketik <strong>RESET ORDER</strong>
-          <input
-            value={directResetCode}
-            onChange={e=>setDirectResetCode(e.target.value)}
-            placeholder="RESET ORDER"
-            disabled={directResetBusy}
-          />
-        </label>
-
-        <button
-          type="button"
-          className="reset-confirm-button"
-          onClick={()=>void directResetOrders()}
-          disabled={directResetBusy||directResetCode.trim().toUpperCase()!=='RESET ORDER'}
-        >
-          <Trash2 size={17}/>{directResetBusy?'Menghapus...':'RESET ORDER SEKARANG'}
-        </button>
-
-        {directResetMessage&&<div className={`direct-reset-message ${directResetMessage.startsWith('RESET GAGAL')?'error':''}`}>
-          {directResetMessage}
-        </div>}
-      </div>
     </section>
 
     <section className="panel reset-data-panel">
@@ -370,31 +292,102 @@ export function BackupPage(){
         <div>
           <span className="eyebrow">OWNER ONLY • DANGER ZONE</span>
           <h2>Reset Data</h2>
-          <p>Gunakan untuk membersihkan data tertentu. Lakukan <b>Download Backup</b> terlebih dahulu.</p>
+          <p>Pilih data yang ingin dibersihkan. <b>Download Backup</b> terlebih dahulu.</p>
         </div>
       </div>
 
       <div className="reset-data-options">
-        <button type="button" onClick={()=>openReset('orders')} disabled={!isOwner}>
+        <button
+          type="button"
+          className={selectedReset==='orders'?'selected':''}
+          onClick={()=>openReset('orders')}
+          disabled={!isOwner||resetBusy}
+        >
           <RotateCcw size={21}/>
           <span><b>Data Order</b><small>Order, pembayaran, item, dan kas terkait order.</small></span>
         </button>
 
-        <button type="button" onClick={()=>openReset('customers')} disabled={!isOwner}>
+        <button
+          type="button"
+          className={selectedReset==='customers'?'selected':''}
+          onClick={()=>openReset('customers')}
+          disabled={!isOwner||resetBusy}
+        >
           <RotateCcw size={21}/>
           <span><b>Data Pelanggan</b><small>Pelanggan + order/transaksi yang bergantung padanya.</small></span>
         </button>
 
-        <button type="button" onClick={()=>openReset('services')} disabled={!isOwner}>
+        <button
+          type="button"
+          className={selectedReset==='services'?'selected':''}
+          onClick={()=>openReset('services')}
+          disabled={!isOwner||resetBusy}
+        >
           <RotateCcw size={21}/>
           <span><b>Data Layanan</b><small>Hapus daftar layanan untuk dibuat ulang.</small></span>
         </button>
 
-        <button type="button" className="reset-all-button" onClick={()=>openReset('all')} disabled={!isOwner}>
+        <button
+          type="button"
+          className={`reset-all-button ${selectedReset==='all'?'selected':''}`}
+          onClick={()=>openReset('all')}
+          disabled={!isOwner||resetBusy}
+        >
           <Trash2 size={21}/>
           <span><b>ALL DATA</b><small>Reset seluruh data operasional. Akun login tetap aman.</small></span>
         </button>
       </div>
+
+      {selectedReset&&<div className={`reset-inline-confirm ${selectedReset==='all'?'critical':''}`}>
+        <div className="reset-inline-info">
+          <AlertTriangle size={24}/>
+          <div>
+            <b>{resetInfo[selectedReset].title}</b>
+            <span>{resetInfo[selectedReset].description}</span>
+            <small>{resetInfo[selectedReset].warning}</small>
+          </div>
+        </div>
+
+        <label>
+          Untuk konfirmasi ketik
+          <strong>{resetInfo[selectedReset].confirm}</strong>
+          <input
+            value={confirmation}
+            onChange={e=>setConfirmation(e.target.value)}
+            placeholder={resetInfo[selectedReset].confirm}
+            autoComplete="off"
+            disabled={resetBusy}
+          />
+        </label>
+
+        {resetStatus&&<div className="reset-running-status">{resetStatus}</div>}
+        {resetResult&&<div className={`direct-reset-message ${resetResult.startsWith('RESET GAGAL')?'error':''}`}>
+          {resetResult}
+        </div>}
+
+        <div className="reset-inline-actions">
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={()=>{
+              setSelectedReset(null)
+              setConfirmation('')
+              setResetResult('')
+            }}
+            disabled={resetBusy}
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            className="reset-confirm-button"
+            onClick={()=>void executeSelectedReset()}
+            disabled={resetBusy||confirmation.trim().toUpperCase()!==resetInfo[selectedReset].confirm}
+          >
+            <Trash2 size={17}/>{resetBusy?'Menghapus...':'RESET SEKARANG'}
+          </button>
+        </div>
+      </div>}
 
       {!isOwner&&<div className="reset-owner-note">
         <AlertTriangle size={17}/>Reset Data hanya tersedia untuk akun Owner.
@@ -403,47 +396,5 @@ export function BackupPage(){
 
     {message&&<div className="error-box inline-message">{message}</div>}
     {success&&<div className="success-box inline-message"><CheckCircle2 size={18}/>{success}</div>}
-
-    {resetType&&<Modal title={resetInfo[resetType].title} onClose={()=>!resetBusy&&setResetType(null)}>
-      <form className="modal-form reset-confirm-form" onSubmit={executeReset}>
-        <div className={`reset-confirm-warning ${resetType==='all'?'critical':''}`}>
-          <AlertTriangle size={28}/>
-          <div>
-            <b>{resetInfo[resetType].description}</b>
-            <span>{resetInfo[resetType].warning}</span>
-          </div>
-        </div>
-
-        <div className="reset-backup-reminder">
-          <DatabaseBackup size={18}/>
-          <span>Setelah kode konfirmasi benar, tombol Reset Sekarang akan langsung menjalankan reset.</span>
-        </div>
-
-        <label>
-          Untuk konfirmasi, ketik:
-          <strong className="reset-confirm-code">{resetInfo[resetType].confirm}</strong>
-          <input
-            value={confirmation}
-            onChange={e=>setConfirmation(e.target.value)}
-            placeholder={resetInfo[resetType].confirm}
-            autoComplete="off"
-            disabled={resetBusy}
-          />
-        </label>
-
-        {resetStatus&&<div className="reset-running-status">{resetStatus}</div>}
-
-        <div className="form-actions">
-          <button type="button" className="secondary-button" onClick={()=>setResetType(null)} disabled={resetBusy}>Batal</button>
-          <button
-            type="submit"
-            className="reset-confirm-button"
-            disabled={resetBusy||confirmation.trim().toUpperCase()!==resetInfo[resetType].confirm}
-          >
-            <Trash2 size={17}/>{resetBusy?'Menghapus...':'Reset Sekarang'}
-          </button>
-        </div>
-      </form>
-    </Modal>}
   </>
 }

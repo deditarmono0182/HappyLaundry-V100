@@ -5388,3 +5388,96 @@ body{
   .reset-diagnostic-actions button{width:100%}
   .direct-reset-box label{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   HappyLaundry V110.7.5 — Unified Reset Buttons
+   ========================================================= */
+
+.reset-data-options>button.selected{
+  border-color:#d76c60!important;
+  background:#fff1ef!important;
+  box-shadow:0 0 0 2px rgba(207,70,57,.08)!important;
+}
+
+.reset-inline-confirm{
+  display:grid;
+  gap:12px;
+  margin-top:14px;
+  padding:14px;
+  border:1px solid #efc2bc;
+  border-radius:13px;
+  background:#fff8f7;
+}
+
+.reset-inline-confirm.critical{
+  border-color:#df8075;
+  background:#fff2f0;
+}
+
+.reset-inline-info{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.reset-inline-info>svg{
+  color:#c54438;
+  flex:0 0 auto;
+}
+
+.reset-inline-info>div{
+  display:grid;
+  gap:4px;
+}
+
+.reset-inline-info b{
+  color:#8e3e36!important;
+  font-size:13px!important;
+  font-weight:950!important;
+}
+
+.reset-inline-info span{
+  color:#725c59!important;
+  font-size:10.5px!important;
+  font-weight:750!important;
+}
+
+.reset-inline-info small{
+  color:#906b66!important;
+  font-size:9.5px!important;
+  font-weight:650!important;
+}
+
+.reset-inline-confirm label{
+  display:grid!important;
+  grid-template-columns:190px 155px minmax(220px,1fr);
+  align-items:center;
+  gap:10px!important;
+}
+
+.reset-inline-confirm label strong{
+  display:inline-flex;
+  padding:5px 7px;
+  border-radius:7px;
+  background:#ffe8e4;
+  color:#b83d32!important;
+  font-size:10.5px!important;
+  font-weight:950!important;
+}
+
+.reset-inline-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+@media(max-width:760px){
+  .reset-inline-confirm label{
+    grid-template-columns:1fr;
+  }
+  .reset-inline-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+}

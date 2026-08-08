@@ -1,0 +1,75 @@
+HAPPYLAUNDRY ENTERPRISE V110.7.5 — ALL RESET BUTTONS FIX
+
+MASALAH:
+Reset Order langsung V110.7.4 berhasil.
+Tetapi tombol bawah:
+- Data Order
+- Data Pelanggan
+- Data Layanan
+- ALL DATA
+masih memakai mekanisme/modal lama.
+
+V110.7.5:
+Semua tombol bawah sekarang memakai SATU mekanisme direct reset baru.
+
+ALUR:
+1. Klik kartu reset.
+2. Panel konfirmasi muncul langsung di bawah kartu.
+3. Ketik kode:
+   Data Order      -> RESET ORDER
+   Data Pelanggan  -> RESET PELANGGAN
+   Data Layanan    -> RESET LAYANAN
+   ALL DATA        -> RESET ALL DATA
+4. Klik RESET SEKARANG.
+5. Hasil sukses/error tampil langsung di panel.
+
+SQL BARU:
+supabase/022_v110_7_5_all_reset_buttons_fix.sql
+
+PERILAKU:
+DATA ORDER:
+- hapus order
+- item order
+- pembayaran
+- kas terkait order
+- pelanggan tetap
+- layanan tetap
+
+DATA PELANGGAN:
+- hapus order dan transaksi terkait terlebih dulu
+- hapus seluruh pelanggan
+- layanan tetap
+
+DATA LAYANAN:
+- hapus seluruh master layanan
+- pelanggan tetap
+- order lama tidak sengaja dihapus oleh reset ini
+- referensi service item lama menjadi null sesuai FK
+
+ALL DATA:
+- order/transaksi
+- pelanggan
+- layanan
+- pengeluaran
+- stok/pergerakan stok
+- supplier
+- kas operasional
+
+TETAP DISIMPAN:
+- akun Owner
+- akun Karyawan
+- login/password
+- pengaturan toko
+- kategori pengeluaran
+- konfigurasi persentase bagi hasil
+
+CARA PASANG:
+1. Jalankan SQL 022 di Supabase.
+2. Pastikan Success.
+3. Deploy V110.7.5.
+4. Pastikan halaman Backup menampilkan:
+   Versi Reset Aktif: V110.7.5
+5. Coba setiap tombol bawah.
+
+SEBELUM RESET:
+Download Backup terlebih dahulu.

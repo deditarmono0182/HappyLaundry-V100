@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.7.4 Direct Reset Order
+# HappyLaundry Enterprise V110.7.5 All Reset Buttons Fix
 
 ## Jalankan
 ```bash
@@ -186,3 +186,7 @@ Database diagnostic for v100_orders/view + hard reset RPC with table locks and p
 
 ## V110.7.4
 Direct Reset Order from diagnostic panel using owner-only TRUNCATE v100_orders CASCADE and immediate verification.
+
+
+## V110.7.5
+Semua tombol Reset Data memakai direct inline confirmation + unified Owner-only RPC.
