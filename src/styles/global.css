@@ -7485,3 +7485,188 @@ body{
     width:100%;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.8.5 — Courier Delivery Proof
+   ========================================================= */
+.delivery-confirm-button,
+.delivery-proof-badge{
+  min-height:32px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding:0 8px;
+  border-radius:9px;
+  font-size:8.5px;
+  font-weight:900;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.delivery-confirm-button{
+  border:1px solid #b9d9ed;
+  background:#eef7ff;
+  color:#176a9f;
+}
+.delivery-proof-badge{
+  border:1px solid #b9e1cf;
+  background:#edf9f3;
+  color:#0e8258;
+}
+.delivery-proof-form{
+  gap:13px!important;
+}
+.delivery-order-summary{
+  display:grid;
+  gap:7px;
+  padding:11px;
+  border:1px solid #dbe8ef;
+  border-radius:11px;
+  background:#f8fbfd;
+}
+.delivery-order-summary>div{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.delivery-order-summary span{
+  color:#718998;
+  font-size:9px;
+}
+.delivery-order-summary b{
+  color:#174e72;
+  font-size:10.5px;
+}
+.delivery-photo-upload{
+  position:relative;
+  min-height:84px;
+  display:flex!important;
+  align-items:center;
+  gap:12px!important;
+  padding:13px!important;
+  border:2px dashed #a9cee4!important;
+  border-radius:13px!important;
+  background:#f3faff;
+  color:#176a9f!important;
+  cursor:pointer;
+}
+.delivery-photo-upload>span{
+  display:grid;
+  gap:3px;
+}
+.delivery-photo-upload b{
+  font-size:11px;
+}
+.delivery-photo-upload small{
+  font-size:8.8px;
+  color:#718998;
+}
+.delivery-photo-upload input{
+  position:absolute;
+  width:1px!important;
+  height:1px!important;
+  opacity:0;
+  pointer-events:none;
+}
+.delivery-photo-preview{
+  min-height:180px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid #d4e5ef;
+  border-radius:13px;
+  background:#f8fbfd;
+}
+.delivery-photo-preview img{
+  display:block;
+  width:100%;
+  max-height:360px;
+  object-fit:contain;
+}
+.delivery-confirm-info{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  padding:10px;
+  border:1px solid #bfe3d2;
+  border-radius:11px;
+  background:#f0faf5;
+}
+.delivery-confirm-info svg{
+  color:#0e9364;
+  flex:0 0 auto;
+}
+.delivery-confirm-info span{
+  display:grid;
+  gap:3px;
+}
+.delivery-confirm-info b{
+  color:#17684d;
+  font-size:10px;
+}
+.delivery-confirm-info small{
+  color:#628477;
+  font-size:8.8px;
+}
+.order-detail-delivery{
+  align-items:flex-start!important;
+}
+.order-detail-delivery-proof{
+  display:grid!important;
+  gap:3px;
+  justify-items:end;
+}
+.order-detail-delivery-proof a{
+  display:block;
+}
+.order-detail-delivery-proof img{
+  width:110px;
+  height:82px;
+  object-fit:cover;
+  border-radius:9px;
+  border:1px solid #d4e4ec;
+}
+.order-detail-delivery-proof b{
+  color:#0d875c!important;
+}
+.order-detail-delivery-proof small{
+  color:#718998!important;
+  font-size:8.5px!important;
+}
+@media(max-width:700px){
+  .delivery-confirm-button,
+  .delivery-proof-badge{
+    min-height:36px;
+  }
+  .delivery-photo-preview img{
+    max-height:300px;
+  }
+}
+
+
+/* =========================================================
+   HappyLaundry V112.8.6 — Tracking Pelanggan di Detail Order
+   ========================================================= */
+.order-detail-actions{
+  display:flex!important;
+  flex-wrap:wrap;
+  gap:8px!important;
+}
+.order-detail-tracking{
+  min-width:180px;
+}
+.order-detail-tracking-row b{
+  color:#1b6f9f!important;
+  font-size:9.5px!important;
+  word-break:break-all;
+}
+@media(max-width:620px){
+  .order-detail-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+  }
+  .order-detail-actions button{
+    width:100%;
+  }
+}

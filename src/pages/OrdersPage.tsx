@@ -7,10 +7,13 @@ import {
   Eye,
   FileSpreadsheet,
   FileText,
+  ExternalLink,
+  Image,
   PackageCheck,
   Plus,
   Printer,
   Search,
+  Truck,
   ShoppingBag,
   Trash2
 } from 'lucide-react'
@@ -18,6 +21,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { downloadXls, printPdf } from '../lib/exportData'
+import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
@@ -41,8 +45,20 @@ type OrderServiceItem={
   quantity:number
 }
 
+type DeliveryProof={
+  id:string
+  order_id:string
+  order_no:string
+  photo_url:string
+  photo_path:string
+  note:string|null
+  delivered_at:string
+  confirmed_by_name:string|null
+}
+
 export function OrdersPage() {
   const [searchParams]=useSearchParams()
+  const {profile}=useAuth()
   const [rows, setRows] = useState<OrderRow[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [services, setServices] = useState<Service[]>([])
@@ -59,11 +75,17 @@ export function OrdersPage() {
   const [form, setForm] = useState(emptyOrder)
   const [items, setItems] = useState<OrderItemDraft[]>([])
   const [quantityDraft, setQuantityDraft] = useState<Record<string,string>>({})
+  const [deliveryProofs,setDeliveryProofs]=useState<DeliveryProof[]>([])
+  const [deliveryOrder,setDeliveryOrder]=useState<OrderRow|null>(null)
+  const [deliveryFile,setDeliveryFile]=useState<File|null>(null)
+  const [deliveryPreview,setDeliveryPreview]=useState('')
+  const [deliveryNote,setDeliveryNote]=useState('')
+  const [deliveryBusy,setDeliveryBusy]=useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     setMessage('')
-    const [ordersResult, customersResult, servicesResult, orderItemsResult] = await Promise.all([
+    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult] = await Promise.all([
       supabase
         .from('v100_orders_view')
         .select('*')
@@ -80,16 +102,21 @@ export function OrdersPage() {
       supabase
         .from('v100_order_items')
         .select('order_id,service_name,unit,quantity')
-        .order('created_at')
+        .order('created_at'),
+      supabase
+        .from('v112_delivery_proofs')
+        .select('id,order_id,order_no,photo_url,photo_path,note,delivered_at,confirmed_by_name')
+        .order('delivered_at',{ascending:false})
     ])
 
-    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error
+    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error
     if (error) setMessage(error.message)
     else {
       setRows((ordersResult.data as OrderRow[]) || [])
       setCustomers((customersResult.data as Customer[]) || [])
       setServices((servicesResult.data as Service[]) || [])
       setOrderServiceItems((orderItemsResult.data as OrderServiceItem[]) || [])
+      setDeliveryProofs((deliveryResult.data as DeliveryProof[]) || [])
     }
     setLoading(false)
   }, [])
@@ -133,6 +160,106 @@ export function OrdersPage() {
         : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
       return `${item.service_name} ${formattedQty} ${item.unit}`
     }).join(' • ')
+  }
+
+  const deliveryProofByOrder=useMemo(()=>{
+    const map=new Map<string,DeliveryProof>()
+    for(const proof of deliveryProofs){
+      if(!map.has(proof.order_id))map.set(proof.order_id,proof)
+    }
+    return map
+  },[deliveryProofs])
+
+  const openDelivery=(row:OrderRow)=>{
+    setDeliveryOrder(row)
+    setDeliveryFile(null)
+    setDeliveryPreview('')
+    setDeliveryNote('')
+    setMessage('')
+  }
+
+  const chooseDeliveryFile=(file:File|null)=>{
+    if(!file)return
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
+      setMessage('Foto bukti harus JPG, PNG, atau WEBP.')
+      return
+    }
+    if(file.size>5*1024*1024){
+      setMessage('Ukuran foto maksimal 5 MB.')
+      return
+    }
+    setDeliveryFile(file)
+    const url=URL.createObjectURL(file)
+    setDeliveryPreview(current=>{
+      if(current.startsWith('blob:'))URL.revokeObjectURL(current)
+      return url
+    })
+  }
+
+  const submitDelivery=async()=>{
+    if(!deliveryOrder)return
+    if(!deliveryFile){
+      setMessage('Foto bukti pengiriman wajib diambil atau dipilih.')
+      return
+    }
+
+    if(!window.confirm(`${deliveryOrder.order_no}\nKonfirmasi barang sudah dikirim dan diterima pelanggan?`))return
+
+    setDeliveryBusy(true)
+    setMessage('')
+
+    try{
+      const ext=(deliveryFile.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg'
+      const safeOrder=deliveryOrder.order_no.replace(/[^a-zA-Z0-9_-]/g,'_')
+      const path=`${safeOrder}/${Date.now()}.${ext}`
+
+      const upload=await supabase.storage
+        .from('delivery-proofs')
+        .upload(path,deliveryFile,{
+          cacheControl:'3600',
+          upsert:false,
+          contentType:deliveryFile.type
+        })
+
+      if(upload.error)throw upload.error
+
+      const publicData=supabase.storage.from('delivery-proofs').getPublicUrl(path)
+      const photoUrl=publicData.data.publicUrl
+
+      const proof=await supabase.from('v112_delivery_proofs').insert({
+        order_id:deliveryOrder.id,
+        order_no:deliveryOrder.order_no,
+        photo_url:photoUrl,
+        photo_path:path,
+        note:deliveryNote.trim()||null,
+        confirmed_by_name:profile?.full_name||profile?.login_id||'Karyawan',
+        delivered_at:new Date().toISOString()
+      })
+
+      if(proof.error){
+        await supabase.storage.from('delivery-proofs').remove([path])
+        throw proof.error
+      }
+
+      const update=await supabase
+        .from('v100_orders')
+        .update({status:'completed',updated_at:new Date().toISOString()})
+        .eq('id',deliveryOrder.id)
+
+      if(update.error)throw update.error
+
+      if(deliveryPreview.startsWith('blob:'))URL.revokeObjectURL(deliveryPreview)
+      setDeliveryOrder(null)
+      setDeliveryFile(null)
+      setDeliveryPreview('')
+      setDeliveryNote('')
+      await load()
+      window.alert(`${deliveryOrder.order_no} berhasil dikonfirmasi TELAH DIKIRIM. Bukti foto tersimpan.`)
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Konfirmasi pengiriman gagal.')
+    }finally{
+      setDeliveryBusy(false)
+    }
   }
 
   const filtered = useMemo(() => {
@@ -369,6 +496,11 @@ export function OrdersPage() {
     const payment=paymentFilter==='all'?'Semua Pembayaran':paymentLabels[paymentFilter]
     const status=statusFilter==='all'?'Semua Status Cucian':statusLabels[statusFilter]
     return `Filter: ${status} • ${payment}`
+  }
+
+  const openCustomerTracking=(row:OrderRow)=>{
+    const url=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
+    window.open(url,'_blank','noopener,noreferrer')
   }
 
   const printReceipt=(row:OrderRow)=>{
@@ -638,9 +770,9 @@ export function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={9} className="table-empty">Memuat order...</td></tr>}
+              {loading && <tr><td colSpan={10} className="table-empty">Memuat order...</td></tr>}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={9} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
+                <tr><td colSpan={10} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
               )}
               {filtered.map(row => (
                 <tr key={row.id}>
@@ -682,6 +814,25 @@ export function OrdersPage() {
                     {row.due_at
                       ? <><b>{new Date(row.due_at).toLocaleDateString('id-ID')}</b><small>{new Date(row.due_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}{isOverdue(row)?' • TERLAMBAT':''}</small></>
                       : <span className="order-no-due">Belum diatur</span>}
+                  </td>
+                  <td>
+                    {deliveryProofByOrder.get(row.id)
+                      ? <button
+                          type="button"
+                          className="delivery-proof-badge"
+                          onClick={()=>window.open(deliveryProofByOrder.get(row.id)!.photo_url,'_blank')}
+                          title="Lihat foto bukti pengiriman"
+                        >
+                          <Image size={13}/>Terkirim
+                        </button>
+                      : <button
+                          type="button"
+                          className="delivery-confirm-button"
+                          onClick={()=>openDelivery(row)}
+                          title="Konfirmasi kurir telah mengirim order"
+                        >
+                          <Truck size={13}/>Konfirmasi Kurir
+                        </button>}
                   </td>
                   <td>{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
                   <td>
@@ -775,6 +926,74 @@ export function OrdersPage() {
         </Modal>
       )}
 
+      {deliveryOrder&&(
+        <Modal title={`Konfirmasi Kurir — ${deliveryOrder.order_no}`} onClose={()=>{
+          if(deliveryPreview.startsWith('blob:'))URL.revokeObjectURL(deliveryPreview)
+          setDeliveryOrder(null)
+          setDeliveryFile(null)
+          setDeliveryPreview('')
+          setDeliveryNote('')
+        }}>
+          <div className="modal-form delivery-proof-form">
+            <div className="delivery-order-summary">
+              <div><span>Nomor Order</span><b>{deliveryOrder.order_no}</b></div>
+              <div><span>Pelanggan</span><b>{deliveryOrder.customer_name}</b></div>
+              <div><span>WhatsApp</span><b>{deliveryOrder.customer_phone}</b></div>
+            </div>
+
+            <label className="delivery-photo-upload">
+              <Truck size={22}/>
+              <span>
+                <b>{deliveryFile?'Ganti Foto Bukti':'Ambil / Upload Foto Bukti'}</b>
+                <small>Foto paket/barang saat diserahkan kepada pelanggan.</small>
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                capture="environment"
+                onChange={e=>chooseDeliveryFile(e.target.files?.[0]||null)}
+              />
+            </label>
+
+            {deliveryPreview&&<div className="delivery-photo-preview">
+              <img src={deliveryPreview} alt="Preview bukti pengiriman"/>
+            </div>}
+
+            <label>
+              Catatan Pengiriman (opsional)
+              <textarea
+                rows={3}
+                value={deliveryNote}
+                onChange={e=>setDeliveryNote(e.target.value)}
+                placeholder="Contoh: diterima Ibu Puspa di rumah"
+              />
+            </label>
+
+            <div className="delivery-confirm-info">
+              <PackageCheck size={18}/>
+              <span>
+                <b>Konfirmasi Telah Dikirim</b>
+                <small>Foto akan disimpan pada nomor order ini dan status order otomatis menjadi Selesai.</small>
+              </span>
+            </div>
+
+            {message&&<div className="error-box">{message}</div>}
+
+            <div className="form-actions">
+              <button type="button" className="secondary-button" onClick={()=>setDeliveryOrder(null)}>Batal</button>
+              <button
+                type="button"
+                className="primary-button"
+                disabled={deliveryBusy||!deliveryFile}
+                onClick={()=>void submitDelivery()}
+              >
+                <Truck size={16}/>{deliveryBusy?'Mengirim...':'Konfirmasi Telah Dikirim'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {detail && (
         <Modal title={`Detail ${detail.order_no}`} onClose={() => setDetail(null)}>
           <div className="order-detail">
@@ -794,6 +1013,22 @@ export function OrdersPage() {
                   : <b>-</b>}
               </div>
             </div>
+            <div className="order-detail-delivery">
+              <span>Pengiriman Kurir</span>
+              {deliveryProofByOrder.get(detail.id)
+                ? <div className="order-detail-delivery-proof">
+                    <a href={deliveryProofByOrder.get(detail.id)!.photo_url} target="_blank" rel="noreferrer">
+                      <img src={deliveryProofByOrder.get(detail.id)!.photo_url} alt={`Bukti pengiriman ${detail.order_no}`}/>
+                    </a>
+                    <b>Telah Dikirim</b>
+                    <small>{new Date(deliveryProofByOrder.get(detail.id)!.delivered_at).toLocaleString('id-ID')}</small>
+                    <small>Konfirmasi: {deliveryProofByOrder.get(detail.id)!.confirmed_by_name||'-'}</small>
+                    {deliveryProofByOrder.get(detail.id)!.note&&<small>{deliveryProofByOrder.get(detail.id)!.note}</small>}
+                  </div>
+                : <button type="button" className="secondary-button" onClick={()=>openDelivery(detail)}>
+                    <Truck size={15}/>Konfirmasi Kurir
+                  </button>}
+            </div>
             <div><span>Status Cucian</span><b>{statusLabels[detail.status]}</b></div>
             <div><span>Status Pembayaran</span><b>{paymentLabels[detail.payment_status]}</b></div>
             <div><span>Estimasi Selesai</span><b className={isOverdue(detail)?'order-detail-overdue':''}>{detail.due_at?new Date(detail.due_at).toLocaleString('id-ID'):'Belum diatur'}{isOverdue(detail)?' • TERLAMBAT':''}</b></div>
@@ -801,9 +1036,24 @@ export function OrdersPage() {
             <div><span>Sudah Bayar</span><b>{formatRupiah(detail.paid_amount)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(detail.total-detail.paid_amount)}</b></div>
             <div><span>Catatan</span><b>{detail.notes || '-'}</b></div>
-            <div className="form-actions">
-              <button className="secondary-button order-detail-reprint" onClick={()=>printReceipt(detail)}><Printer size={16}/> Cetak Ulang Nota</button>
-              <button className="primary-button" onClick={() => setDetail(null)}><CheckCircle2 size={16}/> Tutup</button>
+            <div className="order-detail-tracking-row">
+              <span>Tracking Pelanggan</span>
+              <b>/track/{detail.order_no}</b>
+            </div>
+            <div className="form-actions order-detail-actions">
+              <button
+                type="button"
+                className="secondary-button order-detail-tracking"
+                onClick={()=>openCustomerTracking(detail)}
+              >
+                <ExternalLink size={16}/>Buka Tracking Pelanggan
+              </button>
+              <button className="secondary-button order-detail-reprint" onClick={()=>printReceipt(detail)}>
+                <Printer size={16}/>Cetak Ulang Nota
+              </button>
+              <button className="primary-button" onClick={() => setDetail(null)}>
+                <CheckCircle2 size={16}/>Tutup
+              </button>
             </div>
           </div>
         </Modal>

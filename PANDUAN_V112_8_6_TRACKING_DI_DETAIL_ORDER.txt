@@ -1,0 +1,40 @@
+HAPPYLAUNDRY ENTERPRISE V112.8.6 — TRACKING PELANGGAN DI DETAIL ORDER
+
+FITUR BARU:
+Detail Order sekarang memiliki tombol:
+Buka Tracking Pelanggan
+
+ALUR:
+1. Buka menu Order.
+2. Cari nomor order.
+3. Klik Detail (icon mata).
+4. Klik Buka Tracking Pelanggan.
+5. Halaman tracking pelanggan terbuka di tab baru.
+
+URL:
+https://domain-anda.com/track/NOMOR-ORDER
+
+CONTOH:
+https://happylaundrybabakancbr.com/track/HL-260808-00014
+
+DI DETAIL ORDER JUGA DITAMPILKAN:
+Tracking Pelanggan
+/track/HL-260808-00014
+
+KEGUNAAN:
+- Owner bisa cek tampilan pelanggan.
+- Kasir bisa membantu pelanggan melihat status.
+- Bisa dicek sebelum mengirim link WhatsApp.
+- Tidak perlu mengetik URL tracking manual.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.8.6.
+2. Tunggu Netlify Published.
+3. Refresh aplikasi.
+4. Buka Order -> Detail.
+5. Klik Buka Tracking Pelanggan.
+
+CACHE:
+happylaundry-v112-8-6

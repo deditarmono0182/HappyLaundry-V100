@@ -1,0 +1,74 @@
+HAPPYLAUNDRY ENTERPRISE V112.8.5 — KONFIRMASI KURIR + FOTO
+
+FITUR BARU:
+Setiap nomor order sekarang dapat memiliki Bukti Pengiriman Kurir.
+
+DI DASHBOARD ORDER:
+Kolom baru:
+PENGIRIMAN
+
+Jika belum dikirim:
+Konfirmasi Kurir
+
+Jika sudah dikirim:
+Terkirim
+
+ALUR KURIR / KARYAWAN:
+1. Buka Order.
+2. Cari nomor order.
+3. Klik Konfirmasi Kurir.
+4. Kamera/file picker HP terbuka.
+5. Ambil foto barang/paket saat diserahkan.
+6. Isi catatan opsional.
+7. Klik Konfirmasi Telah Dikirim.
+8. Foto tersimpan pada nomor order.
+9. Waktu pengiriman tersimpan.
+10. Nama akun yang mengonfirmasi tersimpan.
+11. Status order otomatis menjadi SELESAI.
+
+FOTO:
+Format:
+- JPG/JPEG
+- PNG
+- WEBP
+
+Maksimal:
+5 MB
+
+IPHONE / ANDROID:
+Input foto memakai capture="environment" sehingga HP dapat langsung menawarkan kamera belakang.
+
+DETAIL ORDER:
+Bagian Pengiriman Kurir menampilkan:
+- thumbnail foto
+- Telah Dikirim
+- tanggal/jam
+- akun yang mengonfirmasi
+- catatan
+Klik foto untuk membuka ukuran penuh.
+
+SUPABASE:
+Foto disimpan di Storage bucket:
+delivery-proofs
+
+Data bukti disimpan di:
+v112_delivery_proofs
+
+WAJIB SQL:
+supabase/031_v112_8_5_courier_delivery_proof.sql
+
+CARA PASANG:
+1. Supabase -> SQL Editor.
+2. Jalankan SQL 031.
+3. Pastikan Success.
+4. Deploy V112.8.5.
+5. Refresh.
+6. Buka Order.
+7. Klik Konfirmasi Kurir pada sebuah order.
+8. Ambil/upload foto.
+9. Klik Konfirmasi Telah Dikirim.
+10. Buka Detail Order untuk melihat bukti.
+
+CATATAN:
+Konfirmasi kurir menandakan barang benar-benar telah diserahkan kepada pelanggan,
+sehingga status order otomatis menjadi Selesai.
