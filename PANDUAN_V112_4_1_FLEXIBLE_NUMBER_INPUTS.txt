@@ -1,0 +1,45 @@
+HAPPYLAUNDRY ENTERPRISE V112.4.1 — FLEXIBLE NUMBER INPUTS
+
+PERUBAHAN:
+Semua input angka lebih mudah dipakai di iPhone, tablet, dan desktop.
+
+SEMUA INPUT TYPE NUMBER:
+- Saat disentuh, angka lama otomatis terseleksi.
+- Keyboard diarahkan ke angka/desimal.
+- Lebih cepat mengganti nominal tanpa blok manual.
+- Spinner angka disembunyikan pada HP/tablet.
+
+KHUSUS BERAT/JUMLAH LAYANAN DI KASIR DAN ORDER:
+- Bisa dikosongkan sementara saat mengedit.
+- Delete/Backspace tidak langsung memaksa nilai kembali.
+- Bisa input 0.1, 0.25, 0.5, 1.5, 2.75.
+- Bisa memakai titik atau koma: 1.5 / 1,5.
+- Subtotal berubah saat angka valid.
+- Saat keluar dari kolom dan masih kosong, nilai minimum menjadi 0.1.
+
+INPUT ANGKA LAIN YANG JUGA LEBIH MUDAH:
+- Diskon
+- Pembayaran
+- Harga layanan
+- Stok bahan
+- Bonus
+- Gaji
+- Persentase
+- Radius
+- Ukuran logo
+- Input angka lain di aplikasi
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.4.1.
+2. Tunggu Netlify Published.
+3. Refresh aplikasi.
+4. Buka Kasir.
+5. Tambah layanan.
+6. Sentuh berat/jumlah.
+7. Angka lama langsung terseleksi.
+8. Ketik angka baru langsung.
+
+CACHE:
+happylaundry-v112-4-1

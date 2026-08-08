@@ -44,6 +44,7 @@ export function OrdersPage() {
   const [detail, setDetail] = useState<OrderRow | null>(null)
   const [form, setForm] = useState(emptyOrder)
   const [items, setItems] = useState<OrderItemDraft[]>([])
+  const [quantityDraft, setQuantityDraft] = useState<Record<string,string>>({})
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -124,6 +125,7 @@ export function OrdersPage() {
   const openCreate = () => {
     setForm(emptyOrder)
     setItems([])
+    setQuantityDraft({})
     setMessage('')
     setModalOpen(true)
   }
@@ -134,10 +136,11 @@ export function OrdersPage() {
       setMessage('Belum ada layanan aktif. Tambahkan layanan terlebih dahulu.')
       return
     }
+    const key=crypto.randomUUID()
     setItems(current => [
       ...current,
       {
-        key: crypto.randomUUID(),
+        key,
         service_id: first.id,
         service_name: first.name,
         unit: first.unit,
@@ -146,6 +149,7 @@ export function OrdersPage() {
         subtotal: Number(first.price)
       }
     ])
+    setQuantityDraft(current=>({...current,[key]:'1'}))
   }
 
   const changeService = (key: string, serviceId: string) => {
@@ -165,17 +169,39 @@ export function OrdersPage() {
     ))
   }
 
-  const changeQuantity = (key: string, quantity: number) => {
-    const safeQuantity = Math.max(0.1, quantity || 0.1)
-    setItems(current => current.map(item =>
-      item.key === key
-        ? { ...item, quantity: safeQuantity, subtotal: item.price * safeQuantity }
+  const parseFlexibleNumber=(value:string)=>{
+    const normalized=value.replace(',','.').trim()
+    if(!normalized||normalized==='.'||normalized==='-')return null
+    const parsed=Number(normalized)
+    return Number.isFinite(parsed)?parsed:null
+  }
+
+  const changeQuantityDraft=(key:string,value:string)=>{
+    const cleaned=value.replace(/[^0-9.,]/g,'')
+    setQuantityDraft(current=>({...current,[key]:cleaned}))
+    const parsed=parseFlexibleNumber(cleaned)
+    if(parsed===null||parsed<=0)return
+    setItems(current=>current.map(item =>
+      item.key===key
+        ? {...item,quantity:parsed,subtotal:item.price*parsed}
+        : item
+    ))
+  }
+
+  const finishQuantityEdit=(key:string)=>{
+    const parsed=parseFlexibleNumber(quantityDraft[key]??'')
+    const safe=parsed!==null&&parsed>0?parsed:.1
+    setQuantityDraft(current=>({...current,[key]:String(safe)}))
+    setItems(current=>current.map(item =>
+      item.key===key
+        ? {...item,quantity:safe,subtotal:item.price*safe}
         : item
     ))
   }
 
   const removeItem = (key: string) => {
     setItems(current => current.filter(item => item.key !== key))
+    setQuantityDraft(current=>{const next={...current};delete next[key];return next})
   }
 
   const submit = async (event: FormEvent) => {
@@ -379,7 +405,17 @@ export function OrdersPage() {
                   </label>
                   <label>
                     Jumlah ({item.unit})
-                    <input type="number" min="0.1" step="0.1" value={item.quantity} onChange={event => changeQuantity(item.key, Number(event.target.value))}/>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      enterKeyHint="done"
+                      className="flex-number-input"
+                      value={quantityDraft[item.key]??String(item.quantity)}
+                      onFocus={event=>event.currentTarget.select()}
+                      onChange={event=>changeQuantityDraft(item.key,event.target.value)}
+                      onBlur={()=>finishQuantityEdit(item.key)}
+                      placeholder="0.1"
+                    />
                   </label>
                   <div className="item-subtotal"><span>Subtotal</span><b>{formatRupiah(item.subtotal)}</b></div>
                   <button type="button" className="remove-item-button" onClick={() => removeItem(item.key)} aria-label="Hapus layanan"><Trash2 size={17}/></button>

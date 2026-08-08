@@ -62,6 +62,7 @@ export function CashierPage() {
   const [customerPhone,setCustomerPhone]=useState('')
   const [customerAddress,setCustomerAddress]=useState('')
   const [items,setItems]=useState<OrderItemDraft[]>([])
+  const [quantityDraft,setQuantityDraft]=useState<Record<string,string>>({})
   const [discountValue,setDiscountValue]=useState(0)
   const [discountMode,setDiscountMode]=useState<DiscountMode>('nominal')
   const [paymentAmount,setPaymentAmount]=useState(0)
@@ -149,10 +150,12 @@ export function CashierPage() {
   const addItem=(service?:Service)=>{
     const selected=service||filteredServices[0]||services[0]
     if(!selected){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
+    const key=crypto.randomUUID()
     setItems(current=>[...current,{
-      key:crypto.randomUUID(),service_id:selected.id,service_name:selected.name,unit:selected.unit,
+      key,service_id:selected.id,service_name:selected.name,unit:selected.unit,
       price:Number(selected.price),quantity:1,subtotal:Number(selected.price)
     }])
+    setQuantityDraft(current=>({...current,[key]:'1'}))
   }
 
   const updateService=(key:string,id:string)=>{
@@ -163,14 +166,35 @@ export function CashierPage() {
     }:i))
   }
 
-  const updateQty=(key:string,qty:number)=>{
-    const safe=Math.max(.1,qty||.1)
-    setItems(current=>current.map(i=>i.key===key?{...i,quantity:safe,subtotal:i.price*safe}:i))
+  const parseFlexibleNumber=(value:string)=>{
+    const normalized=value.replace(',','.').trim()
+    if(!normalized||normalized==='.'||normalized==='-')return null
+    const parsed=Number(normalized)
+    return Number.isFinite(parsed)?parsed:null
+  }
+
+  const updateQtyDraft=(key:string,value:string)=>{
+    const cleaned=value.replace(/[^0-9.,]/g,'')
+    setQuantityDraft(current=>({...current,[key]:cleaned}))
+    const parsed=parseFlexibleNumber(cleaned)
+    if(parsed===null||parsed<=0)return
+    setItems(current=>current.map(i=>
+      i.key===key?{...i,quantity:parsed,subtotal:i.price*parsed}:i
+    ))
+  }
+
+  const finishQtyEdit=(key:string)=>{
+    const parsed=parseFlexibleNumber(quantityDraft[key]??'')
+    const safe=parsed!==null&&parsed>0?parsed:.1
+    setQuantityDraft(current=>({...current,[key]:String(safe)}))
+    setItems(current=>current.map(i=>
+      i.key===key?{...i,quantity:safe,subtotal:i.price*safe}:i
+    ))
   }
 
   const reset=()=>{
     setCustomerId('');setNewCustomer(false);setCustomerName('');setCustomerPhone('');setCustomerAddress('')
-    setItems([]);setDiscountValue(0);setDiscountMode('nominal');setPaymentAmount(0)
+    setItems([]);setQuantityDraft({});setDiscountValue(0);setDiscountMode('nominal');setPaymentAmount(0)
     setMethod('cash');setDueAt('');setNotes('');setQuery('');setMessage('')
   }
 
@@ -394,9 +418,22 @@ export function CashierPage() {
               <select value={item.service_id} onChange={e=>updateService(item.key,e.target.value)}>
                 {filteredServices.map(s=><option key={s.id} value={s.id}>{s.name} — {formatIDR(Number(s.price))}/{s.unit}</option>)}
               </select>
-              <input type="number" min="0.1" step="0.1" value={item.quantity} onChange={e=>updateQty(item.key,Number(e.target.value))}/>
+              <input
+                type="text"
+                inputMode="decimal"
+                enterKeyHint="done"
+                className="flex-number-input"
+                value={quantityDraft[item.key]??String(item.quantity)}
+                onFocus={e=>e.currentTarget.select()}
+                onChange={e=>updateQtyDraft(item.key,e.target.value)}
+                onBlur={()=>finishQtyEdit(item.key)}
+                placeholder="0.1"
+              />
               <b>{formatIDR(item.subtotal)}</b>
-              <button type="button" onClick={()=>setItems(cur=>cur.filter(i=>i.key!==item.key))}><Trash2 size={17}/></button>
+              <button type="button" onClick={()=>{
+                setItems(cur=>cur.filter(i=>i.key!==item.key))
+                setQuantityDraft(cur=>{const next={...cur};delete next[item.key];return next})
+              }}><Trash2 size={17}/></button>
             </div>)}
           </div>
         </section>

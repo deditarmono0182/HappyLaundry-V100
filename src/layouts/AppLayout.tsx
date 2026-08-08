@@ -37,6 +37,40 @@ export function AppLayout() {
     window.addEventListener('online',yes);window.addEventListener('offline',no)
     return()=>{window.removeEventListener('online',yes);window.removeEventListener('offline',no)}
   },[])
+
+  useEffect(()=>{
+    const prepare=(root:ParentNode=document)=>{
+      root.querySelectorAll<HTMLInputElement>('input[type="number"]').forEach(input=>{
+        input.inputMode='decimal'
+        input.setAttribute('enterkeyhint','done')
+        input.classList.add('flex-number-input')
+      })
+    }
+
+    const handleFocus=(event:FocusEvent)=>{
+      const input=event.target as HTMLInputElement|null
+      if(!input||input.type!=='number')return
+      window.setTimeout(()=>{
+        try{input.select()}catch{}
+      },0)
+    }
+
+    prepare()
+    const observer=new MutationObserver(records=>{
+      for(const record of records){
+        for(const node of Array.from(record.addedNodes)){
+          if(node instanceof HTMLElement)prepare(node)
+        }
+      }
+    })
+    observer.observe(document.body,{childList:true,subtree:true})
+    document.addEventListener('focusin',handleFocus)
+
+    return()=>{
+      observer.disconnect()
+      document.removeEventListener('focusin',handleFocus)
+    }
+  },[])
   const { profile, signOut } = useAuth()
   const role = profile?.role ?? 'staff'
 
@@ -45,7 +79,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V112.4 Production QR</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V112.4.1 Flexible Input</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

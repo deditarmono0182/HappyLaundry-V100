@@ -6905,3 +6905,31 @@ body{
     min-height:280px;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.4.1 — Flexible Number Inputs
+   ========================================================= */
+.flex-number-input{
+  font-variant-numeric:tabular-nums;
+  caret-color:#1976d2;
+  touch-action:manipulation;
+}
+
+.flex-number-input:focus{
+  outline:none!important;
+  border-color:#2f98dc!important;
+  box-shadow:0 0 0 4px rgba(47,152,220,.12)!important;
+}
+
+@media(max-width:900px){
+  input[type="number"].flex-number-input::-webkit-inner-spin-button,
+  input[type="number"].flex-number-input::-webkit-outer-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+
+  input[type="number"].flex-number-input{
+    appearance:textfield;
+  }
+}
