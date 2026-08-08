@@ -1,0 +1,47 @@
+HAPPYLAUNDRY ENTERPRISE V112.8.1 — TUTUP PREVIEW NOTA IPHONE
+
+MASALAH:
+Setelah transaksi di Kasir, preview nota terbuka di iPhone.
+Halaman preview hanya memiliki Cetak / Simpan PDF sehingga pengguna sulit kembali ke Kasir.
+
+PERBAIKAN:
+Preview nota sekarang mempunyai DUA cara menutup:
+
+1. Tombol X bulat di pojok kanan atas.
+2. Tombol besar:
+   ← Tutup Preview Nota
+   di bawah tombol Cetak / Simpan PDF.
+
+ALUR:
+Kasir -> Simpan Transaksi -> Preview Nota
+
+Setelah selesai:
+Klik X
+atau
+Klik ← Tutup Preview Nota
+
+Preview akan ditutup dan kembali ke Kasir.
+
+FALLBACK IPHONE/SAFARI:
+Jika iOS/Safari tidak mengizinkan window.close(),
+aplikasi otomatis membuka kembali halaman /cashier.
+
+SAAT CETAK/PDF:
+Tombol X dan tombol Tutup Preview tidak ikut tercetak.
+
+TAMPILAN HP:
+Tombol dibuat besar dan mudah disentuh.
+Tombol X memperhitungkan safe area iPhone.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.8.1.
+2. Tunggu Netlify Published.
+3. Refresh aplikasi.
+4. Buat transaksi di Kasir.
+5. Buka preview nota.
+6. Coba tombol X atau Tutup Preview Nota.
+
+CACHE:
+happylaundry-v112-8-1

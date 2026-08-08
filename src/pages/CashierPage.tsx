@@ -246,10 +246,36 @@ export function CashierPage() {
       .grand{font-size:${size==='a4'?'20px':'14px'};font-weight:800}.qr{width:${size==='a4'?'105px':'82px'};height:${size==='a4'?'105px':'82px'};margin:6px auto;display:block}
       .barcode{height:45px;display:flex;justify-content:center;overflow:hidden;margin:7px 0 3px}.order-code{text-align:center;font-size:10px;letter-spacing:1px}
       .a4-grid{${size==='a4'?'display:grid;grid-template-columns:1fr 130px;gap:22px;align-items:start':''}}
-      .footer{margin-top:9px;text-align:center}.no-print{margin-top:12px;display:flex;gap:8px;justify-content:center}
-      .no-print button{padding:9px 14px;border:0;border-radius:7px;background:#087d55;color:#fff;font-weight:700}
-      @media print{.no-print{display:none}}
-    </style></head><body>
+      .footer{margin-top:9px;text-align:center}
+      .no-print{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+      .no-print button{padding:10px 14px;border:0;border-radius:8px;font-weight:800;cursor:pointer}
+      .print-button{background:#087d55;color:#fff}
+      .close-preview-button{background:#eef6fb!important;color:#145f91!important;border:1px solid #b9d7e8!important}
+      .preview-top-close{
+        position:fixed;top:max(12px,env(safe-area-inset-top));right:12px;z-index:9999;
+        width:44px;height:44px;border:1px solid #c8dce8;border-radius:50%;
+        display:grid;place-items:center;background:#fff;color:#185f8d;
+        font:900 23px/1 Arial;box-shadow:0 8px 24px rgba(20,75,112,.16);cursor:pointer
+      }
+      @media(max-width:600px){
+        body{padding-top:${size==='a4'?'10mm':'14mm'}}
+        .no-print{display:grid}
+        .no-print button{width:100%;min-height:44px}
+      }
+      @media print{.no-print,.preview-top-close{display:none!important}}
+    </style>
+    <script>
+      function closeReceiptPreview(){
+        try{ window.close(); }catch(e){}
+        setTimeout(function(){
+          if(!window.closed){
+            window.location.href=window.location.origin+'/cashier'
+          }
+        },180)
+      }
+    </script>
+    </head><body>
+      <button class="preview-top-close" type="button" onclick="closeReceiptPreview()" aria-label="Tutup preview nota" title="Tutup preview nota">×</button>
       <div class="center">
         ${printSettings.show_logo?`<div class="logo-wrap" data-logo-align="${logoAlign}"><img class="logo" src="${printSettings.logo_url||'/logo-happylaundry.jpg'}" style="display:block;width:${Math.min(180,Math.max(30,Number(printSettings.logo_width)||64))}px;max-width:90%;height:auto;margin-left:${logoMarginLeft};margin-right:${logoMarginRight};object-fit:contain"></div>`:''}
         <h1 class="title">${business}</h1>
@@ -287,7 +313,10 @@ export function CashierPage() {
       </div></div>
       ${printSettings.show_cut_line?'<div class="line"></div>':''}
       <p class="footer">${footer}</p>
-      <div class="no-print"><button onclick="window.print()">Cetak / Simpan PDF</button></div>
+      <div class="no-print">
+        <button class="print-button" type="button" onclick="window.print()">Cetak / Simpan PDF</button>
+        <button class="close-preview-button" type="button" onclick="closeReceiptPreview()">← Tutup Preview Nota</button>
+      </div>
     </body></html>`
   }
 

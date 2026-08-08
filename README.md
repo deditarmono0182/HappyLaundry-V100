@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.8 Customer Analytics
+# HappyLaundry Enterprise V112.8.1 Close Receipt Preview
 
 ## Jalankan
 ```bash
@@ -274,3 +274,7 @@ Dashboard menampilkan Top 5 pelanggan berdasarkan jumlah transaksi, total belanj
 
 ## V112.8
 Dashboard Pelanggan mendapat analitik transaksi, total belanja, rata-rata transaksi, pelanggan baru, Top 10, dan pelanggan tidak kembali 60+ hari.
+
+
+## V112.8.1
+Preview nota mempunyai tombol X kanan atas dan ← Tutup Preview Nota dengan fallback kembali ke Kasir pada iPhone/Safari.
