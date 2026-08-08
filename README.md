@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.3.1 Logo Position Fix
+# HappyLaundry Enterprise V112.4 Production QR Scan
 
 ## Jalankan
 ```bash
@@ -250,3 +250,7 @@ Owner dapat upload logo nota ke Supabase Storage, mengatur ukuran/posisi, hapus 
 
 ## V112.3.1
 Hard fix posisi logo Kiri/Tengah/Kanan memakai margin langsung + inline style pada preview dan nota cetak.
+
+
+## V112.4
+Produksi dapat scan QR nota tracking untuk menemukan order, menyorot kartu, dan menjalankan Tahap Berikutnya dengan cepat.

@@ -6657,3 +6657,251 @@ body{
   font-size:8.5px!important;
   font-weight:850!important;
 }
+
+
+/* =========================================================
+   HappyLaundry V112.4 — Production QR Nota Scan
+   ========================================================= */
+.production-tools{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.production-tools>select{
+  min-height:42px;
+  border:1px solid #c8dce8;
+  border-radius:10px;
+  padding:0 10px;
+  background:#fff;
+  color:#315f7c;
+  font-weight:750;
+}
+.production-qr-button{
+  white-space:nowrap;
+}
+.production-inline-success{
+  margin:0 0 12px!important;
+}
+.production-scan-result{
+  position:sticky;
+  top:92px;
+  z-index:17;
+  display:grid;
+  grid-template-columns:auto minmax(190px,1fr) auto auto auto;
+  align-items:center;
+  gap:11px;
+  margin-bottom:14px!important;
+  padding:12px 13px!important;
+  border:2px solid #70b7e5!important;
+  background:linear-gradient(135deg,#edf8ff,#fff)!important;
+  box-shadow:0 12px 30px rgba(28,113,173,.15)!important;
+}
+.production-scan-result-icon{
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:#dff1ff;
+  color:#187ac1;
+}
+.production-scan-result-main{
+  display:grid;
+  gap:2px;
+}
+.production-scan-result-main>span{
+  color:#1e7ebe;
+  font-size:8.5px;
+  letter-spacing:.7px;
+  font-weight:950;
+}
+.production-scan-result-main h3{
+  margin:0;
+  color:#124f79;
+  font-size:16px;
+}
+.production-scan-result-main p{
+  margin:0;
+  color:#6c8798;
+  font-size:9.5px;
+}
+.production-scan-status{
+  display:grid;
+  gap:2px;
+  padding:7px 11px;
+  border:1px solid #d1e4f1;
+  border-radius:9px;
+  background:#fff;
+}
+.production-scan-status span{
+  color:#758b9b;
+  font-size:8.5px;
+}
+.production-scan-status b{
+  color:#16577f;
+  font-size:10.5px;
+}
+.production-scan-next{
+  min-width:150px;
+}
+.production-scan-clear{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border:1px solid #d5e5ef!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#5c788b!important;
+}
+.production-card-scanned{
+  border:2px solid #2589d0!important;
+  box-shadow:0 0 0 4px rgba(37,137,208,.13),0 12px 28px rgba(31,107,160,.18)!important;
+  transform:translateY(-2px);
+}
+.production-card-scanned::before{
+  content:'QR NOTA';
+  display:inline-flex;
+  width:max-content;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#dff1ff;
+  color:#176da7;
+  font-size:7.5px;
+  font-weight:950;
+  letter-spacing:.6px;
+}
+
+.production-scanner-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:160;
+  display:grid;
+  place-items:center;
+  padding:18px;
+  background:rgba(7,30,44,.68);
+  backdrop-filter:blur(3px);
+}
+.production-scanner-modal{
+  width:min(560px,100%);
+  max-height:92vh;
+  overflow:auto;
+  display:grid;
+  gap:12px;
+  padding:14px;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 30px 90px rgba(0,0,0,.34);
+}
+.production-scanner-modal>header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  padding-bottom:10px;
+  border-bottom:1px solid #e1ebf2;
+}
+.production-scanner-modal>header>div{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+}
+.production-scanner-modal>header svg{
+  color:#1d84ca;
+}
+.production-scanner-modal>header span{
+  display:grid;
+  gap:2px;
+}
+.production-scanner-modal>header b{
+  color:#164f76;
+  font-size:12px;
+}
+.production-scanner-modal>header small{
+  color:#738b9b;
+  font-size:9px;
+}
+.production-qr-reader{
+  min-height:330px;
+  border-radius:13px;
+  overflow:hidden;
+  background:#102a39;
+}
+.production-qr-reader video{
+  border-radius:12px!important;
+}
+.production-scanner-wait{
+  min-height:120px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:6px;
+  color:#758b99;
+  border:1px dashed #cadde8;
+  border-radius:12px;
+}
+.production-scanner-help{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:9px 10px;
+  border:1px solid #cae3f3;
+  border-radius:10px;
+  background:#f3faff;
+  color:#5b7c91;
+  font-size:9.5px;
+  line-height:1.4;
+}
+.production-scanner-help svg{
+  color:#2384c9;
+  flex:0 0 auto;
+}
+
+@media(max-width:850px){
+  .production-tools{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    width:100%;
+  }
+  .production-search{
+    grid-column:1/-1;
+  }
+  .production-scan-result{
+    position:relative;
+    top:auto;
+    grid-template-columns:auto 1fr auto;
+  }
+  .production-scan-status{
+    grid-column:1/3;
+  }
+  .production-scan-next{
+    grid-column:1/3;
+    width:100%;
+  }
+  .production-scan-clear{
+    grid-column:3;
+    grid-row:1;
+  }
+}
+
+@media(max-width:520px){
+  .production-tools{
+    grid-template-columns:1fr;
+  }
+  .production-tools>*,
+  .production-tools .production-search{
+    grid-column:1;
+    width:100%;
+  }
+  .production-scan-result{
+    grid-template-columns:auto 1fr auto;
+  }
+  .production-scan-status,
+  .production-scan-next{
+    grid-column:1/-1;
+  }
+  .production-qr-reader{
+    min-height:280px;
+  }
+}

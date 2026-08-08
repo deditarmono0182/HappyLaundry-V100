@@ -1,0 +1,69 @@
+HAPPYLAUNDRY ENTERPRISE V112.4 — SCAN QR NOTA DI PRODUKSI
+
+FITUR BARU:
+Pada halaman Produksi sekarang ada tombol:
+SCAN QR NOTA
+
+TUJUAN:
+Karyawan produksi tidak perlu mengetik nomor order untuk mencari cucian.
+
+ALUR:
+1. Buka Produksi.
+2. Klik Scan QR Nota.
+3. Kamera terbuka.
+4. Arahkan ke QR tracking pada nota pelanggan.
+5. Sistem membaca nomor order.
+6. Order langsung dicari.
+7. Kartu order disorot.
+8. Di atas papan muncul kartu:
+   ORDER DARI QR NOTA
+   Nomor order
+   Pelanggan
+   Status proses saat ini
+   Tombol TAHAP BERIKUTNYA
+
+CONTOH:
+QR Nota:
+https://domain-happylaundry.com/track/HL-260808-00020
+
+Hasil:
+HL-260808-00020
+Status sekarang: Diterima
+
+Klik:
+Tahap Berikutnya
+
+menjadi:
+Cuci
+
+Scan lagi di tahap berikutnya:
+Cuci -> Kering -> Setrika -> Packing -> Siap -> Selesai
+
+JIKA STATUS MENJADI SIAP:
+Fitur WhatsApp siap diambil yang sudah ada tetap berjalan.
+
+JIKA ORDER SUDAH SELESAI/DIBATALKAN:
+Aplikasi memberi pesan bahwa order tidak lagi berada di papan produksi aktif.
+
+KEAMANAN:
+QR yang digunakan adalah QR tracking yang sudah tercetak di nota HappyLaundry.
+Tidak ada perubahan database.
+
+KAMERA:
+Browser memerlukan:
+- HTTPS
+- izin Camera
+
+DEPENDENCY:
+html5-qrcode sudah tersedia sejak fitur Smart Attendance V112.0.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.4.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Produksi.
+5. Klik Scan QR Nota.
+6. Izinkan kamera.
+7. Scan QR dari nota pelanggan.
