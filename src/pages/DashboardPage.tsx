@@ -180,7 +180,8 @@ export function DashboardPage() {
 
 
   return <>
-    <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."/>
+    <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."      hideBack
+    />
     {message&&<div className="error-box inline-message">{message}</div>}
     <section className="panel dashboard-display-customizer">
       <div className="dashboard-display-title">

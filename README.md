@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.0 Smart Attendance QR GPS
+# HappyLaundry Enterprise V112.1 Back Navigation
 
 ## Jalankan
 ```bash
@@ -234,3 +234,7 @@ Owner dapat override absensi dengan alasan wajib; Hadir Manual dibedakan dari Au
 
 ## V112.0
 Absensi karyawan menggunakan login + QR statis yang dapat diganti Owner + GPS radius. Login saja tidak lagi dihitung Hadir. Owner override tetap tersedia.
+
+
+## V112.1
+Tombol global ← Kembali pada seluruh halaman yang memakai PageHeader, dengan browser-history dan fallback aman.

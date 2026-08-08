@@ -6357,3 +6357,78 @@ body{
   .attendance-success-card{grid-template-columns:auto 1fr}
   .attendance-success-distance{grid-column:1/-1;text-align:left;padding-left:78px}
 }
+
+
+/* =========================================================
+   HappyLaundry V112.1 — Global Back Navigation
+   ========================================================= */
+.page-heading-main{
+  min-width:0;
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+}
+
+.page-heading-copy{
+  min-width:0;
+}
+
+.page-back-button{
+  min-width:40px;
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex:0 0 auto;
+  margin-top:1px;
+  padding:0 10px;
+  border:1px solid #c9deeb;
+  border-radius:11px;
+  background:#fff;
+  color:#1d6da7;
+  font-size:10.5px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(34,102,148,.06);
+}
+
+.page-back-button:hover{
+  border-color:#7eb8df;
+  background:#edf7ff;
+  color:#145f97;
+}
+
+.page-back-button:active{
+  transform:translateY(1px);
+}
+
+.page-heading-with-back .page-heading-copy h2{
+  margin-top:4px;
+}
+
+/* On small screens the arrow stays very compact and easy to tap. */
+@media(max-width:700px){
+  .page-heading-main{
+    width:100%;
+    gap:8px;
+  }
+
+  .page-back-button{
+    width:42px;
+    height:42px;
+    min-width:42px;
+    padding:0;
+    position:sticky;
+    top:90px;
+    z-index:12;
+  }
+
+  .page-back-button span{
+    display:none;
+  }
+
+  .page-heading-copy h2{
+    font-size:22px!important;
+  }
+}

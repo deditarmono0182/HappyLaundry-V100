@@ -1,0 +1,76 @@
+HAPPYLAUNDRY ENTERPRISE V112.1 — TOMBOL KEMBALI / ARROW BACK
+
+PERUBAHAN:
+Semua halaman utama sekarang mempunyai tombol:
+← Kembali
+
+Dashboard utama tidak menampilkan tombol kembali.
+
+CONTOH:
+Dashboard -> Order
+Di halaman Order tersedia:
+← Kembali
+
+Klik akan kembali ke Dashboard.
+
+Dashboard -> Pengaturan -> Pengaturan Absensi
+Di Pengaturan Absensi tersedia:
+← Kembali
+
+Jika dibuka dari Pengaturan, tombol kembali akan kembali ke Pengaturan.
+
+HALAMAN YANG OTOMATIS MENDAPAT TOMBOL:
+- Kasir
+- Order
+- QR Center
+- Produksi
+- Pelanggan
+- Layanan
+- Stok
+- Supplier
+- Pembayaran
+- Kas
+- Keuangan
+- Pemasukan
+- Pengeluaran
+- Piutang
+- Laporan Owner
+- Absensi & Gaji
+- Absen Karyawan
+- Backup
+- Pengaturan
+- Pengaturan Karyawan
+- Pengaturan Print
+- Pengaturan Absensi
+- Riwayat Audit
+dan halaman lain yang menggunakan PageHeader.
+
+CARA KERJA:
+Jika ada riwayat halaman di aplikasi:
+tombol menggunakan browser back.
+
+Jika halaman dibuka langsung / refresh:
+sistem menggunakan fallback aman:
+- subhalaman Pengaturan -> Pengaturan
+- subhalaman Keuangan -> Keuangan
+- halaman utama lain -> Dashboard
+
+HP / IPHONE:
+Tombol tampil sebagai icon panah besar 42x42 px agar mudah ditekan.
+Saat area header bergerak, tombol dibuat sticky di layar kecil.
+
+DESKTOP:
+Tombol menampilkan:
+← Kembali
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.1.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Order/Piutang/Pengaturan Absensi.
+5. Klik tombol ← Kembali.
+
+CACHE:
+happylaundry-v112-1-0
