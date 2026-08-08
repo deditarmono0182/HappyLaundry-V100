@@ -1,0 +1,83 @@
+HAPPYLAUNDRY ENTERPRISE V111.1 — BAGI HASIL GAJI PER KATEGORI LAYANAN
+
+PERUBAHAN:
+Bagi hasil karyawan sekarang TIDAK lagi otomatis dihitung dari seluruh omzet laundry.
+
+Sekarang Owner memilih KATEGORI LAYANAN untuk setiap karyawan.
+
+CONTOH:
+Karyawan A
+Kategori: Kiloan
+Omzet Kiloan bulan ini: Rp10.000.000
+Persentase: 10%
+Bagi Hasil: Rp1.000.000
+
+Karyawan B
+Kategori: Satuan
+Omzet Satuan bulan ini: Rp6.000.000
+Persentase: 15%
+Bagi Hasil: Rp900.000
+
+Karyawan C
+Kategori: Express
+Omzet Express bulan ini: Rp4.000.000
+Persentase: 5%
+Bagi Hasil: Rp200.000
+
+RUMUS:
+Bagi Hasil =
+Omzet Pembayaran Aktual Kategori Terpilih
+x
+Persentase Bagi Hasil Karyawan
+
+TOTAL GAJI:
+Uang Kehadiran
++ Tunjangan
++ Bonus
++ Bagi Hasil Kategori
+
+CARA HITUNG OMZET KATEGORI:
+Pembayaran aktual pada bulan terpilih dialokasikan proporsional ke item layanan dalam order.
+Ini konsisten dengan metode Bagi Hasil di Dashboard Keuangan.
+
+PENGATURAN:
+Absensi & Gaji -> Daftar Gaji -> Atur
+
+Sekarang tersedia:
+- Uang Kehadiran per Hari
+- Tunjangan Bulanan
+- Kategori Layanan untuk Bagi Hasil
+- Bagi Hasil dari Omzet Kategori (%)
+
+Kategori diambil dari master Layanan & Harga.
+Kategori umum juga tersedia:
+- Kiloan
+- Satuan
+- Express
+- Premium
+
+DAFTAR GAJI:
+Kolom Bagi Hasil akan menampilkan:
+Persentase x Nama Kategori (Omzet Kategori)
+
+EXPORT XLS/PDF:
+Sekarang juga mencantumkan:
+- kategori bagi hasil
+- omzet kategori
+- persentase
+- nilai bagi hasil
+
+WAJIB SQL:
+supabase/025_v111_1_payroll_category_revenue_share.sql
+
+CARA PASANG:
+1. Supabase -> SQL Editor
+2. Jalankan SQL 025
+3. Pastikan Success
+4. Deploy V111.1
+5. Refresh
+6. Absensi & Gaji -> Daftar Gaji
+7. Klik Atur pada karyawan
+8. Pilih kategori
+9. Isi persentase
+10. Simpan

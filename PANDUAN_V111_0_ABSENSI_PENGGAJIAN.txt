@@ -1,0 +1,94 @@
+HAPPYLAUNDRY ENTERPRISE V111.0 — ABSENSI & PENGGAJIAN
+
+FITUR BARU:
+Menu Owner:
+ABSENSI & GAJI
+
+1. DAFTAR HADIR
+Status:
+- Hadir
+- Izin
+- Sakit
+- Alpha
+
+Owner memilih tanggal lalu klik status karyawan.
+Satu karyawan hanya mempunyai satu status per tanggal.
+
+2. KOMPONEN GAJI PER KARYAWAN
+Klik Atur pada Daftar Gaji:
+- Uang Kehadiran per Hari
+- Tunjangan Bulanan
+- Persentase Bagi Hasil dari Omzet
+
+3. BONUS
+Bonus dapat diisi berbeda setiap bulan langsung dari tabel Daftar Gaji.
+
+4. BAGI HASIL
+Bagi hasil dihitung dari OMZET PEMBAYARAN AKTUAL pada bulan terpilih.
+
+Rumus:
+Bagi Hasil = Omzet Bulan x Persentase Karyawan
+
+Contoh:
+Omzet bulan = Rp20.000.000
+Bagi hasil Dede = 2%
+Bagi hasil = Rp400.000
+
+5. TOTAL GAJI
+Uang Kehadiran =
+Jumlah Hari Hadir x Tarif Kehadiran per Hari
+
+Total Gaji =
+Uang Kehadiran
++ Tunjangan
++ Bonus
++ Bagi Hasil
+
+Contoh:
+Hadir 25 hari x Rp50.000 = Rp1.250.000
+Tunjangan                 = Rp500.000
+Bonus                     = Rp250.000
+Bagi Hasil                = Rp400.000
+TOTAL GAJI                = Rp2.400.000
+
+6. EXPORT
+Daftar Hadir:
+- XLS
+- PDF
+
+Daftar Gaji:
+- XLS
+- PDF
+
+7. KEAMANAN
+Absensi dan Penggajian dibuat OWNER ONLY karena mengandung informasi kompensasi karyawan.
+
+WAJIB SQL:
+supabase/024_v111_0_attendance_payroll.sql
+
+SQL MEMBUAT:
+- v111_attendance
+- v111_employee_payroll_settings
+- v111_payroll_adjustments
+
+CARA PASANG:
+1. Supabase -> SQL Editor
+2. Jalankan:
+   024_v111_0_attendance_payroll.sql
+3. Pastikan Success
+4. Deploy V111.0
+5. Refresh
+6. Login Owner
+7. Menu Absensi & Gaji
+
+SETUP AWAL:
+1. Buka Daftar Gaji.
+2. Klik Atur pada setiap karyawan.
+3. Isi:
+   - Uang Hadir per Hari
+   - Tunjangan Bulanan
+   - % Bagi Hasil
+4. Simpan.
+5. Setiap hari isi Daftar Hadir.
+6. Akhir bulan isi Bonus.
+7. Export XLS/PDF.

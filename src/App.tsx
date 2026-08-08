@@ -19,6 +19,7 @@ const CashierPage=lazy(()=>import('./pages/CashierPage').then(m=>({default:m.Cas
 const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.SettingsPage})))
 const PrintSettingsPage=lazy(()=>import('./pages/PrintSettingsPage').then(m=>({default:m.PrintSettingsPage})))
 const EmployeesPage=lazy(()=>import('./pages/EmployeesPage').then(m=>({default:m.EmployeesPage})))
+const PayrollPage=lazy(()=>import('./pages/PayrollPage').then(m=>({default:m.PayrollPage})))
 const UserAuditPage=lazy(()=>import('./pages/UserAuditPage').then(m=>({default:m.UserAuditPage})))
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
 const FinancePage=lazy(()=>import('./pages/FinancePage').then(m=>({default:m.FinancePage})))
@@ -63,6 +64,7 @@ export default function App(){
       <Route path="settings" element={<PermissionRoute permission="settings"><SettingsPage/></PermissionRoute>}/>
       <Route path="settings/print" element={<PermissionRoute permission="settings"><PrintSettingsPage/></PermissionRoute>}/>
       <Route path="settings/employees" element={<EmployeesPage/>}/>
+      <Route path="payroll" element={<PayrollPage/>}/>
       <Route path="settings/audit" element={<UserAuditPage/>}/>
     </Route>
     <Route path="*" element={<Navigate to="/" replace/>}/>

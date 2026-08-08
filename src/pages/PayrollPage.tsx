@@ -1,0 +1,477 @@
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  CalendarCheck2, CheckCircle2, FileSpreadsheet, FileText, Gift,
+  HandCoins, Save, Search, Settings2, UsersRound, WalletCards
+} from 'lucide-react'
+import { Modal } from '../components/Modal'
+import { PageHeader } from '../components/PageHeader'
+import { StatCard } from '../components/StatCard'
+import { downloadXls, printPdf } from '../lib/exportData'
+import { formatRupiah } from '../lib/format'
+import { supabase } from '../lib/supabase'
+
+type AttendanceStatus='present'|'permission'|'sick'|'absent'
+
+interface Employee{
+  id:string
+  full_name:string
+  login_id:string
+  phone:string|null
+  is_active:boolean
+}
+
+interface Attendance{
+  id:string
+  employee_id:string
+  attendance_date:string
+  status:AttendanceStatus
+  note:string|null
+}
+
+interface PayrollSetting{
+  employee_id:string
+  attendance_rate:number
+  monthly_allowance:number
+  revenue_share_percent:number
+  revenue_share_category:string
+}
+
+interface PayrollAdjustment{
+  employee_id:string
+  payroll_month:string
+  bonus:number
+}
+
+interface Payment{
+  order_id:string
+  amount:number
+  created_at:string
+}
+
+interface OrderItem{
+  order_id:string
+  service_id:string|null
+  subtotal:number
+}
+
+interface Service{
+  id:string
+  category:string
+}
+
+const statusLabels:Record<AttendanceStatus,string>={
+  present:'Hadir',
+  permission:'Izin',
+  sick:'Sakit',
+  absent:'Alpha'
+}
+
+const today=()=>new Date().toISOString().slice(0,10)
+const currentMonth=()=>new Date().toISOString().slice(0,7)
+const monthRange=(month:string)=>{
+  const [y,m]=month.split('-').map(Number)
+  const start=`${month}-01`
+  const endDate=new Date(y,m,0)
+  const end=`${y}-${String(m).padStart(2,'0')}-${String(endDate.getDate()).padStart(2,'0')}`
+  return{start,end}
+}
+
+export function PayrollPage(){
+  const[employees,setEmployees]=useState<Employee[]>([])
+  const[attendance,setAttendance]=useState<Attendance[]>([])
+  const[settings,setSettings]=useState<PayrollSetting[]>([])
+  const[adjustments,setAdjustments]=useState<PayrollAdjustment[]>([])
+  const[payments,setPayments]=useState<Payment[]>([])
+  const[orderItems,setOrderItems]=useState<OrderItem[]>([])
+  const[services,setServices]=useState<Service[]>([])
+  const[tab,setTab]=useState<'attendance'|'payroll'>('attendance')
+  const[attendanceDate,setAttendanceDate]=useState(today())
+  const[month,setMonth]=useState(currentMonth())
+  const[query,setQuery]=useState('')
+  const[message,setMessage]=useState('')
+  const[success,setSuccess]=useState('')
+  const[loading,setLoading]=useState(true)
+  const[busy,setBusy]=useState(false)
+  const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
+  const[settingForm,setSettingForm]=useState({
+    attendance_rate:'0',
+    monthly_allowance:'0',
+    revenue_share_percent:'0',
+    revenue_share_category:'Kiloan'
+  })
+  const[bonusDraft,setBonusDraft]=useState<Record<string,string>>({})
+
+  const load=useCallback(async()=>{
+    setLoading(true);setMessage('')
+    const range=monthRange(month)
+    const [e,a,s,adj,p,oi,sv]=await Promise.all([
+      supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
+      supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
+      supabase.from('v111_employee_payroll_settings').select('*'),
+      supabase.from('v111_payroll_adjustments').select('*').eq('payroll_month',range.start),
+      supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
+      supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
+      supabase.from('v100_services').select('id,category')
+    ])
+    const error=e.error||a.error||s.error||adj.error||p.error||oi.error||sv.error
+    if(error)setMessage(error.message)
+    else{
+      setEmployees((e.data as Employee[])||[])
+      setAttendance((a.data as Attendance[])||[])
+      setSettings((s.data as PayrollSetting[])||[])
+      setAdjustments((adj.data as PayrollAdjustment[])||[])
+      setPayments((p.data as Payment[])||[])
+      setOrderItems((oi.data as OrderItem[])||[])
+      setServices((sv.data as Service[])||[])
+      const drafts:Record<string,string>={}
+      for(const row of (adj.data as PayrollAdjustment[])||[])drafts[row.employee_id]=String(Number(row.bonus||0))
+      setBonusDraft(drafts)
+    }
+    setLoading(false)
+  },[month])
+
+  useEffect(()=>{void load()},[load])
+
+  const attendanceMap=useMemo(()=>{
+    const map=new Map<string,Attendance>()
+    attendance.forEach(a=>map.set(`${a.employee_id}|${a.attendance_date}`,a))
+    return map
+  },[attendance])
+
+  const settingMap=useMemo(()=>new Map(settings.map(s=>[s.employee_id,s])),[settings])
+  const adjustmentMap=useMemo(()=>new Map(adjustments.map(a=>[a.employee_id,a])),[adjustments])
+
+  const monthlyRevenue=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
+
+  const categoryRevenue=useMemo(()=>{
+    const serviceCategory=new Map(services.map(service=>[
+      service.id,(service.category||'Kiloan').trim()||'Kiloan'
+    ]))
+
+    const itemsByOrder=new Map<string,OrderItem[]>()
+    for(const item of orderItems){
+      const list=itemsByOrder.get(item.order_id)||[]
+      list.push(item)
+      itemsByOrder.set(item.order_id,list)
+    }
+
+    const grouped:Record<string,number>={}
+
+    for(const payment of payments){
+      const items=itemsByOrder.get(payment.order_id)||[]
+      const itemTotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.subtotal||0)),0)
+      const paymentAmount=Math.max(0,Number(payment.amount||0))
+      if(paymentAmount<=0)continue
+
+      if(items.length===0||itemTotal<=0){
+        grouped['Kiloan']=(grouped['Kiloan']||0)+paymentAmount
+        continue
+      }
+
+      for(const item of items){
+        const subtotal=Math.max(0,Number(item.subtotal||0))
+        if(subtotal<=0)continue
+        const category=item.service_id
+          ? serviceCategory.get(item.service_id)||'Kiloan'
+          : 'Kiloan'
+        grouped[category]=(grouped[category]||0)+(paymentAmount*(subtotal/itemTotal))
+      }
+    }
+
+    return grouped
+  },[payments,orderItems,services])
+
+  const serviceCategories=useMemo(()=>Array.from(new Set([
+    ...services.map(s=>(s.category||'Kiloan').trim()||'Kiloan'),
+    ...Object.keys(categoryRevenue),
+    'Kiloan','Satuan','Express','Premium'
+  ])).sort((a,b)=>a.localeCompare(b,'id')),[services,categoryRevenue])
+
+  const payrollRows=useMemo(()=>employees.map(employee=>{
+    const setting=settingMap.get(employee.id)
+    const presentDays=attendance.filter(a=>a.employee_id===employee.id&&a.status==='present').length
+    const permissionDays=attendance.filter(a=>a.employee_id===employee.id&&a.status==='permission').length
+    const sickDays=attendance.filter(a=>a.employee_id===employee.id&&a.status==='sick').length
+    const absentDays=attendance.filter(a=>a.employee_id===employee.id&&a.status==='absent').length
+    const attendanceRate=Number(setting?.attendance_rate||0)
+    const attendancePay=presentDays*attendanceRate
+    const allowance=Number(setting?.monthly_allowance||0)
+    const sharePercent=Number(setting?.revenue_share_percent||0)
+    const shareCategory=setting?.revenue_share_category||'Kiloan'
+    const categoryBaseRevenue=Number(categoryRevenue[shareCategory]||0)
+    const revenueShare=categoryBaseRevenue*(sharePercent/100)
+    const bonus=Number(bonusDraft[employee.id]??adjustmentMap.get(employee.id)?.bonus??0)
+    const total=attendancePay+allowance+bonus+revenueShare
+    return{
+      employee,presentDays,permissionDays,sickDays,absentDays,
+      attendanceRate,attendancePay,allowance,sharePercent,shareCategory,
+      categoryBaseRevenue,revenueShare,bonus,total
+    }
+  }),[employees,settingMap,attendance,categoryRevenue,bonusDraft,adjustmentMap])
+
+  const filteredEmployees=useMemo(()=>{
+    const key=query.toLowerCase().trim()
+    if(!key)return employees
+    return employees.filter(e=>`${e.full_name} ${e.login_id} ${e.phone||''}`.toLowerCase().includes(key))
+  },[employees,query])
+
+  const filteredPayroll=useMemo(()=>{
+    const ids=new Set(filteredEmployees.map(e=>e.id))
+    return payrollRows.filter(r=>ids.has(r.employee.id))
+  },[payrollRows,filteredEmployees])
+
+  const setAttendanceStatus=async(employee:Employee,status:AttendanceStatus)=>{
+    setMessage('');setSuccess('')
+    const existing=attendanceMap.get(`${employee.id}|${attendanceDate}`)
+    setBusy(true)
+    const payload={
+      employee_id:employee.id,
+      attendance_date:attendanceDate,
+      status,
+      note:existing?.note||null,
+      updated_at:new Date().toISOString()
+    }
+    const{error}=await supabase
+      .from('v111_attendance')
+      .upsert(payload,{onConflict:'employee_id,attendance_date'})
+    if(error)setMessage(error.message)
+    else{
+      setSuccess(`${employee.full_name}: ${statusLabels[status]} pada ${new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('id-ID')}.`)
+      await load()
+    }
+    setBusy(false)
+  }
+
+  const openSettings=(employee:Employee)=>{
+    const row=settingMap.get(employee.id)
+    setSettingsEmployee(employee)
+    setSettingForm({
+      attendance_rate:String(Number(row?.attendance_rate||0)),
+      monthly_allowance:String(Number(row?.monthly_allowance||0)),
+      revenue_share_percent:String(Number(row?.revenue_share_percent||0)),
+      revenue_share_category:row?.revenue_share_category||'Kiloan'
+    })
+    setMessage('')
+  }
+
+  const saveSettings=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!settingsEmployee)return
+    setBusy(true);setMessage('')
+    const payload={
+      employee_id:settingsEmployee.id,
+      attendance_rate:Math.max(0,Number(settingForm.attendance_rate)||0),
+      monthly_allowance:Math.max(0,Number(settingForm.monthly_allowance)||0),
+      revenue_share_percent:Math.max(0,Math.min(100,Number(settingForm.revenue_share_percent)||0)),
+      revenue_share_category:settingForm.revenue_share_category,
+      updated_at:new Date().toISOString()
+    }
+    const{error}=await supabase
+      .from('v111_employee_payroll_settings')
+      .upsert(payload,{onConflict:'employee_id'})
+    if(error)setMessage(error.message)
+    else{
+      setSettingsEmployee(null)
+      setSuccess(`Komponen gaji ${settingsEmployee.full_name} berhasil disimpan.`)
+      await load()
+    }
+    setBusy(false)
+  }
+
+  const saveBonuses=async()=>{
+    setBusy(true);setMessage('');setSuccess('')
+    const range=monthRange(month)
+    const payload=employees.map(employee=>({
+      employee_id:employee.id,
+      payroll_month:range.start,
+      bonus:Math.max(0,Number(bonusDraft[employee.id]||0)),
+      updated_at:new Date().toISOString()
+    }))
+    const{error}=await supabase
+      .from('v111_payroll_adjustments')
+      .upsert(payload,{onConflict:'employee_id,payroll_month'})
+    if(error)setMessage(error.message)
+    else{
+      setSuccess('Bonus bulanan berhasil disimpan.')
+      await load()
+    }
+    setBusy(false)
+  }
+
+  const attendanceExport=()=>({
+    title:'Daftar Hadir Karyawan',
+    filename:`absensi-${month}`,
+    subtitle:`Periode ${month}`,
+    headers:['Karyawan','ID Akun','Hadir','Izin','Sakit','Alpha'],
+    rows:filteredPayroll.map(r=>[
+      r.employee.full_name,r.employee.login_id,
+      r.presentDays,r.permissionDays,r.sickDays,r.absentDays
+    ]),
+    summary:[
+      ['Total Karyawan',filteredPayroll.length],
+      ['Total Kehadiran',filteredPayroll.reduce((s,r)=>s+r.presentDays,0)]
+    ] as Array<[string,string|number]>
+  })
+
+  const payrollExport=()=>({
+    title:'Daftar Gaji Karyawan',
+    filename:`gaji-karyawan-${month}`,
+    subtitle:`Periode ${month} • Omzet aktual ${formatRupiah(monthlyRevenue)}`,
+    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Kategori Bagi Hasil','Omzet Kategori','Bagi Hasil %','Bagi Hasil','Total Gaji'],
+    rows:filteredPayroll.map(r=>[
+      r.employee.full_name,r.presentDays,r.attendanceRate,
+      Math.round(r.attendancePay),Math.round(r.allowance),Math.round(r.bonus),
+      r.shareCategory,Math.round(r.categoryBaseRevenue),
+      r.sharePercent.toFixed(2),Math.round(r.revenueShare),Math.round(r.total)
+    ]),
+    summary:[
+      ['Omzet Bulan',Math.round(monthlyRevenue)],
+      ['Total Gaji',Math.round(filteredPayroll.reduce((s,r)=>s+r.total,0))]
+    ] as Array<[string,string|number]>
+  })
+
+  const totalPayroll=payrollRows.reduce((sum,r)=>sum+r.total,0)
+  const totalPresent=payrollRows.reduce((sum,r)=>sum+r.presentDays,0)
+  const totalShare=payrollRows.reduce((sum,r)=>sum+r.revenueShare,0)
+
+  return <>
+    <PageHeader
+      eyebrow="HR & PAYROLL"
+      title="Absensi & Penggajian"
+      description="Kelola kehadiran dan hitung gaji dari uang hadir, tunjangan, bonus, dan bagi hasil omzet."
+      action={<div className="payroll-page-actions">
+        <button className="secondary-button" onClick={()=>downloadXls(tab==='attendance'?attendanceExport():payrollExport())}><FileSpreadsheet size={16}/>XLS</button>
+        <button className="secondary-button" onClick={()=>printPdf(tab==='attendance'?attendanceExport():payrollExport())}><FileText size={16}/>PDF</button>
+      </div>}
+    />
+
+    <section className="panel payroll-toolbar">
+      <div className="payroll-tabs">
+        <button className={tab==='attendance'?'active':''} onClick={()=>setTab('attendance')}><CalendarCheck2 size={17}/>Daftar Hadir</button>
+        <button className={tab==='payroll'?'active':''} onClick={()=>setTab('payroll')}><WalletCards size={17}/>Daftar Gaji</button>
+      </div>
+      <label>Bulan<input type="month" value={month} onChange={e=>setMonth(e.target.value)}/></label>
+      {tab==='attendance'&&<label>Tanggal<input type="date" value={attendanceDate} onChange={e=>setAttendanceDate(e.target.value)}/></label>}
+      <label className="search-box payroll-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari karyawan atau ID Akun"/></label>
+    </section>
+
+    {message&&<div className="error-box inline-message">{message}</div>}
+    {success&&<div className="success-box inline-message"><CheckCircle2 size={17}/>{success}</div>}
+
+    {tab==='attendance'?<>
+      <section className="stats-grid payroll-stats">
+        <StatCard icon={UsersRound} label="Karyawan Aktif" value={String(employees.length)} caption="Karyawan yang dapat diabsen"/>
+        <StatCard icon={CalendarCheck2} label="Total Hadir Bulan Ini" value={String(totalPresent)} caption="Akumulasi hari hadir"/>
+        <StatCard icon={HandCoins} label="Omzet Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Bagi hasil dihitung per kategori layanan"/>
+      </section>
+
+      <section className="panel data-panel">
+        <div className="attendance-date-title">
+          <div><b>Absensi {new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</b><small>Klik status untuk mencatat atau mengubah kehadiran.</small></div>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Karyawan</th><th>ID Akun</th><th>Status Hari Ini</th><th>Pilih Kehadiran</th></tr></thead>
+            <tbody>
+              {loading&&<tr><td colSpan={4} className="table-empty">Memuat absensi...</td></tr>}
+              {!loading&&filteredEmployees.length===0&&<tr><td colSpan={4} className="table-empty">Tidak ada karyawan.</td></tr>}
+              {filteredEmployees.map(employee=>{
+                const current=attendanceMap.get(`${employee.id}|${attendanceDate}`)?.status
+                return <tr key={employee.id}>
+                  <td><b>{employee.full_name}</b>{employee.phone&&<small>{employee.phone}</small>}</td>
+                  <td><b>{employee.login_id}</b></td>
+                  <td><span className={`attendance-badge attendance-${current||'none'}`}>{current?statusLabels[current]:'Belum Absen'}</span></td>
+                  <td><div className="attendance-actions">
+                    {(['present','permission','sick','absent'] as AttendanceStatus[]).map(status=>
+                      <button
+                        type="button"
+                        key={status}
+                        className={`${current===status?'active ':''}attendance-${status}`}
+                        disabled={busy}
+                        onClick={()=>void setAttendanceStatus(employee,status)}
+                      >{statusLabels[status]}</button>
+                    )}
+                  </div></td>
+                </tr>
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>:<>
+      <section className="stats-grid payroll-stats">
+        <StatCard icon={HandCoins} label="Omzet Bulan" value={formatRupiah(monthlyRevenue)} caption="Pembayaran aktual"/>
+        <StatCard icon={WalletCards} label="Total Gaji" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
+        <StatCard icon={Gift} label="Total Bagi Hasil" value={formatRupiah(totalShare)} caption="Berdasarkan persentase karyawan"/>
+      </section>
+
+      <section className="panel payroll-formula">
+        <HandCoins size={21}/>
+        <div><b>Rumus Gaji</b><span>Bagi Hasil = Omzet kategori layanan terpilih × Persentase. Total Gaji = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil.</span></div>
+      </section>
+
+      <section className="panel data-panel">
+        <div className="payroll-table-head">
+          <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Bagi hasil menggunakan omzet pembayaran aktual dari kategori layanan yang dipilih untuk setiap karyawan.</small></div>
+          <button className="primary-button" onClick={()=>void saveBonuses()} disabled={busy}><Save size={16}/>{busy?'Menyimpan...':'Simpan Bonus'}</button>
+        </div>
+        <div className="table-wrap">
+          <table className="payroll-table">
+            <thead><tr>
+              <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>
+              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil</th><th>Total Gaji</th><th>Atur</th>
+            </tr></thead>
+            <tbody>
+              {filteredPayroll.map(r=><tr key={r.employee.id}>
+                <td><b>{r.employee.full_name}</b><small>{r.employee.login_id}</small></td>
+                <td><b>{r.presentDays}</b><small>Izin {r.permissionDays} • Sakit {r.sickDays} • Alpha {r.absentDays}</small></td>
+                <td>{formatRupiah(r.attendanceRate)}</td>
+                <td><b>{formatRupiah(r.attendancePay)}</b></td>
+                <td>{formatRupiah(r.allowance)}</td>
+                <td><input className="payroll-bonus-input" type="number" min="0" value={bonusDraft[r.employee.id]??String(r.bonus)} onChange={e=>setBonusDraft({...bonusDraft,[r.employee.id]:e.target.value})}/></td>
+                <td><b>{formatRupiah(r.revenueShare)}</b><small>{r.sharePercent.toFixed(2)}% × {r.shareCategory} ({formatRupiah(r.categoryBaseRevenue)})</small></td>
+                <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
+                <td><button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button></td>
+              </tr>)}
+              {filteredPayroll.length===0&&<tr><td colSpan={9} className="table-empty">Belum ada karyawan aktif.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>}
+
+    {settingsEmployee&&<Modal title={`Komponen Gaji — ${settingsEmployee.full_name}`} onClose={()=>setSettingsEmployee(null)}>
+      <form className="modal-form" onSubmit={saveSettings}>
+        <div className="payroll-setting-note">
+          <HandCoins size={20}/>
+          <div><b>Pengaturan gaji tetap</b><span>Bonus diisi per bulan langsung dari tabel gaji.</span></div>
+        </div>
+        <label>Uang Kehadiran per Hari
+          <input type="number" min="0" value={settingForm.attendance_rate} onChange={e=>setSettingForm({...settingForm,attendance_rate:e.target.value})}/>
+        </label>
+        <label>Tunjangan Bulanan
+          <input type="number" min="0" value={settingForm.monthly_allowance} onChange={e=>setSettingForm({...settingForm,monthly_allowance:e.target.value})}/>
+        </label>
+        <label>Kategori Layanan untuk Bagi Hasil
+          <select value={settingForm.revenue_share_category} onChange={e=>setSettingForm({...settingForm,revenue_share_category:e.target.value})}>
+            {serviceCategories.map(category=><option key={category} value={category}>{category}</option>)}
+          </select>
+        </label>
+        <label>Bagi Hasil dari Omzet Kategori (%)
+          <input type="number" min="0" max="100" step="0.01" value={settingForm.revenue_share_percent} onChange={e=>setSettingForm({...settingForm,revenue_share_percent:e.target.value})}/>
+        </label>
+        <div className="payroll-live-example">
+          <span>Omzet kategori {settingForm.revenue_share_category}</span>
+          <b>{formatRupiah(Number(categoryRevenue[settingForm.revenue_share_category]||0))}</b>
+          <span>Perkiraan bagi hasil</span>
+          <b>{formatRupiah(Number(categoryRevenue[settingForm.revenue_share_category]||0)*(Math.max(0,Number(settingForm.revenue_share_percent)||0)/100))}</b>
+        </div>
+        {message&&<div className="error-box">{message}</div>}
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setSettingsEmployee(null)}>Batal</button>
+          <button className="primary-button" disabled={busy}>{busy?'Menyimpan...':'Simpan Komponen Gaji'}</button>
+        </div>
+      </form>
+    </Modal>}
+  </>
+}

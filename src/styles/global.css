@@ -5959,3 +5959,100 @@ body{
     overflow:visible!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V111.0 — Attendance & Payroll
+   ========================================================= */
+.payroll-page-actions{display:flex;gap:7px}
+.payroll-toolbar{
+  display:grid;
+  grid-template-columns:auto 155px 155px minmax(260px,1fr);
+  gap:10px;
+  align-items:end;
+  margin-bottom:14px!important;
+  padding:12px!important;
+}
+.payroll-tabs{display:flex;gap:6px}
+.payroll-tabs button{
+  min-height:42px;display:flex;align-items:center;gap:7px;padding:0 12px;
+  border:1px solid #c9deed;border-radius:10px;background:#fff;color:#376680;font-weight:850
+}
+.payroll-tabs button.active{background:#eaf5ff;border-color:#2c8bdb;color:#1565c0}
+.payroll-toolbar>label:not(.search-box){display:grid;gap:5px;font-size:10px;font-weight:850;color:#476d84}
+.payroll-toolbar input{height:42px;border:1px solid #c8dce9;border-radius:10px;padding:0 10px}
+.payroll-search{min-width:0!important;width:100%!important}
+.payroll-stats{margin-bottom:14px!important}
+.attendance-date-title,.payroll-table-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;border-bottom:1px solid #e2edf4
+}
+.attendance-date-title>div,.payroll-table-head>div{display:grid;gap:3px}
+.attendance-date-title b,.payroll-table-head b{color:#164c73;font-size:12px;font-weight:950}
+.attendance-date-title small,.payroll-table-head small{color:#71899b;font-size:9.5px}
+.attendance-badge{display:inline-flex;padding:6px 9px;border-radius:999px;font-size:9.5px;font-weight:900}
+.attendance-none{background:#edf2f5;color:#728491}
+.attendance-present{background:#e5f8ee;color:#08764e}
+.attendance-permission{background:#e8f2ff;color:#285e9a}
+.attendance-sick{background:#fff4d9;color:#8a6500}
+.attendance-absent{background:#ffe8e8;color:#a83b32}
+.attendance-actions{display:flex;gap:5px;flex-wrap:wrap}
+.attendance-actions button{
+  min-height:31px;padding:0 9px;border:1px solid #d6e3eb;border-radius:8px;background:#fff;
+  font-size:9.5px;font-weight:850;cursor:pointer
+}
+.attendance-actions button.active{box-shadow:0 0 0 2px rgba(30,136,229,.13)}
+.attendance-actions .attendance-present.active{background:#e5f8ee;border-color:#7dcaa2;color:#08764e}
+.attendance-actions .attendance-permission.active{background:#e8f2ff;border-color:#8bb5e2;color:#285e9a}
+.attendance-actions .attendance-sick.active{background:#fff4d9;border-color:#e2c56d;color:#8a6500}
+.attendance-actions .attendance-absent.active{background:#ffe8e8;border-color:#e7aaa4;color:#a83b32}
+.payroll-formula{
+  display:flex;align-items:flex-start;gap:10px;margin-bottom:14px!important;padding:12px!important;
+  border-color:#cfe4f2!important;background:#f5faff!important
+}
+.payroll-formula svg{color:#1f83cf;flex:0 0 auto}
+.payroll-formula>div{display:grid;gap:2px}
+.payroll-formula b{color:#164f77;font-size:11.5px;font-weight:950}
+.payroll-formula span{color:#6d8698;font-size:9.5px;font-weight:650}
+.payroll-table{min-width:1180px!important}
+.payroll-bonus-input{
+  width:115px;height:34px;border:1px solid #c8dce8;border-radius:8px;padding:0 8px;text-align:right;font-weight:850
+}
+.payroll-total{color:#1565c0!important;font-size:12.5px!important}
+.payroll-setting-note{
+  display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid #cfe3f1;border-radius:10px;background:#f5faff
+}
+.payroll-setting-note svg{color:#1f83cf}
+.payroll-setting-note>div{display:grid;gap:2px}
+.payroll-setting-note span{font-size:9.5px;color:#6d8496}
+.payroll-live-example{
+  display:grid;grid-template-columns:1fr auto;gap:7px;padding:11px;border:1px solid #dbe8f1;border-radius:10px;background:#fbfdfe
+}
+.payroll-live-example span{font-size:10px;color:#718797}
+.payroll-live-example b{font-size:11px;color:#164e76}
+
+@media(max-width:1050px){
+  .payroll-toolbar{grid-template-columns:1fr 1fr}
+  .payroll-tabs{grid-column:1/-1}
+  .payroll-search{grid-column:1/-1}
+}
+@media(max-width:600px){
+  .payroll-page-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
+  .payroll-toolbar{grid-template-columns:1fr}
+  .payroll-tabs{display:grid;grid-template-columns:1fr 1fr}
+  .attendance-actions{display:grid;grid-template-columns:1fr 1fr}
+}
+
+
+/* V111.1 Payroll category revenue share */
+.payroll-table td small{
+  line-height:1.35;
+}
+.payroll-setting-note + label select,
+.modal-form select{
+  width:100%;
+  border:1px solid #bfd7e5;
+  border-radius:10px;
+  padding:11px 12px;
+  background:#fff;
+  color:#174866;
+}

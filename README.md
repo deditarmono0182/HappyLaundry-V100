@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.12 Cashier Total Layout Fix
+# HappyLaundry Enterprise V111.1 Category Revenue Share Payroll
 
 ## Jalankan
 ```bash
@@ -210,3 +210,11 @@ Pengaturan Comfort/Compact/Ultra Compact dipindahkan dari Settings ke Dashboard 
 
 ## V110.12
 Total Belanja dipisahkan dari scrollbar kanan agar tidak terpotong.
+
+
+## V111.0
+Modul Owner-only Absensi & Penggajian: hadir/izin/sakit/alpha, uang hadir, tunjangan, bonus, bagi hasil omzet, total gaji, XLS/PDF.
+
+
+## V111.1
+Bagi hasil gaji dihitung dari omzet kategori layanan yang dipilih per karyawan, bukan total omzet seluruh laundry.
