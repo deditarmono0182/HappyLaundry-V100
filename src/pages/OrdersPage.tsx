@@ -7,7 +7,6 @@ import {
   Eye,
   FileSpreadsheet,
   FileText,
-  ExternalLink,
   Image,
   PackageCheck,
   Plus,
@@ -496,11 +495,6 @@ export function OrdersPage() {
     const payment=paymentFilter==='all'?'Semua Pembayaran':paymentLabels[paymentFilter]
     const status=statusFilter==='all'?'Semua Status Cucian':statusLabels[statusFilter]
     return `Filter: ${status} • ${payment}`
-  }
-
-  const openCustomerTracking=(row:OrderRow)=>{
-    const url=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
-    window.open(url,'_blank','noopener,noreferrer')
   }
 
   const printReceipt=(row:OrderRow)=>{
@@ -1036,24 +1030,9 @@ export function OrdersPage() {
             <div><span>Sudah Bayar</span><b>{formatRupiah(detail.paid_amount)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(detail.total-detail.paid_amount)}</b></div>
             <div><span>Catatan</span><b>{detail.notes || '-'}</b></div>
-            <div className="order-detail-tracking-row">
-              <span>Tracking Pelanggan</span>
-              <b>/track/{detail.order_no}</b>
-            </div>
-            <div className="form-actions order-detail-actions">
-              <button
-                type="button"
-                className="secondary-button order-detail-tracking"
-                onClick={()=>openCustomerTracking(detail)}
-              >
-                <ExternalLink size={16}/>Buka Tracking Pelanggan
-              </button>
-              <button className="secondary-button order-detail-reprint" onClick={()=>printReceipt(detail)}>
-                <Printer size={16}/>Cetak Ulang Nota
-              </button>
-              <button className="primary-button" onClick={() => setDetail(null)}>
-                <CheckCircle2 size={16}/>Tutup
-              </button>
+            <div className="form-actions">
+              <button className="secondary-button order-detail-reprint" onClick={()=>printReceipt(detail)}><Printer size={16}/> Cetak Ulang Nota</button>
+              <button className="primary-button" onClick={() => setDetail(null)}><CheckCircle2 size={16}/> Tutup</button>
             </div>
           </div>
         </Modal>

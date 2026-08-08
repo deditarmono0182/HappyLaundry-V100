@@ -7643,30 +7643,3 @@ body{
     max-height:300px;
   }
 }
-
-
-/* =========================================================
-   HappyLaundry V112.8.6 — Tracking Pelanggan di Detail Order
-   ========================================================= */
-.order-detail-actions{
-  display:flex!important;
-  flex-wrap:wrap;
-  gap:8px!important;
-}
-.order-detail-tracking{
-  min-width:180px;
-}
-.order-detail-tracking-row b{
-  color:#1b6f9f!important;
-  font-size:9.5px!important;
-  word-break:break-all;
-}
-@media(max-width:620px){
-  .order-detail-actions{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-  }
-  .order-detail-actions button{
-    width:100%;
-  }
-}
