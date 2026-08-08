@@ -265,6 +265,7 @@ export function PrintSettingsPage(){
                 <option value="center">Tengah</option>
                 <option value="right">Kanan</option>
               </select>
+              <small className="logo-position-current">Aktif: {form.logo_align==='left'?'Kiri':form.logo_align==='right'?'Kanan':'Tengah'}</small>
             </label>
           </div>
 
@@ -325,11 +326,16 @@ export function PrintSettingsPage(){
         </div>
 
         <div className={`receipt-paper receipt-template-${form.template}`} style={{maxWidth:width,fontSize:`${previewFont}px`}}>
-          {form.show_logo&&<div className={`receipt-preview-logo logo-${form.logo_align}`}>
+          {form.show_logo&&<div className="receipt-preview-logo">
             <img
               src={form.logo_url||'/logo-happylaundry.jpg'}
               alt="Logo"
-              style={{width:`${Math.min(180,Math.max(30,Number(form.logo_width)||64))}px`}}
+              style={{
+                width:`${Math.min(180,Math.max(30,Number(form.logo_width)||64))}px`,
+                display:'block',
+                marginLeft:form.logo_align==='right'?'auto':form.logo_align==='center'?'auto':'0',
+                marginRight:form.logo_align==='left'?'auto':form.logo_align==='center'?'auto':'0'
+              }}
             />
           </div>}
           <h2>HappyLaundry Babakan</h2>

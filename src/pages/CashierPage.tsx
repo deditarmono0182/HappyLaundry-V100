@@ -201,6 +201,9 @@ export function CashierPage() {
       const n=ch.charCodeAt(0)
       return `<i style="display:inline-block;width:${(n+i)%3+1}px;height:42px;background:#111;margin-right:1px"></i>`
     }).join('')
+    const logoAlign=printSettings.logo_align==='left'?'left':printSettings.logo_align==='right'?'right':'center'
+    const logoMarginLeft=logoAlign==='left'?'0':'auto'
+    const logoMarginRight=logoAlign==='right'?'0':'auto'
     const rows=data.items.map(item=>`
       <tr>
         <td>${item.service_name}${printSettings.show_item_price?`<small>${item.quantity} ${item.unit} × ${formatIDR(item.price)}</small>`:`<small>${item.quantity} ${item.unit}</small>`}</td>
@@ -210,8 +213,8 @@ export function CashierPage() {
     <style>
       @page{size:${page};margin:${size==='a4'?'12mm':'3mm'}}
       *{box-sizing:border-box}body{font-family:Arial,sans-serif;width:${width};max-width:100%;margin:0 auto;padding:${size==='a4'?'10mm':'3mm'};color:#111;font-size:${Math.max(8,Math.min(18,printSettings.font_size||11))}px}
-      h1,h2,p{margin:0}.center{text-align:center}.logo-wrap{display:flex;justify-content:${printSettings.logo_align==='left'?'flex-start':printSettings.logo_align==='right'?'flex-end':'center'};width:100%}
-      .logo{width:${Math.min(180,Math.max(30,Number(printSettings.logo_width)||64))}px;max-width:90%;height:auto;max-height:${size==='a4'?'120px':'90px'};object-fit:contain}
+      h1,h2,p{margin:0}.center{text-align:center}.logo-wrap{display:block!important;width:100%!important;text-align:${logoAlign}!important}
+      .logo{display:block!important;width:${Math.min(180,Math.max(30,Number(printSettings.logo_width)||64))}px;max-width:90%!important;height:auto!important;max-height:${size==='a4'?'120px':'90px'};object-fit:contain!important;margin-left:${logoMarginLeft}!important;margin-right:${logoMarginRight}!important}
       .title{font-size:${size==='a4'?'26px':'17px'};margin-top:6px}.muted{color:#555}.small{font-size:10px}.line{border-top:1px dashed #333;margin:9px 0}
       .meta,.summary{width:100%;border-collapse:collapse}.meta td,.summary td{padding:3px 0;vertical-align:top}.meta td:last-child,.summary td:last-child{text-align:right;font-weight:700}
       .items{width:100%;border-collapse:collapse}.items th{border-bottom:1px solid #222;padding:5px 0;text-align:left}.items th:last-child,.items td:last-child{text-align:right}
@@ -224,7 +227,7 @@ export function CashierPage() {
       @media print{.no-print{display:none}}
     </style></head><body>
       <div class="center">
-        ${printSettings.show_logo?`<div class="logo-wrap"><img class="logo" src="${printSettings.logo_url||'/logo-happylaundry.jpg'}"></div>`:''}
+        ${printSettings.show_logo?`<div class="logo-wrap" data-logo-align="${logoAlign}"><img class="logo" src="${printSettings.logo_url||'/logo-happylaundry.jpg'}" style="display:block;width:${Math.min(180,Math.max(30,Number(printSettings.logo_width)||64))}px;max-width:90%;height:auto;margin-left:${logoMarginLeft};margin-right:${logoMarginRight};object-fit:contain"></div>`:''}
         <h1 class="title">${business}</h1>
         <p>${address}</p><p>${phone}</p>
         <p class="muted">${title}</p>

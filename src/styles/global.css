@@ -6631,3 +6631,29 @@ body{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.3.1 — Logo Position Hard Fix
+   ========================================================= */
+.receipt-preview-logo{
+  width:100%!important;
+  display:block!important;
+  margin:0 0 5px!important;
+  padding:0!important;
+}
+
+.receipt-preview-logo img{
+  display:block!important;
+  height:auto!important;
+  max-height:100px!important;
+  object-fit:contain!important;
+}
+
+.logo-position-current{
+  display:block;
+  margin-top:2px;
+  color:#1976d2!important;
+  font-size:8.5px!important;
+  font-weight:850!important;
+}

@@ -1,0 +1,50 @@
+HAPPYLAUNDRY ENTERPRISE V112.3.1 — LOGO POSITION FIX
+
+MASALAH V112.3:
+Pilihan posisi Kiri / Tengah / Kanan dapat terlihat tidak berubah atau hasil cetak tetap berada pada posisi lama.
+
+PENYEBAB:
+Posisi sebelumnya terutama mengandalkan flex alignment.
+Pada kombinasi CSS/template tertentu, aturan layout lain dapat mengalahkan posisi logo.
+
+PERBAIKAN V112.3.1:
+Logo sekarang menggunakan DUA lapisan posisi:
+1. text-align pada pembungkus
+2. margin-left / margin-right langsung pada gambar
+
+KIRI:
+margin-left: 0
+margin-right: auto
+
+TENGAH:
+margin-left: auto
+margin-right: auto
+
+KANAN:
+margin-left: auto
+margin-right: 0
+
+Selain itu inline style ikut ditulis langsung ke HTML nota sehingga aturan CSS lain tidak dapat memindahkan posisi logo.
+
+BERLAKU UNTUK:
+- Preview Print Nota
+- Thermal 58 mm
+- Thermal 80 mm
+- A4
+- PDF
+
+CARA TEST:
+1. Deploy V112.3.1.
+2. Pengaturan -> Pengaturan Print Nota.
+3. Pilih Posisi Logo = Kiri.
+4. Klik Simpan Pengaturan Print.
+5. Pastikan preview pindah ke kiri.
+6. Buka Kasir -> Cetak Default.
+7. Logo harus di kiri.
+8. Ulangi Tengah dan Kanan.
+
+TIDAK ADA SQL BARU.
+SQL 030 dari V112.3 tetap dipakai.
+
+CACHE:
+happylaundry-v112-3-1

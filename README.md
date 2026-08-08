@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.3 Print Logo Settings
+# HappyLaundry Enterprise V112.3.1 Logo Position Fix
 
 ## Jalankan
 ```bash
@@ -246,3 +246,7 @@ Tombol kembali global dipindahkan ke pojok kanan atas, berbentuk bulat dan stick
 
 ## V112.3
 Owner dapat upload logo nota ke Supabase Storage, mengatur ukuran/posisi, hapus custom, restore default, dan logo dipakai pada thermal/A4/PDF.
+
+
+## V112.3.1
+Hard fix posisi logo Kiri/Tengah/Kanan memakai margin langsung + inline style pada preview dan nota cetak.
