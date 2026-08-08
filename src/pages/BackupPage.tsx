@@ -69,6 +69,9 @@ export function BackupPage(){
     view_count:number
     rpc_version?:string
   }|null>(null)
+  const [directResetCode,setDirectResetCode]=useState('')
+  const [directResetBusy,setDirectResetBusy]=useState(false)
+  const [directResetMessage,setDirectResetMessage]=useState('')
 
   const exportBackup=async()=>{
     setBusy(true);setMessage('');setSuccess('')
@@ -161,6 +164,51 @@ export function BackupPage(){
     })
   }
 
+  const directResetOrders=async()=>{
+    if(!isOwner){
+      setDirectResetMessage('Hanya Owner yang dapat Reset Order.')
+      return
+    }
+    if(directResetCode.trim().toUpperCase()!=='RESET ORDER'){
+      setDirectResetMessage('Ketik tepat: RESET ORDER')
+      return
+    }
+
+    setDirectResetBusy(true)
+    setDirectResetMessage('Menghapus seluruh data order...')
+    setMessage('')
+    setSuccess('')
+
+    const{data,error}=await supabase.rpc('v110_reset_orders_v4',{
+      p_confirmation:'RESET ORDER'
+    })
+
+    if(error){
+      setDirectResetBusy(false)
+      setDirectResetMessage(`RESET GAGAL: ${error.message}`)
+      return
+    }
+
+    const result=(Array.isArray(data)?data[0]:data) as {
+      before_count?:number
+      after_count?:number
+      view_count?:number
+      rpc_version?:string
+      message?:string
+    }|null
+
+    setOrderDiagnostic({
+      table_count:Number(result?.after_count||0),
+      view_count:Number(result?.view_count||0),
+      rpc_version:result?.rpc_version||'110.7.4'
+    })
+    setDirectResetCode('')
+    setDirectResetBusy(false)
+    setDirectResetMessage(
+      `${result?.message||'Reset selesai.'} Sebelum: ${Number(result?.before_count||0)}. Sesudah: ${Number(result?.after_count||0)}.`
+    )
+  }
+
   const executeReset=async(event:FormEvent)=>{
     event.preventDefault()
     if(!resetType)return
@@ -230,7 +278,7 @@ export function BackupPage(){
       description="Unduh salinan data, pulihkan master data, dan kelola reset data dengan aman."
     />
 
-    <div className="backup-version-badge">Versi Reset Aktif: <b>V110.7.3</b></div>
+    <div className="backup-version-badge">Versi Reset Aktif: <b>V110.7.4</b></div>
 
     <section className="backup-grid">
       <article className="panel backup-card">
@@ -264,19 +312,56 @@ export function BackupPage(){
       </article>
     </section>
 
-    <section className="panel reset-diagnostic-panel">
+    <section className="panel reset-diagnostic-panel reset-direct-panel">
       <div>
-        <b>Diagnostic Reset Order</b>
-        <span>Cek jumlah order langsung dari database sebelum atau sesudah reset.</span>
+        <b>Diagnostic & Reset Order Langsung</b>
+        <span>Cek jumlah order langsung dari database dan reset tanpa melalui modal lama.</span>
       </div>
-      <button type="button" className="secondary-button" onClick={()=>void checkOrderCount()}>
-        Cek Jumlah Order
-      </button>
+
+      <div className="reset-diagnostic-actions">
+        <button type="button" className="secondary-button" onClick={()=>void checkOrderCount()} disabled={directResetBusy}>
+          Cek Jumlah Order
+        </button>
+      </div>
+
       {orderDiagnostic&&<div className="reset-diagnostic-values">
         <span>Tabel v100_orders <b>{orderDiagnostic.table_count}</b></span>
         <span>View v100_orders_view <b>{orderDiagnostic.view_count}</b></span>
         <span>RPC <b>{orderDiagnostic.rpc_version||'-'}</b></span>
       </div>}
+
+      <div className="direct-reset-box">
+        <div>
+          <AlertTriangle size={20}/>
+          <span>
+            <b>Reset seluruh data Order</b>
+            <small>Order, item order, dan pembayaran akan dihapus. Pelanggan dan Layanan tetap ada.</small>
+          </span>
+        </div>
+
+        <label>
+          Ketik <strong>RESET ORDER</strong>
+          <input
+            value={directResetCode}
+            onChange={e=>setDirectResetCode(e.target.value)}
+            placeholder="RESET ORDER"
+            disabled={directResetBusy}
+          />
+        </label>
+
+        <button
+          type="button"
+          className="reset-confirm-button"
+          onClick={()=>void directResetOrders()}
+          disabled={directResetBusy||directResetCode.trim().toUpperCase()!=='RESET ORDER'}
+        >
+          <Trash2 size={17}/>{directResetBusy?'Menghapus...':'RESET ORDER SEKARANG'}
+        </button>
+
+        {directResetMessage&&<div className={`direct-reset-message ${directResetMessage.startsWith('RESET GAGAL')?'error':''}`}>
+          {directResetMessage}
+        </div>}
+      </div>
     </section>
 
     <section className="panel reset-data-panel">

@@ -1,0 +1,52 @@
+HAPPYLAUNDRY ENTERPRISE V110.7.4 — DIRECT RESET ORDER
+
+DARI SCREENSHOT V110.7.3:
+Tabel v100_orders = 8
+View v100_orders_view = 8
+RPC Diagnostic = 110.7.3
+
+Artinya:
+- cache benar
+- frontend benar
+- Supabase terhubung
+- Owner permission benar
+- data memang ada di v100_orders
+- masalah hanya aksi reset lama
+
+V110.7.4 TIDAK MENGGUNAKAN MODAL RESET ORDER LAMA.
+
+Sekarang di panel Diagnostic ada:
+RESET ORDER LANGSUNG
+
+Cara:
+1. Klik Cek Jumlah Order
+2. Ketik RESET ORDER
+3. Klik RESET ORDER SEKARANG
+
+SQL menggunakan:
+TRUNCATE TABLE public.v100_orders CASCADE
+
+Ini akan menghapus:
+- v100_orders
+- dependency FK seperti v100_order_items
+- dependency FK seperti v100_payments
+
+Kas yang terkait order dibersihkan lebih dulu.
+
+WAJIB SQL:
+supabase/021_v110_7_4_direct_reset_order.sql
+
+Setelah SQL Success:
+1. Deploy V110.7.4
+2. Pastikan Backup Data menampilkan V110.7.4
+3. Klik Cek Jumlah Order
+4. Ketik RESET ORDER
+5. Klik RESET ORDER SEKARANG
+
+HASIL WAJIB:
+RESET ORDER BERHASIL. Sebelum: 8. Sesudah: 0.
+
+Diagnostic akan langsung berubah:
+Tabel v100_orders = 0
+View v100_orders_view = 0
+RPC = 110.7.4

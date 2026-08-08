@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.7.3 Hard Reset Diagnostic
+# HappyLaundry Enterprise V110.7.4 Direct Reset Order
 
 ## Jalankan
 ```bash
@@ -182,3 +182,7 @@ Force refresh PWA cache, visible reset version, and dedicated reset-order RPC.
 
 ## V110.7.3
 Database diagnostic for v100_orders/view + hard reset RPC with table locks and post-delete verification.
+
+
+## V110.7.4
+Direct Reset Order from diagnostic panel using owner-only TRUNCATE v100_orders CASCADE and immediate verification.
