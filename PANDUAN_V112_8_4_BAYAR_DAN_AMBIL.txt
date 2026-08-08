@@ -1,0 +1,56 @@
+HAPPYLAUNDRY ENTERPRISE V112.8.4 — BAYAR & AMBIL
+
+FITUR BARU DI MENU PEMBAYARAN:
+
+SETIAP TAGIHAN MEMPUNYAI:
+1. Bayar
+2. Bayar & Ambil
+
+SAAT KLIK BAYAR:
+- Pembayaran dicatat seperti biasa.
+- Bisa bayar sebagian atau lunas.
+- Status produksi TIDAK berubah.
+
+SAAT KLIK BAYAR & AMBIL:
+- Sistem otomatis memakai seluruh sisa tagihan.
+- Pembayaran dicatat.
+- Order otomatis berubah menjadi:
+  SELESAI
+- Order otomatis keluar dari papan Produksi aktif.
+- Tidak perlu masuk ke Produksi dan klik tahap berikutnya lagi.
+
+MODAL PEMBAYARAN:
+Terdapat dua kartu pilihan:
+- Bayar Saja
+- Bayar & Ambil
+
+BAYAR & AMBIL:
+Nominal dikunci sebesar sisa tagihan agar order benar-benar LUNAS sebelum dianggap sudah diambil.
+
+METODE PEMBAYARAN:
+Tetap tersedia:
+- Tunai
+- QRIS
+- Transfer
+- Lainnya
+
+CATATAN:
+Bayar & Ambil dapat digunakan walaupun status order masih diproses.
+Karena tombol ini berarti Owner/Kasir memastikan barang memang diserahkan kepada pelanggan.
+Ada konfirmasi visual jelas di modal.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.8.4.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Pembayaran.
+5. Pilih tagihan.
+6. Klik Bayar & Ambil.
+7. Pilih metode.
+8. Klik Bayar & Ambil Sekarang.
+9. Cek Produksi: order sudah tidak ada karena status menjadi Selesai.
+
+CACHE:
+happylaundry-v112-8-4

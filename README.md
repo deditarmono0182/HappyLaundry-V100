@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.8.3 Large Mobile Receipt Preview
+# HappyLaundry Enterprise V112.8.4 Pay and Pickup
 
 ## Jalankan
 ```bash
@@ -286,3 +286,7 @@ Tombol Cetak Ulang Nota dibuat jelas di Order dan Detail Order, dengan preview, 
 
 ## V112.8.3
 Preview nota Kasir dan Cetak Ulang diperbesar di iPhone/HP tanpa mengubah ukuran hasil print thermal/A4.
+
+
+## V112.8.4
+Menu Pembayaran mendapat Bayar Saja dan Bayar & Ambil. Bayar & Ambil melunasi sisa tagihan dan langsung mengubah status order menjadi Selesai.

@@ -7370,3 +7370,118 @@ body{
     display:none!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.8.4 — Bayar & Ambil
+   ========================================================= */
+.payment-row-actions{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.pay-pickup-row{
+  background:#1376b7!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:5px!important;
+}
+.payment-success-banner{
+  margin-bottom:14px!important;
+}
+.payment-action-cards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.payment-action-card{
+  min-height:92px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:2px solid #d8e6ee;
+  border-radius:13px;
+  background:#fff;
+  color:#315e79;
+  text-align:left;
+  cursor:pointer;
+}
+.payment-action-card>svg{
+  flex:0 0 auto;
+  color:#1e88e5;
+}
+.payment-action-card>span{
+  display:grid;
+  gap:3px;
+}
+.payment-action-card b{
+  font-size:11px;
+  color:#164f75;
+}
+.payment-action-card small{
+  font-size:8.7px;
+  color:#738a99;
+  line-height:1.35;
+}
+.payment-action-card.active{
+  border-color:#1e88e5;
+  background:#edf7ff;
+  box-shadow:0 0 0 3px rgba(30,136,229,.1);
+}
+.payment-action-card.pickup>svg{
+  color:#0d9364;
+}
+.payment-action-card.pickup.active{
+  border-color:#15a06e;
+  background:#eefaf5;
+  box-shadow:0 0 0 3px rgba(21,160,110,.1);
+}
+.payment-full-note{
+  margin-top:2px;
+  color:#0c8660!important;
+  font-size:8.5px!important;
+  font-weight:800!important;
+}
+.payment-pickup-warning{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  padding:10px 11px;
+  border:1px solid #bfe3d2;
+  border-radius:11px;
+  background:#f0faf5;
+  color:#416e5c;
+}
+.payment-pickup-warning>svg{
+  color:#0e9464;
+  flex:0 0 auto;
+}
+.payment-pickup-warning>span{
+  display:grid;
+  gap:3px;
+}
+.payment-pickup-warning b{
+  font-size:10px;
+  color:#17684d;
+}
+.payment-pickup-warning small{
+  font-size:8.7px;
+  line-height:1.35;
+}
+.payment-pickup-submit{
+  background:#0b9362!important;
+}
+@media(max-width:620px){
+  .payment-action-cards{
+    grid-template-columns:1fr;
+  }
+  .payment-row-actions{
+    display:grid;
+    min-width:115px;
+  }
+  .payment-row-actions button{
+    width:100%;
+  }
+}
