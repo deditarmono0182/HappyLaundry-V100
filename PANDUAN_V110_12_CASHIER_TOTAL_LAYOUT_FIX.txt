@@ -1,0 +1,12 @@
+HAPPYLAUNDRY ENTERPRISE V110.12 — CASHIER TOTAL LAYOUT FIX
+
+PERBAIKAN:
+- Total Belanja dipisahkan dari scrollbar kanan.
+- Total Belanja sekarang selalu tampil utuh.
+- Scroll kanan hanya untuk Shortcut Kasir, Nota Enterprise, dan Transaksi Hari Ini.
+- Scroll kiri tetap untuk form Pelanggan, Layanan, dan Pembayaran.
+- Tablet/iPhone tetap memakai scroll normal.
+
+TIDAK ADA SQL BARU.
+
+Deploy V110.12 lalu refresh aplikasi.

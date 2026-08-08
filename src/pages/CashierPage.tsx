@@ -461,25 +461,28 @@ export function CashierPage() {
           {method==='cash'&&paymentAmount>total&&<div className="cashier-change"><span>Kembalian</span><b>{formatIDR(change)}</b></div>}
           <div><span>Sisa Tagihan</span><b>{formatIDR(Math.max(0,total-paymentAmount))}</b></div>
         </section>
-        <section className="panel cashier-shortcuts">
-          <header><b>Shortcut Kasir</b><span>V102 Stable</span></header>
-          <div><kbd>F2</kbd><span>Cari pelanggan</span></div>
-          <div><kbd>F4</kbd><span>Tambah layanan</span></div>
-          <div><kbd>Ctrl + Enter</kbd><span>Simpan transaksi</span></div>
-          <div><kbd>Esc</kbd><span>Bersihkan form</span></div>
-        </section>
-        <section className="panel cashier-pro-features">
-          <header><QrCode size={20}/><b>Nota Enterprise</b></header>
-          <p>Setelah transaksi tersimpan, tersedia:</p>
-          <ul><li>Thermal 58 mm</li><li>Thermal 80 mm</li><li>A4 / Simpan PDF</li><li>QR status order</li><li>Barcode invoice</li></ul>
-        </section>
-        <section className="panel cashier-today">
-          <header><b>Transaksi Hari Ini</b><span>{todayOrders.length}</span></header>
-          {todayOrders.slice(0,8).map(o=><div key={o.id}>
-            <span><b>{o.order_no}</b><small>{o.customer_name}</small></span><b>{formatIDR(Number(o.total))}</b>
-          </div>)}
-          {todayOrders.length===0&&<p>Belum ada transaksi hari ini.</p>}
-        </section>
+
+        <div className="cashier-summary-scroll">
+          <section className="panel cashier-shortcuts">
+            <header><b>Shortcut Kasir</b><span>V102 Stable</span></header>
+            <div><kbd>F2</kbd><span>Cari pelanggan</span></div>
+            <div><kbd>F4</kbd><span>Tambah layanan</span></div>
+            <div><kbd>Ctrl + Enter</kbd><span>Simpan transaksi</span></div>
+            <div><kbd>Esc</kbd><span>Bersihkan form</span></div>
+          </section>
+          <section className="panel cashier-pro-features">
+            <header><QrCode size={20}/><b>Nota Enterprise</b></header>
+            <p>Setelah transaksi tersimpan, tersedia:</p>
+            <ul><li>Thermal 58 mm</li><li>Thermal 80 mm</li><li>A4 / Simpan PDF</li><li>QR status order</li><li>Barcode invoice</li></ul>
+          </section>
+          <section className="panel cashier-today">
+            <header><b>Transaksi Hari Ini</b><span>{todayOrders.length}</span></header>
+            {todayOrders.slice(0,8).map(o=><div key={o.id}>
+              <span><b>{o.order_no}</b><small>{o.customer_name}</small></span><b>{formatIDR(Number(o.total))}</b>
+            </div>)}
+            {todayOrders.length===0&&<p>Belum ada transaksi hari ini.</p>}
+          </section>
+        </div>
       </aside>
     </div>
   </>

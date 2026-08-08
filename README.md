@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.11 Dashboard Display Customizer
+# HappyLaundry Enterprise V110.12 Cashier Total Layout Fix
 
 ## Jalankan
 ```bash
@@ -206,3 +206,7 @@ Kasir desktop memakai scroll independen pada form transaksi kiri dan Total Belan
 
 ## V110.11
 Pengaturan Comfort/Compact/Ultra Compact dipindahkan dari Settings ke Dashboard agar karyawan dapat mengubah tampilan per perangkat.
+
+
+## V110.12
+Total Belanja dipisahkan dari scrollbar kanan agar tidak terpotong.

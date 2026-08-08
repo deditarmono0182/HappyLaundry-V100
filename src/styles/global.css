@@ -5847,3 +5847,115 @@ body{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V110.12 — Cashier Total Layout Fix
+   ========================================================= */
+@media (min-width:1051px){
+  .cashier-layout{
+    height:calc(100dvh - 165px)!important;
+    min-height:570px!important;
+    overflow:hidden!important;
+    align-items:stretch!important;
+  }
+
+  .cashier-form{
+    height:100%!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain;
+    padding-right:14px!important;
+  }
+
+  .cashier-summary{
+    position:relative!important;
+    top:auto!important;
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    align-content:stretch!important;
+    gap:14px!important;
+    padding-right:0!important;
+  }
+
+  .cashier-summary > .cashier-total-card{
+    position:relative!important;
+    top:auto!important;
+    z-index:5!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:235px!important;
+    max-height:none!important;
+    overflow:visible!important;
+    flex:none!important;
+    align-self:start!important;
+    margin:0!important;
+    padding:15px!important;
+    display:grid!important;
+    gap:10px!important;
+    border-radius:18px!important;
+    box-shadow:0 10px 24px rgba(24,92,150,.18)!important;
+  }
+
+  .cashier-summary > .cashier-total-card > strong{
+    display:block!important;
+    min-height:36px!important;
+    line-height:1.05!important;
+    font-size:31px!important;
+    overflow:visible!important;
+  }
+
+  .cashier-summary > .cashier-total-card > div{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    min-height:31px!important;
+    padding-top:9px!important;
+    overflow:visible!important;
+  }
+
+  .cashier-summary-scroll{
+    min-height:0!important;
+    height:100%!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    display:grid!important;
+    align-content:start!important;
+    gap:14px!important;
+    padding-right:5px!important;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+  }
+
+  .cashier-summary-scroll::-webkit-scrollbar{width:6px}
+  .cashier-summary-scroll::-webkit-scrollbar-track{background:transparent}
+  .cashier-summary-scroll::-webkit-scrollbar-thumb{background:#b8d7eb;border-radius:999px}
+}
+
+@media (max-width:1050px){
+  .cashier-layout{height:auto!important;overflow:visible!important}
+  .cashier-form{height:auto!important;overflow:visible!important}
+  .cashier-summary{
+    height:auto!important;
+    overflow:visible!important;
+    position:static!important;
+    display:grid!important;
+    grid-template-rows:auto!important;
+  }
+  .cashier-summary > .cashier-total-card{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+    position:static!important;
+  }
+  .cashier-summary-scroll{
+    display:contents!important;
+    overflow:visible!important;
+  }
+}
