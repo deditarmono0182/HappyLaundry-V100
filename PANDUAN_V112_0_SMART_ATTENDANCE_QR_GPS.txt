@@ -1,0 +1,87 @@
+HAPPYLAUNDRY ENTERPRISE V112.0 — SMART ATTENDANCE QR + GPS
+
+PERUBAHAN UTAMA:
+LOGIN KARYAWAN SAJA TIDAK LAGI DIHITUNG HADIR.
+
+Karyawan baru tercatat HADIR jika:
+1. Sudah login dengan ID Akun + Password.
+2. Membuka menu Absen.
+3. Scan QR Absen aktif yang ditempel di toko.
+4. Mengizinkan GPS/Location.
+5. Jarak GPS berada di dalam radius yang diatur Owner.
+
+OWNER TIDAK HARUS BERADA DI TOKO:
+Owner dapat membuka:
+Pengaturan -> Pengaturan Absensi
+dari rumah, laptop, iPhone, atau lokasi lain.
+
+PENGATURAN OWNER:
+- Nama Cabang
+- Latitude toko
+- Longitude toko
+- Radius 25 / 50 / 75 / 100 / 150 / 200 meter
+- Batas jam absen opsional
+- QR aktif
+- Generate QR Baru
+- Download QR PNG
+- Print QR
+- Jumlah penggunaan QR hari ini
+
+QR:
+QR bersifat statis sampai Owner menekan Generate QR Baru.
+Setelah Generate:
+- QR baru aktif
+- QR lama langsung tidak berlaku
+- Owner print QR baru satu kali dan tempel di toko
+
+KARYAWAN:
+Menu baru:
+ABSEN
+
+Alur:
+Login -> Absen -> Scan QR -> GPS -> Hadir
+
+Jika karyawan scan foto QR dari rumah:
+QR bisa benar,
+tetapi GPS di luar radius,
+maka absensi DITOLAK.
+
+DATA YANG DISIMPAN:
+- Karyawan
+- Tanggal
+- Jam masuk
+- Latitude
+- Longitude
+- Akurasi GPS
+- Jarak dari toko
+- Device
+- QR version
+- Metode QR + GPS
+
+OWNER OVERRIDE:
+Fitur V111.4 tetap tersedia.
+Jika internet/GPS/kamera bermasalah tetapi karyawan benar-benar hadir,
+Owner dapat:
+Absensi & Gaji -> Daftar Hadir -> Hadir -> isi alasan.
+
+TIDAK ADA LAPORAN ABSENSI BARU.
+
+WAJIB SQL:
+supabase/029_v112_0_smart_attendance_qr_gps.sql
+
+URUTAN JIKA SUDAH V111.4:
+1. Jalankan SQL 029 di Supabase.
+2. Pastikan Success.
+3. Deploy V112.0.
+4. npm dependencies akan menginstal qrcode + html5-qrcode saat build.
+5. Refresh.
+6. Owner -> Pengaturan -> Pengaturan Absensi.
+7. Isi Latitude, Longitude, Radius.
+8. Simpan.
+9. Generate QR Baru.
+10. Print QR dan tempel di toko.
+11. Login akun karyawan.
+12. Menu Absen -> Scan QR -> Izinkan GPS.
+
+PENTING:
+Gunakan HTTPS/domain Netlify agar browser mengizinkan kamera dan GPS.

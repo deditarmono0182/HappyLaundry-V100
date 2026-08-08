@@ -110,9 +110,9 @@ export function AuthProvider({children}:{children:React.ReactNode}){
         const row=(Array.isArray(data)?data[0]:data) as EmployeeSessionRow|undefined
         if(row&&mounted){
           setProfile(employeeToProfile(row))
-          // Auto attendance is idempotent: one row per employee per day.
-          // Existing Owner-set Izin/Sakit/Alpha is never overwritten.
-          try{await supabase.rpc('v111_auto_attendance_login')}catch{}
+
+          // V112.0: login alone does NOT count as attendance.
+          // Attendance requires QR toko + GPS verification.
           return
         }
       }
@@ -179,9 +179,9 @@ export function AuthProvider({children}:{children:React.ReactNode}){
         throw new Error(bindError?.message||'Gagal mengaktifkan sesi karyawan.')
       }
 
-      // First successful employee login of the day creates attendance automatically.
-      // Do not block login if attendance service is temporarily unavailable.
-      try{await supabase.rpc('v111_auto_attendance_login')}catch{}
+
+      // V112.0: employee login only opens the app.
+      // Attendance is recorded separately through QR + GPS.
 
       await supabase.auth.refreshSession()
     },

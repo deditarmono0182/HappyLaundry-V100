@@ -468,8 +468,8 @@ export function PayrollPage(){
       <section className="panel attendance-auto-info">
         <CalendarCheck2 size={20}/>
         <div>
-          <b>Absensi Otomatis Aktif</b>
-          <span>Login pertama karyawan pada hari itu otomatis tercatat Hadir. Status manual Owner tidak akan ditimpa.</span>
+          <b>Absensi QR + GPS Aktif</b>
+          <span>Login saja tidak dihitung Hadir. Karyawan harus scan QR toko dan lolos verifikasi radius GPS. Owner tetap dapat override manual jika ada kendala.</span>
         </div>
       </section>
 
@@ -508,6 +508,13 @@ export function PayrollPage(){
                         Manual Owner
                         {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.override_reason
                           ? ` • ${attendanceMap.get(`${employee.id}|${attendanceDate}`)!.override_reason}`
+                          : ''}
+                      </small>}
+                    {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.attendance_source==='qr_gps'&&
+                      <small className="attendance-qr-gps-note">
+                        QR + GPS
+                        {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.check_in_at
+                          ? ` • ${new Date(attendanceMap.get(`${employee.id}|${attendanceDate}`)!.check_in_at!).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`
                           : ''}
                       </small>}
                   </td>

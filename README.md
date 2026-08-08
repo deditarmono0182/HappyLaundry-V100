@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V111.4 Owner Attendance Override
+# HappyLaundry Enterprise V112.0 Smart Attendance QR GPS
 
 ## Jalankan
 ```bash
@@ -230,3 +230,7 @@ Login pertama karyawan per hari otomatis membuat status Hadir, dengan sumber Aut
 
 ## V111.4
 Owner dapat override absensi dengan alasan wajib; Hadir Manual dibedakan dari Auto Login dan tercatat di audit log.
+
+
+## V112.0
+Absensi karyawan menggunakan login + QR statis yang dapat diganti Owner + GPS radius. Login saja tidak lagi dihitung Hadir. Owner override tetap tersedia.
