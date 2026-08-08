@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.7 Top Customers Dashboard
+# HappyLaundry Enterprise V112.8 Customer Analytics
 
 ## Jalankan
 ```bash
@@ -270,3 +270,7 @@ Order mendapat Export All/XLS Filter/PDF Filter, filter status pembayaran + cuci
 
 ## V112.7
 Dashboard menampilkan Top 5 pelanggan berdasarkan jumlah transaksi, total belanja, dan transaksi terakhir.
+
+
+## V112.8
+Dashboard Pelanggan mendapat analitik transaksi, total belanja, rata-rata transaksi, pelanggan baru, Top 10, dan pelanggan tidak kembali 60+ hari.

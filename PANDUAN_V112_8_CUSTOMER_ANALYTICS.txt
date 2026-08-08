@@ -1,0 +1,55 @@
+HAPPYLAUNDRY ENTERPRISE V112.8 — ANALITIK PELANGGAN
+
+FITUR BARU DI DASHBOARD PELANGGAN:
+
+1. TOTAL PELANGGAN
+Jumlah seluruh pelanggan tersimpan.
+
+2. TOTAL TRANSAKSI
+Jumlah seluruh order pelanggan, order dibatalkan tidak dihitung.
+
+3. PELANGGAN BARU BULAN INI
+Pelanggan yang dibuat sejak tanggal 1 bulan berjalan.
+
+4. TIDAK KEMBALI 60+ HARI
+Pelanggan yang pernah transaksi tetapi transaksi terakhirnya sudah lebih dari 60 hari.
+
+5. PELANGGAN PALING AKTIF
+Menampilkan pelanggan dengan jumlah transaksi terbanyak.
+Jika jumlah transaksi sama, total belanja terbesar menjadi ranking lebih tinggi.
+
+6. TOTAL NILAI TRANSAKSI PELANGGAN
+Akumulasi nilai seluruh order pelanggan.
+
+7. FILTER / SEGMENT:
+- Semua
+- Top 10
+- Baru Bulan Ini
+- Tidak Kembali 60+ Hari
+
+8. TABEL PELANGGAN LEBIH LENGKAP:
+- Nama
+- WhatsApp
+- Jumlah transaksi
+- Total belanja
+- Total yang sudah dibayar
+- Rata-rata transaksi
+- Transaksi terakhir
+- Berapa hari sejak transaksi terakhir
+- Tanggal pelanggan dibuat
+
+DATA:
+Menggunakan tabel pelanggan dan order yang sudah ada.
+Order cancelled tidak dihitung untuk analitik.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.8.
+2. Tunggu Netlify Published.
+3. Refresh aplikasi.
+4. Buka menu Pelanggan.
+5. Analitik langsung tampil di atas daftar pelanggan.
+
+CACHE:
+happylaundry-v112-8-0

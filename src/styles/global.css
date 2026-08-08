@@ -7181,3 +7181,155 @@ body{
     gap:10px;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.8 — Customer Analytics
+   ========================================================= */
+.customer-analytics-stats{
+  margin-bottom:16px!important;
+}
+.customer-analytics-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(260px,.7fr);
+  gap:14px;
+  margin-bottom:14px;
+}
+.customer-best-card{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:12px;
+  background:linear-gradient(135deg,#fff9e7,#fff)!important;
+  border-color:#eadca8!important;
+}
+.customer-best-icon{
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:#fff0bd;
+  color:#ae7c00;
+}
+.customer-best-card>div:nth-child(2){
+  display:grid;
+  gap:2px;
+}
+.customer-best-card>div:nth-child(2)>span{
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.7px;
+  color:#a27b18;
+}
+.customer-best-card h3{
+  margin:0;
+  color:#5e4b16;
+  font-size:17px;
+}
+.customer-best-card p{
+  margin:0;
+  color:#877642;
+  font-size:9.5px;
+}
+.customer-best-average{
+  display:grid;
+  gap:3px;
+  text-align:right;
+}
+.customer-best-average span{
+  font-size:8.5px;
+  color:#8a7a4d;
+}
+.customer-best-average b{
+  color:#735a13;
+  font-size:13px;
+}
+.customer-value-card{
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.customer-value-card>svg{
+  color:#1e88e5;
+}
+.customer-value-card>div{
+  display:grid;
+  gap:3px;
+}
+.customer-value-card span,
+.customer-value-card small{
+  font-size:8.5px;
+  color:#71899a;
+}
+.customer-value-card b{
+  font-size:16px;
+  color:#164e75;
+}
+.customer-segment-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px!important;
+}
+.customer-segment-toolbar>div:first-child{
+  display:grid;
+  gap:2px;
+}
+.customer-segment-toolbar>div:first-child b{
+  color:#164d73;
+  font-size:11px;
+}
+.customer-segment-toolbar>div:first-child small{
+  color:#7b919e;
+  font-size:8.8px;
+}
+.customer-segment-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.customer-segment-tabs button{
+  min-height:35px;
+  padding:0 11px;
+  border:1px solid #c9dfea;
+  border-radius:999px;
+  background:#fff;
+  color:#376681;
+  font-size:9px;
+  font-weight:850;
+  cursor:pointer;
+}
+.customer-segment-tabs button.active{
+  background:#1e88e5;
+  border-color:#1e88e5;
+  color:#fff;
+}
+.customer-top-label{
+  color:#a67800!important;
+  font-weight:900!important;
+}
+.customer-never-order{
+  color:#8b9da8;
+  font-size:9.5px;
+}
+@media(max-width:850px){
+  .customer-analytics-grid{
+    grid-template-columns:1fr;
+  }
+  .customer-segment-toolbar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+}
+@media(max-width:560px){
+  .customer-best-card{
+    grid-template-columns:auto 1fr;
+  }
+  .customer-best-average{
+    grid-column:1/-1;
+    text-align:left;
+    padding-left:64px;
+  }
+}
