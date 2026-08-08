@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.10 Sticky Cashier Total
+# HappyLaundry Enterprise V110.11 Dashboard Display Customizer
 
 ## Jalankan
 ```bash
@@ -202,3 +202,7 @@ Export XLS dan PDF untuk Pemasukan, Pengeluaran, Piutang, Bagi Hasil, dan Lapora
 
 ## V110.10
 Kasir desktop memakai scroll independen pada form transaksi kiri dan Total Belanja sticky di kanan.
+
+
+## V110.11
+Pengaturan Comfort/Compact/Ultra Compact dipindahkan dari Settings ke Dashboard agar karyawan dapat mengubah tampilan per perangkat.

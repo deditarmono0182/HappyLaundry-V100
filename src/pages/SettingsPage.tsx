@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Activity, CheckCircle2, ExternalLink, MapPin, MessageCircle, Printer, Save, SlidersHorizontal, Store, UsersRound } from 'lucide-react'
+import { Activity, CheckCircle2, ExternalLink, MapPin, MessageCircle, Printer, Save, Store, UsersRound } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -27,9 +27,6 @@ export function SettingsPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [success, setSuccess] = useState('')
-  const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
-    (localStorage.getItem('happylaundry-density') as 'comfort'|'compact'|'ultra')||'compact'
-  )
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -51,12 +48,6 @@ export function SettingsPage() {
     setBusy(false)
   }
 
-  const applyDensity=(value:'comfort'|'compact'|'ultra')=>{
-    setDensity(value)
-    localStorage.setItem('happylaundry-density',value)
-    document.documentElement.dataset.density=value
-    setSuccess(`Tampilan ${value==='comfort'?'Comfort':value==='compact'?'Compact':'Ultra Compact'} aktif.`)
-  }
 
   const testWhatsApp = () => {
     try {
@@ -104,21 +95,6 @@ export function SettingsPage() {
       <section className="panel settings-card settings-wide employee-settings-link">
         <header><Printer size={21}/><div><b>Pengaturan Print Nota</b><small>Atur thermal 58/80 mm, A4, template, font, QR tracking, barcode, copy, dan preview nota.</small></div></header>
         <button type="button" className="primary-button" onClick={()=>navigate('/settings/print')}><Printer size={17}/>Buka Pengaturan Print</button>
-      </section>
-
-      <section className="panel settings-card settings-wide density-settings-card">
-        <header><SlidersHorizontal size={21}/><div><b>Kepadatan Tampilan</b><small>Pilih ukuran baris, kartu, input, dan jarak seluruh aplikasi.</small></div></header>
-        <div className="density-options">
-          <button type="button" className={density==='comfort'?'active':''} onClick={()=>applyDensity('comfort')}>
-            <b>Comfort</b><span>Lebih besar dan lega</span>
-          </button>
-          <button type="button" className={density==='compact'?'active':''} onClick={()=>applyDensity('compact')}>
-            <b>Compact</b><span>Rekomendasi operasional</span>
-          </button>
-          <button type="button" className={density==='ultra'?'active':''} onClick={()=>applyDensity('ultra')}>
-            <b>Ultra Compact</b><span>Maksimal data per layar</span>
-          </button>
-        </div>
       </section>
 
       <section className="panel settings-card settings-wide">

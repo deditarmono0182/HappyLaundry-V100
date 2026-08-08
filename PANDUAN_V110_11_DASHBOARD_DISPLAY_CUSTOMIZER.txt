@@ -1,0 +1,51 @@
+HAPPYLAUNDRY ENTERPRISE V110.11 — DASHBOARD DISPLAY CUSTOMIZER
+
+PERUBAHAN:
+Pengaturan Kepadatan Tampilan DIPINDAHKAN dari menu Pengaturan Owner ke DASHBOARD.
+
+TUJUAN:
+Karyawan yang memiliki akses Dashboard dapat mengubah tampilan sendiri tanpa harus memiliki akses Pengaturan.
+
+PILIHAN:
+1. Comfort
+   - huruf/row/kartu lebih besar
+   - lebih lega
+
+2. Compact
+   - rekomendasi operasional
+   - seimbang antara ukuran dan jumlah data
+
+3. Ultra Compact
+   - row/input/kartu lebih kecil
+   - lebih banyak data terlihat di layar
+
+PENYIMPANAN:
+Pengaturan disimpan di:
+localStorage browser/perangkat
+
+Artinya:
+- Karyawan A di komputer kasir bisa memilih Compact.
+- Owner di laptop bisa memilih Comfort.
+- Karyawan B di tablet bisa memilih Ultra Compact.
+- Perubahan satu perangkat TIDAK mengubah pengguna/perangkat lain.
+
+AKSES:
+Siapa pun yang mempunyai hak akses Dashboard dapat menggunakan pengaturan tampilan ini.
+
+MENU PENGATURAN:
+Bagian Kepadatan Tampilan lama sudah dipindahkan dari Pengaturan agar karyawan tidak perlu masuk menu Owner.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V110.11.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Dashboard.
+5. Di bagian atas Dashboard akan terlihat:
+   Tampilan Aplikasi
+   Comfort | Compact | Ultra Compact
+6. Klik pilihan dan tampilan langsung berubah.
+
+CACHE:
+happylaundry-v110-11-0

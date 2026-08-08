@@ -5736,3 +5736,114 @@ body{
     position:static!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V110.11 — Dashboard Display Customizer
+   ========================================================= */
+
+.dashboard-display-customizer{
+  display:grid;
+  grid-template-columns:minmax(240px,1fr) auto;
+  align-items:center;
+  gap:12px;
+  margin:0 0 14px!important;
+  padding:12px 14px!important;
+  border-color:#cfe3f3!important;
+  background:linear-gradient(135deg,#fff,#f6fbff)!important;
+}
+
+.dashboard-display-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.dashboard-display-icon{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border-radius:11px;
+  background:#e7f4ff;
+  color:#1976d2;
+}
+
+.dashboard-display-title>div:last-child{
+  display:grid;
+  gap:2px;
+}
+
+.dashboard-display-title b{
+  color:#164b72!important;
+  font-size:12px!important;
+  font-weight:950!important;
+}
+
+.dashboard-display-title small{
+  color:#71899b!important;
+  font-size:9.5px!important;
+  font-weight:650!important;
+}
+
+.dashboard-density-options{
+  display:flex;
+  gap:7px;
+}
+
+.dashboard-density-options button{
+  min-width:112px;
+  display:grid;
+  gap:2px;
+  padding:8px 11px;
+  border:1px solid #cbdfea;
+  border-radius:10px;
+  background:#fff;
+  color:#315f7e;
+  cursor:pointer;
+}
+
+.dashboard-density-options button b{
+  font-size:10.5px!important;
+  font-weight:950!important;
+}
+
+.dashboard-density-options button span{
+  font-size:8.5px!important;
+  color:#7890a1!important;
+  font-weight:650!important;
+}
+
+.dashboard-density-options button.active{
+  border-color:#2787d8;
+  background:#eaf5ff;
+  color:#1565c0;
+  box-shadow:0 0 0 2px rgba(30,136,229,.08);
+}
+
+.dashboard-display-device-note{
+  grid-column:1/-1;
+  color:#8194a2!important;
+  font-size:8.5px!important;
+  font-weight:650!important;
+}
+
+@media(max-width:850px){
+  .dashboard-display-customizer{
+    grid-template-columns:1fr;
+  }
+  .dashboard-density-options{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+  }
+  .dashboard-density-options button{
+    min-width:0;
+  }
+}
+
+@media(max-width:520px){
+  .dashboard-density-options{
+    grid-template-columns:1fr;
+  }
+}

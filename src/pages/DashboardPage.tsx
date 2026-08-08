@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Banknote, CheckCircle2, PackageCheck, ShoppingBag, WashingMachine } from 'lucide-react'
+import { AlertTriangle, Banknote, CheckCircle2, MonitorCog, PackageCheck, ShoppingBag, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
@@ -27,6 +27,9 @@ export function DashboardPage() {
   const [services,setServices]=useState<DashboardService[]>([])
   const [message,setMessage]=useState('')
   const [revenuePeriod,setRevenuePeriod]=useState<'7d'|'month'|'3m'|'6m'|'12m'>('7d')
+  const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
+    (localStorage.getItem('happylaundry-density') as 'comfort'|'compact'|'ultra')||'compact'
+  )
 
   const load=useCallback(async()=>{
     const start=new Date(); start.setHours(0,0,0,0)
@@ -46,6 +49,16 @@ export function DashboardPage() {
   },[])
 
   useEffect(()=>{void load()},[load])
+
+  useEffect(()=>{
+    document.documentElement.dataset.density=density
+  },[density])
+
+  const applyDensity=(value:'comfort'|'compact'|'ultra')=>{
+    setDensity(value)
+    localStorage.setItem('happylaundry-density',value)
+    document.documentElement.dataset.density=value
+  }
 
   const today=useMemo(()=>{const d=new Date();d.setHours(0,0,0,0);return orders.filter(r=>new Date(r.created_at)>=d)},[orders])
   const omzet=cash.reduce((s,r)=>s+(r.direction==='in'?Number(r.amount):0),0)
@@ -169,6 +182,27 @@ export function DashboardPage() {
   return <>
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."/>
     {message&&<div className="error-box inline-message">{message}</div>}
+    <section className="panel dashboard-display-customizer">
+      <div className="dashboard-display-title">
+        <div className="dashboard-display-icon"><MonitorCog size={20}/></div>
+        <div>
+          <b>Tampilan Aplikasi</b>
+          <small>Setiap karyawan dapat memilih ukuran tampilan yang nyaman di perangkat ini.</small>
+        </div>
+      </div>
+      <div className="dashboard-density-options">
+        <button type="button" className={density==='comfort'?'active':''} onClick={()=>applyDensity('comfort')}>
+          <b>Comfort</b><span>Besar & lega</span>
+        </button>
+        <button type="button" className={density==='compact'?'active':''} onClick={()=>applyDensity('compact')}>
+          <b>Compact</b><span>Rekomendasi</span>
+        </button>
+        <button type="button" className={density==='ultra'?'active':''} onClick={()=>applyDensity('ultra')}>
+          <b>Ultra Compact</b><span>Data lebih banyak</span>
+        </button>
+      </div>
+      <small className="dashboard-display-device-note">Pengaturan tersimpan di perangkat/browser ini dan tidak mengubah tampilan pengguna lain.</small>
+    </section>
     <section className="stats-grid dashboard-stats">
       <StatCard label="Omzet Hari Ini" value={formatIDR(omzet)} caption={`Pengeluaran ${formatIDR(expense)}`} icon={Banknote}/>
       <StatCard label="Order Hari Ini" value={String(today.length)} caption="Order masuk hari ini" icon={ShoppingBag}/>
