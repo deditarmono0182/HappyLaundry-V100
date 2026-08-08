@@ -5631,3 +5631,108 @@ body{
     grid-column:1/-1;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V110.10 — Kasir Scroll + Sticky Total
+   ========================================================= */
+
+/*
+  Desktop:
+  - Form transaksi kiri mempunyai scroll sendiri.
+  - Panel kanan tetap di tempat.
+  - Total Belanja selalu terlihat di bagian atas panel kanan.
+*/
+@media (min-width:1051px){
+  .cashier-layout{
+    height:calc(100dvh - 165px)!important;
+    min-height:570px;
+    overflow:hidden!important;
+    align-items:stretch!important;
+  }
+
+  .cashier-form{
+    height:100%!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+    padding-right:14px!important;
+  }
+
+  .cashier-form::-webkit-scrollbar{
+    width:8px;
+  }
+
+  .cashier-form::-webkit-scrollbar-track{
+    background:#edf5fb;
+    border-radius:999px;
+  }
+
+  .cashier-form::-webkit-scrollbar-thumb{
+    background:#9fc8e5;
+    border-radius:999px;
+  }
+
+  .cashier-summary{
+    position:relative!important;
+    top:auto!important;
+    height:100%!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    align-content:start!important;
+    padding-right:5px;
+    scrollbar-gutter:stable;
+  }
+
+  .cashier-total-card{
+    position:sticky!important;
+    top:0!important;
+    z-index:8!important;
+    margin-top:0!important;
+    box-shadow:0 12px 28px rgba(24,92,150,.18)!important;
+  }
+
+  .cashier-summary::-webkit-scrollbar{
+    width:6px;
+  }
+
+  .cashier-summary::-webkit-scrollbar-track{
+    background:transparent;
+  }
+
+  .cashier-summary::-webkit-scrollbar-thumb{
+    background:#b8d7eb;
+    border-radius:999px;
+  }
+}
+
+/*
+  Tablet/HP:
+  Gunakan scroll halaman biasa agar field tetap mudah disentuh
+  dan tidak terjadi scroll bertumpuk.
+*/
+@media (max-width:1050px){
+  .cashier-layout{
+    height:auto!important;
+    overflow:visible!important;
+  }
+
+  .cashier-form{
+    height:auto!important;
+    overflow:visible!important;
+    padding-right:16px!important;
+  }
+
+  .cashier-summary{
+    height:auto!important;
+    overflow:visible!important;
+    position:static!important;
+  }
+
+  .cashier-total-card{
+    position:static!important;
+  }
+}

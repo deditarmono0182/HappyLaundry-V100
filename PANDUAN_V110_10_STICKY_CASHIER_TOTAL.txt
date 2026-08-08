@@ -1,0 +1,33 @@
+HAPPYLAUNDRY ENTERPRISE V110.10 — STICKY CASHIER TOTAL
+
+PERUBAHAN HALAMAN KASIR:
+
+DESKTOP / LAPTOP:
+- Form transaksi di sebelah kiri sekarang memiliki scroll sendiri.
+- Pelanggan, Layanan, dan Pembayaran dapat di-scroll ke bawah.
+- Panel kanan tidak ikut bergerak bersama form kiri.
+- Kartu Total Belanja dibuat STICKY di atas.
+- Total Belanja, Subtotal, Diskon, Dibayar, dan Sisa Tagihan selalu terlihat.
+
+PANEL KANAN:
+Jika panel kanan terlalu panjang, Shortcut Kasir dan Nota Enterprise
+masih dapat di-scroll sendiri, tetapi kartu Total Belanja tetap berada di atas.
+
+TABLET / IPHONE:
+- Scroll tetap menggunakan scroll halaman normal.
+- Tidak dibuat dua scrollbar sempit.
+- Lebih nyaman untuk layar sentuh.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy project V110.10.
+2. Tunggu Netlify Published.
+3. Refresh aplikasi.
+4. Buka Kasir.
+5. Scroll bagian transaksi sebelah kiri.
+6. Kartu Total Belanja di kanan harus tetap terlihat.
+
+CACHE:
+Service Worker sudah dinaikkan ke:
+happylaundry-v110-10-0

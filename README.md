@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.9 XLS PDF Export
+# HappyLaundry Enterprise V110.10 Sticky Cashier Total
 
 ## Jalankan
 ```bash
@@ -198,3 +198,7 @@ Pengaturan Print Nota tersimpan di Supabase, preview langsung, default paper/tem
 
 ## V110.9
 Export XLS dan PDF untuk Pemasukan, Pengeluaran, Piutang, Bagi Hasil, dan Laporan Owner. Export mengikuti filter/periode aktif.
+
+
+## V110.10
+Kasir desktop memakai scroll independen pada form transaksi kiri dan Total Belanja sticky di kanan.
