@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V111.1 Category Revenue Share Payroll
+# HappyLaundry Enterprise V111.2 Multi Category Revenue Share
 
 ## Jalankan
 ```bash
@@ -218,3 +218,7 @@ Modul Owner-only Absensi & Penggajian: hadir/izin/sakit/alpha, uang hadir, tunja
 
 ## V111.1
 Bagi hasil gaji dihitung dari omzet kategori layanan yang dipilih per karyawan, bukan total omzet seluruh laundry.
+
+
+## V111.2
+Satu karyawan dapat memiliki banyak kategori bagi hasil dengan persentase berbeda per kategori.

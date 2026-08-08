@@ -6056,3 +6056,121 @@ body{
   background:#fff;
   color:#174866;
 }
+
+
+/* =========================================================
+   HappyLaundry V111.2 — Multi Category Revenue Share
+   ========================================================= */
+.multi-share-section{
+  display:grid;
+  gap:10px;
+  padding:12px;
+  border:1px solid #cfe2ef;
+  border-radius:12px;
+  background:#f8fcff;
+}
+.multi-share-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.multi-share-heading>div{
+  display:grid;
+  gap:3px;
+}
+.multi-share-heading b{
+  color:#164d73!important;
+  font-size:11.5px!important;
+  font-weight:950!important;
+}
+.multi-share-heading small{
+  color:#71889a!important;
+  font-size:9.2px!important;
+}
+.multi-share-list{
+  display:grid;
+  gap:9px;
+}
+.multi-share-row{
+  display:grid;
+  grid-template-columns:minmax(150px,1.2fr) 125px minmax(180px,1fr) 38px;
+  gap:8px;
+  align-items:end;
+  padding:10px;
+  border:1px solid #dce9f2;
+  border-radius:10px;
+  background:#fff;
+}
+.multi-share-row label{
+  display:grid!important;
+  gap:5px!important;
+}
+.multi-share-result{
+  min-height:42px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:3px 8px;
+  align-content:center;
+  padding:7px 9px;
+  border:1px solid #e1ebf2;
+  border-radius:9px;
+  background:#fbfdfe;
+}
+.multi-share-result span{
+  font-size:8.5px;
+  color:#72899b;
+}
+.multi-share-result b{
+  font-size:9.5px;
+  color:#164f77;
+  text-align:right;
+}
+.multi-share-remove{
+  color:#c3473c!important;
+  border-color:#efc3bd!important;
+}
+.multi-share-total{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#eaf5ff;
+  color:#174e75;
+}
+.multi-share-total span{
+  font-size:10px;
+  font-weight:750;
+}
+.multi-share-total b{
+  font-size:14px;
+  font-weight:950;
+}
+.payroll-share-lines{
+  display:grid;
+  gap:2px;
+  margin-top:3px;
+}
+.payroll-share-lines small{
+  display:block!important;
+  color:#6f8797!important;
+  font-size:8.5px!important;
+  line-height:1.3!important;
+}
+@media(max-width:760px){
+  .multi-share-heading{
+    display:grid;
+  }
+  .multi-share-row{
+    grid-template-columns:1fr 1fr;
+  }
+  .multi-share-result{
+    grid-column:1/-1;
+  }
+  .multi-share-remove{
+    grid-column:1/-1;
+    width:100%;
+  }
+}

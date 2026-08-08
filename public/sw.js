@@ -1,4 +1,4 @@
-const CACHE_NAME='happylaundry-v111-1-0';
+const CACHE_NAME='happylaundry-v111-2-0';
 const APP_SHELL=['/','/index.html','/manifest.webmanifest','/favicon.png','/icon-192.png','/icon-512.png','/logo-happylaundry.jpg'];
 
 self.addEventListener('install',event=>{

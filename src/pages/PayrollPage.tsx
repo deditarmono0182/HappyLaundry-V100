@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CalendarCheck2, CheckCircle2, FileSpreadsheet, FileText, Gift,
-  HandCoins, Save, Search, Settings2, UsersRound, WalletCards
+  HandCoins, Plus, Save, Search, Settings2, Trash2, UsersRound, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
@@ -32,8 +32,13 @@ interface PayrollSetting{
   employee_id:string
   attendance_rate:number
   monthly_allowance:number
-  revenue_share_percent:number
-  revenue_share_category:string
+}
+
+interface PayrollShare{
+  id?:string
+  employee_id:string
+  category:string
+  share_percent:number
 }
 
 interface PayrollAdjustment{
@@ -80,6 +85,7 @@ export function PayrollPage(){
   const[employees,setEmployees]=useState<Employee[]>([])
   const[attendance,setAttendance]=useState<Attendance[]>([])
   const[settings,setSettings]=useState<PayrollSetting[]>([])
+  const[shares,setShares]=useState<PayrollShare[]>([])
   const[adjustments,setAdjustments]=useState<PayrollAdjustment[]>([])
   const[payments,setPayments]=useState<Payment[]>([])
   const[orderItems,setOrderItems]=useState<OrderItem[]>([])
@@ -95,30 +101,31 @@ export function PayrollPage(){
   const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
-    monthly_allowance:'0',
-    revenue_share_percent:'0',
-    revenue_share_category:'Kiloan'
+    monthly_allowance:'0'
   })
+  const[shareDraft,setShareDraft]=useState<Array<{category:string;share_percent:string}>>([])
   const[bonusDraft,setBonusDraft]=useState<Record<string,string>>({})
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
     const range=monthRange(month)
-    const [e,a,s,adj,p,oi,sv]=await Promise.all([
+    const [e,a,s,shr,adj,p,oi,sv]=await Promise.all([
       supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
       supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
       supabase.from('v111_employee_payroll_settings').select('*'),
+      supabase.from('v111_employee_revenue_shares').select('*'),
       supabase.from('v111_payroll_adjustments').select('*').eq('payroll_month',range.start),
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
-    const error=e.error||a.error||s.error||adj.error||p.error||oi.error||sv.error
+    const error=e.error||a.error||s.error||shr.error||adj.error||p.error||oi.error||sv.error
     if(error)setMessage(error.message)
     else{
       setEmployees((e.data as Employee[])||[])
       setAttendance((a.data as Attendance[])||[])
       setSettings((s.data as PayrollSetting[])||[])
+      setShares((shr.data as PayrollShare[])||[])
       setAdjustments((adj.data as PayrollAdjustment[])||[])
       setPayments((p.data as Payment[])||[])
       setOrderItems((oi.data as OrderItem[])||[])
@@ -139,6 +146,16 @@ export function PayrollPage(){
   },[attendance])
 
   const settingMap=useMemo(()=>new Map(settings.map(s=>[s.employee_id,s])),[settings])
+
+  const sharesByEmployee=useMemo(()=>{
+    const map=new Map<string,PayrollShare[]>()
+    for(const share of shares){
+      const list=map.get(share.employee_id)||[]
+      list.push(share)
+      map.set(share.employee_id,list)
+    }
+    return map
+  },[shares])
   const adjustmentMap=useMemo(()=>new Map(adjustments.map(a=>[a.employee_id,a])),[adjustments])
 
   const monthlyRevenue=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
@@ -196,18 +213,30 @@ export function PayrollPage(){
     const attendanceRate=Number(setting?.attendance_rate||0)
     const attendancePay=presentDays*attendanceRate
     const allowance=Number(setting?.monthly_allowance||0)
-    const sharePercent=Number(setting?.revenue_share_percent||0)
-    const shareCategory=setting?.revenue_share_category||'Kiloan'
-    const categoryBaseRevenue=Number(categoryRevenue[shareCategory]||0)
-    const revenueShare=categoryBaseRevenue*(sharePercent/100)
+
+    const employeeShares=sharesByEmployee.get(employee.id)||[]
+    const shareDetails=employeeShares.map(share=>{
+      const baseRevenue=Number(categoryRevenue[share.category]||0)
+      const percent=Number(share.share_percent||0)
+      const amount=baseRevenue*(percent/100)
+      return{
+        category:share.category,
+        percent,
+        baseRevenue,
+        amount
+      }
+    })
+    const revenueShare=shareDetails.reduce((sum,item)=>sum+item.amount,0)
+
     const bonus=Number(bonusDraft[employee.id]??adjustmentMap.get(employee.id)?.bonus??0)
     const total=attendancePay+allowance+bonus+revenueShare
+
     return{
       employee,presentDays,permissionDays,sickDays,absentDays,
-      attendanceRate,attendancePay,allowance,sharePercent,shareCategory,
-      categoryBaseRevenue,revenueShare,bonus,total
+      attendanceRate,attendancePay,allowance,
+      shareDetails,revenueShare,bonus,total
     }
-  }),[employees,settingMap,attendance,categoryRevenue,bonusDraft,adjustmentMap])
+  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,bonusDraft,adjustmentMap])
 
   const filteredEmployees=useMemo(()=>{
     const key=query.toLowerCase().trim()
@@ -247,10 +276,17 @@ export function PayrollPage(){
     setSettingsEmployee(employee)
     setSettingForm({
       attendance_rate:String(Number(row?.attendance_rate||0)),
-      monthly_allowance:String(Number(row?.monthly_allowance||0)),
-      revenue_share_percent:String(Number(row?.revenue_share_percent||0)),
-      revenue_share_category:row?.revenue_share_category||'Kiloan'
+      monthly_allowance:String(Number(row?.monthly_allowance||0))
     })
+    const employeeShares=sharesByEmployee.get(employee.id)||[]
+    setShareDraft(
+      employeeShares.length
+        ? employeeShares.map(item=>({
+            category:item.category,
+            share_percent:String(Number(item.share_percent||0))
+          }))
+        : [{category:'Kiloan',share_percent:'0'}]
+    )
     setMessage('')
   }
 
@@ -262,19 +298,56 @@ export function PayrollPage(){
       employee_id:settingsEmployee.id,
       attendance_rate:Math.max(0,Number(settingForm.attendance_rate)||0),
       monthly_allowance:Math.max(0,Number(settingForm.monthly_allowance)||0),
-      revenue_share_percent:Math.max(0,Math.min(100,Number(settingForm.revenue_share_percent)||0)),
-      revenue_share_category:settingForm.revenue_share_category,
       updated_at:new Date().toISOString()
     }
-    const{error}=await supabase
+
+    const cleanShares=shareDraft
+      .map(item=>({
+        employee_id:settingsEmployee.id,
+        category:item.category,
+        share_percent:Math.max(0,Math.min(100,Number(item.share_percent)||0)),
+        updated_at:new Date().toISOString()
+      }))
+      .filter((item,index,array)=>
+        item.category&&
+        array.findIndex(x=>x.category===item.category)===index
+      )
+
+    const settingsResult=await supabase
       .from('v111_employee_payroll_settings')
       .upsert(payload,{onConflict:'employee_id'})
-    if(error)setMessage(error.message)
-    else{
-      setSettingsEmployee(null)
-      setSuccess(`Komponen gaji ${settingsEmployee.full_name} berhasil disimpan.`)
-      await load()
+
+    if(settingsResult.error){
+      setMessage(settingsResult.error.message)
+      setBusy(false)
+      return
     }
+
+    const deleteResult=await supabase
+      .from('v111_employee_revenue_shares')
+      .delete()
+      .eq('employee_id',settingsEmployee.id)
+
+    if(deleteResult.error){
+      setMessage(deleteResult.error.message)
+      setBusy(false)
+      return
+    }
+
+    if(cleanShares.length){
+      const insertResult=await supabase
+        .from('v111_employee_revenue_shares')
+        .insert(cleanShares)
+      if(insertResult.error){
+        setMessage(insertResult.error.message)
+        setBusy(false)
+        return
+      }
+    }
+
+    setSettingsEmployee(null)
+    setSuccess(`Komponen gaji ${settingsEmployee.full_name} berhasil disimpan.`)
+    await load()
     setBusy(false)
   }
 
@@ -317,12 +390,14 @@ export function PayrollPage(){
     title:'Daftar Gaji Karyawan',
     filename:`gaji-karyawan-${month}`,
     subtitle:`Periode ${month} • Omzet aktual ${formatRupiah(monthlyRevenue)}`,
-    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Kategori Bagi Hasil','Omzet Kategori','Bagi Hasil %','Bagi Hasil','Total Gaji'],
+    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Rincian Bagi Hasil','Total Bagi Hasil','Total Gaji'],
     rows:filteredPayroll.map(r=>[
       r.employee.full_name,r.presentDays,r.attendanceRate,
       Math.round(r.attendancePay),Math.round(r.allowance),Math.round(r.bonus),
-      r.shareCategory,Math.round(r.categoryBaseRevenue),
-      r.sharePercent.toFixed(2),Math.round(r.revenueShare),Math.round(r.total)
+      r.shareDetails.length
+        ? r.shareDetails.map(item=>`${item.category} ${item.percent.toFixed(2)}% x ${Math.round(item.baseRevenue)} = ${Math.round(item.amount)}`).join(' | ')
+        : '-',
+      Math.round(r.revenueShare),Math.round(r.total)
     ]),
     summary:[
       ['Omzet Bulan',Math.round(monthlyRevenue)],
@@ -429,7 +504,16 @@ export function PayrollPage(){
                 <td><b>{formatRupiah(r.attendancePay)}</b></td>
                 <td>{formatRupiah(r.allowance)}</td>
                 <td><input className="payroll-bonus-input" type="number" min="0" value={bonusDraft[r.employee.id]??String(r.bonus)} onChange={e=>setBonusDraft({...bonusDraft,[r.employee.id]:e.target.value})}/></td>
-                <td><b>{formatRupiah(r.revenueShare)}</b><small>{r.sharePercent.toFixed(2)}% × {r.shareCategory} ({formatRupiah(r.categoryBaseRevenue)})</small></td>
+                <td>
+                  <b>{formatRupiah(r.revenueShare)}</b>
+                  {r.shareDetails.length
+                    ? <div className="payroll-share-lines">
+                        {r.shareDetails.map(item=><small key={item.category}>
+                          {item.category}: {item.percent.toFixed(2)}% × {formatRupiah(item.baseRevenue)} = {formatRupiah(item.amount)}
+                        </small>)}
+                      </div>
+                    : <small>Belum ada kategori bagi hasil</small>}
+                </td>
                 <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
                 <td><button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button></td>
               </tr>)}
@@ -452,19 +536,87 @@ export function PayrollPage(){
         <label>Tunjangan Bulanan
           <input type="number" min="0" value={settingForm.monthly_allowance} onChange={e=>setSettingForm({...settingForm,monthly_allowance:e.target.value})}/>
         </label>
-        <label>Kategori Layanan untuk Bagi Hasil
-          <select value={settingForm.revenue_share_category} onChange={e=>setSettingForm({...settingForm,revenue_share_category:e.target.value})}>
-            {serviceCategories.map(category=><option key={category} value={category}>{category}</option>)}
-          </select>
-        </label>
-        <label>Bagi Hasil dari Omzet Kategori (%)
-          <input type="number" min="0" max="100" step="0.01" value={settingForm.revenue_share_percent} onChange={e=>setSettingForm({...settingForm,revenue_share_percent:e.target.value})}/>
-        </label>
-        <div className="payroll-live-example">
-          <span>Omzet kategori {settingForm.revenue_share_category}</span>
-          <b>{formatRupiah(Number(categoryRevenue[settingForm.revenue_share_category]||0))}</b>
-          <span>Perkiraan bagi hasil</span>
-          <b>{formatRupiah(Number(categoryRevenue[settingForm.revenue_share_category]||0)*(Math.max(0,Number(settingForm.revenue_share_percent)||0)/100))}</b>
+        <div className="multi-share-section">
+          <div className="multi-share-heading">
+            <div>
+              <b>Bagi Hasil per Kategori Layanan</b>
+              <small>Satu karyawan bisa memiliki lebih dari satu kategori dengan persentase berbeda.</small>
+            </div>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={()=>setShareDraft([...shareDraft,{category:serviceCategories.find(category=>!shareDraft.some(item=>item.category===category))||'Kiloan',share_percent:'0'}])}
+              disabled={shareDraft.length>=serviceCategories.length}
+            >
+              <Plus size={15}/>Tambah Kategori
+            </button>
+          </div>
+
+          <div className="multi-share-list">
+            {shareDraft.map((item,index)=>{
+              const baseRevenue=Number(categoryRevenue[item.category]||0)
+              const percent=Math.max(0,Number(item.share_percent)||0)
+              const amount=baseRevenue*(percent/100)
+              return <div className="multi-share-row" key={`${item.category}-${index}`}>
+                <label>Kategori
+                  <select
+                    value={item.category}
+                    onChange={e=>{
+                      const next=[...shareDraft]
+                      next[index]={...next[index],category:e.target.value}
+                      setShareDraft(next)
+                    }}
+                  >
+                    {serviceCategories.map(category=><option
+                      key={category}
+                      value={category}
+                      disabled={shareDraft.some((x,i)=>i!==index&&x.category===category)}
+                    >{category}</option>)}
+                  </select>
+                </label>
+
+                <label>Persentase (%)
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={item.share_percent}
+                    onChange={e=>{
+                      const next=[...shareDraft]
+                      next[index]={...next[index],share_percent:e.target.value}
+                      setShareDraft(next)
+                    }}
+                  />
+                </label>
+
+                <div className="multi-share-result">
+                  <span>Omzet kategori</span>
+                  <b>{formatRupiah(baseRevenue)}</b>
+                  <span>Bagi hasil</span>
+                  <b>{formatRupiah(amount)}</b>
+                </div>
+
+                <button
+                  type="button"
+                  className="icon-button multi-share-remove"
+                  title="Hapus kategori"
+                  onClick={()=>setShareDraft(shareDraft.filter((_,i)=>i!==index))}
+                >
+                  <Trash2 size={16}/>
+                </button>
+              </div>
+            })}
+          </div>
+
+          <div className="multi-share-total">
+            <span>Total perkiraan bagi hasil</span>
+            <b>{formatRupiah(shareDraft.reduce((sum,item)=>{
+              const base=Number(categoryRevenue[item.category]||0)
+              const percent=Math.max(0,Number(item.share_percent)||0)
+              return sum+(base*(percent/100))
+            },0))}</b>
+          </div>
         </div>
         {message&&<div className="error-box">{message}</div>}
         <div className="form-actions">

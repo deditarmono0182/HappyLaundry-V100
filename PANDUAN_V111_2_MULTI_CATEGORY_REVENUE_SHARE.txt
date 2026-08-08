@@ -1,0 +1,62 @@
+HAPPYLAUNDRY ENTERPRISE V111.2 — MULTI CATEGORY BAGI HASIL
+
+PERUBAHAN:
+Satu karyawan sekarang bisa mendapatkan bagi hasil dari BANYAK kategori layanan sekaligus.
+
+CONTOH CECE:
+- Kiloan 5%
+- Satuan 3%
+- Express 10%
+
+Jika omzet bulan:
+Kiloan  Rp10.000.000 -> 5%  = Rp500.000
+Satuan  Rp 6.000.000 -> 3%  = Rp180.000
+Express Rp 4.000.000 -> 10% = Rp400.000
+
+TOTAL BAGI HASIL CECE:
+Rp1.080.000
+
+TOTAL GAJI:
+Uang Kehadiran
++ Tunjangan
++ Bonus
++ Semua Bagi Hasil Kategori
+
+CARA PAKAI:
+Absensi & Gaji -> Daftar Gaji -> Atur
+
+Di bagian:
+Bagi Hasil per Kategori Layanan
+
+Klik:
+Tambah Kategori
+
+Untuk setiap baris:
+- pilih kategori layanan
+- masukkan persentase
+
+Bisa menambah beberapa kategori selama kategorinya tidak sama.
+
+Setiap baris langsung menampilkan:
+- omzet kategori
+- nilai bagi hasil
+
+Di bawahnya ada:
+TOTAL PERKIRAAN BAGI HASIL
+
+EXPORT XLS/PDF:
+Rincian semua kategori juga ikut masuk ke laporan gaji.
+
+WAJIB SQL:
+supabase/026_v111_2_multi_category_revenue_share.sql
+
+URUTAN JIKA BELUM PERNAH PASANG PAYROLL:
+1. 024_v111_0_attendance_payroll.sql
+2. 025_v111_1_payroll_category_revenue_share.sql
+3. 026_v111_2_multi_category_revenue_share.sql
+4. Deploy V111.2
+
+JIKA SUDAH PAKAI V111.1:
+Cukup jalankan SQL 026 lalu deploy V111.2.
+
+SQL 026 juga memigrasikan kategori/persentase lama V111.1 ke sistem multi-category.
