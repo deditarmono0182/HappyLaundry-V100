@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  CheckCircle2, FileText, Printer, QrCode, Save, Settings2
+  CheckCircle2, ImagePlus, RotateCcw, Trash2, FileText, Printer, QrCode, Save, Settings2
 } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
@@ -17,6 +17,8 @@ export function PrintSettingsPage(){
   const[busy,setBusy]=useState(false)
   const[message,setMessage]=useState('')
   const[success,setSuccess]=useState('')
+  const[logoBusy,setLogoBusy]=useState(false)
+  const[logoPreview,setLogoPreview]=useState('')
 
   const load=useCallback(async()=>{
     setLoading(true)
@@ -26,7 +28,13 @@ export function PrintSettingsPage(){
       .eq('id',1)
       .maybeSingle()
     if(error)setMessage(error.message)
-    else if(data)setForm({...defaultReceiptPrintSettings,...data} as ReceiptPrintSettings)
+    else if(data){
+      const next={...defaultReceiptPrintSettings,...data} as ReceiptPrintSettings
+      setForm(next)
+      setLogoPreview(next.logo_url||'/logo-happylaundry.jpg')
+    }else{
+      setLogoPreview('/logo-happylaundry.jpg')
+    }
     setLoading(false)
   },[])
 
@@ -34,6 +42,80 @@ export function PrintSettingsPage(){
 
   const setBool=(key:keyof ReceiptPrintSettings,value:boolean)=>
     setForm(current=>({...current,[key]:value}))
+
+  const uploadLogo=async(file:File)=>{
+    setMessage('')
+    setSuccess('')
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type)){
+      setMessage('Logo harus berupa PNG, JPG/JPEG, atau WEBP.')
+      return
+    }
+    if(file.size>2*1024*1024){
+      setMessage('Ukuran logo maksimal 2 MB.')
+      return
+    }
+
+    setLogoBusy(true)
+    try{
+      const ext=(file.name.split('.').pop()||'png').toLowerCase().replace(/[^a-z0-9]/g,'')||'png'
+      const path=`receipt-logo/logo-${Date.now()}.${ext}`
+
+      const{error:uploadError}=await supabase.storage
+        .from('receipt-assets')
+        .upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type})
+      if(uploadError)throw uploadError
+
+      const{data:publicData}=supabase.storage.from('receipt-assets').getPublicUrl(path)
+      const url=publicData.publicUrl
+
+      // Delete previous custom logo after new upload succeeds.
+      if(form.logo_path){
+        await supabase.storage.from('receipt-assets').remove([form.logo_path])
+      }
+
+      setForm(current=>({...current,logo_url:url,logo_path:path,show_logo:true}))
+      setLogoPreview(url)
+      setSuccess('Logo baru siap. Klik Simpan Pengaturan Print agar digunakan pada nota.')
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Upload logo gagal.')
+    }finally{
+      setLogoBusy(false)
+    }
+  }
+
+  const removeCustomLogo=async()=>{
+    setLogoBusy(true);setMessage('');setSuccess('')
+    try{
+      if(form.logo_path){
+        const{error}=await supabase.storage.from('receipt-assets').remove([form.logo_path])
+        if(error)throw error
+      }
+      setForm(current=>({...current,logo_url:'',logo_path:'',show_logo:false}))
+      setLogoPreview('/logo-happylaundry.jpg')
+      setSuccess('Logo custom dihapus. Klik Simpan Pengaturan Print.')
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Logo gagal dihapus.')
+    }finally{
+      setLogoBusy(false)
+    }
+  }
+
+  const restoreDefaultLogo=async()=>{
+    setLogoBusy(true);setMessage('');setSuccess('')
+    try{
+      if(form.logo_path){
+        const{error}=await supabase.storage.from('receipt-assets').remove([form.logo_path])
+        if(error)throw error
+      }
+      setForm(current=>({...current,logo_url:'',logo_path:'',show_logo:true}))
+      setLogoPreview('/logo-happylaundry.jpg')
+      setSuccess('Logo default HappyLaundry dipilih. Klik Simpan Pengaturan Print.')
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Gagal mengembalikan logo default.')
+    }finally{
+      setLogoBusy(false)
+    }
+  }
 
   const submit=async(event:FormEvent)=>{
     event.preventDefault()
@@ -43,6 +125,7 @@ export function PrintSettingsPage(){
       id:1,
       font_size:Math.min(18,Math.max(8,Number(form.font_size)||11)),
       copies:Math.min(3,Math.max(1,Number(form.copies)||1)),
+      logo_width:Math.min(180,Math.max(30,Number(form.logo_width)||64)),
       updated_at:new Date().toISOString()
     }
     const{error}=await supabase
@@ -119,6 +202,78 @@ export function PrintSettingsPage(){
           </label>
         </section>
 
+        <section className="panel print-settings-card receipt-logo-settings">
+          <header><ImagePlus size={20}/><div><b>Logo Nota</b><small>Upload logo usaha dan atur ukuran/posisinya pada nota.</small></div></header>
+
+          <div className="receipt-logo-editor">
+            <div className="receipt-logo-preview-box">
+              <img
+                src={logoPreview||form.logo_url||'/logo-happylaundry.jpg'}
+                alt="Preview logo nota"
+                style={{
+                  width:`${Math.min(180,Math.max(30,Number(form.logo_width)||64))}px`,
+                  maxWidth:'90%',
+                  objectFit:'contain'
+                }}
+              />
+              <small>{form.logo_url?'Logo Custom':'Logo Default HappyLaundry'}</small>
+            </div>
+
+            <div className="receipt-logo-controls">
+              <label className="receipt-logo-upload">
+                <ImagePlus size={16}/>
+                <span>{logoBusy?'Memproses...':'Upload Logo'}</span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  disabled={logoBusy}
+                  onChange={e=>{
+                    const file=e.target.files?.[0]
+                    if(file)void uploadLogo(file)
+                    e.currentTarget.value=''
+                  }}
+                />
+              </label>
+
+              <button type="button" className="secondary-button" disabled={logoBusy} onClick={()=>void restoreDefaultLogo()}>
+                <RotateCcw size={16}/>Logo Default
+              </button>
+
+              <button type="button" className="secondary-button danger-logo-button" disabled={logoBusy||!form.logo_path} onClick={()=>void removeCustomLogo()}>
+                <Trash2 size={16}/>Hapus Custom
+              </button>
+            </div>
+          </div>
+
+          <div className="form-grid-two">
+            <label>Ukuran Logo (px)
+              <input
+                type="number"
+                min="30"
+                max="180"
+                value={form.logo_width}
+                onChange={e=>setForm({...form,logo_width:Number(e.target.value)})}
+              />
+            </label>
+
+            <label>Posisi Logo
+              <select
+                value={form.logo_align}
+                onChange={e=>setForm({...form,logo_align:e.target.value as ReceiptPrintSettings['logo_align']})}
+              >
+                <option value="left">Kiri</option>
+                <option value="center">Tengah</option>
+                <option value="right">Kanan</option>
+              </select>
+            </label>
+          </div>
+
+          <label className="print-switch">
+            <input type="checkbox" checked={form.show_logo} onChange={e=>setBool('show_logo',e.target.checked)}/>
+            <span><b>Tampilkan Logo di Nota</b><small>Berlaku untuk thermal 58/80 mm dan A4/PDF.</small></span>
+          </label>
+        </section>
+
         <section className="panel print-settings-card">
           <header><QrCode size={20}/><div><b>Isi Nota</b><small>Centang informasi yang ingin dicetak.</small></div></header>
           <div className="print-option-grid">
@@ -170,7 +325,13 @@ export function PrintSettingsPage(){
         </div>
 
         <div className={`receipt-paper receipt-template-${form.template}`} style={{maxWidth:width,fontSize:`${previewFont}px`}}>
-          {form.show_logo&&<img src="/logo-happylaundry.jpg" alt="Logo"/>}
+          {form.show_logo&&<div className={`receipt-preview-logo logo-${form.logo_align}`}>
+            <img
+              src={form.logo_url||'/logo-happylaundry.jpg'}
+              alt="Logo"
+              style={{width:`${Math.min(180,Math.max(30,Number(form.logo_width)||64))}px`}}
+            />
+          </div>}
           <h2>HappyLaundry Babakan</h2>
           <p>Jalan Prabu Kiansantang • Babakan Cirebon</p>
           {form.header_note&&<p><b>{form.header_note}</b></p>}

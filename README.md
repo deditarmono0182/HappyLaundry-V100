@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.2 Top Right Back Button
+# HappyLaundry Enterprise V112.3 Print Logo Settings
 
 ## Jalankan
 ```bash
@@ -242,3 +242,7 @@ Tombol global ← Kembali pada seluruh halaman yang memakai PageHeader, dengan b
 
 ## V112.2
 Tombol kembali global dipindahkan ke pojok kanan atas, berbentuk bulat dan sticky.
+
+
+## V112.3
+Owner dapat upload logo nota ke Supabase Storage, mengatur ukuran/posisi, hapus custom, restore default, dan logo dipakai pada thermal/A4/PDF.

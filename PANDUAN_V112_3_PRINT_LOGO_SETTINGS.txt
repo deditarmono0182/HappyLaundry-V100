@@ -1,0 +1,62 @@
+HAPPYLAUNDRY ENTERPRISE V112.3 — GANTI LOGO NOTA
+
+FITUR BARU:
+Pengaturan -> Pengaturan Print Nota -> Logo Nota
+
+OWNER DAPAT:
+- Upload logo PNG
+- Upload JPG/JPEG
+- Upload WEBP
+- Preview logo
+- Atur ukuran 30–180 px
+- Atur posisi Kiri / Tengah / Kanan
+- Tampilkan / sembunyikan logo
+- Hapus logo custom
+- Kembalikan Logo Default HappyLaundry
+
+PENYIMPANAN:
+Logo custom disimpan di Supabase Storage bucket:
+receipt-assets
+
+Karena disimpan di Supabase:
+- tidak hilang saat ganti laptop
+- tetap sama di tablet/iPhone
+- tidak hilang saat aplikasi di-deploy ulang
+- nota dari perangkat berbeda memakai logo yang sama
+
+UKURAN FILE:
+Maksimal 2 MB.
+Format:
+PNG / JPG / JPEG / WEBP
+
+INTEGRASI:
+Logo custom otomatis dipakai pada:
+- Preview Print Nota
+- Nota Thermal 58 mm
+- Nota Thermal 80 mm
+- A4
+- Simpan PDF
+
+LOGO DEFAULT:
+Jika klik Logo Default:
+logo custom dilepas dan nota kembali memakai:
+/logo-happylaundry.jpg
+
+WAJIB SQL:
+supabase/030_v112_3_print_logo_storage.sql
+
+CARA PASANG:
+1. Supabase -> SQL Editor.
+2. Jalankan SQL 030.
+3. Pastikan Success.
+4. Deploy V112.3.
+5. Refresh.
+6. Pengaturan -> Pengaturan Print Nota.
+7. Upload Logo.
+8. Atur ukuran dan posisi.
+9. Klik Simpan Pengaturan Print.
+10. Buka Kasir -> buat transaksi -> Cetak Default.
+
+CATATAN:
+Upload/hapus logo hanya dapat dilakukan Owner.
+Bucket dibuat public hanya untuk membaca gambar pada nota print/PDF.

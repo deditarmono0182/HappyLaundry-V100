@@ -11,6 +11,10 @@ export interface ReceiptPrintSettings{
   copies:number
   auto_print:boolean
   show_logo:boolean
+  logo_url:string
+  logo_path:string
+  logo_width:number
+  logo_align:'left'|'center'|'right'
   show_qr:boolean
   show_barcode:boolean
   show_customer_phone:boolean
@@ -36,6 +40,10 @@ export const defaultReceiptPrintSettings:ReceiptPrintSettings={
   copies:1,
   auto_print:false,
   show_logo:true,
+  logo_url:'',
+  logo_path:'',
+  logo_width:64,
+  logo_align:'center',
   show_qr:true,
   show_barcode:true,
   show_customer_phone:true,

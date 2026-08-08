@@ -210,7 +210,8 @@ export function CashierPage() {
     <style>
       @page{size:${page};margin:${size==='a4'?'12mm':'3mm'}}
       *{box-sizing:border-box}body{font-family:Arial,sans-serif;width:${width};max-width:100%;margin:0 auto;padding:${size==='a4'?'10mm':'3mm'};color:#111;font-size:${Math.max(8,Math.min(18,printSettings.font_size||11))}px}
-      h1,h2,p{margin:0}.center{text-align:center}.logo{width:${size==='a4'?'80px':'58px'};height:${size==='a4'?'80px':'58px'};object-fit:contain;border-radius:50%}
+      h1,h2,p{margin:0}.center{text-align:center}.logo-wrap{display:flex;justify-content:${printSettings.logo_align==='left'?'flex-start':printSettings.logo_align==='right'?'flex-end':'center'};width:100%}
+      .logo{width:${Math.min(180,Math.max(30,Number(printSettings.logo_width)||64))}px;max-width:90%;height:auto;max-height:${size==='a4'?'120px':'90px'};object-fit:contain}
       .title{font-size:${size==='a4'?'26px':'17px'};margin-top:6px}.muted{color:#555}.small{font-size:10px}.line{border-top:1px dashed #333;margin:9px 0}
       .meta,.summary{width:100%;border-collapse:collapse}.meta td,.summary td{padding:3px 0;vertical-align:top}.meta td:last-child,.summary td:last-child{text-align:right;font-weight:700}
       .items{width:100%;border-collapse:collapse}.items th{border-bottom:1px solid #222;padding:5px 0;text-align:left}.items th:last-child,.items td:last-child{text-align:right}
@@ -223,7 +224,7 @@ export function CashierPage() {
       @media print{.no-print{display:none}}
     </style></head><body>
       <div class="center">
-        ${printSettings.show_logo?'<img class="logo" src="/logo-happylaundry.jpg">':''}
+        ${printSettings.show_logo?`<div class="logo-wrap"><img class="logo" src="${printSettings.logo_url||'/logo-happylaundry.jpg'}"></div>`:''}
         <h1 class="title">${business}</h1>
         <p>${address}</p><p>${phone}</p>
         <p class="muted">${title}</p>

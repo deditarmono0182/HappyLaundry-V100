@@ -6545,3 +6545,89 @@ body{
     gap:16px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.3 — Print Nota Logo Settings
+   ========================================================= */
+.receipt-logo-settings{
+  overflow:hidden;
+}
+.receipt-logo-editor{
+  display:grid;
+  grid-template-columns:minmax(170px,240px) 1fr;
+  gap:13px;
+  align-items:center;
+}
+.receipt-logo-preview-box{
+  min-height:150px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:8px;
+  border:1px dashed #bcd5e5;
+  border-radius:12px;
+  background:#f8fcff;
+  overflow:hidden;
+  padding:12px;
+}
+.receipt-logo-preview-box img{
+  height:auto;
+  max-height:110px;
+}
+.receipt-logo-preview-box small{
+  color:#71899a;
+  font-size:9px;
+  font-weight:750;
+}
+.receipt-logo-controls{
+  display:grid;
+  gap:8px;
+}
+.receipt-logo-upload{
+  min-height:42px;
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:8px!important;
+  border:1px solid #1e88e5;
+  border-radius:11px;
+  background:#1e88e5;
+  color:#fff!important;
+  font-size:10.5px!important;
+  font-weight:900!important;
+  cursor:pointer;
+}
+.receipt-logo-upload input{
+  position:absolute;
+  width:1px!important;
+  height:1px!important;
+  opacity:0;
+  pointer-events:none;
+}
+.danger-logo-button{
+  color:#b33d35!important;
+  border-color:#e7beb9!important;
+}
+.receipt-preview-logo{
+  width:100%;
+  display:flex;
+  margin-bottom:5px;
+}
+.receipt-preview-logo.logo-left{justify-content:flex-start}
+.receipt-preview-logo.logo-center{justify-content:center}
+.receipt-preview-logo.logo-right{justify-content:flex-end}
+.receipt-preview-logo img{
+  height:auto;
+  max-height:100px;
+  object-fit:contain;
+}
+.receipt-paper>img{
+  display:none!important;
+}
+
+@media(max-width:650px){
+  .receipt-logo-editor{
+    grid-template-columns:1fr;
+  }
+}
