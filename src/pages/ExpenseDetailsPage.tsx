@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Search, TrendingDown, WalletCards } from 'lucide-react'
+import { FileSpreadsheet, FileText, Search, TrendingDown, WalletCards } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
+import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
 
 interface ExpenseRow{
@@ -51,6 +52,28 @@ export function ExpenseDetailsPage(){
     )
   },[rows,query])
 
+  const exportRows=useMemo(()=>filtered.map(r=>[
+    new Date(`${r.expense_date}T00:00:00`).toLocaleDateString('id-ID'),
+    r.category_name,
+    r.group_name||'-',
+    r.description||'-',
+    r.reference||'-',
+    r.payment_method.toUpperCase(),
+    Number(r.amount||0)
+  ]),[filtered])
+
+  const exportOptions=()=>({
+    title:'Daftar Pengeluaran',
+    filename:`pengeluaran-${from}-${to}`,
+    subtitle:`Periode ${from} s/d ${to}`,
+    headers:['Tanggal','Kategori','Grup','Keterangan','Referensi','Metode','Nominal'],
+    rows:exportRows,
+    summary:[
+      ['Jumlah Transaksi',filtered.length],
+      ['Total Pengeluaran',filtered.reduce((sum,r)=>sum+Number(r.amount||0),0)]
+    ] as Array<[string,string|number]>
+  })
+
   const total=rows.reduce((sum,r)=>sum+Number(r.amount||0),0)
   const avg=rows.length?total/rows.length:0
 
@@ -59,6 +82,10 @@ export function ExpenseDetailsPage(){
       eyebrow="FINANCE & ACCOUNTING"
       title="Daftar Pengeluaran"
       description="Rincian biaya operasional, gaji, pajak, laundry, kendaraan, marketing, dan lainnya."
+      action={<div className="export-actions">
+        <button className="secondary-button" onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>XLS</button>
+        <button className="secondary-button" onClick={()=>printPdf(exportOptions())}><FileText size={16}/>PDF</button>
+      </div>}
     />
 
     <section className="panel finance-filter">

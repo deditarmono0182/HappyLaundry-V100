@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CreditCard, Eye, Search, TrendingUp, WalletCards } from 'lucide-react'
+import { CreditCard, Eye, FileSpreadsheet, FileText, Search, TrendingUp, WalletCards } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
+import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
 
 interface PaymentRow{
@@ -68,6 +69,29 @@ export function IncomeDetailsPage(){
     })
   },[payments,query,orderMap])
 
+  const exportRows=useMemo(()=>filtered.map(p=>{
+    const o=orderMap.get(p.order_id)
+    return[
+      new Date(p.created_at).toLocaleString('id-ID'),
+      o?.order_no||'-',
+      o?.customer_name||'-',
+      (p.method||'lainnya').toUpperCase(),
+      Number(p.amount||0)
+    ]
+  }),[filtered,orderMap])
+
+  const exportOptions=()=>({
+    title:'Daftar Pemasukan',
+    filename:`pemasukan-${from}-${to}`,
+    subtitle:`Periode ${from} s/d ${to}`,
+    headers:['Tanggal','Order','Pelanggan','Metode','Nominal'],
+    rows:exportRows,
+    summary:[
+      ['Jumlah Pembayaran',filtered.length],
+      ['Total Pemasukan',filtered.reduce((sum,p)=>sum+Number(p.amount||0),0)]
+    ] as Array<[string,string|number]>
+  })
+
   const total=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
   const avg=payments.length?total/payments.length:0
 
@@ -76,6 +100,10 @@ export function IncomeDetailsPage(){
       eyebrow="FINANCE & ACCOUNTING"
       title="Daftar Pemasukan"
       description="Daftar pembayaran order yang benar-benar sudah diterima."
+      action={<div className="export-actions">
+        <button className="secondary-button" onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>XLS</button>
+        <button className="secondary-button" onClick={()=>printPdf(exportOptions())}><FileText size={16}/>PDF</button>
+      </div>}
     />
 
     <section className="panel finance-filter">

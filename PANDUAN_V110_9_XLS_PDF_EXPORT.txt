@@ -1,0 +1,78 @@
+HAPPYLAUNDRY ENTERPRISE V110.9 — EXPORT XLS & PDF
+
+FITUR BARU:
+Data keuangan dapat diekspor ke XLS dan PDF.
+
+HALAMAN YANG SUDAH TERHUBUNG:
+1. Daftar Pemasukan
+   - XLS
+   - PDF
+   - mengikuti filter tanggal dan pencarian
+
+2. Daftar Pengeluaran
+   - XLS
+   - PDF
+   - mengikuti filter tanggal dan pencarian
+
+3. Daftar Piutang
+   - XLS
+   - PDF
+   - mengikuti pencarian yang aktif
+
+4. Bagi Hasil per Kategori Layanan
+   - XLS
+   - PDF
+   - mengikuti periode Keuangan
+   - isi:
+     kategori
+     omzet
+     persentase
+     nilai bagi hasil
+     sisa omzet
+     total dan persentase efektif
+
+5. Laporan Owner
+   - XLS
+   - PDF
+   - CSV tetap tersedia
+   - Cetak tetap tersedia
+   - mengikuti periode laporan
+
+XLS:
+Tombol XLS langsung mengunduh file .xls yang dapat dibuka dengan Microsoft Excel.
+
+PDF:
+Tombol PDF membuka laporan A4 landscape yang rapi.
+Dialog print otomatis muncul.
+Pilih:
+Save as PDF / Simpan sebagai PDF.
+
+ALASAN PDF MENGGUNAKAN PRINT:
+Browser/PWA tidak boleh menyimpan PDF ke folder perangkat tanpa izin pengguna.
+Cara ini kompatibel dengan:
+- Windows
+- Mac
+- iPhone/iPad
+- Android/tablet
+
+RINGKASAN:
+File export juga menyertakan total penting, misalnya:
+- Total pemasukan
+- Total pengeluaran
+- Total piutang
+- Total bagi hasil
+- Sisa setelah bagi hasil
+
+TIDAK ADA SQL BARU.
+Fitur ini menggunakan data yang sudah dimuat aplikasi.
+
+CARA PASANG:
+1. Deploy V110.9.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Keuangan / Pemasukan / Pengeluaran / Piutang.
+5. Coba XLS.
+6. Coba PDF -> Save as PDF.
+
+VERSI:
+HappyLaundry Enterprise V110.9 XLS PDF Export

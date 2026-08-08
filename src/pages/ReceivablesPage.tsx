@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CreditCard, Eye, MessageCircle, ReceiptText, Search, WalletCards } from 'lucide-react'
+import { CreditCard, Eye, FileSpreadsheet, FileText, MessageCircle, ReceiptText, Search, WalletCards } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
+import { downloadXls, printPdf } from '../lib/exportData'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
 import type { OrderRow } from '../types/order'
@@ -44,6 +45,32 @@ export function ReceivablesPage(){
     )
   },[rows,query])
 
+  const exportRows=useMemo(()=>filtered.map(row=>{
+    const remaining=Math.max(0,Number(row.total)-Number(row.paid_amount))
+    return[
+      row.order_no,
+      row.customer_name,
+      row.customer_phone||'-',
+      Number(row.total||0),
+      Number(row.paid_amount||0),
+      remaining,
+      statusLabels[row.status],
+      new Date(row.created_at).toLocaleDateString('id-ID')
+    ]
+  }),[filtered])
+
+  const exportOptions=()=>({
+    title:'Daftar Piutang',
+    filename:`piutang-${new Date().toISOString().slice(0,10)}`,
+    subtitle:'Order yang masih memiliki sisa tagihan',
+    headers:['Order','Pelanggan','Telepon','Total','Sudah Bayar','Sisa Piutang','Status','Dibuat'],
+    rows:exportRows,
+    summary:[
+      ['Order Belum Lunas',filtered.length],
+      ['Total Piutang',filtered.reduce((sum,row)=>sum+Math.max(0,Number(row.total)-Number(row.paid_amount)),0)]
+    ] as Array<[string,string|number]>
+  })
+
   const totalReceivable=useMemo(
     ()=>rows.reduce((sum,r)=>sum+Math.max(0,Number(r.total||0)-Number(r.paid_amount||0)),0),
     [rows]
@@ -65,6 +92,10 @@ export function ReceivablesPage(){
       eyebrow="FINANCE & ACCOUNTING"
       title="Daftar Piutang"
       description="Semua order yang masih memiliki sisa tagihan."
+      action={<div className="export-actions">
+        <button className="secondary-button" onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>XLS</button>
+        <button className="secondary-button" onClick={()=>printPdf(exportOptions())}><FileText size={16}/>PDF</button>
+      </div>}
     />
 
     <section className="stats-grid receivable-stats">

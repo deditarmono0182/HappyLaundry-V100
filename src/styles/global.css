@@ -5595,3 +5595,39 @@ body{
 @media(max-width:560px){
   .print-option-grid{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   HappyLaundry V110.9 — XLS / PDF Export
+   ========================================================= */
+.export-actions,
+.revenue-share-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.export-actions .secondary-button,
+.revenue-share-actions .secondary-button{
+  min-height:38px!important;
+  padding:0 12px!important;
+}
+.revenue-share-heading{
+  align-items:flex-start!important;
+}
+@media(max-width:700px){
+  .export-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    width:100%;
+  }
+  .export-actions button{width:100%}
+  .revenue-share-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .revenue-share-actions button:last-child{
+    grid-column:1/-1;
+  }
+}

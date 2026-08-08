@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.8 Print Nota Settings
+# HappyLaundry Enterprise V110.9 XLS PDF Export
 
 ## Jalankan
 ```bash
@@ -194,3 +194,7 @@ Semua tombol Reset Data memakai direct inline confirmation + unified Owner-only 
 
 ## V110.8
 Pengaturan Print Nota tersimpan di Supabase, preview langsung, default paper/template/font/QR/barcode, dan integrasi Cetak Default di Kasir.
+
+
+## V110.9
+Export XLS dan PDF untuk Pemasukan, Pengeluaran, Piutang, Bagi Hasil, dan Laporan Owner. Export mengikuti filter/periode aktif.

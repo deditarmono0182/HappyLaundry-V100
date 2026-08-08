@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { BarChart3, CalendarDays, CreditCard, FileSpreadsheet, Printer, ReceiptText, TrendingUp, Users, WalletCards } from 'lucide-react'
+import { BarChart3, CalendarDays, CreditCard, FileSpreadsheet, FileText, Printer, ReceiptText, TrendingUp, Users, WalletCards } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
+import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
 
 interface OrderRow{
@@ -202,6 +203,29 @@ export function ReportsPage(){
     setAppliedTo(to)
   }
 
+  const ownerExportOptions=()=>({
+    title:'Laporan Owner',
+    filename:`laporan-owner-${appliedFrom}-${appliedTo}`,
+    subtitle:`Periode ${appliedFrom} s/d ${appliedTo}`,
+    headers:['Bagian','Nama','Qty/Jumlah','Nilai'],
+    rows:[
+      ['Ringkasan','Omzet',payments.length,report.omzet],
+      ['Ringkasan','Pengeluaran',cash.length,report.expense],
+      ['Ringkasan','Laba Bersih','-',report.net],
+      ['Ringkasan','Piutang',orders.filter(o=>Number(o.total)>Number(o.paid_amount)).length,report.receivable],
+      ['Ringkasan','Order',report.orders,Math.round(report.avg)],
+      ...report.paymentMethods.map(([name,value])=>['Metode Pembayaran',name.toUpperCase(),'-',value]),
+      ...report.services.map(s=>['Layanan',s.name,s.qty,s.revenue]),
+      ...report.customers.map(c=>['Pelanggan',c.name,c.orders,c.total])
+    ],
+    summary:[
+      ['Omzet',report.omzet],
+      ['Pengeluaran',report.expense],
+      ['Laba Bersih',report.net],
+      ['Piutang',report.receivable]
+    ] as Array<[string,string|number]>
+  })
+
   const print=()=>window.print()
 
   const exportCSV=()=>{
@@ -242,6 +266,8 @@ export function ReportsPage(){
       title="Laporan Owner"
       description="Analisis omzet, kas, piutang, pelanggan, dan layanan dari transaksi aktual."
       action={<div className="report-actions">
+        <button className="secondary-button" onClick={()=>downloadXls(ownerExportOptions())}><FileSpreadsheet size={17}/>XLS</button>
+        <button className="secondary-button" onClick={()=>printPdf(ownerExportOptions())}><FileText size={17}/>PDF</button>
         <button className="secondary-button" onClick={exportCSV}><FileSpreadsheet size={17}/>CSV</button>
         <button className="secondary-button" onClick={print}><Printer size={17}/>Cetak</button>
       </div>}

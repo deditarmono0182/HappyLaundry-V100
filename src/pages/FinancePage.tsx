@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  AlertTriangle, CalendarDays, FileSpreadsheet, Percent, Plus,
+  AlertTriangle, CalendarDays, FileSpreadsheet, FileText, Percent, Plus,
   ReceiptText, Search, Settings2, TrendingDown, TrendingUp, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
@@ -9,6 +9,7 @@ import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
+import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
 
 interface ExpenseCategory{
@@ -216,6 +217,26 @@ export function FinancePage(){
     return{rows,totalRevenue,totalShare,remaining,effectivePercent}
   },[payments,orderItems,services,shareSettings])
 
+  const revenueShareExportOptions=()=>({
+    title:'Bagi Hasil per Kategori Layanan',
+    filename:`bagi-hasil-${from}-${to}`,
+    subtitle:`Periode ${from} s/d ${to}`,
+    headers:['Kategori Layanan','Omzet','Persentase (%)','Nilai Bagi Hasil','Sisa Omzet'],
+    rows:revenueSharing.rows.map(row=>[
+      row.category,
+      Math.round(row.revenue),
+      row.sharePercent.toFixed(2),
+      Math.round(row.shareAmount),
+      Math.round(row.revenue-row.shareAmount)
+    ]),
+    summary:[
+      ['Total Omzet',Math.round(revenueSharing.totalRevenue)],
+      ['Total Bagi Hasil',Math.round(revenueSharing.totalShare)],
+      ['Sisa Setelah Bagi Hasil',Math.round(revenueSharing.remaining)],
+      ['Persentase Efektif',`${revenueSharing.effectivePercent.toFixed(2)}%`]
+    ] as Array<[string,string|number]>
+  })
+
   const openShareSettings=()=>{
     const draft:Record<string,string>={}
     for(const row of revenueSharing.rows)draft[row.category]=String(row.sharePercent)
@@ -332,15 +353,23 @@ export function FinancePage(){
           <h3>Bagi Hasil per Kategori Layanan</h3>
           <p>Persentase diterapkan ke omzet pembayaran aktual pada periode yang dipilih.</p>
         </div>
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={openShareSettings}
-          disabled={!isOwner}
-          title={isOwner?'Ubah persentase bagi hasil':'Hanya Owner yang dapat mengubah persentase'}
-        >
-          <Settings2 size={17}/>Atur Persentase
-        </button>
+        <div className="revenue-share-actions">
+          <button type="button" className="secondary-button" onClick={()=>downloadXls(revenueShareExportOptions())}>
+            <FileSpreadsheet size={16}/>XLS
+          </button>
+          <button type="button" className="secondary-button" onClick={()=>printPdf(revenueShareExportOptions())}>
+            <FileText size={16}/>PDF
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={openShareSettings}
+            disabled={!isOwner}
+            title={isOwner?'Ubah persentase bagi hasil':'Hanya Owner yang dapat mengubah persentase'}
+          >
+            <Settings2 size={17}/>Atur Persentase
+          </button>
+        </div>
       </div>
 
       <div className="revenue-share-summary">
