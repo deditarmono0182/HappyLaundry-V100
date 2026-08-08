@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.8.5 Courier Delivery Proof
+# HappyLaundry Enterprise V112.8.6 Tracking in Order Detail
 
 ## Jalankan
 ```bash
@@ -294,3 +294,7 @@ Menu Pembayaran mendapat Bayar Saja dan Bayar & Ambil. Bayar & Ambil melunasi si
 
 ## V112.8.5
 Order mendapat Konfirmasi Kurir dengan foto bukti per nomor order. Foto/waktu/akun tersimpan di Supabase dan status otomatis menjadi Selesai.
+
+
+## V112.8.6
+Detail Order mendapat tombol Buka Tracking Pelanggan yang membuka /track/<nomor-order> di tab baru.
