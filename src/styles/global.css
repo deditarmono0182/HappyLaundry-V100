@@ -6993,3 +6993,100 @@ body{
     justify-content:space-between;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.6 — Order Export / Filter / Click Status
+   ========================================================= */
+.order-header-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.order-filter-toolbar{
+  display:grid!important;
+  grid-template-columns:minmax(280px,1.6fr) 180px 180px auto auto auto;
+  gap:9px!important;
+  align-items:end!important;
+}
+.order-search-box{
+  width:100%!important;
+  min-width:0!important;
+}
+.order-filter-field{
+  display:grid;
+  gap:4px;
+}
+.order-filter-field>span{
+  color:#698398;
+  font-size:8.5px;
+  font-weight:850;
+}
+.order-filter-field select{
+  min-height:42px;
+  width:100%;
+  padding:0 9px;
+  border:1px solid #c9dfea;
+  border-radius:10px;
+  background:#fff;
+  color:#1d567b;
+  font-size:9.5px;
+  font-weight:800;
+}
+.order-reset-filter{
+  min-width:76px;
+}
+.order-toolbar-export{
+  display:flex;
+}
+.clickable-order-status{
+  border:0!important;
+  cursor:pointer;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.clickable-order-status:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(31,104,153,.13);
+}
+.clickable-order-status:disabled{
+  opacity:.65;
+  cursor:wait;
+}
+.clickable-order-status svg{
+  flex:0 0 auto;
+}
+
+@media(max-width:1200px){
+  .order-filter-toolbar{
+    grid-template-columns:minmax(260px,1fr) 1fr 1fr!important;
+  }
+  .order-reset-filter,
+  .order-toolbar-export,
+  .order-filter-toolbar .record-count{
+    align-self:end;
+  }
+}
+@media(max-width:760px){
+  .order-header-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    width:100%;
+  }
+  .order-header-actions .primary-button{
+    grid-column:1/-1;
+  }
+  .order-filter-toolbar{
+    grid-template-columns:1fr!important;
+  }
+  .order-filter-toolbar>*{
+    width:100%;
+  }
+  .order-filter-toolbar .record-count{
+    width:max-content;
+  }
+}

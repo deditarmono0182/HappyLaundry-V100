@@ -1,0 +1,93 @@
+HAPPYLAUNDRY ENTERPRISE V112.6 — ORDER EXPORT + FILTER + CLICK STATUS
+
+FITUR BARU DI DASHBOARD ORDER:
+
+1. EXPORT ALL
+Tombol di bagian atas:
+Export All
+
+Mengunduh XLS seluruh data order tanpa mengikuti filter.
+
+Data export mencakup:
+- No Order
+- Pelanggan
+- Telepon
+- Jenis layanan + berat/jumlah
+- Status cucian
+- Status pembayaran
+- Subtotal
+- Diskon
+- Total
+- Sudah bayar
+- Piutang
+- Estimasi selesai
+- Tanggal dibuat
+
+2. EXPORT SESUAI FILTER
+Tersedia:
+XLS Filter
+PDF Filter
+
+Contoh:
+Status Pembayaran = Lunas
+Status Cucian = Dicuci
+
+Maka XLS/PDF Filter hanya berisi order:
+Lunas + Dicuci.
+
+3. FILTER STATUS PEMBAYARAN
+Pilihan:
+- Semua Pembayaran
+- Belum Bayar
+- DP / Sebagian
+- Lunas
+
+4. FILTER STATUS CUCIAN
+Pilihan:
+- Semua Status
+- Diterima
+- Dicuci
+- Dikeringkan
+- Disetrika
+- Packing
+- Siap Diambil
+- Selesai
+- Dibatalkan
+
+Filter pembayaran dan status cucian dapat digunakan bersamaan.
+
+5. STATUS BISA DIKLIK
+Di tabel Order, badge Status Cucian sekarang menjadi tombol.
+
+Contoh:
+Diterima -> klik -> konfirmasi -> Dicuci
+Dicuci -> klik -> Dikeringkan
+Dikeringkan -> klik -> Disetrika
+Disetrika -> klik -> Packing
+Packing -> klik -> Siap Diambil
+Siap Diambil -> klik -> Selesai
+
+Sebelum perubahan aplikasi menampilkan konfirmasi agar tidak salah klik.
+
+Tombol panah lama pada kolom aksi dihilangkan karena sekarang cukup klik badge status.
+
+6. TOMBOL SEMUA
+Menghapus:
+- kata pencarian
+- filter pembayaran
+- filter status cucian
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.6.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Order.
+5. Coba Status Pembayaran = Lunas.
+6. Status Cucian = Dicuci.
+7. Coba XLS Filter / PDF Filter.
+8. Klik badge status Dicuci untuk lanjut ke proses berikutnya.
+
+CACHE:
+happylaundry-v112-6-0

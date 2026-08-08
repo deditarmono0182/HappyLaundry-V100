@@ -5,6 +5,8 @@ import {
   ChevronRight,
   CircleDollarSign,
   Eye,
+  FileSpreadsheet,
+  FileText,
   PackageCheck,
   Plus,
   Printer,
@@ -15,6 +17,7 @@ import {
 import { useSearchParams } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
+import { downloadXls, printPdf } from '../lib/exportData'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
@@ -45,6 +48,9 @@ export function OrdersPage() {
   const [services, setServices] = useState<Service[]>([])
   const [orderServiceItems, setOrderServiceItems] = useState<OrderServiceItem[]>([])
   const [query, setQuery] = useState('')
+  const [paymentFilter,setPaymentFilter]=useState<'all'|'unpaid'|'partial'|'paid'>('all')
+  const [statusFilter,setStatusFilter]=useState<'all'|OrderStatus>('all')
+  const [statusBusyId,setStatusBusyId]=useState<string|null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
@@ -120,9 +126,14 @@ export function OrdersPage() {
   }
 
   const filtered = useMemo(() => {
-    const keyword = query.trim().toLowerCase()
-    if (!keyword) return rows
-    return rows.filter(row => {
+    const keyword=query.trim().toLowerCase()
+
+    return rows.filter(row=>{
+      if(paymentFilter!=='all'&&row.payment_status!==paymentFilter)return false
+      if(statusFilter!=='all'&&row.status!==statusFilter)return false
+
+      if(!keyword)return true
+
       const haystack=[
         row.order_no,
         row.customer_name,
@@ -133,9 +144,10 @@ export function OrdersPage() {
         row.payment_status,
         serviceSummary(row.id)
       ].join(' ').toLowerCase()
+
       return haystack.includes(keyword)
     })
-  }, [query, rows, serviceItemsByOrder])
+  },[query,rows,serviceItemsByOrder,paymentFilter,statusFilter])
 
   const overdueRows = useMemo(() => {
     const now = Date.now()
@@ -283,16 +295,70 @@ export function OrdersPage() {
     setBusy(false)
   }
 
-  const advanceStatus = async (row: OrderRow) => {
-    const index = statusFlow.indexOf(row.status)
-    if (index < 0 || index >= statusFlow.length - 1) return
-    const next = statusFlow[index + 1]
-    const { error } = await supabase
+  const advanceStatus=async(row:OrderRow)=>{
+    const index=statusFlow.indexOf(row.status)
+    if(index<0||index>=statusFlow.length-1)return
+
+    const nextStatus=statusFlow[index+1]
+    const currentLabel=statusLabels[row.status]
+    const nextLabel=statusLabels[nextStatus]
+
+    if(!window.confirm(`${row.order_no}\nUbah proses dari "${currentLabel}" menjadi "${nextLabel}"?`))return
+
+    setStatusBusyId(row.id)
+    setMessage('')
+
+    const{error}=await supabase
       .from('v100_orders')
-      .update({ status: next, updated_at: new Date().toISOString() })
-      .eq('id', row.id)
-    if (error) setMessage(error.message)
-    else await load()
+      .update({status:nextStatus,updated_at:new Date().toISOString()})
+      .eq('id',row.id)
+
+    if(error){
+      setMessage(error.message)
+    }else{
+      await load()
+    }
+
+    setStatusBusyId(null)
+  }
+
+  const orderExport=(exportRows:OrderRow[],label:string)=>({
+    title:'Data Order Laundry',
+    filename:`order-laundry-${new Date().toISOString().slice(0,10)}-${label.toLowerCase().replace(/\s+/g,'-')}`,
+    subtitle:`${label} • ${new Date().toLocaleString('id-ID')}`,
+    headers:[
+      'No. Order','Pelanggan','Telepon','Layanan',
+      'Status Cucian','Status Pembayaran',
+      'Subtotal','Diskon','Total','Sudah Bayar','Piutang',
+      'Estimasi Selesai','Dibuat'
+    ],
+    rows:exportRows.map(row=>[
+      row.order_no,
+      row.customer_name,
+      row.customer_phone,
+      serviceSummary(row.id),
+      statusLabels[row.status],
+      paymentLabels[row.payment_status],
+      Number(row.subtotal||0),
+      Number(row.discount||0),
+      Number(row.total||0),
+      Number(row.paid_amount||0),
+      Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),
+      row.due_at?new Date(row.due_at).toLocaleString('id-ID'):'-',
+      new Date(row.created_at).toLocaleString('id-ID')
+    ]),
+    summary:[
+      ['Jumlah Order',exportRows.length],
+      ['Total Nilai Order',Math.round(exportRows.reduce((sum,row)=>sum+Number(row.total||0),0))],
+      ['Total Sudah Bayar',Math.round(exportRows.reduce((sum,row)=>sum+Number(row.paid_amount||0),0))],
+      ['Total Piutang',Math.round(exportRows.reduce((sum,row)=>sum+Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),0))]
+    ] as Array<[string,string|number]>
+  })
+
+  const filteredLabel=()=>{
+    const payment=paymentFilter==='all'?'Semua Pembayaran':paymentLabels[paymentFilter]
+    const status=statusFilter==='all'?'Semua Status Cucian':statusLabels[statusFilter]
+    return `Filter: ${status} • ${payment}`
   }
 
   const printReceipt = (row: OrderRow) => {
@@ -341,9 +407,25 @@ export function OrdersPage() {
         title="Order Laundry"
         description="Buat order, catat pembayaran, dan pantau proses cucian."
         action={
-          <button className="primary-button" onClick={openCreate}>
-            <Plus size={18} /> Order Baru
-          </button>
+          <div className="order-header-actions">
+            <button
+              className="secondary-button"
+              onClick={()=>downloadXls(orderExport(rows,'Semua Data'))}
+              title="Export seluruh order tanpa mengikuti filter"
+            >
+              <FileSpreadsheet size={16}/>Export All
+            </button>
+            <button
+              className="secondary-button"
+              onClick={()=>printPdf(orderExport(filtered,filteredLabel()))}
+              title="Export PDF sesuai filter yang sedang tampil"
+            >
+              <FileText size={16}/>PDF Filter
+            </button>
+            <button className="primary-button" onClick={openCreate}>
+              <Plus size={18}/>Order Baru
+            </button>
+          </div>
         }
       />
 
@@ -355,11 +437,59 @@ export function OrdersPage() {
       </section>
 
       <section className="panel data-panel order-panel">
-        <div className="toolbar">
-          <label className="search-box">
+        <div className="toolbar order-filter-toolbar">
+          <label className="search-box order-search-box">
             <Search size={18}/>
-            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari order, pelanggan, telepon, layanan, status, atau pembayaran" />
+            <input
+              value={query}
+              onChange={event=>setQuery(event.target.value)}
+              placeholder="Cari order, pelanggan, telepon, layanan, status, atau pembayaran"
+            />
           </label>
+
+          <label className="order-filter-field">
+            <span>Status Pembayaran</span>
+            <select value={paymentFilter} onChange={e=>setPaymentFilter(e.target.value as typeof paymentFilter)}>
+              <option value="all">Semua Pembayaran</option>
+              <option value="unpaid">Belum Bayar</option>
+              <option value="partial">DP / Sebagian</option>
+              <option value="paid">Lunas</option>
+            </select>
+          </label>
+
+          <label className="order-filter-field">
+            <span>Status Cucian</span>
+            <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value as typeof statusFilter)}>
+              <option value="all">Semua Status</option>
+              <option value="received">{statusLabels.received}</option>
+              <option value="washing">{statusLabels.washing}</option>
+              <option value="drying">{statusLabels.drying}</option>
+              <option value="ironing">{statusLabels.ironing}</option>
+              <option value="packing">{statusLabels.packing}</option>
+              <option value="ready">{statusLabels.ready}</option>
+              <option value="completed">{statusLabels.completed}</option>
+              <option value="cancelled">{statusLabels.cancelled}</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            className="secondary-button order-reset-filter"
+            onClick={()=>{
+              setQuery('')
+              setPaymentFilter('all')
+              setStatusFilter('all')
+            }}
+          >
+            Semua
+          </button>
+
+          <div className="order-toolbar-export">
+            <button className="secondary-button" onClick={()=>downloadXls(orderExport(filtered,filteredLabel()))}>
+              <FileSpreadsheet size={15}/>XLS Filter
+            </button>
+          </div>
+
           <span className="record-count">{filtered.length} order</span>
         </div>
 
@@ -405,7 +535,20 @@ export function OrdersPage() {
                         </div>
                       : <span className="order-service-empty">-</span>}
                   </td>
-                  <td><span className={`badge status-${row.status}`}>{statusLabels[row.status]}</span></td>
+                  <td>
+                    {statusFlow.indexOf(row.status)>=0&&statusFlow.indexOf(row.status)<statusFlow.length-1
+                      ? <button
+                          type="button"
+                          className={`badge status-${row.status} clickable-order-status`}
+                          onClick={()=>void advanceStatus(row)}
+                          disabled={statusBusyId===row.id}
+                          title={`Klik untuk lanjut ke ${statusLabels[statusFlow[statusFlow.indexOf(row.status)+1]]}`}
+                        >
+                          {statusBusyId===row.id?'Memproses...':statusLabels[row.status]}
+                          <ChevronRight size={12}/>
+                        </button>
+                      : <span className={`badge status-${row.status}`}>{statusLabels[row.status]}</span>}
+                  </td>
                   <td><span className={`badge payment-${row.payment_status}`}>{paymentLabels[row.payment_status]}</span><small>{formatRupiah(row.paid_amount)} / {formatRupiah(row.total)}</small></td>
                   <td><b>{formatRupiah(row.total)}</b></td>
                   <td className={isOverdue(row)?'order-due-cell overdue':''}>
@@ -418,9 +561,7 @@ export function OrdersPage() {
                     <div className="row-actions">
                       <button onClick={() => setDetail(row)} aria-label="Detail"><Eye size={16}/></button>
                       <button onClick={() => printReceipt(row)} aria-label="Cetak"><Printer size={16}/></button>
-                      {statusFlow.indexOf(row.status) >= 0 && statusFlow.indexOf(row.status) < statusFlow.length - 1 && (
-                        <button className="advance-button" onClick={() => void advanceStatus(row)} aria-label="Status berikutnya"><ChevronRight size={16}/></button>
-                      )}
+
                     </div>
                   </td>
                 </tr>

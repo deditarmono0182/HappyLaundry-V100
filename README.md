@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.5 Order Service Column
+# HappyLaundry Enterprise V112.6 Order Export Filter Click Status
 
 ## Jalankan
 ```bash
@@ -262,3 +262,7 @@ Input angka global auto-select dan decimal keyboard; berat/jumlah Kasir serta Or
 
 ## V112.5
 Dashboard Order menampilkan jenis layanan + jumlah/berat, pencarian berdasarkan layanan, dan rincian layanan pada Detail Order.
+
+
+## V112.6
+Order mendapat Export All/XLS Filter/PDF Filter, filter status pembayaran + cucian, dan badge status dapat diklik untuk proses berikutnya.
