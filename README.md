@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.1 Back Navigation
+# HappyLaundry Enterprise V112.2 Top Right Back Button
 
 ## Jalankan
 ```bash
@@ -238,3 +238,7 @@ Absensi karyawan menggunakan login + QR statis yang dapat diganti Owner + GPS ra
 
 ## V112.1
 Tombol global ← Kembali pada seluruh halaman yang memakai PageHeader, dengan browser-history dan fallback aman.
+
+
+## V112.2
+Tombol kembali global dipindahkan ke pojok kanan atas, berbentuk bulat dan sticky.

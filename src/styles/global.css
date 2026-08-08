@@ -6432,3 +6432,116 @@ body{
     font-size:22px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.2 — Back Button Top Right
+   ========================================================= */
+
+.page-heading{
+  position:relative;
+}
+
+.page-heading-copy{
+  min-width:0;
+  flex:1 1 auto;
+}
+
+.page-heading-right{
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-end;
+  gap:8px;
+  flex:0 0 auto;
+  position:sticky;
+  top:92px;
+  z-index:18;
+}
+
+.page-heading-with-back{
+  align-items:flex-start!important;
+}
+
+.page-back-button{
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+  padding:0!important;
+  margin:0!important;
+  border-radius:50%!important;
+  display:grid!important;
+  place-items:center!important;
+  background:#ffffff!important;
+  color:#176aa4!important;
+  border:1px solid #c8deec!important;
+  box-shadow:0 8px 22px rgba(34,102,148,.14)!important;
+  cursor:pointer!important;
+  flex:0 0 auto!important;
+  position:relative!important;
+  top:auto!important;
+  z-index:auto!important;
+}
+
+.page-back-button:hover{
+  background:#edf7ff!important;
+  border-color:#71b1dc!important;
+  color:#0f5c94!important;
+  transform:translateY(-1px);
+}
+
+.page-back-button:active{
+  transform:translateY(0);
+}
+
+.page-back-button span{
+  display:none!important;
+}
+
+/* Keep title/action layout clean when export/action buttons exist. */
+.page-heading-action{
+  display:flex;
+  align-items:center;
+}
+
+@media(max-width:700px){
+  .page-heading{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:start!important;
+    gap:10px!important;
+  }
+
+  .page-heading-right{
+    grid-column:2;
+    grid-row:1;
+    top:88px;
+    align-self:start;
+  }
+
+  .page-heading-copy{
+    grid-column:1;
+    grid-row:1;
+  }
+
+  .page-heading-action{
+    grid-column:1/-1;
+    width:auto;
+  }
+
+  .page-back-button{
+    width:46px!important;
+    height:46px!important;
+    min-width:46px!important;
+    min-height:46px!important;
+  }
+}
+
+@media(min-width:701px){
+  .page-heading{
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:flex-start!important;
+    gap:16px!important;
+  }
+}

@@ -1,0 +1,32 @@
+HAPPYLAUNDRY ENTERPRISE V112.2 — BACK BUTTON TOP RIGHT
+
+PERUBAHAN:
+Tombol kembali dipindahkan dari kiri judul ke POJOK KANAN ATAS.
+
+TAMPILAN:
+- Tombol bulat
+- Icon panah saja
+- Tidak memakan ruang judul
+- Sticky saat halaman di-scroll
+- Ukuran 44 px desktop
+- Ukuran 46 px HP/tablet
+
+CARA KERJA:
+Tetap sama seperti V112.1:
+- Jika ada riwayat halaman -> kembali ke halaman sebelumnya
+- Jika halaman dibuka langsung -> fallback aman
+  * Settings subpage -> Pengaturan
+  * Finance subpage -> Keuangan
+  * Halaman utama -> Dashboard
+
+DASHBOARD UTAMA:
+Tidak menampilkan tombol kembali.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.2.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Order/Piutang/Pengaturan Absensi.
+5. Tombol bulat ← muncul di kanan atas.

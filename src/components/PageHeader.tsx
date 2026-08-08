@@ -53,7 +53,14 @@ export function PageHeader({
 
   return (
     <div className={`page-heading ${showBack?'page-heading-with-back':''}`}>
-      <div className="page-heading-main">
+      <div className="page-heading-copy">
+        <span className="eyebrow">{eyebrow}</span>
+        <h2>{title}</h2>
+        <p>{description}</p>
+      </div>
+
+      <div className="page-heading-right">
+        {action && <div className="page-heading-action">{action}</div>}
         {showBack&&
           <button
             type="button"
@@ -62,16 +69,9 @@ export function PageHeader({
             aria-label="Kembali ke halaman sebelumnya"
             title="Kembali"
           >
-            <ArrowLeft size={19}/>
-            <span>Kembali</span>
+            <ArrowLeft size={20}/>
           </button>}
-        <div className="page-heading-copy">
-          <span className="eyebrow">{eyebrow}</span>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
       </div>
-      {action && <div className="page-heading-action">{action}</div>}
     </div>
   )
 }
