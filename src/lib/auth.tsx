@@ -110,6 +110,9 @@ export function AuthProvider({children}:{children:React.ReactNode}){
         const row=(Array.isArray(data)?data[0]:data) as EmployeeSessionRow|undefined
         if(row&&mounted){
           setProfile(employeeToProfile(row))
+          // Auto attendance is idempotent: one row per employee per day.
+          // Existing Owner-set Izin/Sakit/Alpha is never overwritten.
+          try{await supabase.rpc('v111_auto_attendance_login')}catch{}
           return
         }
       }
@@ -175,6 +178,10 @@ export function AuthProvider({children}:{children:React.ReactNode}){
         await supabase.auth.signOut()
         throw new Error(bindError?.message||'Gagal mengaktifkan sesi karyawan.')
       }
+
+      // First successful employee login of the day creates attendance automatically.
+      // Do not block login if attendance service is temporarily unavailable.
+      try{await supabase.rpc('v111_auto_attendance_login')}catch{}
 
       await supabase.auth.refreshSession()
     },

@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V111.2 Multi Category Revenue Share
+# HappyLaundry Enterprise V111.4 Owner Attendance Override
 
 ## Jalankan
 ```bash
@@ -222,3 +222,11 @@ Bagi hasil gaji dihitung dari omzet kategori layanan yang dipilih per karyawan, 
 
 ## V111.2
 Satu karyawan dapat memiliki banyak kategori bagi hasil dengan persentase berbeda per kategori.
+
+
+## V111.3
+Login pertama karyawan per hari otomatis membuat status Hadir, dengan sumber Auto Login dan jam masuk; status manual Owner tidak ditimpa.
+
+
+## V111.4
+Owner dapat override absensi dengan alasan wajib; Hadir Manual dibedakan dari Auto Login dan tercatat di audit log.

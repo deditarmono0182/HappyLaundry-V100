@@ -1,0 +1,68 @@
+HAPPYLAUNDRY ENTERPRISE V111.4 — OWNER ATTENDANCE OVERRIDE
+
+FITUR BARU:
+Owner dapat memperbaiki absensi jika karyawan benar-benar hadir tetapi gagal absen otomatis.
+
+CONTOH KENDALA:
+- Internet toko mati
+- GPS gagal membaca lokasi
+- Kamera tidak mendapat izin
+- QR tidak dapat discan
+- HP karyawan bermasalah
+- Sistem sedang offline
+
+CARA:
+1. Login Owner.
+2. Absensi & Gaji -> Daftar Hadir.
+3. Pilih tanggal.
+4. Cari karyawan.
+5. Klik Hadir.
+6. Isi alasan, contoh:
+   "Karyawan hadir, internet toko mati saat jam masuk."
+7. Simpan Absensi Manual.
+
+HASIL:
+Status:
+Hadir
+
+Sumber:
+Manual Owner
+
+Alasan juga terlihat dan tersimpan.
+
+OWNER JUGA DAPAT MENGUBAH:
+- Hadir
+- Izin
+- Sakit
+- Alpha
+
+KEAMANAN:
+Setiap override menyimpan:
+- alasan
+- waktu perubahan
+- user Owner yang mengubah
+- audit log OWNER_ATTENDANCE_OVERRIDE
+
+Jadi Hadir dari sistem dapat dibedakan dari Hadir Manual Owner.
+
+AUTO LOGIN:
+Absensi otomatis dari login V111.3 tetap bekerja.
+Jika Owner sudah membuat status manual untuk tanggal tersebut,
+auto login tidak akan menimpanya.
+
+WAJIB SQL:
+supabase/028_v111_4_owner_attendance_override.sql
+
+JIKA SUDAH V111.3:
+1. Jalankan SQL 028.
+2. Deploy V111.4.
+3. Refresh.
+4. Buka Absensi & Gaji.
+5. Coba pilih karyawan -> Hadir -> isi alasan -> Simpan.
+
+URUTAN SQL PAYROLL LENGKAP:
+024
+025
+026
+027
+028

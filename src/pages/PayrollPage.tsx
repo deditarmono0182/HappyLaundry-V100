@@ -26,6 +26,10 @@ interface Attendance{
   attendance_date:string
   status:AttendanceStatus
   note:string|null
+  attendance_source?:string|null
+  check_in_at?:string|null
+  override_reason?:string|null
+  overridden_at?:string|null
 }
 
 interface PayrollSetting{
@@ -105,6 +109,8 @@ export function PayrollPage(){
   })
   const[shareDraft,setShareDraft]=useState<Array<{category:string;share_percent:string}>>([])
   const[bonusDraft,setBonusDraft]=useState<Record<string,string>>({})
+  const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus}|null>(null)
+  const[overrideReason,setOverrideReason]=useState('')
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
@@ -249,25 +255,50 @@ export function PayrollPage(){
     return payrollRows.filter(r=>ids.has(r.employee.id))
   },[payrollRows,filteredEmployees])
 
-  const setAttendanceStatus=async(employee:Employee,status:AttendanceStatus)=>{
-    setMessage('');setSuccess('')
+  const setAttendanceStatus=(employee:Employee,status:AttendanceStatus)=>{
     const existing=attendanceMap.get(`${employee.id}|${attendanceDate}`)
+    setOverrideTarget({employee,status})
+    setOverrideReason(
+      status==='present' && !existing
+        ? 'Kendala koneksi / GPS / QR'
+        : existing?.override_reason||''
+    )
+    setMessage('')
+    setSuccess('')
+  }
+
+  const saveAttendanceOverride=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!overrideTarget)return
+
+    const reason=overrideReason.trim()
+    if(!reason){
+      setMessage('Alasan perubahan absensi wajib diisi.')
+      return
+    }
+
     setBusy(true)
-    const payload={
-      employee_id:employee.id,
-      attendance_date:attendanceDate,
-      status,
-      note:existing?.note||null,
-      updated_at:new Date().toISOString()
+    setMessage('')
+    setSuccess('')
+
+    const{data,error}=await supabase.rpc('v111_owner_override_attendance',{
+      p_employee_id:overrideTarget.employee.id,
+      p_attendance_date:attendanceDate,
+      p_status:overrideTarget.status,
+      p_reason:reason
+    })
+
+    if(error){
+      setMessage(error.message)
+      setBusy(false)
+      return
     }
-    const{error}=await supabase
-      .from('v111_attendance')
-      .upsert(payload,{onConflict:'employee_id,attendance_date'})
-    if(error)setMessage(error.message)
-    else{
-      setSuccess(`${employee.full_name}: ${statusLabels[status]} pada ${new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('id-ID')}.`)
-      await load()
-    }
+
+    const result=(Array.isArray(data)?data[0]:data) as {message?:string}|null
+    setOverrideTarget(null)
+    setOverrideReason('')
+    setSuccess(result?.message||`${overrideTarget.employee.full_name}: ${statusLabels[overrideTarget.status]} berhasil disimpan.`)
+    await load()
     setBusy(false)
   }
 
@@ -434,6 +465,14 @@ export function PayrollPage(){
     {success&&<div className="success-box inline-message"><CheckCircle2 size={17}/>{success}</div>}
 
     {tab==='attendance'?<>
+      <section className="panel attendance-auto-info">
+        <CalendarCheck2 size={20}/>
+        <div>
+          <b>Absensi Otomatis Aktif</b>
+          <span>Login pertama karyawan pada hari itu otomatis tercatat Hadir. Status manual Owner tidak akan ditimpa.</span>
+        </div>
+      </section>
+
       <section className="stats-grid payroll-stats">
         <StatCard icon={UsersRound} label="Karyawan Aktif" value={String(employees.length)} caption="Karyawan yang dapat diabsen"/>
         <StatCard icon={CalendarCheck2} label="Total Hadir Bulan Ini" value={String(totalPresent)} caption="Akumulasi hari hadir"/>
@@ -455,7 +494,23 @@ export function PayrollPage(){
                 return <tr key={employee.id}>
                   <td><b>{employee.full_name}</b>{employee.phone&&<small>{employee.phone}</small>}</td>
                   <td><b>{employee.login_id}</b></td>
-                  <td><span className={`attendance-badge attendance-${current||'none'}`}>{current?statusLabels[current]:'Belum Absen'}</span></td>
+                  <td>
+                    <span className={`attendance-badge attendance-${current||'none'}`}>{current?statusLabels[current]:'Belum Absen'}</span>
+                    {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.attendance_source==='login'&&
+                      <small className="attendance-auto-note">
+                        Auto Login
+                        {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.check_in_at
+                          ? ` • ${new Date(attendanceMap.get(`${employee.id}|${attendanceDate}`)!.check_in_at!).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`
+                          : ''}
+                      </small>}
+                    {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.attendance_source==='owner_override'&&
+                      <small className="attendance-owner-note" title={attendanceMap.get(`${employee.id}|${attendanceDate}`)?.override_reason||''}>
+                        Manual Owner
+                        {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.override_reason
+                          ? ` • ${attendanceMap.get(`${employee.id}|${attendanceDate}`)!.override_reason}`
+                          : ''}
+                      </small>}
+                  </td>
                   <td><div className="attendance-actions">
                     {(['present','permission','sick','absent'] as AttendanceStatus[]).map(status=>
                       <button
@@ -463,7 +518,7 @@ export function PayrollPage(){
                         key={status}
                         className={`${current===status?'active ':''}attendance-${status}`}
                         disabled={busy}
-                        onClick={()=>void setAttendanceStatus(employee,status)}
+                        onClick={()=>setAttendanceStatus(employee,status)}
                       >{statusLabels[status]}</button>
                     )}
                   </div></td>
@@ -523,6 +578,44 @@ export function PayrollPage(){
         </div>
       </section>
     </>}
+
+    {overrideTarget&&<Modal
+      title={`Ubah Absensi — ${overrideTarget.employee.full_name}`}
+      onClose={()=>!busy&&setOverrideTarget(null)}
+    >
+      <form className="modal-form" onSubmit={saveAttendanceOverride}>
+        <div className="attendance-override-card">
+          <CalendarCheck2 size={22}/>
+          <div>
+            <b>Status: {statusLabels[overrideTarget.status]}</b>
+            <span>{new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span>
+          </div>
+        </div>
+
+        {overrideTarget.status==='present'&&<div className="attendance-override-info">
+          Gunakan Hadir Manual jika karyawan memang hadir tetapi gagal absen otomatis karena koneksi, GPS, kamera, atau QR.
+        </div>}
+
+        <label>Alasan / Catatan Owner
+          <textarea
+            rows={3}
+            value={overrideReason}
+            onChange={e=>setOverrideReason(e.target.value)}
+            placeholder="Contoh: Karyawan hadir, internet toko mati saat jam masuk."
+            autoFocus
+          />
+        </label>
+
+        {message&&<div className="error-box">{message}</div>}
+
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setOverrideTarget(null)} disabled={busy}>Batal</button>
+          <button className="primary-button" disabled={busy||!overrideReason.trim()}>
+            <Save size={16}/>{busy?'Menyimpan...':'Simpan Absensi Manual'}
+          </button>
+        </div>
+      </form>
+    </Modal>}
 
     {settingsEmployee&&<Modal title={`Komponen Gaji — ${settingsEmployee.full_name}`} onClose={()=>setSettingsEmployee(null)}>
       <form className="modal-form" onSubmit={saveSettings}>

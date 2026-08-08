@@ -6174,3 +6174,94 @@ body{
     width:100%;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V111.3 — Auto Login Attendance
+   ========================================================= */
+.attendance-auto-info{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:12px!important;
+  padding:11px 13px!important;
+  border-color:#bfe3d1!important;
+  background:#f2fbf6!important;
+}
+.attendance-auto-info svg{
+  color:#12935f;
+  flex:0 0 auto;
+}
+.attendance-auto-info>div{
+  display:grid;
+  gap:3px;
+}
+.attendance-auto-info b{
+  color:#0c7049!important;
+  font-size:11.5px!important;
+  font-weight:950!important;
+}
+.attendance-auto-info span{
+  color:#5e7e6e!important;
+  font-size:9.5px!important;
+  font-weight:650!important;
+}
+.attendance-auto-note{
+  display:block!important;
+  margin-top:4px!important;
+  color:#16815a!important;
+  font-size:8.5px!important;
+  font-weight:850!important;
+}
+
+
+/* =========================================================
+   HappyLaundry V111.4 — Owner Attendance Override
+   ========================================================= */
+.attendance-owner-note{
+  display:block!important;
+  max-width:220px;
+  margin-top:4px!important;
+  color:#176bb0!important;
+  font-size:8.5px!important;
+  font-weight:850!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.attendance-override-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px;
+  border:1px solid #c9e0ef;
+  border-radius:11px;
+  background:#f4faff;
+}
+.attendance-override-card svg{
+  color:#1976d2;
+  flex:0 0 auto;
+}
+.attendance-override-card>div{
+  display:grid;
+  gap:2px;
+}
+.attendance-override-card b{
+  color:#154d75!important;
+  font-size:12px!important;
+  font-weight:950!important;
+}
+.attendance-override-card span{
+  color:#71889a!important;
+  font-size:9.5px!important;
+}
+.attendance-override-info{
+  padding:10px 11px;
+  border:1px solid #bfe3cf;
+  border-radius:10px;
+  background:#f1fbf5;
+  color:#39755b;
+  font-size:9.5px;
+  font-weight:700;
+  line-height:1.45;
+}

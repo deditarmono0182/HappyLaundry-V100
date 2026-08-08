@@ -1,0 +1,59 @@
+HAPPYLAUNDRY ENTERPRISE V111.3 — ABSENSI OTOMATIS DARI LOGIN
+
+FITUR:
+Saat karyawan berhasil login ke HappyLaundry, sistem otomatis memasukkan:
+STATUS = HADIR
+
+ke Daftar Hadir pada tanggal tersebut.
+
+CONTOH:
+CECE login tanggal 8 Agustus 2026 pukul 08:03.
+Daftar Hadir otomatis:
+CECE | Hadir | Auto Login • 08:03
+
+TIDAK DUPLIKAT:
+Satu karyawan hanya mempunyai satu absensi per tanggal.
+Login berkali-kali pada hari yang sama tidak membuat baris baru.
+
+AMAN UNTUK STATUS MANUAL:
+Jika Owner sudah mengubah CECE menjadi:
+- Izin
+- Sakit
+- Alpha
+
+login berikutnya TIDAK mengubahnya kembali menjadi Hadir.
+
+ZONA WAKTU:
+Tanggal absensi otomatis memakai WIB / Asia Jakarta,
+bukan UTC Supabase.
+
+AUDIT:
+Absensi otomatis dicatat juga ke audit log dengan action:
+AUTO_ATTENDANCE
+
+OWNER:
+Owner tetap dapat mengubah status di:
+Absensi & Gaji -> Daftar Hadir
+
+Jika Owner mengubah status secara manual,
+sumber absensi menjadi MANUAL.
+
+WAJIB SQL:
+supabase/027_v111_3_auto_login_attendance.sql
+
+JIKA SUDAH V111.2:
+1. Jalankan SQL 027.
+2. Deploy V111.3.
+3. Logout akun karyawan.
+4. Login kembali menggunakan ID Akun + Password.
+5. Login Owner.
+6. Buka Absensi & Gaji -> Daftar Hadir.
+7. Karyawan harus otomatis berstatus Hadir.
+
+JIKA BELUM PERNAH PASANG PAYROLL:
+Jalankan berurutan:
+024
+025
+026
+027
+lalu langsung deploy V111.3.
