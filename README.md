@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.8.1 Close Receipt Preview
+# HappyLaundry Enterprise V112.8.2 Reprint Receipt
 
 ## Jalankan
 ```bash
@@ -278,3 +278,7 @@ Dashboard Pelanggan mendapat analitik transaksi, total belanja, rata-rata transa
 
 ## V112.8.1
 Preview nota mempunyai tombol X kanan atas dan ← Tutup Preview Nota dengan fallback kembali ke Kasir pada iPhone/Safari.
+
+
+## V112.8.2
+Tombol Cetak Ulang Nota dibuat jelas di Order dan Detail Order, dengan preview, layanan, Cetak/PDF, X, dan Tutup Preview untuk iPhone.

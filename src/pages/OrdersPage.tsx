@@ -371,39 +371,137 @@ export function OrdersPage() {
     return `Filter: ${status} • ${payment}`
   }
 
-  const printReceipt = (row: OrderRow) => {
-    const printWindow = window.open('', '_blank', 'width=420,height=700')
-    if (!printWindow) return
+  const printReceipt=(row:OrderRow)=>{
+    const printWindow=window.open('','_blank','width=520,height=850')
+    if(!printWindow)return
+
+    const serviceRows=(serviceItemsByOrder.get(row.id)||[])
+      .map(item=>{
+        const qty=Number(item.quantity||0)
+        const formattedQty=Number.isInteger(qty)
+          ? String(qty)
+          : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
+        return `<div class="service-row"><span>${item.service_name}</span><b>${formattedQty} ${item.unit}</b></div>`
+      })
+      .join('')
+
+    const closeFallback=`${window.location.origin}/orders?order=${encodeURIComponent(row.order_no)}`
+
     printWindow.document.write(`
       <!doctype html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>${row.order_no}</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+        <title>Cetak Ulang ${row.order_no}</title>
         <style>
-          body{font-family:Arial,sans-serif;width:58mm;margin:0 auto;padding:4mm;color:#111}
-          h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8px 0}
-          .row{display:flex;justify-content:space-between;font-size:12px;margin:4px 0}
-          .strong{font-weight:700}.small{font-size:11px}
+          @page{size:58mm auto;margin:3mm}
+          *{box-sizing:border-box}
+          body{
+            font-family:Arial,sans-serif;
+            width:58mm;
+            max-width:100%;
+            margin:0 auto;
+            padding:4mm;
+            color:#111;
+            font-size:11px
+          }
+          h2,p{margin:0 0 5px;text-align:center}
+          .line{border-top:1px dashed #111;margin:8px 0}
+          .row,.service-row{
+            display:flex;
+            justify-content:space-between;
+            gap:8px;
+            font-size:11px;
+            margin:5px 0
+          }
+          .row span:first-child{color:#444}
+          .service-row span{max-width:65%}
+          .strong{font-weight:800;font-size:13px}
+          .small{font-size:10px}
+          .reprint-label{
+            display:block;
+            width:max-content;
+            margin:0 auto 8px;
+            padding:3px 7px;
+            border:1px solid #aaa;
+            border-radius:999px;
+            font-size:8px;
+            font-weight:800
+          }
+          .preview-actions{
+            display:grid;
+            gap:8px;
+            margin-top:14px
+          }
+          .preview-actions button{
+            min-height:44px;
+            border-radius:9px;
+            font-weight:850;
+            cursor:pointer
+          }
+          .print-btn{border:0;background:#087d55;color:#fff}
+          .close-btn{border:1px solid #bdd7e7;background:#eef7fc;color:#145f91}
+          .top-close{
+            position:fixed;
+            top:max(12px,env(safe-area-inset-top));
+            right:12px;
+            width:44px;
+            height:44px;
+            display:grid;
+            place-items:center;
+            border:1px solid #c8dce8;
+            border-radius:50%;
+            background:#fff;
+            color:#145f91;
+            font:900 23px/1 Arial;
+            box-shadow:0 8px 24px rgba(20,75,112,.16);
+            cursor:pointer
+          }
+          @media print{
+            .preview-actions,.top-close{display:none!important}
+          }
         </style>
+        <script>
+          function closePreview(){
+            try{window.close()}catch(e){}
+            setTimeout(function(){
+              if(!window.closed)window.location.href=${JSON.stringify(closeFallback)}
+            },180)
+          }
+        </script>
       </head>
       <body>
+        <button class="top-close" type="button" onclick="closePreview()" aria-label="Tutup preview">×</button>
+        <span class="reprint-label">CETAK ULANG NOTA</span>
         <h2>HappyLaundry</h2>
         <p class="small">Babakan, Cirebon</p>
+
         <div class="line"></div>
         <div class="row"><span>No. Order</span><b>${row.order_no}</b></div>
         <div class="row"><span>Pelanggan</span><b>${row.customer_name}</b></div>
         <div class="row"><span>WhatsApp</span><span>${row.customer_phone}</span></div>
-        <div class="row"><span>Status</span><span>${statusLabels[row.status]}</span></div>
+        <div class="row"><span>Status Cucian</span><b>${statusLabels[row.status]}</b></div>
+        <div class="row"><span>Pembayaran</span><b>${paymentLabels[row.payment_status]}</b></div>
+
+        <div class="line"></div>
+        <b>Layanan</b>
+        ${serviceRows||'<p class="small">Rincian layanan tidak tersedia.</p>'}
+
         <div class="line"></div>
         <div class="row"><span>Subtotal</span><span>${formatRupiah(row.subtotal)}</span></div>
         <div class="row"><span>Diskon</span><span>${formatRupiah(row.discount)}</span></div>
         <div class="row strong"><span>Total</span><span>${formatRupiah(row.total)}</span></div>
         <div class="row"><span>Sudah Bayar</span><span>${formatRupiah(row.paid_amount)}</span></div>
-        <div class="row"><span>Sisa</span><span>${formatRupiah(row.total-row.paid_amount)}</span></div>
+        <div class="row"><span>Sisa</span><span>${formatRupiah(Math.max(0,row.total-row.paid_amount))}</span></div>
+
         <div class="line"></div>
         <p class="small">Terima kasih telah menggunakan HappyLaundry.</p>
-        <script>window.onload=()=>window.print()</script>
+
+        <div class="preview-actions">
+          <button class="print-btn" type="button" onclick="window.print()">Cetak / Simpan PDF</button>
+          <button class="close-btn" type="button" onclick="closePreview()">← Tutup Preview Nota</button>
+        </div>
       </body>
       </html>
     `)
@@ -570,7 +668,15 @@ export function OrdersPage() {
                   <td>
                     <div className="row-actions">
                       <button onClick={() => setDetail(row)} aria-label="Detail"><Eye size={16}/></button>
-                      <button onClick={() => printReceipt(row)} aria-label="Cetak"><Printer size={16}/></button>
+                      <button
+                        className="order-reprint-button"
+                        onClick={()=>printReceipt(row)}
+                        aria-label={`Cetak ulang nota ${row.order_no}`}
+                        title="Cetak Ulang Nota"
+                      >
+                        <Printer size={15}/>
+                        <span>Cetak Ulang Nota</span>
+                      </button>
 
                     </div>
                   </td>
@@ -677,7 +783,7 @@ export function OrdersPage() {
             <div><span>Sisa</span><b>{formatRupiah(detail.total-detail.paid_amount)}</b></div>
             <div><span>Catatan</span><b>{detail.notes || '-'}</b></div>
             <div className="form-actions">
-              <button className="secondary-button" onClick={() => printReceipt(detail)}><Printer size={16}/> Cetak Nota</button>
+              <button className="secondary-button order-detail-reprint" onClick={()=>printReceipt(detail)}><Printer size={16}/> Cetak Ulang Nota</button>
               <button className="primary-button" onClick={() => setDetail(null)}><CheckCircle2 size={16}/> Tutup</button>
             </div>
           </div>

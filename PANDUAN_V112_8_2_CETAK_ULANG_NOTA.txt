@@ -1,0 +1,56 @@
+HAPPYLAUNDRY ENTERPRISE V112.8.2 — CETAK ULANG NOTA
+
+FITUR:
+Di halaman Order tombol printer sekarang lebih jelas:
+Cetak Ulang Nota
+
+DESKTOP/TABLET:
+Tombol menampilkan icon printer + tulisan:
+Cetak Ulang Nota
+
+HP:
+Karena ruang sempit, tombol tetap memakai icon printer agar tabel tidak terlalu lebar.
+Tooltip/title tetap: Cetak Ulang Nota.
+
+DETAIL ORDER:
+Tombol berubah menjadi:
+Cetak Ulang Nota
+
+PREVIEW CETAK ULANG:
+Tidak langsung print otomatis.
+Preview dibuka terlebih dahulu dan tersedia:
+- Cetak / Simpan PDF
+- ← Tutup Preview Nota
+- Tombol X di kanan atas
+
+IPHONE/SAFARI:
+Jika window.close tidak diizinkan, aplikasi kembali ke:
+Order -> order yang sedang dicetak ulang.
+
+NOTA CETAK ULANG MENAMPILKAN:
+- No Order
+- Pelanggan
+- WhatsApp
+- Status Cucian
+- Status Pembayaran
+- Rincian Layanan + berat/jumlah
+- Subtotal
+- Diskon
+- Total
+- Sudah Bayar
+- Sisa
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.8.2.
+2. Tunggu Netlify Published.
+3. Refresh.
+4. Buka Order.
+5. Cari order.
+6. Klik Cetak Ulang Nota.
+7. Preview terbuka.
+8. Cetak atau Tutup Preview.
+
+CACHE:
+happylaundry-v112-8-2

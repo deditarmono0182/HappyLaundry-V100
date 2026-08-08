@@ -7333,3 +7333,40 @@ body{
     padding-left:64px;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.8.2 — Clear Reprint Receipt Button
+   ========================================================= */
+.row-actions .order-reprint-button{
+  width:auto!important;
+  min-width:112px;
+  padding:0 10px;
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  background:#eef7ff!important;
+  border-color:#b9d9ed!important;
+  color:#176a9f!important;
+  white-space:nowrap;
+  font-size:8.8px;
+  font-weight:900;
+}
+.row-actions .order-reprint-button span{
+  display:inline!important;
+}
+.order-detail-reprint{
+  min-width:150px;
+}
+
+@media(max-width:700px){
+  .row-actions .order-reprint-button{
+    min-width:44px;
+    width:44px!important;
+    padding:0;
+  }
+  .row-actions .order-reprint-button span{
+    display:none!important;
+  }
+}
