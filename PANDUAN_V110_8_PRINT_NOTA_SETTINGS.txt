@@ -1,0 +1,65 @@
+HAPPYLAUNDRY ENTERPRISE V110.8 — PENGATURAN PRINT NOTA
+
+FITUR BARU:
+Pengaturan -> Pengaturan Print Nota
+
+PILIHAN:
+- Thermal 58 mm
+- Thermal 80 mm
+- A4 / PDF
+- Template Minimalis
+- Template Professional
+- Template Premium
+- Font 8–18
+- 1, 2, atau 3 copy
+- Auto Print setelah transaksi
+- Logo
+- QR Tracking
+- Barcode
+- Telepon
+- Estimasi selesai
+- Metode pembayaran
+- Status
+- Harga per item
+- Diskon
+- Sudah bayar
+- Sisa/Piutang
+- Maps
+- Garis potong
+- Catatan header
+- Catatan footer
+- Preview langsung
+
+PENTING TENTANG PRINTER:
+Web/PWA tidak dapat memilih nama printer Windows/iPhone secara otomatis karena pembatasan keamanan browser.
+Printer fisik dipilih dari dialog Print sistem.
+HappyLaundry mengatur FORMAT/PAPER/template nota.
+
+INTEGRASI:
+Kasir sekarang membaca pengaturan Print Nota dari Supabase.
+Tersedia tombol:
+Cetak Default (58/80/A4 sesuai pengaturan).
+
+Auto Print juga menggunakan ukuran default yang disimpan.
+
+WAJIB SQL:
+supabase/023_v110_8_print_nota_settings.sql
+
+CARA:
+1. Jalankan SQL 023 di Supabase.
+2. Deploy V110.8.
+3. Pengaturan -> Pengaturan Print Nota.
+4. Pilih contoh:
+   Thermal 80 mm
+   Professional
+   Font 12
+   QR ON
+   Barcode ON
+   2 Copy
+5. Simpan.
+6. Buka Kasir dan buat transaksi.
+7. Klik Cetak Default (80 mm).
+
+CATATAN COPY:
+Browser akan membuka dialog print. Jumlah copy yang tersimpan menjadi preferensi aplikasi,
+tetapi browser/OS tetap menentukan jumlah copy aktual pada dialog printer karena web tidak diberi akses langsung ke driver printer.

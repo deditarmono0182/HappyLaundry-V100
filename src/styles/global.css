@@ -5481,3 +5481,117 @@ body{
     grid-template-columns:1fr 1fr;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V110.8 — Pengaturan Print Nota
+   ========================================================= */
+.print-settings-note{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:14px;
+  padding:11px 13px;
+  border:1px solid #c8e1f2;
+  border-radius:12px;
+  background:#f3f9fe;
+  color:#315f7f;
+}
+.print-settings-note svg{color:#1e88e5;flex:0 0 auto}
+.print-settings-note span{display:grid;gap:2px;font-size:10.5px;line-height:1.45}
+.print-settings-note b{font-weight:950;color:#174f78}
+
+.print-settings-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(320px,430px);
+  gap:16px;
+  align-items:start;
+}
+.print-settings-controls{display:grid;gap:14px}
+.print-settings-card{display:grid;gap:14px}
+.print-settings-card>header{
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:11px;border-bottom:1px solid #e2edf5
+}
+.print-settings-card>header svg{color:#1e88e5}
+.print-settings-card>header div{display:grid;gap:2px}
+.print-settings-card>header b{color:#164b72;font-size:13px;font-weight:950}
+.print-settings-card>header small{color:#71899b;font-size:9.5px}
+.print-settings-card label{display:grid;gap:6px;color:#375f7b;font-size:11px;font-weight:850}
+.print-settings-card input,
+.print-settings-card select,
+.print-settings-card textarea{
+  width:100%;border:1px solid #c5ddeb;border-radius:10px;
+  padding:10px 11px;background:#fff;color:#163f5f
+}
+.print-settings-card textarea{resize:vertical}
+
+.print-switch{
+  grid-template-columns:auto 1fr!important;align-items:center!important;
+  padding:10px;border:1px solid #d7e6f1;border-radius:11px;background:#f8fbfd
+}
+.print-switch input{width:19px!important;height:19px}
+.print-switch span{display:grid;gap:2px}
+.print-switch small{color:#7890a1;font-size:9px}
+
+.print-option-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.print-check{
+  grid-template-columns:auto 1fr!important;align-items:center!important;
+  min-height:40px;padding:8px 9px;border:1px solid #dbe8f1;border-radius:10px;background:#fff
+}
+.print-check input{width:17px!important;height:17px}
+.print-check span{font-size:10.5px;font-weight:800}
+
+.print-settings-actions{display:flex;justify-content:flex-end}
+
+.receipt-live-preview{
+  position:sticky;top:88px;padding:14px!important;background:#edf5fb!important;
+}
+.receipt-preview-head{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:12px
+}
+.receipt-preview-head>div{display:flex;gap:8px;align-items:center}
+.receipt-preview-head svg{color:#1e88e5}
+.receipt-preview-head span{display:grid}
+.receipt-preview-head b{font-size:12px;color:#154c73}
+.receipt-preview-head small{font-size:9px;color:#71899b}
+
+.receipt-paper{
+  width:100%;margin:0 auto;padding:16px;background:#fff;color:#111;
+  box-shadow:0 10px 28px rgba(31,78,115,.15);
+  font-family:Arial,sans-serif;line-height:1.35
+}
+.receipt-paper>img{display:block;width:54px;height:54px;object-fit:contain;margin:0 auto 5px;border-radius:50%}
+.receipt-paper h2{text-align:center;margin:2px 0;font-size:1.45em}
+.receipt-paper p{text-align:center;margin:2px 0;font-size:.85em}
+.receipt-paper hr{border:0;border-top:1px dashed #777;margin:9px 0}
+.receipt-paper>div:not(.receipt-preview-qr):not(.receipt-preview-barcode):not(.receipt-cut-line){
+  display:flex;justify-content:space-between;gap:10px;margin:4px 0
+}
+.receipt-paper>small{display:block;margin:2px 0;color:#555}
+.receipt-preview-total{font-size:1.2em;font-weight:900}
+.receipt-preview-qr{
+  width:72px;height:72px;margin:8px auto!important;display:grid!important;
+  place-items:center;text-align:center;border:5px solid #111;font-weight:950;font-size:1.2em
+}
+.receipt-preview-qr small{font-size:.55em}
+.receipt-preview-barcode{
+  text-align:center!important;font-weight:950!important;letter-spacing:2px;margin:8px 0!important
+}
+.receipt-preview-footer{margin-top:9px!important;font-weight:700}
+.receipt-cut-line{text-align:center!important;color:#777;margin-top:10px!important;font-size:.8em}
+.receipt-preview-url{font-size:.65em!important;word-break:break-all;text-align:center}
+.receipt-template-minimal>img,
+.receipt-template-minimal .receipt-preview-barcode{display:none!important}
+.receipt-template-premium{border-top:6px solid #1e88e5}
+.receipt-template-premium h2{color:#145f9f}
+
+@media(max-width:1050px){
+  .print-settings-layout{grid-template-columns:1fr}
+  .receipt-live-preview{position:static}
+}
+@media(max-width:560px){
+  .print-option-grid{grid-template-columns:1fr}
+}

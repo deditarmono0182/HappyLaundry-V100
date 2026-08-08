@@ -7,6 +7,7 @@ import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
+import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
 import type { StoreSettings } from '../types/settings'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft } from '../types/order'
@@ -73,18 +74,20 @@ export function CashierPage() {
   const [message,setMessage]=useState('')
   const [success,setSuccess]=useState<SuccessData|null>(null)
   const [storeSettings,setStoreSettings]=useState<StoreSettings|null>(null)
+  const [printSettings,setPrintSettings]=useState<ReceiptPrintSettings>(defaultReceiptPrintSettings)
   const formRef=useRef<HTMLFormElement|null>(null)
   const customerSearchRef=useRef<HTMLInputElement|null>(null)
 
   const load=useCallback(async()=>{
     const start=new Date(); start.setHours(0,0,0,0)
-    const [c,s,o,settings]=await Promise.all([
+    const [c,s,o,settings,print]=await Promise.all([
       supabase.from('v100_customers').select('*').order('name'),
       supabase.from('v100_services').select('*').eq('is_active',true).order('name'),
       supabase.from('v100_orders_view')
         .select('id,order_no,customer_name,total,paid_amount,payment_status,created_at')
         .gte('created_at',start.toISOString()).order('created_at',{ascending:false}),
-      supabase.from('v100_store_settings').select('*').eq('id',1).maybeSingle()
+      supabase.from('v100_store_settings').select('*').eq('id',1).maybeSingle(),
+      supabase.from('v110_receipt_print_settings').select('*').eq('id',1).maybeSingle()
     ])
     const error=c.error||s.error||o.error||settings.error
     if(error)setMessage(error.message)
@@ -93,6 +96,7 @@ export function CashierPage() {
       setServices((s.data as Service[])||[])
       setTodayOrders((o.data as TodayOrder[])||[])
       setStoreSettings((settings.data as StoreSettings|null)||null)
+      if(print.data)setPrintSettings({...defaultReceiptPrintSettings,...print.data} as ReceiptPrintSettings)
     }
   },[])
 
@@ -187,7 +191,7 @@ export function CashierPage() {
     const address=settings?.address||'Babakan, Cirebon'
     const phone=settings?.phone||''
     const maps=settings?.maps_url||''
-    const footer=settings?.receipt_footer||'Terima kasih telah menggunakan HappyLaundry.'
+    const footer=printSettings.footer_note||settings?.receipt_footer||'Terima kasih telah menggunakan HappyLaundry.'
     const width=size==='58'?'58mm':size==='80'?'80mm':'190mm'
     const page=size==='a4'?'A4 portrait':`${size}mm auto`
     const title=size==='a4'?'INVOICE LAUNDRY':'NOTA LAUNDRY'
@@ -199,13 +203,13 @@ export function CashierPage() {
     }).join('')
     const rows=data.items.map(item=>`
       <tr>
-        <td>${item.service_name}<small>${item.quantity} ${item.unit} × ${formatIDR(item.price)}</small></td>
+        <td>${item.service_name}${printSettings.show_item_price?`<small>${item.quantity} ${item.unit} × ${formatIDR(item.price)}</small>`:`<small>${item.quantity} ${item.unit}</small>`}</td>
         <td>${formatIDR(item.subtotal)}</td>
       </tr>`).join('')
     return `<!doctype html><html><head><meta charset="utf-8"><title>${data.orderNo}</title>
     <style>
       @page{size:${page};margin:${size==='a4'?'12mm':'3mm'}}
-      *{box-sizing:border-box}body{font-family:Arial,sans-serif;width:${width};max-width:100%;margin:0 auto;padding:${size==='a4'?'10mm':'3mm'};color:#111;font-size:${size==='58'?'11px':'12px'}}
+      *{box-sizing:border-box}body{font-family:Arial,sans-serif;width:${width};max-width:100%;margin:0 auto;padding:${size==='a4'?'10mm':'3mm'};color:#111;font-size:${Math.max(8,Math.min(18,printSettings.font_size||11))}px}
       h1,h2,p{margin:0}.center{text-align:center}.logo{width:${size==='a4'?'80px':'58px'};height:${size==='a4'?'80px':'58px'};object-fit:contain;border-radius:50%}
       .title{font-size:${size==='a4'?'26px':'17px'};margin-top:6px}.muted{color:#555}.small{font-size:10px}.line{border-top:1px dashed #333;margin:9px 0}
       .meta,.summary{width:100%;border-collapse:collapse}.meta td,.summary td{padding:3px 0;vertical-align:top}.meta td:last-child,.summary td:last-child{text-align:right;font-weight:700}
@@ -219,10 +223,11 @@ export function CashierPage() {
       @media print{.no-print{display:none}}
     </style></head><body>
       <div class="center">
-        <img class="logo" src="/logo-happylaundry.jpg">
+        ${printSettings.show_logo?'<img class="logo" src="/logo-happylaundry.jpg">':''}
         <h1 class="title">${business}</h1>
         <p>${address}</p><p>${phone}</p>
         <p class="muted">${title}</p>
+        ${printSettings.header_note?`<p><b>${printSettings.header_note}</b></p>`:''}
       </div>
       <div class="line"></div>
       <div class="a4-grid"><div>
@@ -230,31 +235,29 @@ export function CashierPage() {
           <tr><td>No. Order</td><td>${data.orderNo}</td></tr>
           <tr><td>Tanggal</td><td>${new Date().toLocaleString('id-ID')}</td></tr>
           <tr><td>Pelanggan</td><td>${data.customer}</td></tr>
-          <tr><td>WhatsApp</td><td>${data.phone}</td></tr>
-          <tr><td>Estimasi</td><td>${data.due||'-'}</td></tr>
-          <tr><td>Metode</td><td>${methodLabels[data.method]}</td></tr>
+          ${printSettings.show_customer_phone?`<tr><td>WhatsApp</td><td>${data.phone}</td></tr>`:''}
+          ${printSettings.show_due_at?`<tr><td>Estimasi</td><td>${data.due||'-'}</td></tr>`:''}
+          ${printSettings.show_payment_method?`<tr><td>Metode</td><td>${methodLabels[data.method]}</td></tr>`:''}
         </table>
         <div class="line"></div>
         <table class="items"><thead><tr><th>Layanan</th><th>Jumlah</th></tr></thead><tbody>${rows}</tbody></table>
         <div class="line"></div>
         <table class="summary">
           <tr><td>Subtotal</td><td>${formatIDR(data.subtotal)}</td></tr>
-          <tr><td>Diskon</td><td>${formatIDR(data.discount)}</td></tr>
+          ${printSettings.show_discount?`<tr><td>Diskon</td><td>${formatIDR(data.discount)}</td></tr>`:''}
           <tr class="grand"><td>Total</td><td>${formatIDR(data.total)}</td></tr>
-          <tr><td>Dibayar</td><td>${formatIDR(data.paid)}</td></tr>
-          <tr><td>Sisa</td><td>${formatIDR(Math.max(0,data.total-data.paid))}</td></tr>
+          ${printSettings.show_paid?`<tr><td>Dibayar</td><td>${formatIDR(data.paid)}</td></tr>`:''}
+          ${printSettings.show_balance?`<tr><td>Sisa</td><td>${formatIDR(Math.max(0,data.total-data.paid))}</td></tr>`:''}
           ${data.method==='cash'&&data.paid>data.total?`<tr><td>Kembalian</td><td>${formatIDR(data.paid-data.total)}</td></tr>`:''}
         </table>
         ${data.notes?`<div class="line"></div><p><b>Catatan:</b> ${data.notes}</p>`:''}
       </div>
       <div>
-        <img class="qr" src="${qrUrl}" alt="QR status order">
-        <p class="center small"><b>Scan untuk melihat status laundry</b></p><p class="center small">${statusUrl}</p>
-        <div class="barcode">${barcode}</div>
-        <p class="order-code">${data.orderNo}</p>
-        ${maps?`<p class="center small">${maps}</p>`:''}
+        ${printSettings.show_qr?`<img class="qr" src="${qrUrl}" alt="QR status order"><p class="center small"><b>Scan untuk melihat status laundry</b></p><p class="center small">${statusUrl}</p>`:''}
+        ${printSettings.show_barcode?`<div class="barcode">${barcode}</div><p class="order-code">${data.orderNo}</p>`:''}
+        ${printSettings.show_maps&&maps?`<p class="center small">${maps}</p>`:''}
       </div></div>
-      <div class="line"></div>
+      ${printSettings.show_cut_line?'<div class="line"></div>':''}
       <p class="footer">${footer}</p>
       <div class="no-print"><button onclick="window.print()">Cetak / Simpan PDF</button></div>
     </body></html>`
@@ -329,6 +332,9 @@ export function CashierPage() {
         method,notes:notes.trim(),items:[...items]
       }
       setSuccess(saved)
+      if(printSettings.auto_print){
+        window.setTimeout(()=>printReceipt(saved,printSettings.paper_size),150)
+      }
       reset(); await load()
     }catch(err){setMessage(err instanceof Error?err.message:'Transaksi gagal.')}
     finally{setBusy(false)}
@@ -428,6 +434,7 @@ export function CashierPage() {
         {success&&<div className="cashier-success-panel cashier-success-pro">
           <div className="success-box"><CheckCircle2 size={18}/>Order {success.orderNo} berhasil dibuat.</div>
           <div className="receipt-actions">
+            <button type="button" className="primary-button" onClick={()=>printReceipt(success,printSettings.paper_size)}><Printer size={16}/>Cetak Default ({printSettings.paper_size==='a4'?'A4':`${printSettings.paper_size} mm`})</button>
             <button type="button" className="secondary-button" onClick={()=>printReceipt(success,'58')}><Printer size={16}/>58 mm</button>
             <button type="button" className="secondary-button" onClick={()=>printReceipt(success,'80')}><Printer size={16}/>80 mm</button>
             <button type="button" className="secondary-button" onClick={()=>printReceipt(success,'a4')}><FileText size={16}/>A4 / PDF</button>

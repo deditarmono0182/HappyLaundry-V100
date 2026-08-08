@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V110.7.5 All Reset Buttons Fix
+# HappyLaundry Enterprise V110.8 Print Nota Settings
 
 ## Jalankan
 ```bash
@@ -190,3 +190,7 @@ Direct Reset Order from diagnostic panel using owner-only TRUNCATE v100_orders C
 
 ## V110.7.5
 Semua tombol Reset Data memakai direct inline confirmation + unified Owner-only RPC.
+
+
+## V110.8
+Pengaturan Print Nota tersimpan di Supabase, preview langsung, default paper/template/font/QR/barcode, dan integrasi Cetak Default di Kasir.

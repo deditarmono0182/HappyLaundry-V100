@@ -17,6 +17,7 @@ const PaymentsPage=lazy(()=>import('./pages/PaymentsPage').then(m=>({default:m.P
 const CashPage=lazy(()=>import('./pages/CashPage').then(m=>({default:m.CashPage})))
 const CashierPage=lazy(()=>import('./pages/CashierPage').then(m=>({default:m.CashierPage})))
 const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.SettingsPage})))
+const PrintSettingsPage=lazy(()=>import('./pages/PrintSettingsPage').then(m=>({default:m.PrintSettingsPage})))
 const EmployeesPage=lazy(()=>import('./pages/EmployeesPage').then(m=>({default:m.EmployeesPage})))
 const UserAuditPage=lazy(()=>import('./pages/UserAuditPage').then(m=>({default:m.UserAuditPage})))
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
@@ -60,6 +61,7 @@ export default function App(){
       <Route path="reports" element={<PermissionRoute permission="reports"><ReportsPage/></PermissionRoute>}/>
       <Route path="backup" element={<PermissionRoute permission="backup"><BackupPage/></PermissionRoute>}/>
       <Route path="settings" element={<PermissionRoute permission="settings"><SettingsPage/></PermissionRoute>}/>
+      <Route path="settings/print" element={<PermissionRoute permission="settings"><PrintSettingsPage/></PermissionRoute>}/>
       <Route path="settings/employees" element={<EmployeesPage/>}/>
       <Route path="settings/audit" element={<UserAuditPage/>}/>
     </Route>

@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Activity, CheckCircle2, ExternalLink, MapPin, MessageCircle, Save, SlidersHorizontal, Store, UsersRound } from 'lucide-react'
+import { Activity, CheckCircle2, ExternalLink, MapPin, MessageCircle, Printer, Save, SlidersHorizontal, Store, UsersRound } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -99,6 +99,11 @@ export function SettingsPage() {
       <section className="panel settings-card settings-wide employee-settings-link">
         <header><Activity size={21}/><div><b>Riwayat & Audit Karyawan</b><small>Lihat login berhasil/gagal dan aktivitas akun internal HappyLaundry.</small></div></header>
         <button type="button" className="secondary-button" onClick={()=>navigate('/settings/audit')}><Activity size={17}/>Buka Riwayat</button>
+      </section>
+
+      <section className="panel settings-card settings-wide employee-settings-link">
+        <header><Printer size={21}/><div><b>Pengaturan Print Nota</b><small>Atur thermal 58/80 mm, A4, template, font, QR tracking, barcode, copy, dan preview nota.</small></div></header>
+        <button type="button" className="primary-button" onClick={()=>navigate('/settings/print')}><Printer size={17}/>Buka Pengaturan Print</button>
       </section>
 
       <section className="panel settings-card settings-wide density-settings-card">
