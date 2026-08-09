@@ -591,22 +591,27 @@ export function OrdersPage() {
             cursor:pointer
           }
           @media screen and (max-width:700px){
-            body{
-              width:min(94vw,430px)!important;
-              max-width:94vw!important;
-              padding:22px 18px 28px!important;
-              padding-top:calc(22px + env(safe-area-inset-top))!important;
-              font-size:14px!important;
-              line-height:1.35!important;
+            html,body{
+              width:100%!important;
+              max-width:100%!important;
+              margin:0!important;
             }
-            h2{font-size:22px!important}
-            .row,.service-row{font-size:13px!important;margin:7px 0!important}
-            .strong{font-size:17px!important}
-            .small{font-size:11px!important}
+            body{
+              width:min(96vw,560px)!important;
+              max-width:96vw!important;
+              padding:18px 14px 24px!important;
+              padding-top:calc(18px + env(safe-area-inset-top))!important;
+              font-size:15px!important;
+              line-height:1.42!important;
+            }
+            h2{font-size:24px!important}
+            .row,.service-row{font-size:14px!important;margin:7px 0!important}
+            .strong{font-size:18px!important}
+            .small{font-size:12px!important}
             .line{margin:11px 0!important}
             .reprint-label{font-size:10px!important;padding:5px 9px!important}
             .preview-actions{margin-top:18px!important}
-            .preview-actions button{min-height:48px!important;font-size:13px!important}
+            .preview-actions button{min-height:50px!important;font-size:14px!important}
             .top-close{width:48px!important;height:48px!important;right:14px!important;top:max(12px,env(safe-area-inset-top))!important}
           }
           @media print{

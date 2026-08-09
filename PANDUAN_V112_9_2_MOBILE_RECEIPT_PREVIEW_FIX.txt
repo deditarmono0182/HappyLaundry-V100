@@ -1,0 +1,14 @@
+HAPPYLaundry Enterprise V112.9.2 — MOBILE RECEIPT PREVIEW FIX
+
+Perbaikan:
+1. Preview nota setelah transaksi di Kasir sekarang lebih besar di iPhone/Android.
+2. Ditambahkan meta viewport agar Safari/iPhone tidak menampilkan nota terlalu kecil.
+3. Tombol Cetak / Simpan PDF dan Tutup Preview Nota tetap ada.
+4. Perbaikan juga diterapkan pada Cetak Ulang Nota dari detail order.
+
+Tidak perlu SQL baru.
+
+Cara pakai:
+- Deploy versi V112.9.2.
+- Setelah publish, hard refresh / buka ulang aplikasi.
+- Coba transaksi baru lalu buka preview nota.

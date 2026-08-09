@@ -15,7 +15,7 @@ createRoot(document.getElementById('root')!).render(
 if('serviceWorker' in navigator&&import.meta.env.PROD){
   window.addEventListener('load',async()=>{
     try{
-      const registration=await navigator.serviceWorker.register('/sw.js?v=112.9.1',{updateViaCache:'none'})
+      const registration=await navigator.serviceWorker.register('/sw.js?v=112.9.2',{updateViaCache:'none'})
       await registration.update()
     }catch(error){
       console.warn('Service worker gagal:',error)

@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.9.1 Compact Tracking
+# HappyLaundry Enterprise V112.9.2 Mobile Receipt Preview Fix
 
 ## Jalankan
 ```bash
@@ -306,3 +306,7 @@ QRIS & rekening dapat dikelola Owner, tampil otomatis di Tracking Pelanggan, pel
 
 ## V112.9.1
 Tracking pelanggan dipadatkan secara vertikal dan background biru pada baris progress cucian dihilangkan, tanpa mengubah fitur QRIS/Transfer.
+
+
+## V112.9.2
+Perbaikan preview nota di iPhone/mobile: ditambahkan meta viewport dan diperbesar agar tampilan nota tidak kecil saat selesai transaksi di Kasir maupun saat cetak ulang nota.

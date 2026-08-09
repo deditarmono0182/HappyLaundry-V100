@@ -233,10 +233,11 @@ export function CashierPage() {
         <td>${item.service_name}${printSettings.show_item_price?`<small>${item.quantity} ${item.unit} × ${formatIDR(item.price)}</small>`:`<small>${item.quantity} ${item.unit}</small>`}</td>
         <td>${formatIDR(item.subtotal)}</td>
       </tr>`).join('')
-    return `<!doctype html><html><head><meta charset="utf-8"><title>${data.orderNo}</title>
+    return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>${data.orderNo}</title>
     <style>
       @page{size:${page};margin:${size==='a4'?'12mm':'3mm'}}
-      *{box-sizing:border-box}body{font-family:Arial,sans-serif;width:${width};max-width:100%;margin:0 auto;padding:${size==='a4'?'10mm':'3mm'};color:#111;font-size:${Math.max(8,Math.min(18,printSettings.font_size||11))}px}
+      *{box-sizing:border-box;-webkit-text-size-adjust:100%}html,body{min-height:100%}
+      body{font-family:Arial,sans-serif;width:${width};max-width:100%;margin:0 auto;padding:${size==='a4'?'10mm':'3mm'};color:#111;font-size:${Math.max(8,Math.min(18,printSettings.font_size||11))}px;background:#fff}
       h1,h2,p{margin:0}.center{text-align:center}.logo-wrap{display:block!important;width:100%!important;text-align:${logoAlign}!important}
       .logo{display:block!important;width:${Math.min(180,Math.max(30,Number(printSettings.logo_width)||64))}px;max-width:90%!important;height:auto!important;max-height:${size==='a4'?'120px':'90px'};object-fit:contain!important;margin-left:${logoMarginLeft}!important;margin-right:${logoMarginRight}!important}
       .title{font-size:${size==='a4'?'26px':'17px'};margin-top:6px}.muted{color:#555}.small{font-size:10px}.line{border-top:1px dashed #333;margin:9px 0}
@@ -258,29 +259,34 @@ export function CashierPage() {
         font:900 23px/1 Arial;box-shadow:0 8px 24px rgba(20,75,112,.16);cursor:pointer
       }
       @media screen and (max-width:700px){
-        body{
-          width:min(94vw,430px)!important;
-          max-width:94vw!important;
-          padding:22px 18px 28px!important;
-          padding-top:calc(22px + env(safe-area-inset-top))!important;
-          font-size:14px!important;
-          line-height:1.35!important;
+        html,body{
+          width:100%!important;
+          max-width:100%!important;
+          margin:0!important;
         }
-        .title{font-size:22px!important;margin-top:8px!important}
-        .meta td,.summary td{padding:5px 0!important;font-size:13px!important}
-        .items th{font-size:13px!important;padding:7px 0!important}
-        .items td{font-size:13px!important;padding:8px 0!important}
+        body{
+          width:min(96vw,560px)!important;
+          max-width:96vw!important;
+          padding:18px 14px 24px!important;
+          padding-top:calc(18px + env(safe-area-inset-top))!important;
+          font-size:15px!important;
+          line-height:1.42!important;
+        }
+        .title{font-size:24px!important;margin-top:8px!important}
+        .meta td,.summary td{padding:5px 0!important;font-size:14px!important}
+        .items th{font-size:14px!important;padding:7px 0!important}
+        .items td{font-size:14px!important;padding:8px 0!important}
         .items small{font-size:11px!important}
         .grand{font-size:18px!important}
-        .small{font-size:11px!important;line-height:1.35!important}
-        .qr{width:122px!important;height:122px!important;margin:10px auto!important}
+        .small{font-size:12px!important;line-height:1.4!important}
+        .qr{width:132px!important;height:132px!important;margin:10px auto!important}
         .barcode{height:56px!important;margin-top:10px!important}
         .barcode i{height:54px!important}
         .order-code{font-size:11px!important}
         .footer{font-size:12px!important;margin-top:12px!important}
         .line{margin:11px 0!important}
         .no-print{display:grid!important;gap:9px!important;margin-top:18px!important}
-        .no-print button{width:100%!important;min-height:48px!important;font-size:13px!important}
+        .no-print button{width:100%!important;min-height:50px!important;font-size:14px!important}
         .preview-top-close{width:48px!important;height:48px!important;right:14px!important;top:max(12px,env(safe-area-inset-top))!important}
         .logo{max-height:105px!important}
       }
