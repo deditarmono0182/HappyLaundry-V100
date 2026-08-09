@@ -1,0 +1,32 @@
+HAPPYLAUNDRY V113.0.15 — NETLIFY CAMERA + GPS PERMISSION FIX
+
+AKAR MASALAH DITEMUKAN:
+netlify.toml sebelumnya berisi:
+Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+Itu berarti server HappyLaundry sendiri memblokir kamera dan GPS.
+Akibatnya:
+- Chrome selalu memberi NotAllowedError / Permission denied.
+- Menu Permissions domain tidak menampilkan Camera.
+- QR Scanner Android tidak bisa membuka kamera.
+- Geolocation untuk Absensi QR + GPS juga berpotensi diblokir.
+
+PERBAIKAN V113.0.15:
+Permissions-Policy = "camera=(self), microphone=(), geolocation=(self)"
+
+Artinya:
+- Kamera diizinkan untuk HappyLaundry sendiri.
+- GPS/geolocation diizinkan untuk HappyLaundry sendiri.
+- Mikrofon tetap diblokir karena aplikasi tidak memerlukannya.
+
+TIDAK ADA SQL BARU.
+
+SETELAH DEPLOY:
+1. Tunggu Netlify Published.
+2. Tutup semua tab HappyLaundry di tablet.
+3. Buka Chrome lagi ke happylaundrybabakancrb.com.
+4. Masuk QR & Barcode Center -> Mulai Scan.
+5. Saat Chrome meminta Camera, pilih Allow.
+6. Untuk Absensi, saat Location diminta pilih Allow.
+
+Jika Chrome menyimpan permission lama, tekan ikon kiri alamat -> Permissions -> Reset permissions, lalu refresh sekali.
