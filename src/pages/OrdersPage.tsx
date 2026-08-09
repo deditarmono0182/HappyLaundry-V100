@@ -17,7 +17,7 @@ import {
   ShoppingBag,
   Trash2
 } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { downloadXls, printPdf } from '../lib/exportData'
@@ -59,6 +59,7 @@ type DeliveryProof={
 }
 
 export function OrdersPage() {
+  const navigate=useNavigate()
   const [searchParams]=useSearchParams()
   const {profile}=useAuth()
   const [rows, setRows] = useState<OrderRow[]>([])

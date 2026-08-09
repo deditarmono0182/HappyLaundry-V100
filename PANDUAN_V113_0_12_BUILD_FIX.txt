@@ -1,0 +1,17 @@
+HAPPYLAUNDRY V113.0.12 — TRACKING NAVIGATE BUILD FIX
+
+ERROR V113.0.11:
+src/pages/OrdersPage.tsx: Cannot find name 'navigate'
+
+PENYEBAB:
+Tombol Tracking Pelanggan di Order sudah diubah memakai navigate(...),
+tetapi OrdersPage belum mengimpor useNavigate dan belum membuat const navigate=useNavigate().
+
+PERBAIKAN:
+- Tambah useNavigate dari react-router-dom.
+- Tambah const navigate=useNavigate() di OrdersPage.
+- Fitur Kembali ke Aplikasi dari Tracking tetap dipertahankan.
+- Tidak ada SQL baru.
+
+DEPLOY:
+Deploy V113.0.12, tunggu Published, lalu refresh aplikasi.
