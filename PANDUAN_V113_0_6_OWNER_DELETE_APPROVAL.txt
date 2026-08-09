@@ -1,0 +1,38 @@
+HAPPYLAUNDRY V113.0.6 — OWNER DELETE APPROVAL
+
+ORDER:
+- Karyawan: tombol Ajukan Hapus -> wajib alasan -> dikirim ke Owner.
+- Owner: tombol Hapus -> wajib alasan + ketik HAPUS ORDER -> hapus langsung dan tetap tercatat audit.
+
+PENGELUARAN:
+- Karyawan finance: Ajukan Hapus -> wajib alasan.
+- Owner: Hapus -> wajib ketik HAPUS PENGELUARAN.
+- Gaji virtual tidak bisa dihapus dari Keuangan.
+
+OWNER:
+Menu baru Persetujuan Hapus.
+Owner melihat:
+- siapa yang meminta
+- waktu
+- alasan
+- snapshot order/pengeluaran
+Owner dapat Tolak atau Setujui Hapus.
+Untuk menyetujui, Owner harus mengetik frasa konfirmasi.
+
+FILE BUKTI:
+- Foto kurir/order dan bukti pembayaran online dicoba ikut dihapus dari Storage setelah Order dihapus.
+- Bukti nota pengeluaran ikut dihapus setelah Pengeluaran dihapus.
+
+AUDIT:
+Semua request disimpan di v11306_delete_requests, termasuk approved/rejected.
+
+WAJIB SQL:
+supabase/037_v113_0_6_owner_delete_approval.sql
+
+URUTAN:
+1. Jalankan SQL 037.
+2. Pastikan Success.
+3. Deploy V113.0.6.
+4. Refresh.
+5. Tes karyawan Ajukan Hapus.
+6. Login Owner -> Persetujuan Hapus.

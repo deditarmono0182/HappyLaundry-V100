@@ -25,6 +25,7 @@ import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft, OrderRow, OrderStatus } from '../types/order'
 
@@ -81,6 +82,10 @@ export function OrdersPage() {
   const [deliveryPreview,setDeliveryPreview]=useState('')
   const [deliveryNote,setDeliveryNote]=useState('')
   const [deliveryBusy,setDeliveryBusy]=useState(false)
+  const [deleteTarget,setDeleteTarget]=useState<OrderRow|null>(null)
+  const [deleteReason,setDeleteReason]=useState('')
+  const [deletePhrase,setDeletePhrase]=useState('')
+  const [deleteBusy,setDeleteBusy]=useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -503,6 +508,37 @@ export function OrdersPage() {
     window.open(url,'_blank','noopener,noreferrer')
   }
 
+  const submitDeleteOrder=async()=>{
+    if(!deleteTarget)return
+    if(deleteReason.trim().length<5){
+      setMessage('Alasan penghapusan minimal 5 karakter.')
+      return
+    }
+    const isOwner=profile?.role==='owner'
+    if(isOwner&&deletePhrase!=='HAPUS ORDER'){
+      setMessage('Owner harus mengetik HAPUS ORDER untuk menghapus langsung.')
+      return
+    }
+
+    setDeleteBusy(true);setMessage('')
+    try{
+      if(isOwner){
+        const {data,error}=await ownerDeleteDirect('order',deleteTarget.id,deleteReason.trim())
+        if(error)throw error
+        await removeDeleteFiles(data)
+        window.alert(`${deleteTarget.order_no} berhasil dihapus oleh Owner.`)
+      }else{
+        const {error}=await requestDelete('order',deleteTarget.id,deleteReason.trim())
+        if(error)throw error
+        window.alert(`Permintaan hapus ${deleteTarget.order_no} sudah dikirim ke Owner.`)
+      }
+      setDeleteTarget(null);setDeleteReason('');setDeletePhrase('')
+      await load()
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Permintaan hapus gagal.')
+    }finally{setDeleteBusy(false)}
+  }
+
   const printReceipt=(row:OrderRow)=>{
     const printWindow=window.open('','_blank','width=520,height=850')
     if(!printWindow)return
@@ -853,6 +889,16 @@ export function OrdersPage() {
                         <span>Cetak Ulang Nota</span>
                       </button>
 
+                      <button
+                        type="button"
+                        className="order-delete-request-button"
+                        onClick={()=>{setDeleteTarget(row);setDeleteReason('');setDeletePhrase('');setMessage('')}}
+                        title={profile?.role==='owner'?'Hapus Order':'Ajukan Hapus ke Owner'}
+                      >
+                        <Trash2 size={15}/>
+                        <span>{profile?.role==='owner'?'Hapus':'Ajukan Hapus'}</span>
+                      </button>
+
                     </div>
                   </td>
                 </tr>
@@ -928,6 +974,31 @@ export function OrdersPage() {
               <button className="primary-button" disabled={busy}>{busy ? 'Menyimpan...' : 'Simpan Order'}</button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {deleteTarget&&(
+        <Modal title={`${profile?.role==='owner'?'Hapus':'Ajukan Hapus'} Order — ${deleteTarget.order_no}`} onClose={()=>setDeleteTarget(null)}>
+          <div className="modal-form delete-request-form">
+            <div className="delete-request-warning">
+              <AlertTriangle size={20}/>
+              <div>
+                <b>{profile?.role==='owner'?'Penghapusan permanen':'Memerlukan persetujuan Owner'}</b>
+                <span>{profile?.role==='owner'
+                  ? 'Order, item dan pembayaran terkait akan dihapus. Tindakan dicatat pada audit.'
+                  : 'Order tidak akan terhapus sampai Owner menyetujui permintaan ini.'}</span>
+              </div>
+            </div>
+            <label>Alasan Penghapusan<textarea rows={3} value={deleteReason} onChange={e=>setDeleteReason(e.target.value)} placeholder="Contoh: order salah input / duplikat"/></label>
+            {profile?.role==='owner'&&<label>Konfirmasi Owner <input value={deletePhrase} onChange={e=>setDeletePhrase(e.target.value)} placeholder="Ketik HAPUS ORDER"/></label>}
+            {message&&<div className="error-box">{message}</div>}
+            <div className="form-actions">
+              <button type="button" className="secondary-button" onClick={()=>setDeleteTarget(null)}>Batal</button>
+              <button type="button" className={profile?.role==='owner'?'danger-button':'primary-button'} disabled={deleteBusy} onClick={()=>void submitDeleteOrder()}>
+                <Trash2 size={16}/>{deleteBusy?'Memproses...':profile?.role==='owner'?'Hapus Order':'Kirim ke Owner'}
+              </button>
+            </div>
+          </div>
         </Modal>
       )}
 

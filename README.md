@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V113.0.5 Expense Receipt Proof
+# HappyLaundry Enterprise V113.0.6 Owner Delete Approval
 
 ## Jalankan
 ```bash
@@ -342,3 +342,7 @@ Karyawan dengan permission Keuangan dapat input pengeluaran, tetapi seluruh bagi
 
 ## V113.0.5
 Tambah Pengeluaran dapat menyimpan foto/PDF nota bukti secara private dan menampilkannya kembali dari Keuangan/Detail Pengeluaran.
+
+
+## V113.0.6
+Penghapusan Order dan Pengeluaran memakai alur approval Owner, alasan wajib, konfirmasi kuat, audit request, dan penghapusan bukti Storage terkait.

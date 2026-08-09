@@ -2,7 +2,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, CalendarDays, Eye, FileSpreadsheet, FileText, ImageUp, Percent, Plus,
-  ReceiptText, Search, Settings2, TrendingDown, TrendingUp, WalletCards
+  ReceiptText, Search, Settings2, Trash2, TrendingDown, TrendingUp, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
@@ -12,6 +12,7 @@ import { formatRupiah } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
 import { loadPayrollExpenseRows, type PayrollExpenseRow } from '../lib/payrollExpense'
+import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 
 interface ExpenseCategory{
   id:string
@@ -97,6 +98,10 @@ export function FinancePage(){
   const [shareMessage,setShareMessage]=useState('')
   const [proofFile,setProofFile]=useState<File|null>(null)
   const [proofPreview,setProofPreview]=useState('')
+  const [deleteExpense,setDeleteExpense]=useState<ExpenseRow|null>(null)
+  const [deleteReason,setDeleteReason]=useState('')
+  const [deletePhrase,setDeletePhrase]=useState('')
+  const [deleteBusy,setDeleteBusy]=useState(false)
 
   const [form,setForm]=useState({
     expense_date:today(),category_id:'',amount:'',payment_method:'cash',
@@ -372,6 +377,32 @@ export function FinancePage(){
     }
   }
 
+  const submitDeleteExpense=async()=>{
+    if(!deleteExpense)return
+    if(deleteReason.trim().length<5){setMessage('Alasan penghapusan minimal 5 karakter.');return}
+    if(isOwner&&deletePhrase!=='HAPUS PENGELUARAN'){
+      setMessage('Owner harus mengetik HAPUS PENGELUARAN untuk menghapus langsung.')
+      return
+    }
+    setDeleteBusy(true);setMessage('')
+    try{
+      if(isOwner){
+        const {data,error}=await ownerDeleteDirect('expense',deleteExpense.id,deleteReason.trim())
+        if(error)throw error
+        await removeDeleteFiles(data)
+        window.alert('Pengeluaran berhasil dihapus oleh Owner.')
+      }else{
+        const {error}=await requestDelete('expense',deleteExpense.id,deleteReason.trim())
+        if(error)throw error
+        window.alert('Permintaan hapus pengeluaran sudah dikirim ke Owner.')
+      }
+      setDeleteExpense(null);setDeleteReason('');setDeletePhrase('')
+      await load()
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Permintaan hapus gagal.')
+    }finally{setDeleteBusy(false)}
+  }
+
   const exportCSV=()=>{
     const rows=[
       ['Tanggal','Kategori','Grup','Nominal','Metode','Keterangan','Referensi'],
@@ -509,7 +540,7 @@ export function FinancePage(){
         </div>
         {message&&<div className="error-box inline-message">{message}</div>}
         <div className="table-wrap"><table>
-          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th></tr></thead>
+          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th><th>Aksi</th></tr></thead>
           <tbody>
             {filtered.map(row=><tr key={row.id}>
               <td>{new Date(`${row.expense_date}T00:00:00`).toLocaleDateString('id-ID')}</td>
@@ -521,8 +552,13 @@ export function FinancePage(){
                 ? <button type="button" className="expense-proof-view" onClick={()=>void viewExpenseProof(row)}><Eye size={14}/>Lihat</button>
                 : <span className="expense-proof-empty">-</span>}</td>
               <td><b>{formatRupiah(Number(row.amount))}</b></td>
+              <td>{row.payment_method!=='payroll'
+                ? <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(row as ExpenseRow);setDeleteReason('');setDeletePhrase('');setMessage('')}}>
+                    <Trash2 size={14}/>{isOwner?'Hapus':'Ajukan Hapus'}
+                  </button>
+                : <span className="expense-proof-empty">-</span>}</td>
             </tr>)}
-            {filtered.length===0&&<tr><td colSpan={7} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
+            {filtered.length===0&&<tr><td colSpan={8} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
           </tbody>
         </table></div>
       </article>
@@ -538,6 +574,26 @@ export function FinancePage(){
         </div>
       </article>
     </section>
+
+    {deleteExpense&&<Modal title={`${isOwner?'Hapus':'Ajukan Hapus'} Pengeluaran`} onClose={()=>setDeleteExpense(null)}>
+      <div className="modal-form delete-request-form">
+        <div className="delete-request-warning">
+          <AlertTriangle size={20}/>
+          <div><b>{isOwner?'Penghapusan permanen':'Memerlukan persetujuan Owner'}</b>
+          <span>{isOwner?'Pengeluaran dan bukti nota terkait akan dihapus.':'Data tetap ada sampai Owner menyetujui.'}</span></div>
+        </div>
+        <div className="delete-expense-summary"><span>{deleteExpense.category_name}</span><b>{formatRupiah(Number(deleteExpense.amount))}</b></div>
+        <label>Alasan Penghapusan<textarea rows={3} value={deleteReason} onChange={e=>setDeleteReason(e.target.value)} placeholder="Contoh: salah nominal / duplikat"/></label>
+        {isOwner&&<label>Konfirmasi Owner<input value={deletePhrase} onChange={e=>setDeletePhrase(e.target.value)} placeholder="Ketik HAPUS PENGELUARAN"/></label>}
+        {message&&<div className="error-box">{message}</div>}
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setDeleteExpense(null)}>Batal</button>
+          <button type="button" className={isOwner?'danger-button':'primary-button'} disabled={deleteBusy} onClick={()=>void submitDeleteExpense()}>
+            <Trash2 size={15}/>{deleteBusy?'Memproses...':isOwner?'Hapus Pengeluaran':'Kirim ke Owner'}
+          </button>
+        </div>
+      </div>
+    </Modal>}
 
     {isOwner&&shareOpen&&<Modal title="Atur Persentase Bagi Hasil" onClose={()=>setShareOpen(false)}>
       <form className="modal-form share-settings-form" onSubmit={saveShareSettings}>

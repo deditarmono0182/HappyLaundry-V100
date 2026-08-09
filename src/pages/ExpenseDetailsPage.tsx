@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Eye, FileSpreadsheet, FileText, Search, TrendingDown, WalletCards } from 'lucide-react'
+import { AlertTriangle, Eye, FileSpreadsheet, FileText, Search, Trash2, TrendingDown, WalletCards } from 'lucide-react'
+import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
 import { loadPayrollExpenseRows, type PayrollExpenseRow } from '../lib/payrollExpense'
+import { useAuth } from '../lib/auth'
+import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 
 interface ExpenseRow{
   id:string
@@ -22,6 +25,8 @@ interface ExpenseRow{
 }
 
 export function ExpenseDetailsPage(){
+  const {profile}=useAuth()
+  const isOwner=profile?.role==='owner'
   const [rows,setRows]=useState<ExpenseRow[]>([])
   const [payrollRows,setPayrollRows]=useState<PayrollExpenseRow[]>([])
   const [query,setQuery]=useState('')
@@ -32,6 +37,10 @@ export function ExpenseDetailsPage(){
   const [to,setTo]=useState(()=>new Date().toISOString().slice(0,10))
   const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
+  const [deleteExpense,setDeleteExpense]=useState<ExpenseRow|null>(null)
+  const [deleteReason,setDeleteReason]=useState('')
+  const [deletePhrase,setDeletePhrase]=useState('')
+  const [deleteBusy,setDeleteBusy]=useState(false)
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
@@ -80,6 +89,29 @@ export function ExpenseDetailsPage(){
     const {data,error}=await supabase.storage.from('expense-proofs').createSignedUrl(proofPath,300)
     if(error){setMessage(error.message);return}
     window.open(data.signedUrl,'_blank','noopener,noreferrer')
+  }
+
+  const submitDeleteExpense=async()=>{
+    if(!deleteExpense)return
+    if(deleteReason.trim().length<5){setMessage('Alasan penghapusan minimal 5 karakter.');return}
+    if(isOwner&&deletePhrase!=='HAPUS PENGELUARAN'){
+      setMessage('Owner harus mengetik HAPUS PENGELUARAN.')
+      return
+    }
+    setDeleteBusy(true);setMessage('')
+    try{
+      if(isOwner){
+        const {data,error}=await ownerDeleteDirect('expense',deleteExpense.id,deleteReason.trim())
+        if(error)throw error
+        await removeDeleteFiles(data)
+      }else{
+        const {error}=await requestDelete('expense',deleteExpense.id,deleteReason.trim())
+        if(error)throw error
+      }
+      setDeleteExpense(null);setDeleteReason('');setDeletePhrase('')
+      await load()
+    }catch(error){setMessage(error instanceof Error?error.message:'Permintaan hapus gagal.')}
+    finally{setDeleteBusy(false)}
   }
 
   const exportRows=useMemo(()=>filtered.map(r=>[
@@ -140,10 +172,10 @@ export function ExpenseDetailsPage(){
       {message&&<div className="error-box inline-message">{message}</div>}
       <div className="table-wrap">
         <table>
-          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th></tr></thead>
+          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th><th>Aksi</th></tr></thead>
           <tbody>
-            {loading&&<tr><td colSpan={7} className="table-empty">Memuat pengeluaran...</td></tr>}
-            {!loading&&filtered.length===0&&<tr><td colSpan={7} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
+            {loading&&<tr><td colSpan={8} className="table-empty">Memuat pengeluaran...</td></tr>}
+            {!loading&&filtered.length===0&&<tr><td colSpan={8} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
             {filtered.map(r=><tr key={r.id}>
               <td>{new Date(`${r.expense_date}T00:00:00`).toLocaleDateString('id-ID')}</td>
               <td><b>{r.category_name}</b></td>
@@ -154,10 +186,29 @@ export function ExpenseDetailsPage(){
                 ? <button type="button" className="expense-proof-view" onClick={()=>void viewProof(r)}><Eye size={14}/>Lihat Bukti</button>
                 : <span className="expense-proof-empty">-</span>}</td>
               <td><b className="expense-amount">{formatRupiah(Number(r.amount))}</b></td>
+              <td>{r.payment_method!=='payroll'
+                ? <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(r as ExpenseRow);setDeleteReason('');setDeletePhrase('')}}><Trash2 size={14}/>{isOwner?'Hapus':'Ajukan Hapus'}</button>
+                : <span className="expense-proof-empty">-</span>}</td>
             </tr>)}
           </tbody>
         </table>
       </div>
     </section>
+
+    {deleteExpense&&<Modal title={`${isOwner?'Hapus':'Ajukan Hapus'} Pengeluaran`} onClose={()=>setDeleteExpense(null)}>
+      <div className="modal-form delete-request-form">
+        <div className="delete-request-warning"><AlertTriangle size={20}/><div>
+          <b>{isOwner?'Penghapusan permanen':'Menunggu persetujuan Owner'}</b>
+          <span>{isOwner?'Data akan dihapus setelah konfirmasi kuat.':'Pengeluaran tetap ada sampai Owner menyetujui.'}</span>
+        </div></div>
+        <div className="delete-expense-summary"><span>{deleteExpense.category_name}</span><b>{formatRupiah(Number(deleteExpense.amount))}</b></div>
+        <label>Alasan Penghapusan<textarea rows={3} value={deleteReason} onChange={e=>setDeleteReason(e.target.value)}/></label>
+        {isOwner&&<label>Konfirmasi Owner<input value={deletePhrase} onChange={e=>setDeletePhrase(e.target.value)} placeholder="Ketik HAPUS PENGELUARAN"/></label>}
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setDeleteExpense(null)}>Batal</button>
+          <button type="button" className={isOwner?'danger-button':'primary-button'} disabled={deleteBusy} onClick={()=>void submitDeleteExpense()}><Trash2 size={15}/>{isOwner?'Hapus Pengeluaran':'Kirim ke Owner'}</button>
+        </div>
+      </div>
+    </Modal>}
   </>
 }

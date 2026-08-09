@@ -8122,3 +8122,39 @@ body{
   .expense-proof-selected{grid-template-columns:50px 1fr}
   .expense-proof-selected button{grid-column:1/-1;width:100%}
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.6 — Owner Delete Approval
+   ========================================================= */
+.order-delete-request-button,.expense-delete-request{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  min-height:31px;padding:0 8px;border:1px solid #efc6c0;border-radius:8px;
+  background:#fff5f3;color:#a7473b;font-size:8.3px;font-weight:900;cursor:pointer
+}
+.delete-request-form{gap:12px!important}
+.delete-request-warning{display:flex;align-items:flex-start;gap:9px;padding:11px;border:1px solid #efc4bd;border-radius:11px;background:#fff5f3;color:#8f4439}
+.delete-request-warning svg{flex:0 0 auto;color:#d14b3c}
+.delete-request-warning>div{display:grid;gap:3px}.delete-request-warning b{font-size:10.5px}.delete-request-warning span{font-size:8.8px;line-height:1.4}
+.delete-expense-summary{display:flex;justify-content:space-between;gap:10px;padding:10px;border-radius:10px;background:#f5f9fb;border:1px solid #dce8ed}
+.delete-expense-summary span{font-size:9.5px}.delete-expense-summary b{color:#a7473b}
+.delete-approval-owner-only{min-height:220px;display:flex;align-items:center;justify-content:center;gap:11px}
+.delete-approval-owner-only>div{display:grid;gap:3px}
+.delete-approval-panel{padding:16px!important}
+.delete-approval-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid #e2ecef}
+.delete-approval-head>div{display:grid;gap:3px}.delete-approval-head b{color:#174e72}.delete-approval-head small{color:#748c98}
+.delete-approval-head>span{padding:5px 9px;border-radius:999px;background:#fff1ed;color:#a34639;font-size:9px;font-weight:900}
+.delete-approval-list{display:grid;gap:10px;margin-top:12px}
+.delete-approval-card{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:start;padding:12px;border:1px solid #dce8ed;border-radius:13px;background:#fbfdfe}
+.delete-approval-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:11px}
+.delete-approval-icon.order{background:#eef7ff;color:#2376a8}.delete-approval-icon.expense{background:#fff2ef;color:#b44d40}
+.delete-approval-info{display:grid;gap:6px}.delete-approval-title{display:flex;align-items:center;gap:7px}.delete-approval-title>b{color:#174b69}.delete-approval-title>span{padding:3px 6px;border-radius:999px;background:#edf4f7;color:#647f8d;font-size:7.5px;font-weight:900}
+.delete-approval-info>small{display:flex;align-items:center;gap:4px;color:#78909b;font-size:8.3px}.delete-approval-info p{margin:0;font-size:9px;color:#506d7b}
+.delete-snapshot{display:flex;gap:12px;flex-wrap:wrap;padding:7px 9px;border-radius:8px;background:#f3f8fa}
+.delete-snapshot span{font-size:8.5px;color:#718994}.delete-snapshot b{color:#244f66}
+.delete-approval-actions{display:grid;gap:6px;min-width:125px}.delete-reject{color:#8b5d2b!important}
+.delete-approval-empty{min-height:140px;display:grid;place-items:center;align-content:center;gap:7px;color:#65818f}
+@media(max-width:760px){
+  .delete-approval-card{grid-template-columns:auto 1fr}
+  .delete-approval-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}
+}
