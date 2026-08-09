@@ -1,8 +1,9 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  AlertTriangle, CalendarDays, CircleDollarSign, Crosshair, Landmark,
-  Pencil, ReceiptText, Save, Target, TrendingDown, TrendingUp, WalletCards
+  AlertTriangle, CalendarDays, CircleDollarSign, Crosshair, Eye, Landmark,
+  Pencil, ReceiptText, Save, Target, TrendingDown, TrendingUp, UsersRound, WalletCards
 } from 'lucide-react'
+import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
@@ -12,6 +13,7 @@ interface PaymentRow{
   id:string
   order_id:string
   amount:number
+  method:string
   created_at:string
 }
 interface ExpenseRow{
@@ -19,9 +21,12 @@ interface ExpenseRow{
   expense_date:string
   amount:number
   category_name:string
+  description:string|null
 }
 interface OrderRow{
   id:string
+  order_no:string
+  customer_name:string
   total:number
   paid_amount:number
   status:string
@@ -29,8 +34,37 @@ interface OrderRow{
 }
 interface OrderItem{
   order_id:string
+  service_id:string|null
   service_name:string
   subtotal:number
+}
+interface Employee{
+  id:string
+  full_name:string
+}
+interface Attendance{
+  employee_id:string
+  attendance_date:string
+  status:string
+}
+interface PayrollSetting{
+  employee_id:string
+  attendance_rate:number
+  monthly_allowance:number
+}
+interface PayrollShare{
+  employee_id:string
+  category:string
+  share_percent:number
+}
+interface PayrollAdjustment{
+  employee_id:string
+  payroll_month:string
+  bonus:number
+}
+interface Service{
+  id:string
+  category:string
 }
 interface TargetRow{
   month_start:string
@@ -40,6 +74,17 @@ interface TargetRow{
   note:string|null
   updated_at:string
 }
+interface PayrollRow{
+  employee:Employee
+  presentDays:number
+  attendancePay:number
+  allowance:number
+  bonus:number
+  revenueShare:number
+  total:number
+}
+
+type DetailType='revenue'|'expense'|'profit'|'receivable'
 
 const pad=(n:number)=>String(n).padStart(2,'0')
 const monthKey=(d:Date)=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-01`
@@ -62,8 +107,15 @@ export function ProfitTargetDashboardPage(){
   const [expenses,setExpenses]=useState<ExpenseRow[]>([])
   const [orders,setOrders]=useState<OrderRow[]>([])
   const [items,setItems]=useState<OrderItem[]>([])
+  const [employees,setEmployees]=useState<Employee[]>([])
+  const [attendance,setAttendance]=useState<Attendance[]>([])
+  const [payrollSettings,setPayrollSettings]=useState<PayrollSetting[]>([])
+  const [payrollShares,setPayrollShares]=useState<PayrollShare[]>([])
+  const [payrollAdjustments,setPayrollAdjustments]=useState<PayrollAdjustment[]>([])
+  const [services,setServices]=useState<Service[]>([])
   const [target,setTarget]=useState<TargetRow|null>(null)
   const [targetOpen,setTargetOpen]=useState(false)
+  const [detailType,setDetailType]=useState<DetailType|null>(null)
   const [targetDraft,setTargetDraft]=useState({revenue_target:'',profit_target:'',order_target:'',note:''})
   const [message,setMessage]=useState('')
   const [success,setSuccess]=useState('')
@@ -78,25 +130,42 @@ export function ProfitTargetDashboardPage(){
   const load=useCallback(async()=>{
     setMessage('')
     const startISO=sixMonthStart.toISOString()
-    const [p,e,o,i,t]=await Promise.all([
+    const startDate=monthKey(sixMonthStart)
+    const [p,e,o,i,emp,a,ps,shr,adj,sv,t]=await Promise.all([
       supabase.from('v100_payments')
-        .select('id,order_id,amount,created_at')
+        .select('id,order_id,amount,method,created_at')
         .gte('created_at',startISO)
         .order('created_at'),
       supabase.from('v106_expenses_view')
-        .select('id,expense_date,amount,category_name')
-        .gte('expense_date',monthKey(sixMonthStart))
+        .select('id,expense_date,amount,category_name,description')
+        .gte('expense_date',startDate)
         .order('expense_date'),
       supabase.from('v100_orders_view')
-        .select('id,total,paid_amount,status,created_at'),
+        .select('id,order_no,customer_name,total,paid_amount,status,created_at'),
       supabase.from('v100_order_items')
-        .select('order_id,service_name,subtotal'),
+        .select('order_id,service_id,service_name,subtotal'),
+      supabase.from('v109_users')
+        .select('id,full_name')
+        .eq('is_active',true)
+        .order('full_name'),
+      supabase.from('v111_attendance')
+        .select('employee_id,attendance_date,status')
+        .gte('attendance_date',startDate),
+      supabase.from('v111_employee_payroll_settings')
+        .select('employee_id,attendance_rate,monthly_allowance'),
+      supabase.from('v111_employee_revenue_shares')
+        .select('employee_id,category,share_percent'),
+      supabase.from('v111_payroll_adjustments')
+        .select('employee_id,payroll_month,bonus')
+        .gte('payroll_month',startDate),
+      supabase.from('v100_services')
+        .select('id,category'),
       supabase.from('v113_business_targets')
         .select('month_start,revenue_target,profit_target,order_target,note,updated_at')
         .eq('month_start',currentMonthStart)
         .maybeSingle()
     ])
-    const error=p.error||e.error||o.error||i.error||t.error
+    const error=p.error||e.error||o.error||i.error||emp.error||a.error||ps.error||shr.error||adj.error||sv.error||t.error
     if(error){
       setMessage(error.message.includes('v113_business_targets')
         ? 'Dashboard V113 belum siap. Jalankan SQL 034 di Supabase terlebih dahulu.'
@@ -107,34 +176,118 @@ export function ProfitTargetDashboardPage(){
     setExpenses((e.data as ExpenseRow[])||[])
     setOrders((o.data as OrderRow[])||[])
     setItems((i.data as OrderItem[])||[])
+    setEmployees((emp.data as Employee[])||[])
+    setAttendance((a.data as Attendance[])||[])
+    setPayrollSettings((ps.data as PayrollSetting[])||[])
+    setPayrollShares((shr.data as PayrollShare[])||[])
+    setPayrollAdjustments((adj.data as PayrollAdjustment[])||[])
+    setServices((sv.data as Service[])||[])
     setTarget((t.data as TargetRow|null)||null)
   },[currentMonthStart])
 
   useEffect(()=>{void load()},[load])
+
+  const orderMap=useMemo(()=>new Map(orders.map(row=>[row.id,row])),[orders])
+  const settingMap=useMemo(()=>new Map(payrollSettings.map(row=>[row.employee_id,row])),[payrollSettings])
+  const serviceCategory=useMemo(()=>new Map(services.map(service=>[
+    service.id,(service.category||'Kiloan').trim()||'Kiloan'
+  ])),[services])
+  const itemsByOrder=useMemo(()=>{
+    const map=new Map<string,OrderItem[]>()
+    for(const item of items){
+      const list=map.get(item.order_id)||[]
+      list.push(item)
+      map.set(item.order_id,list)
+    }
+    return map
+  },[items])
+  const sharesByEmployee=useMemo(()=>{
+    const map=new Map<string,PayrollShare[]>()
+    for(const share of payrollShares){
+      const list=map.get(share.employee_id)||[]
+      list.push(share)
+      map.set(share.employee_id,list)
+    }
+    return map
+  },[payrollShares])
+
+  const payrollForMonth=useCallback((month:Date)=>{
+    const monthPayments=payments.filter(row=>inMonth(row.created_at,month))
+    const categoryRevenue:Record<string,number>={}
+
+    for(const payment of monthPayments){
+      const orderItems=itemsByOrder.get(payment.order_id)||[]
+      const itemTotal=orderItems.reduce((sum,item)=>sum+Math.max(0,Number(item.subtotal||0)),0)
+      const paymentAmount=Math.max(0,Number(payment.amount||0))
+      if(paymentAmount<=0)continue
+      if(orderItems.length===0||itemTotal<=0){
+        categoryRevenue.Kiloan=(categoryRevenue.Kiloan||0)+paymentAmount
+        continue
+      }
+      for(const item of orderItems){
+        const subtotal=Math.max(0,Number(item.subtotal||0))
+        if(subtotal<=0)continue
+        const category=item.service_id?serviceCategory.get(item.service_id)||'Kiloan':'Kiloan'
+        categoryRevenue[category]=(categoryRevenue[category]||0)+(paymentAmount*(subtotal/itemTotal))
+      }
+    }
+
+    const adjustmentMap=new Map(
+      payrollAdjustments
+        .filter(row=>inMonth(`${row.payroll_month}T12:00:00`,month))
+        .map(row=>[row.employee_id,row])
+    )
+
+    const rows:PayrollRow[]=employees.map(employee=>{
+      const setting=settingMap.get(employee.id)
+      const presentDays=attendance.filter(row=>
+        row.employee_id===employee.id&&row.status==='present'&&inMonth(`${row.attendance_date}T12:00:00`,month)
+      ).length
+      const attendancePay=presentDays*Number(setting?.attendance_rate||0)
+      const allowance=Number(setting?.monthly_allowance||0)
+      const bonus=Number(adjustmentMap.get(employee.id)?.bonus||0)
+      const revenueShare=(sharesByEmployee.get(employee.id)||[]).reduce((sum,share)=>
+        sum+(Number(categoryRevenue[share.category]||0)*(Number(share.share_percent||0)/100)),0
+      )
+      return{
+        employee,presentDays,attendancePay,allowance,bonus,revenueShare,
+        total:attendancePay+allowance+bonus+revenueShare
+      }
+    })
+    return{rows,total:rows.reduce((sum,row)=>sum+row.total,0)}
+  },[payments,itemsByOrder,serviceCategory,payrollAdjustments,employees,settingMap,attendance,sharesByEmployee])
+
+  const currentPayroll=useMemo(()=>payrollForMonth(currentMonth),[payrollForMonth])
+  const previousPayroll=useMemo(()=>payrollForMonth(previousMonth),[payrollForMonth])
 
   const current=useMemo(()=>{
     const monthPayments=payments.filter(p=>inMonth(p.created_at,currentMonth))
     const monthExpenses=expenses.filter(e=>inMonth(`${e.expense_date}T12:00:00`,currentMonth))
     const monthOrders=orders.filter(o=>o.status!=='cancelled'&&inMonth(o.created_at,currentMonth))
     const revenue=monthPayments.reduce((s,p)=>s+Number(p.amount||0),0)
-    const expense=monthExpenses.reduce((s,e)=>s+Number(e.amount||0),0)
+    const operationalExpense=monthExpenses.reduce((s,e)=>s+Number(e.amount||0),0)
+    const payroll=currentPayroll.total
+    const expense=operationalExpense+payroll
     const profit=revenue-expense
-    return{payments:monthPayments,expenses:monthExpenses,orders:monthOrders,revenue,expense,profit}
-  },[payments,expenses,orders])
+    return{payments:monthPayments,expenses:monthExpenses,orders:monthOrders,revenue,operationalExpense,payroll,expense,profit}
+  },[payments,expenses,orders,currentPayroll])
 
   const previous=useMemo(()=>{
     const monthPayments=payments.filter(p=>inMonth(p.created_at,previousMonth))
     const monthExpenses=expenses.filter(e=>inMonth(`${e.expense_date}T12:00:00`,previousMonth))
     const monthOrders=orders.filter(o=>o.status!=='cancelled'&&inMonth(o.created_at,previousMonth))
     const revenue=monthPayments.reduce((s,p)=>s+Number(p.amount||0),0)
-    const expense=monthExpenses.reduce((s,e)=>s+Number(e.amount||0),0)
+    const operationalExpense=monthExpenses.reduce((s,e)=>s+Number(e.amount||0),0)
+    const expense=operationalExpense+previousPayroll.total
     return{revenue,expense,profit:revenue-expense,orders:monthOrders.length}
-  },[payments,expenses,orders])
+  },[payments,expenses,orders,previousPayroll])
 
-  const receivable=useMemo(()=>orders
-    .filter(o=>o.status!=='cancelled')
+  const receivableRows=useMemo(()=>orders.filter(o=>
+    o.status!=='cancelled'&&Math.max(0,Number(o.total||0)-Number(o.paid_amount||0))>0
+  ),[orders])
+  const receivable=useMemo(()=>receivableRows
     .reduce((s,o)=>s+Math.max(0,Number(o.total||0)-Number(o.paid_amount||0)),0)
-  ,[orders])
+  ,[receivableRows])
 
   const targetValues={
     revenue:Number(target?.revenue_target||0),
@@ -156,28 +309,17 @@ export function ProfitTargetDashboardPage(){
   const sixMonth=useMemo(()=>Array.from({length:6},(_,idx)=>{
     const d=new Date(now.getFullYear(),now.getMonth()-(5-idx),1)
     const revenue=payments.filter(p=>inMonth(p.created_at,d)).reduce((s,p)=>s+Number(p.amount||0),0)
-    const expense=expenses.filter(e=>inMonth(`${e.expense_date}T12:00:00`,d)).reduce((s,e)=>s+Number(e.amount||0),0)
-    return{
-      label:d.toLocaleDateString('id-ID',{month:'short'}),
-      revenue,
-      expense,
-      profit:revenue-expense
-    }
-  }),[payments,expenses])
+    const operationalExpense=expenses.filter(e=>inMonth(`${e.expense_date}T12:00:00`,d)).reduce((s,e)=>s+Number(e.amount||0),0)
+    const payroll=payrollForMonth(d).total
+    const expense=operationalExpense+payroll
+    return{label:d.toLocaleDateString('id-ID',{month:'short'}),revenue,expense,profit:revenue-expense}
+  }),[payments,expenses,payrollForMonth])
 
   const chartMax=Math.max(1,...sixMonth.flatMap(x=>[x.revenue,Math.max(0,x.profit)]))
 
   const topServices=useMemo(()=>{
     const paymentByOrder=new Map<string,number>()
-    for(const p of current.payments){
-      paymentByOrder.set(p.order_id,(paymentByOrder.get(p.order_id)||0)+Number(p.amount||0))
-    }
-    const itemsByOrder=new Map<string,OrderItem[]>()
-    for(const item of items){
-      const list=itemsByOrder.get(item.order_id)||[]
-      list.push(item)
-      itemsByOrder.set(item.order_id,list)
-    }
+    for(const p of current.payments)paymentByOrder.set(p.order_id,(paymentByOrder.get(p.order_id)||0)+Number(p.amount||0))
     const grouped=new Map<string,number>()
     for(const [orderId,paid] of paymentByOrder){
       const list=itemsByOrder.get(orderId)||[]
@@ -188,22 +330,15 @@ export function ProfitTargetDashboardPage(){
         grouped.set(item.service_name,(grouped.get(item.service_name)||0)+allocated)
       }
     }
-    return Array.from(grouped.entries())
-      .map(([name,revenue])=>({name,revenue}))
-      .sort((a,b)=>b.revenue-a.revenue)
-      .slice(0,5)
-  },[current.payments,items])
+    return Array.from(grouped.entries()).map(([name,revenue])=>({name,revenue})).sort((a,b)=>b.revenue-a.revenue).slice(0,5)
+  },[current.payments,itemsByOrder])
 
   const topExpenseCategories=useMemo(()=>{
     const grouped=new Map<string,number>()
-    for(const e of current.expenses){
-      grouped.set(e.category_name,(grouped.get(e.category_name)||0)+Number(e.amount||0))
-    }
-    return Array.from(grouped.entries())
-      .map(([name,amount])=>({name,amount}))
-      .sort((a,b)=>b.amount-a.amount)
-      .slice(0,5)
-  },[current.expenses])
+    for(const e of current.expenses)grouped.set(e.category_name,(grouped.get(e.category_name)||0)+Number(e.amount||0))
+    if(current.payroll>0)grouped.set('Gaji Karyawan',(grouped.get('Gaji Karyawan')||0)+current.payroll)
+    return Array.from(grouped.entries()).map(([name,amount])=>({name,amount})).sort((a,b)=>b.amount-a.amount).slice(0,5)
+  },[current.expenses,current.payroll])
 
   const openTarget=()=>{
     setTargetDraft({
@@ -249,11 +384,16 @@ export function ProfitTargetDashboardPage(){
   const revenueChange=changePercent(current.revenue,previous.revenue)
   const profitChange=changePercent(current.profit,previous.profit)
 
+  const detailTitle=detailType==='revenue'?'Detail Omzet Masuk'
+    :detailType==='expense'?'Detail Pengeluaran'
+    :detailType==='profit'?'Detail Laba Bersih'
+    :'Detail Piutang Aktif'
+
   return <>
     <PageHeader
       eyebrow="OWNER • V113"
       title="Dashboard Laba & Target Bisnis"
-      description={`Pantau hasil usaha ${monthLabel(currentMonth)}, target bulanan, tren laba, pengeluaran dan piutang.`}
+      description={`Pantau hasil usaha ${monthLabel(currentMonth)}, target bulanan, tren laba, pengeluaran, gaji dan piutang.`}
       action={<button className="primary-button" onClick={openTarget}><Pencil size={16}/>Atur Target Bulan Ini</button>}
     />
 
@@ -261,25 +401,27 @@ export function ProfitTargetDashboardPage(){
     {success&&<div className="success-box inline-message"><Save size={17}/>{success}</div>}
 
     <section className="v113-kpi-grid">
-      <article className="panel v113-kpi">
+      <article className="panel v113-kpi v113-clickable-kpi" role="button" tabIndex={0} onClick={()=>setDetailType('revenue')} onKeyDown={e=>{if(e.key==='Enter')setDetailType('revenue')}}>
         <div className="v113-kpi-icon revenue"><TrendingUp size={22}/></div>
         <div><span>Omzet Masuk Bulan Ini</span><strong>{formatRupiah(current.revenue)}</strong>
           <small className={revenueChange>=0?'positive':'negative'}>{revenueChange>=0?'▲':'▼'} {Math.abs(revenueChange).toFixed(1)}% vs bulan lalu</small>
-        </div>
+        </div><Eye className="v113-kpi-eye" size={16}/>
       </article>
-      <article className="panel v113-kpi">
+      <article className="panel v113-kpi v113-clickable-kpi" role="button" tabIndex={0} onClick={()=>setDetailType('expense')} onKeyDown={e=>{if(e.key==='Enter')setDetailType('expense')}}>
         <div className="v113-kpi-icon expense"><TrendingDown size={22}/></div>
-        <div><span>Pengeluaran Bulan Ini</span><strong>{formatRupiah(current.expense)}</strong><small>{current.expenses.length} transaksi biaya</small></div>
+        <div><span>Pengeluaran + Gaji</span><strong>{formatRupiah(current.expense)}</strong><small>Operasional {formatRupiah(current.operationalExpense)} • Gaji {formatRupiah(current.payroll)}</small></div>
+        <Eye className="v113-kpi-eye" size={16}/>
       </article>
-      <article className="panel v113-kpi featured">
+      <article className="panel v113-kpi featured v113-clickable-kpi" role="button" tabIndex={0} onClick={()=>setDetailType('profit')} onKeyDown={e=>{if(e.key==='Enter')setDetailType('profit')}}>
         <div className="v113-kpi-icon profit"><CircleDollarSign size={22}/></div>
         <div><span>Laba Bersih Operasional</span><strong>{formatRupiah(current.profit)}</strong>
           <small className={profitChange>=0?'positive':'negative'}>{profitChange>=0?'▲':'▼'} {Math.abs(profitChange).toFixed(1)}% vs bulan lalu</small>
-        </div>
+        </div><Eye className="v113-kpi-eye" size={16}/>
       </article>
-      <article className="panel v113-kpi">
+      <article className="panel v113-kpi v113-clickable-kpi" role="button" tabIndex={0} onClick={()=>setDetailType('receivable')} onKeyDown={e=>{if(e.key==='Enter')setDetailType('receivable')}}>
         <div className="v113-kpi-icon receivable"><WalletCards size={22}/></div>
-        <div><span>Piutang Aktif</span><strong>{formatRupiah(receivable)}</strong><small>Belum menjadi uang masuk</small></div>
+        <div><span>Piutang Aktif</span><strong>{formatRupiah(receivable)}</strong><small>{receivableRows.length} order belum lunas</small></div>
+        <Eye className="v113-kpi-eye" size={16}/>
       </article>
     </section>
 
@@ -294,7 +436,7 @@ export function ProfitTargetDashboardPage(){
       </article>
 
       <article className="panel v113-target-card">
-        <header><div><Landmark size={20}/><span><b>Target Laba</b><small>Omzet masuk − pengeluaran</small></span></div><strong>{profitProgress.toFixed(0)}%</strong></header>
+        <header><div><Landmark size={20}/><span><b>Target Laba</b><small>Omzet − operasional − gaji</small></span></div><strong>{profitProgress.toFixed(0)}%</strong></header>
         <div className="v113-progress profit"><i style={{width:`${capPercent(profitProgress)}%`}}/></div>
         <div className="v113-target-values"><b>{formatRupiah(current.profit)}</b><span>dari {formatRupiah(targetValues.profit)}</span></div>
         <footer>{targetValues.profit>0
@@ -312,15 +454,14 @@ export function ProfitTargetDashboardPage(){
 
     <section className="v113-main-grid">
       <article className="panel v113-trend-panel">
-        <header className="v113-section-head"><div><b>Tren 6 Bulan</b><small>Omzet masuk dan laba bersih operasional</small></div></header>
+        <header className="v113-section-head"><div><b>Tren 6 Bulan</b><small>Omzet masuk dan laba setelah pengeluaran + gaji</small></div></header>
         <div className="v113-month-chart">
           {sixMonth.map(row=><div className="v113-month-column" key={row.label}>
             <div className="v113-bar-area">
               <i className="revenue" title={`Omzet ${formatRupiah(row.revenue)}`} style={{height:`${Math.max(2,(row.revenue/chartMax)*100)}%`}}/>
               <i className="profit" title={`Laba ${formatRupiah(row.profit)}`} style={{height:`${Math.max(2,(Math.max(0,row.profit)/chartMax)*100)}%`}}/>
             </div>
-            <b>{row.label}</b>
-            <small>{formatRupiah(row.profit)}</small>
+            <b>{row.label}</b><small>{formatRupiah(row.profit)}</small>
           </div>)}
         </div>
         <div className="v113-chart-legend"><span><i className="revenue"/>Omzet</span><span><i className="profit"/>Laba</span></div>
@@ -330,11 +471,11 @@ export function ProfitTargetDashboardPage(){
         <header className="v113-section-head"><div><b>Kesehatan Bisnis Bulan Ini</b><small>Ringkasan angka yang perlu diperhatikan Owner</small></div></header>
         <div className="v113-health-list">
           <div><span>Margin laba</span><b>{current.revenue>0?((current.profit/current.revenue)*100).toFixed(1):'0.0'}%</b></div>
+          <div><span>Pengeluaran operasional</span><b>{formatRupiah(current.operationalExpense)}</b></div>
+          <div><span>Gaji karyawan otomatis</span><b>{formatRupiah(current.payroll)}</b></div>
           <div><span>Rata-rata omzet / hari berjalan</span><b>{formatRupiah(current.revenue/Math.max(1,now.getDate()))}</b></div>
-          <div><span>Rata-rata nilai pembayaran</span><b>{formatRupiah(current.payments.length?current.revenue/current.payments.length:0)}</b></div>
           <div><span>Order bulan ini</span><b>{current.orders.length}</b></div>
           <div><span>Piutang aktif</span><b>{formatRupiah(receivable)}</b></div>
-          <div><span>Target diperbarui</span><b>{target?.updated_at?new Date(target.updated_at).toLocaleDateString('id-ID'):'Belum diatur'}</b></div>
         </div>
       </article>
     </section>
@@ -344,36 +485,66 @@ export function ProfitTargetDashboardPage(){
         <header className="v113-section-head"><div><b>Top 5 Layanan Penyumbang Omzet</b><small>Berdasarkan pembayaran yang benar-benar masuk bulan ini</small></div></header>
         <div className="v113-ranking-list">
           {topServices.length===0&&<div className="mini-empty">Belum ada pembayaran bulan ini.</div>}
-          {topServices.map((row,index)=><div key={row.name}>
-            <span className="v113-rank">{index+1}</span><b>{row.name}</b><strong>{formatRupiah(row.revenue)}</strong>
-          </div>)}
+          {topServices.map((row,index)=><div key={row.name}><span className="v113-rank">{index+1}</span><b>{row.name}</b><strong>{formatRupiah(row.revenue)}</strong></div>)}
         </div>
       </article>
-
       <article className="panel">
-        <header className="v113-section-head"><div><b>Top 5 Pengeluaran</b><small>Kategori biaya terbesar bulan ini</small></div></header>
+        <header className="v113-section-head"><div><b>Top 5 Pengeluaran</b><small>Termasuk gaji karyawan otomatis</small></div></header>
         <div className="v113-ranking-list expense-list">
           {topExpenseCategories.length===0&&<div className="mini-empty">Belum ada pengeluaran bulan ini.</div>}
-          {topExpenseCategories.map((row,index)=><div key={row.name}>
-            <span className="v113-rank">{index+1}</span><b>{row.name}</b><strong>{formatRupiah(row.amount)}</strong>
-          </div>)}
+          {topExpenseCategories.map((row,index)=><div key={row.name}><span className="v113-rank">{index+1}</span><b>{row.name}</b><strong>{formatRupiah(row.amount)}</strong></div>)}
         </div>
       </article>
     </section>
 
-    {targetOpen&&<div className="modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setTargetOpen(false)}}>
-      <div className="modal-card v113-target-modal" role="dialog" aria-modal="true">
-        <div className="modal-head"><div><span>OWNER</span><h2>Target {monthLabel(currentMonth)}</h2></div><button type="button" className="icon-button" onClick={()=>setTargetOpen(false)}>×</button></div>
-        <form className="modal-form" onSubmit={saveTarget}>
-          <label>Target Omzet Bulanan<input type="number" min="0" value={targetDraft.revenue_target} onChange={e=>setTargetDraft({...targetDraft,revenue_target:e.target.value})}/></label>
-          <label>Target Laba Bulanan<input type="number" min="0" value={targetDraft.profit_target} onChange={e=>setTargetDraft({...targetDraft,profit_target:e.target.value})}/></label>
-          <label>Target Jumlah Order<input type="number" min="0" step="1" value={targetDraft.order_target} onChange={e=>setTargetDraft({...targetDraft,order_target:e.target.value})}/></label>
-          <label>Catatan Target<textarea rows={3} value={targetDraft.note} onChange={e=>setTargetDraft({...targetDraft,note:e.target.value})} placeholder="Contoh: target promo Agustus"/></label>
-          <div className="v113-target-explanation">Laba dashboard = <b>pembayaran yang benar-benar masuk − pengeluaran tercatat</b>. Piutang tidak dihitung sebagai omzet sampai dibayar.</div>
-          {message&&<div className="error-box">{message}</div>}
-          <div className="form-actions"><button type="button" className="secondary-button" onClick={()=>setTargetOpen(false)}>Batal</button><button className="primary-button" disabled={busy}><Save size={16}/>{busy?'Menyimpan...':'Simpan Target'}</button></div>
-        </form>
+    {detailType&&<Modal title={detailTitle} onClose={()=>setDetailType(null)}>
+      <div className="v113-detail-modal">
+        {detailType==='revenue'&&<>
+          <div className="v113-detail-summary"><span>Omzet masuk {monthLabel(currentMonth)}</span><b>{formatRupiah(current.revenue)}</b><small>{current.payments.length} pembayaran</small></div>
+          <div className="table-wrap"><table><thead><tr><th>Tanggal</th><th>Order</th><th>Pelanggan</th><th>Metode</th><th>Masuk</th></tr></thead><tbody>
+            {current.payments.length===0&&<tr><td colSpan={5} className="table-empty">Belum ada pembayaran.</td></tr>}
+            {[...current.payments].reverse().map(row=>{const order=orderMap.get(row.order_id);return <tr key={row.id}><td>{new Date(row.created_at).toLocaleDateString('id-ID')}</td><td><b>{order?.order_no||'-'}</b></td><td>{order?.customer_name||'-'}</td><td>{(row.method||'-').toUpperCase()}</td><td><b>{formatRupiah(Number(row.amount))}</b></td></tr>})}
+          </tbody></table></div>
+        </>}
+
+        {detailType==='expense'&&<>
+          <div className="v113-profit-equation expense"><div><span>Pengeluaran Operasional</span><b>{formatRupiah(current.operationalExpense)}</b></div><div><span>Gaji Karyawan</span><b>{formatRupiah(current.payroll)}</b></div><strong>Total Pengeluaran {formatRupiah(current.expense)}</strong></div>
+          <h4>Rincian Gaji Otomatis</h4>
+          <div className="table-wrap"><table><thead><tr><th>Karyawan</th><th>Hadir</th><th>Uang Hadir</th><th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil</th><th>Total</th></tr></thead><tbody>
+            {currentPayroll.rows.map(row=><tr key={row.employee.id}><td><b>{row.employee.full_name}</b></td><td>{row.presentDays}</td><td>{formatRupiah(row.attendancePay)}</td><td>{formatRupiah(row.allowance)}</td><td>{formatRupiah(row.bonus)}</td><td>{formatRupiah(row.revenueShare)}</td><td><b>{formatRupiah(row.total)}</b></td></tr>)}
+          </tbody></table></div>
+          <h4>Pengeluaran Operasional</h4>
+          <div className="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Nominal</th></tr></thead><tbody>
+            {current.expenses.length===0&&<tr><td colSpan={4} className="table-empty">Belum ada pengeluaran operasional.</td></tr>}
+            {[...current.expenses].reverse().map(row=><tr key={row.id}><td>{new Date(`${row.expense_date}T12:00:00`).toLocaleDateString('id-ID')}</td><td><b>{row.category_name}</b></td><td>{row.description||'-'}</td><td><b>{formatRupiah(Number(row.amount))}</b></td></tr>)}
+          </tbody></table></div>
+        </>}
+
+        {detailType==='profit'&&<>
+          <div className="v113-profit-detail-hero"><CircleDollarSign size={30}/><span>Laba Bersih {monthLabel(currentMonth)}</span><strong>{formatRupiah(current.profit)}</strong></div>
+          <div className="v113-profit-equation"><div><span>Omzet Masuk</span><b>+ {formatRupiah(current.revenue)}</b></div><div><span>Pengeluaran Operasional</span><b>− {formatRupiah(current.operationalExpense)}</b></div><div><span>Gaji Karyawan</span><b>− {formatRupiah(current.payroll)}</b></div><strong>= {formatRupiah(current.profit)}</strong></div>
+          <p className="v113-detail-note">Gaji dihitung otomatis dengan rumus yang sama seperti menu Absensi & Gaji: uang hadir + tunjangan + bonus + bagi hasil kategori layanan.</p>
+        </>}
+
+        {detailType==='receivable'&&<>
+          <div className="v113-detail-summary"><span>Total Piutang Aktif</span><b>{formatRupiah(receivable)}</b><small>{receivableRows.length} order</small></div>
+          <div className="table-wrap"><table><thead><tr><th>Order</th><th>Pelanggan</th><th>Total</th><th>Sudah Bayar</th><th>Sisa</th></tr></thead><tbody>
+            {receivableRows.map(row=><tr key={row.id}><td><b>{row.order_no}</b></td><td>{row.customer_name}</td><td>{formatRupiah(Number(row.total))}</td><td>{formatRupiah(Number(row.paid_amount))}</td><td><b>{formatRupiah(Math.max(0,Number(row.total)-Number(row.paid_amount)))}</b></td></tr>)}
+          </tbody></table></div>
+        </>}
       </div>
-    </div>}
+    </Modal>}
+
+    {targetOpen&&<Modal title={`Target ${monthLabel(currentMonth)}`} onClose={()=>setTargetOpen(false)}>
+      <form className="modal-form" onSubmit={saveTarget}>
+        <label>Target Omzet Bulanan<input type="number" min="0" value={targetDraft.revenue_target} onChange={e=>setTargetDraft({...targetDraft,revenue_target:e.target.value})}/></label>
+        <label>Target Laba Bulanan<input type="number" min="0" value={targetDraft.profit_target} onChange={e=>setTargetDraft({...targetDraft,profit_target:e.target.value})}/></label>
+        <label>Target Jumlah Order<input type="number" min="0" step="1" value={targetDraft.order_target} onChange={e=>setTargetDraft({...targetDraft,order_target:e.target.value})}/></label>
+        <label>Catatan Target<textarea rows={3} value={targetDraft.note} onChange={e=>setTargetDraft({...targetDraft,note:e.target.value})} placeholder="Contoh: target promo Agustus"/></label>
+        <div className="v113-target-explanation">Laba = <b>pembayaran masuk − pengeluaran operasional − gaji karyawan</b>. Piutang belum dihitung sebagai omzet.</div>
+        {message&&<div className="error-box">{message}</div>}
+        <div className="form-actions"><button type="button" className="secondary-button" onClick={()=>setTargetOpen(false)}>Batal</button><button className="primary-button" disabled={busy}><Save size={16}/>{busy?'Menyimpan...':'Simpan Target'}</button></div>
+      </form>
+    </Modal>}
   </>
 }

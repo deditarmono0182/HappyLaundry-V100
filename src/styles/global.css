@@ -8000,3 +8000,23 @@ body{
 .qr-camera-status{margin-top:10px;display:flex;align-items:flex-start;gap:7px;padding:9px 11px;border-radius:10px;font-size:9.5px}
 .qr-camera-status.success{border:1px solid #bce0cf;background:#edf9f3;color:#0b7d56}
 @media(max-width:700px){.qr-html5-camera,.qr-center-reader{min-height:300px}.qr-center-reader video{min-height:300px!important}}
+
+
+/* =========================================================
+   HappyLaundry V113.0.2 — Payroll in Profit + Clickable KPI
+   ========================================================= */
+.v113-clickable-kpi{position:relative;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.v113-clickable-kpi:hover,.v113-clickable-kpi:focus{transform:translateY(-2px);border-color:#a9d6ee!important;box-shadow:0 13px 28px rgba(22,85,125,.11)!important;outline:none}
+.v113-kpi-eye{position:absolute;right:12px;top:12px;color:#84a8bb}
+.v113-detail-modal{display:grid;gap:14px;max-height:72vh;overflow:auto;padding-right:3px}
+.v113-detail-summary{display:grid;gap:3px;padding:13px;border:1px solid #d5e7ef;border-radius:12px;background:#f7fbfd}
+.v113-detail-summary span{font-size:9px;color:#728b98}.v113-detail-summary b{font-size:21px;color:#164d70}.v113-detail-summary small{font-size:8.5px;color:#7b919c}
+.v113-profit-detail-hero{display:grid;justify-items:center;gap:5px;padding:18px;border:1px solid #bfe1d1;border-radius:14px;background:linear-gradient(145deg,#f5fcf8,#edf9f3);text-align:center}
+.v113-profit-detail-hero svg{color:#0b875d}.v113-profit-detail-hero span{font-size:9px;color:#69877a}.v113-profit-detail-hero strong{font-size:27px;color:#087b55}
+.v113-profit-equation{display:grid;gap:8px;padding:13px;border:1px solid #d6e7ef;border-radius:12px;background:#fbfdfe}
+.v113-profit-equation>div{display:flex;justify-content:space-between;gap:10px;padding-bottom:7px;border-bottom:1px dashed #dbe6eb}
+.v113-profit-equation span{font-size:9.5px;color:#6f8793}.v113-profit-equation b{font-size:10px;color:#164b6b}.v113-profit-equation>strong{font-size:16px;color:#07835a;text-align:right}
+.v113-profit-equation.expense>strong{color:#b34e42}
+.v113-detail-modal h4{margin:2px 0 0;color:#174e72;font-size:11px}
+.v113-detail-note{margin:0;padding:10px;border-radius:10px;background:#eef7ff;color:#55788c;font-size:9px;line-height:1.5}
+@media(max-width:650px){.v113-detail-modal{max-height:76vh}.v113-kpi-eye{right:8px;top:8px}.v113-profit-detail-hero strong{font-size:22px}}

@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V113.0.1 Android QR Scanner Fix
+# HappyLaundry Enterprise V113.0.2 Profit Payroll Detail
 
 ## Jalankan
 ```bash
@@ -326,3 +326,7 @@ Dashboard Owner baru Laba & Target: omzet aktual, pengeluaran, laba bersih opera
 
 ## V113.0.1
 QR Center memakai html5-qrcode untuk kompatibilitas tablet Android.
+
+
+## V113.0.2
+Fix build scanner TS2339. Dashboard Laba kini otomatis memasukkan gaji (hadir+tunjangan+bonus+bagi hasil) sebagai biaya dan kartu KPI dapat diklik untuk melihat detail.

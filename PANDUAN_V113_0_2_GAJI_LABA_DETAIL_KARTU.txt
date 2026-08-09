@@ -1,0 +1,29 @@
+HAPPYLAUNDRY ENTERPRISE V113.0.2 — GAJI OTOMATIS DI LABA + DETAIL KARTU
+
+PERBAIKAN SCANNER:
+- Error build TS2339 pada camera.id diperbaiki.
+- Tipe daftar kamera disesuaikan dengan html5-qrcode.
+
+DASHBOARD LABA & TARGET:
+1. Gaji karyawan otomatis dihitung sebagai biaya.
+2. Rumus gaji sama dengan menu Absensi & Gaji:
+   uang hadir + tunjangan + bonus + bagi hasil kategori layanan.
+3. Laba Bersih = Omzet Masuk - Pengeluaran Operasional - Gaji Karyawan.
+4. Tren laba 6 bulan juga sudah mengurangi gaji tiap bulan.
+5. Top Pengeluaran memasukkan Gaji Karyawan.
+
+KARTU BISA DIKLIK:
+- Omzet Masuk -> rincian pembayaran per order.
+- Pengeluaran + Gaji -> rincian operasional + gaji per karyawan.
+- Laba Bersih -> rumus lengkap perhitungan.
+- Piutang Aktif -> daftar order dan sisa tagihan.
+
+TIDAK PERLU SQL BARU.
+Tetap gunakan SQL 034 V113 yang sudah dijalankan.
+
+CARA PASANG:
+1. Deploy V113.0.2.
+2. Tunggu Published.
+3. Refresh / tutup lalu buka ulang aplikasi.
+4. Buka Laba & Target.
+5. Klik kartu untuk melihat detail.

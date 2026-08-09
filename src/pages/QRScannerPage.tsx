@@ -106,7 +106,7 @@ export function QRScannerPage(){
       await stopCamera()
       setCameraState('requesting')
 
-      let cameras:MediaDeviceInfo[]=[]
+      let cameras:Array<{id:string;label:string}>=[]
       try{
         cameras=await Html5Qrcode.getCameras()
       }catch(permissionError){
