@@ -1,0 +1,25 @@
+HAPPYLAUNDRY ENTERPRISE V112.9.1 — COMPACT TRACKING
+
+PERUBAHAN HANYA TAMPILAN TRACKING PELANGGAN:
+
+1. Desain utama V112.9 tetap dipertahankan.
+2. Card/row dibuat lebih pendek secara vertikal.
+3. Jarak antarbagian diperkecil.
+4. Header tracking sedikit lebih ringkas.
+5. Kartu Estimasi / Total / Pembayaran dibuat lebih pendek.
+6. Area progress cucian dibuat lebih ringkas.
+7. BACKGROUND BIRU pada baris tahapan proses cucian DIHILANGKAN.
+8. Bagian Pembayaran Online naik ke atas sehingga QRIS dan Transfer Bank lebih cepat terlihat.
+9. QRIS, Transfer Bank, upload bukti dan konfirmasi pembayaran tidak diubah.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+1. Deploy V112.9.1 ke Netlify.
+2. Tunggu Published.
+3. Refresh / reload aplikasi.
+4. Buka Tracking Pelanggan.
+5. Tampilan akan lebih padat dan background biru progress sudah hilang.
+
+CACHE:
+happylaundry-v112-9-1

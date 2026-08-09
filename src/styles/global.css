@@ -7726,3 +7726,155 @@ body{
   .online-proof-actions{display:grid;grid-template-columns:1fr}
   .online-proof-actions button{width:100%}
 }
+
+
+/* =========================================================
+   HappyLaundry V112.9.1 — Compact Tracking
+   Keep original tracking design, reduce vertical space,
+   and remove the blue background band from process steps.
+   ========================================================= */
+
+/* The old blue-theme override painted the whole step row blue.
+   Restore the original clean/transparent process row. */
+.tracking-progress{
+  background:transparent!important;
+}
+
+/* Compact vertical layout so QRIS / Transfer appears sooner. */
+.tracking-premium{
+  padding-top:16px!important;
+}
+
+.tracking-brand-premium{
+  margin-bottom:10px!important;
+}
+
+.tracking-brand-premium img{
+  width:60px!important;
+  height:60px!important;
+  border-radius:18px!important;
+}
+
+.tracking-brand-premium b{
+  font-size:20px!important;
+}
+
+.tracking-card{
+  margin-bottom:10px!important;
+  padding:16px!important;
+}
+
+.tracking-search-card{
+  padding:18px!important;
+}
+
+.tracking-search-card h1{
+  margin-bottom:2px!important;
+  font-size:29px!important;
+}
+
+.tracking-search-card p{
+  margin-bottom:10px!important;
+}
+
+.tracking-search-card input,
+.tracking-search-card button{
+  height:46px!important;
+}
+
+.tracking-order-head{
+  padding-bottom:10px!important;
+}
+
+.tracking-progress-meter{
+  margin:12px 0 2px!important;
+}
+
+.tracking-progress-top{
+  margin-bottom:5px!important;
+}
+
+.tracking-progress{
+  margin:14px 0!important;
+  padding:0!important;
+}
+
+.tracking-step{
+  gap:4px!important;
+}
+
+.tracking-step span{
+  width:32px!important;
+  height:32px!important;
+}
+
+.tracking-step:not(:last-child)::after{
+  top:15px!important;
+}
+
+.tracking-summary{
+  gap:8px!important;
+}
+
+.tracking-summary-premium>div{
+  min-height:72px!important;
+  padding:10px 12px!important;
+}
+
+.tracking-summary span{
+  gap:2px!important;
+}
+
+.tracking-online-payment{
+  margin-top:12px!important;
+  padding:14px!important;
+}
+
+.tracking-payment-head h2{
+  font-size:18px!important;
+}
+
+.tracking-pay-methods{
+  margin-top:10px!important;
+}
+
+.tracking-pay-methods button{
+  min-height:42px!important;
+}
+
+@media(max-width:640px){
+  .tracking-premium{
+    padding:10px 8px 24px!important;
+  }
+  .tracking-brand-premium{
+    margin-bottom:8px!important;
+  }
+  .tracking-card{
+    padding:13px!important;
+    margin-bottom:8px!important;
+  }
+  .tracking-search-card{
+    padding:14px!important;
+  }
+  .tracking-search-card h1{
+    font-size:24px!important;
+  }
+  .tracking-search-card p{
+    margin-bottom:8px!important;
+  }
+  .tracking-search-card input,
+  .tracking-search-card button{
+    height:43px!important;
+  }
+  .tracking-progress{
+    margin:11px 0!important;
+  }
+  .tracking-summary-premium>div{
+    min-height:66px!important;
+    padding:9px 10px!important;
+  }
+  .tracking-online-payment{
+    margin-top:10px!important;
+    padding:12px!important;
+  }
+}

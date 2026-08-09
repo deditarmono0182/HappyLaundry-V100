@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.9 Online Payment QRIS & Transfer
+# HappyLaundry Enterprise V112.9.1 Compact Tracking
 
 ## Jalankan
 ```bash
@@ -302,3 +302,7 @@ Detail Order mendapat tombol Buka Tracking Pelanggan yang membuka /track/<nomor-
 
 ## V112.9
 QRIS & rekening dapat dikelola Owner, tampil otomatis di Tracking Pelanggan, pelanggan upload bukti bayar, dan Owner/karyawan mengonfirmasi dari menu Pembayaran.
+
+
+## V112.9.1
+Tracking pelanggan dipadatkan secara vertikal dan background biru pada baris progress cucian dihilangkan, tanpa mengubah fitur QRIS/Transfer.
