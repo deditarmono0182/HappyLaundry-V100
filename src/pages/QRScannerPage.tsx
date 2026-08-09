@@ -262,14 +262,14 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
   return <>
     <PageHeader
       eyebrow="ENTERPRISE QR CENTER"
-      title="QR & Barcode Center"
-      description="Scan QR atau barcode pada nota untuk membuka order langsung di aplikasi."
+      title="QR Center"
+      description="Scan QR pada nota untuk membuka order langsung di aplikasi."
     />
 
     <section className="qr-center-grid">
       <article className="panel qr-camera-card">
         <div className="qr-camera-head">
-          <div><QrCode size={24}/><div><h2>Scan QR / Barcode Nota</h2><p>Arahkan kamera ke QR atau barcode Code 39 pada nota HappyLaundry.</p></div></div>
+          <div><QrCode size={24}/><div><h2>Scan QR Nota</h2><p>Arahkan kamera ke QR pada nota HappyLaundry.</p></div></div>
           {scanning
             ? <button className="secondary-button" onClick={()=>void stopCamera()}><StopCircle size={17}/>Stop Kamera</button>
             : <button className="primary-button" onClick={()=>void startCamera(undefined)}>
@@ -288,7 +288,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
           </div>}
           {scanning&&<div className="qr-target"><i/><i/><i/><i/></div>}
         </div>
-        {scanning&&<div className="qr-camera-status success"><CheckCircle2 size={16}/><span>Kamera aktif{cameraName?` • ${cameraName}`:''}. Arahkan QR atau barcode nota ke kotak scanner.</span></div>}
+        {scanning&&<div className="qr-camera-status success"><CheckCircle2 size={16}/><span>Kamera aktif{cameraName?` • ${cameraName}`:''}. Arahkan QR nota ke kotak scanner.</span></div>}
         {cameras.length>1&&<div className="qr-camera-selector">
           <label>
             <span>Pilih Kamera</span>

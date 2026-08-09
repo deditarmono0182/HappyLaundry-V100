@@ -1,0 +1,17 @@
+HAPPYLAUNDRY V113.0.16 — SIMPLE RECEIPT QR ONLY
+
+PERUBAHAN:
+- Barcode dihapus dari Nota Kasir.
+- Barcode dihapus dari Cetak Ulang Nota.
+- Opsi Barcode di Pengaturan Cetak dihapus dari tampilan.
+- QR tetap menjadi kode utama di nota.
+- QR pelanggan tetap membuka Tracking.
+- QR yang sama dapat dipindai di QR Center untuk membuka Order.
+- Nomor order tertulis tetap tampil pada nota.
+
+KOMPATIBILITAS:
+- Scanner masih mendukung Code 39 / Code 128 secara internal.
+- Jadi nota lama yang masih memiliki barcode tetap bisa dipindai.
+- Nota baru hanya menampilkan QR agar lebih rapi dan tidak membingungkan.
+
+TIDAK ADA SQL BARU.

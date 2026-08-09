@@ -45,7 +45,7 @@ export const defaultReceiptPrintSettings:ReceiptPrintSettings={
   logo_width:64,
   logo_align:'center',
   show_qr:true,
-  show_barcode:true,
+  show_barcode:false,
   show_customer_phone:true,
   show_due_at:true,
   show_payment_method:true,

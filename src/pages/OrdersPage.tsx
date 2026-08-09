@@ -25,7 +25,6 @@ import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
-import { code39Svg } from '../lib/code39'
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft, OrderRow, OrderStatus } from '../types/order'
@@ -558,7 +557,6 @@ export function OrdersPage() {
     const closeFallback=`${window.location.origin}/orders?order=${encodeURIComponent(row.order_no)}`
     const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
     const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(trackingUrl)}`
-    const barcodeSvg=code39Svg(row.order_no,54,2,5)
 
     printWindow.document.write(`
       <!doctype html>
@@ -593,8 +591,6 @@ export function OrdersPage() {
           .strong{font-weight:800;font-size:13px}
           .small{font-size:10px}
           .receipt-qr{width:92px;height:92px;display:block;margin:8px auto 4px}
-          .receipt-barcode{display:flex;justify-content:center;overflow:hidden;margin:9px 0 2px}
-          .receipt-barcode svg{max-width:100%;height:auto}
           .scan-caption{text-align:center;font-size:9px;margin:2px 0}
           .tracking-link{text-align:center;font-size:8px;word-break:break-all;margin:2px 0}
 
@@ -702,8 +698,6 @@ export function OrdersPage() {
         <img class="receipt-qr" src="${qrUrl}" alt="QR tracking ${row.order_no}">
         <p class="scan-caption"><b>Scan QR untuk tracking / buka order</b></p>
         <p class="tracking-link">${trackingUrl}</p>
-        <div class="receipt-barcode">${barcodeSvg}</div>
-        <p class="scan-caption"><b>Barcode Order: ${row.order_no}</b></p>
         <p class="small">Terima kasih telah menggunakan HappyLaundry.</p>
 
         <div class="preview-actions">
