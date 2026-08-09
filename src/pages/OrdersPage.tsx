@@ -505,8 +505,7 @@ export function OrdersPage() {
   }
 
   const openCustomerTracking=(row:OrderRow)=>{
-    const url=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
-    window.open(url,'_blank','noopener,noreferrer')
+    navigate(`/track/${encodeURIComponent(row.order_no)}?app=1&from=${encodeURIComponent(`/orders?order=${row.order_no}`)}`)
   }
 
   const submitDeleteOrder=async()=>{

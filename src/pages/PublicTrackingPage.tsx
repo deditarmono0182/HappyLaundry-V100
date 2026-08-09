@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Building2, Check, CheckCircle2, Clock3, CreditCard, ImageUp, MapPin, MessageCircle, PackageCheck, QrCode, Search,
+  ArrowLeft, Building2, Check, CheckCircle2, Clock3, CreditCard, ImageUp, MapPin, MessageCircle, PackageCheck, QrCode, Search,
   Sparkles, Upload, WashingMachine
 } from 'lucide-react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import type { OrderStatus } from '../types/order'
@@ -77,7 +77,11 @@ const statusLabel:Record<string,string>={
 }
 
 export function PublicTrackingPage(){
+  const navigate=useNavigate()
+  const [searchParams]=useSearchParams()
   const {orderNo=''}=useParams()
+  const appReturn=searchParams.get('app')==='1'
+  const returnTo=searchParams.get('from')||'/'
   const [input,setInput]=useState(orderNo)
   const [data,setData]=useState<TrackingData|null>(null)
   const [loading,setLoading]=useState(false)
@@ -121,6 +125,20 @@ export function PublicTrackingPage(){
     const timer=window.setInterval(()=>setNow(Date.now()),60000)
     return()=>window.clearInterval(timer)
   },[])
+
+  const backToApp=()=>{
+    // Internal tracking links carry ?app=1&from=/source.
+    // Use replace so mobile/PWA does not bounce back into tracking again.
+    if(appReturn){
+      navigate(returnTo,{replace:true})
+      return
+    }
+    if(window.history.length>1){
+      window.history.back()
+      return
+    }
+    navigate('/',{replace:true})
+  }
 
   const currentIndex=useMemo(()=>{
     if(!data)return -1
@@ -221,6 +239,10 @@ export function PublicTrackingPage(){
   const isReady=data?.status==='ready'||data?.status==='completed'
 
   return <main className="tracking-page tracking-premium">
+    {appReturn&&<button type="button" className="tracking-back-to-app" onClick={backToApp}>
+      <ArrowLeft size={18}/>
+      <span>Kembali ke Aplikasi</span>
+    </button>}
     <header className="tracking-brand tracking-brand-premium">
       <img src="/logo-happylaundry.jpg" alt="HappyLaundry"/>
       <div><b>{data?.business_name||'HappyLaundry Babakan'}</b><span>Status Laundry Online</span></div>

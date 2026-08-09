@@ -1,0 +1,13 @@
+HAPPYLAUNDRY V113.0.11 — TRACKING KEMBALI KE APLIKASI
+
+MASALAH:
+Di iPhone/Android, saat Tracking Pelanggan dibuka dari aplikasi, pengguna sulit kembali dan terasa harus menutup aplikasi/PWA.
+
+PERBAIKAN:
+- Tracking yang dibuka dari QR Center/Order/Kasir memakai halaman yang sama, bukan tab baru.
+- URL internal membawa parameter app=1 dan from=halaman asal.
+- Halaman Tracking menampilkan tombol sticky "Kembali ke Aplikasi".
+- Tombol kembali memakai replace agar tidak kembali lagi ke Tracking saat menekan Back.
+- Tracking publik dari QR nota pelanggan tetap bersih: tombol Kembali ke Aplikasi tidak muncul jika halaman dibuka langsung oleh pelanggan.
+
+Tidak ada SQL baru.

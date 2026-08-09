@@ -1,4 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CheckCircle2, FileText, MessageCircle, Plus, Printer, QrCode, Search,
   ShoppingCart, Trash2, UserPlus, WalletCards
@@ -54,6 +55,7 @@ const methodLabels: Record<PayMethod,string> = {
 }
 
 export function CashierPage() {
+  const navigate=useNavigate()
   const [customers,setCustomers]=useState<Customer[]>([])
   const [services,setServices]=useState<Service[]>([])
   const [todayOrders,setTodayOrders]=useState<TodayOrder[]>([])

@@ -286,7 +286,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
         <button onClick={()=>navigate(`/production?order=${encodeURIComponent(order.order_no)}`)}><WashingMachine size={18}/>Produksi</button>
         <button onClick={printReceipt}><Printer size={18}/>Cetak Nota</button>
         <button onClick={openWhatsApp}><MessageCircle size={18}/>WhatsApp</button>
-        <button onClick={()=>window.open(`/track/${encodeURIComponent(order.order_no)}`,'_blank')}><ExternalLink size={18}/>Tracking Pelanggan</button>
+        <button onClick={()=>navigate(`/track/${encodeURIComponent(order.order_no)}?app=1&from=${encodeURIComponent('/qr-scan')}`)}><ExternalLink size={18}/>Tracking Pelanggan</button>
       </div>
     </section>}
   </>
