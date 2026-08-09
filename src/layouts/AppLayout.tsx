@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
-  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign, AlertTriangle, CalendarCheck2, ScanLine } from 'lucide-react'
+  CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign, AlertTriangle, CalendarCheck2, ScanLine, Target } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { canAccess, type PermissionKey } from '../lib/permissions'
@@ -19,6 +19,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/payments', label: 'Pembayaran', icon: CreditCard, permission: 'payments' },
   { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
   { to: '/finance', label: 'Keuangan', icon: CircleDollarSign, permission: 'finance' },
+  { to: '/profit-target', label: 'Laba & Target', icon: Target, roles: ['owner'] },
   { to: '/receivables', label: 'Piutang', icon: AlertTriangle, permission: 'receivables' },
   { to: '/reports', label: 'Laporan Owner', icon: BarChart3, permission: 'reports' },
   { to: '/attendance', label: 'Absen', icon: ScanLine, roles: ['employee'] },
@@ -79,7 +80,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V112.10 Loyalty Member</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0 Profit & Target</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

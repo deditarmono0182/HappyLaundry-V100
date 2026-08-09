@@ -1,0 +1,66 @@
+HAPPYLAUNDRY ENTERPRISE V113.0 — DASHBOARD LABA & TARGET BISNIS
+
+MENU BARU KHUSUS OWNER:
+Laba & Target
+
+ANGKA UTAMA:
+- Omzet Masuk Bulan Ini
+- Pengeluaran Bulan Ini
+- Laba Bersih Operasional
+- Piutang Aktif
+- Perbandingan omzet vs bulan lalu
+- Perbandingan laba vs bulan lalu
+
+DEFINISI LABA:
+Laba Bersih Operasional = pembayaran yang benar-benar masuk - pengeluaran yang tercatat.
+
+PENTING:
+Nilai order yang belum dibayar tidak dimasukkan sebagai omzet.
+Sisa order yang belum dibayar masuk ke Piutang Aktif.
+
+TARGET OWNER:
+Owner dapat mengatur per bulan:
+- Target Omzet
+- Target Laba
+- Target Jumlah Order
+- Catatan target
+
+DASHBOARD MENAMPILKAN:
+- Persentase progress target omzet
+- Persentase progress target laba
+- Persentase progress target order
+- Kekurangan menuju target
+- Rata-rata omzet yang dibutuhkan per sisa hari
+- Rata-rata laba yang dibutuhkan per sisa hari
+- Jumlah hari tersisa
+
+ANALISIS TAMBAHAN:
+- Tren omzet & laba 6 bulan
+- Margin laba
+- Rata-rata omzet per hari berjalan
+- Rata-rata nilai pembayaran
+- Top 5 layanan penyumbang omzet
+- Top 5 kategori pengeluaran
+- Piutang aktif
+
+AKSES:
+Dashboard ini hanya untuk Owner.
+Karyawan tidak melihat menu Laba & Target.
+
+WAJIB SQL BARU:
+supabase/034_v113_0_profit_target_dashboard.sql
+
+URUTAN PASANG:
+1. Supabase -> SQL Editor.
+2. Jalankan 034_v113_0_profit_target_dashboard.sql.
+3. Pastikan Success.
+4. Deploy V113.0 ke Netlify.
+5. Refresh aplikasi.
+6. Login Owner.
+7. Buka menu Laba & Target.
+8. Klik Atur Target Bulan Ini.
+9. Masukkan target omzet, laba, dan order.
+10. Simpan.
+
+CACHE:
+happylaundry-v113-0-0

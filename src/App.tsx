@@ -33,6 +33,7 @@ const AttendancePage=lazy(()=>import('./pages/AttendancePage').then(m=>({default
 const AttendanceSettingsPage=lazy(()=>import('./pages/AttendanceSettingsPage').then(m=>({default:m.AttendanceSettingsPage})))
 const OnlinePaymentSettingsPage=lazy(()=>import('./pages/OnlinePaymentSettingsPage').then(m=>({default:m.OnlinePaymentSettingsPage})))
 const LoyaltySettingsPage=lazy(()=>import('./pages/LoyaltySettingsPage').then(m=>({default:m.LoyaltySettingsPage})))
+const ProfitTargetDashboardPage=lazy(()=>import('./pages/ProfitTargetDashboardPage').then(m=>({default:m.ProfitTargetDashboardPage})))
 
 function Protected(){
   const {session,loading}=useAuth()
@@ -60,6 +61,7 @@ export default function App(){
       <Route path="payments" element={<PermissionRoute permission="payments"><PaymentsPage/></PermissionRoute>}/>
       <Route path="cash" element={<PermissionRoute permission="cash"><CashPage/></PermissionRoute>}/>
       <Route path="finance" element={<PermissionRoute permission="finance"><FinancePage/></PermissionRoute>}/>
+      <Route path="profit-target" element={<ProfitTargetDashboardPage/>}/>
       <Route path="finance/income" element={<IncomeDetailsPage/>}/>
       <Route path="finance/expenses" element={<ExpenseDetailsPage/>}/>
       <Route path="receivables" element={<PermissionRoute permission="receivables"><ReceivablesPage/></PermissionRoute>}/>

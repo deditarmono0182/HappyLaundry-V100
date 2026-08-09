@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.10 Loyalty / Member
+# HappyLaundry Enterprise V113.0 Profit & Target Dashboard
 
 ## Jalankan
 ```bash
@@ -318,3 +318,7 @@ Pengaturan WhatsApp memiliki preview visual, QRIS/rekening aktif, Copy Pesan, da
 
 ## V112.10
 Loyalty/Member: kode member, poin otomatis saat lunas, bonus member baru, riwayat poin, penyesuaian poin, filter Member, dan pengaturan Owner.
+
+
+## V113.0
+Dashboard Owner baru Laba & Target: omzet aktual, pengeluaran, laba bersih operasional, piutang, target omzet/laba/order, progress target, tren 6 bulan, top layanan dan top pengeluaran.
