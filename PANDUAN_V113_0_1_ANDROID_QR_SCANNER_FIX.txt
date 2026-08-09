@@ -1,0 +1,7 @@
+V113.0.1 Android QR Scanner Fix
+QR Center sekarang memakai html5-qrcode seperti Produksi dan Absensi.
+- pilih kamera belakang otomatis
+- tombol Coba Lagi
+- pesan error kamera lebih jelas
+- tidak perlu SQL baru
+Deploy -> Published -> tutup tab lama -> buka ulang -> QR Center -> Mulai Scan.

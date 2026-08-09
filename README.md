@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V113.0 Profit & Target Dashboard
+# HappyLaundry Enterprise V113.0.1 Android QR Scanner Fix
 
 ## Jalankan
 ```bash
@@ -322,3 +322,7 @@ Loyalty/Member: kode member, poin otomatis saat lunas, bonus member baru, riwaya
 
 ## V113.0
 Dashboard Owner baru Laba & Target: omzet aktual, pengeluaran, laba bersih operasional, piutang, target omzet/laba/order, progress target, tren 6 bulan, top layanan dan top pengeluaran.
+
+
+## V113.0.1
+QR Center memakai html5-qrcode untuk kompatibilitas tablet Android.

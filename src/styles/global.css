@@ -7991,3 +7991,12 @@ body{
   .v113-kpi span{font-size:8.6px}
   .v113-month-chart{height:180px}
 }
+
+/* HappyLaundry V113.0.1 — Android QR Scanner Fix */
+.qr-html5-camera{position:relative;overflow:hidden;min-height:360px}
+.qr-center-reader{width:100%;min-height:360px;position:relative;z-index:1}
+.qr-center-reader video{width:100%!important;min-height:360px!important;max-height:520px!important;object-fit:cover!important;border-radius:14px}
+.qr-center-reader img{display:none!important}.qr-camera-placeholder{z-index:3}.qr-camera-requesting{color:#276d98}
+.qr-camera-status{margin-top:10px;display:flex;align-items:flex-start;gap:7px;padding:9px 11px;border-radius:10px;font-size:9.5px}
+.qr-camera-status.success{border:1px solid #bce0cf;background:#edf9f3;color:#0b7d56}
+@media(max-width:700px){.qr-html5-camera,.qr-center-reader{min-height:300px}.qr-center-reader video{min-height:300px!important}}

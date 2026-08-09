@@ -1,24 +1,15 @@
-import { FormEvent, useEffect, useRef, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import {
-  Camera, CreditCard, ExternalLink, Eye, MessageCircle, Printer,
-  QrCode, Search, StopCircle, WashingMachine
+  Camera, CheckCircle2, CreditCard, ExternalLink, Eye, MessageCircle, Printer,
+  QrCode, RefreshCw, Search, StopCircle, WashingMachine
 } from 'lucide-react'
+import { Html5Qrcode } from 'html5-qrcode'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { paymentLabels, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
 import type { OrderRow } from '../types/order'
-
-type DetectorLike={
-  detect:(source:CanvasImageSource)=>Promise<Array<{rawValue:string}>>
-}
-
-declare global{
-  interface Window{
-    BarcodeDetector?:new(options?:{formats?:string[]})=>DetectorLike
-  }
-}
 
 function extractOrderNo(value:string){
   const trimmed=value.trim()
@@ -34,10 +25,8 @@ function extractOrderNo(value:string){
 
 export function QRScannerPage(){
   const navigate=useNavigate()
-  const videoRef=useRef<HTMLVideoElement|null>(null)
-  const streamRef=useRef<MediaStream|null>(null)
-  const frameRef=useRef<number|undefined>(undefined)
-  const detectorRef=useRef<DetectorLike|null>(null)
+  const scannerRef=useRef<Html5Qrcode|null>(null)
+  const scanLockedRef=useRef(false)
 
   const [manual,setManual]=useState('')
   const [scanning,setScanning]=useState(false)
@@ -45,15 +34,21 @@ export function QRScannerPage(){
   const [message,setMessage]=useState('')
   const [loading,setLoading]=useState(false)
   const [order,setOrder]=useState<OrderRow|null>(null)
+  const [cameraName,setCameraName]=useState('')
+  const [cameraState,setCameraState]=useState<'idle'|'requesting'|'ready'|'error'>('idle')
 
-  const stopCamera=()=>{
-    if(frameRef.current)cancelAnimationFrame(frameRef.current)
-    frameRef.current=undefined
-    streamRef.current?.getTracks().forEach(track=>track.stop())
-    streamRef.current=null
-    if(videoRef.current)videoRef.current.srcObject=null
+  const stopCamera=useCallback(async()=>{
+    scanLockedRef.current=false
+    const scanner=scannerRef.current
+    if(scanner){
+      try{if(scanner.isScanning)await scanner.stop()}catch{}
+      try{await scanner.clear()}catch{}
+      scannerRef.current=null
+    }
     setScanning(false)
-  }
+    setCameraState('idle')
+    setCameraName('')
+  },[])
 
   const findOrder=async(value:string)=>{
     const orderNo=extractOrderNo(value)
@@ -63,7 +58,7 @@ export function QRScannerPage(){
       return
     }
 
-    stopCamera()
+    await stopCamera()
     setLoading(true)
     setMessage('')
     setOrder(null)
@@ -89,60 +84,80 @@ export function QRScannerPage(){
     setLoading(false)
   }
 
-  const scanFrame=async()=>{
-    if(!scanning||!videoRef.current||!detectorRef.current)return
-    try{
-      const codes=await detectorRef.current.detect(videoRef.current)
-      const found=codes.find(code=>code.rawValue)
-      if(found?.rawValue){
-        void findOrder(found.rawValue)
-        return
-      }
-    }catch{}
-    frameRef.current=requestAnimationFrame(scanFrame)
-  }
-
   const startCamera=async()=>{
     setMessage('')
     setOrder(null)
+    setSupported(true)
+    setCameraState('requesting')
+    scanLockedRef.current=false
 
-    if(!('mediaDevices' in navigator)||!navigator.mediaDevices.getUserMedia){
-      setSupported(false)
-      setMessage('Browser ini tidak mendukung akses kamera. Gunakan pencarian manual.')
+    if(!window.isSecureContext){
+      setCameraState('error');setSupported(false)
+      setMessage('Kamera membutuhkan HTTPS. Buka https://happylaundrybabakancrb.com.')
       return
     }
-
-    if(!window.BarcodeDetector){
-      setSupported(false)
-      setMessage('Scan QR langsung belum didukung browser ini. Gunakan pencarian manual atau kamera bawaan HP.')
+    if(!navigator.mediaDevices?.getUserMedia){
+      setCameraState('error');setSupported(false)
+      setMessage('Browser ini tidak mendukung kamera web. Gunakan Chrome terbaru atau pencarian manual.')
       return
     }
 
     try{
-      detectorRef.current=new window.BarcodeDetector({formats:['qr_code']})
-      const stream=await navigator.mediaDevices.getUserMedia({
-        video:{facingMode:{ideal:'environment'}},
-        audio:false
-      })
-      streamRef.current=stream
-      if(videoRef.current){
-        videoRef.current.srcObject=stream
-        await videoRef.current.play()
+      await stopCamera()
+      setCameraState('requesting')
+
+      let cameras:MediaDeviceInfo[]=[]
+      try{
+        cameras=await Html5Qrcode.getCameras()
+      }catch(permissionError){
+        const err=permissionError as {name?:string;message?:string}
+        const detail=`${err?.name||''} ${err?.message||String(permissionError||'')}`
+        setCameraState('error')
+        if(/NotAllowedError|PermissionDenied|permission|denied|not allowed/i.test(detail)){
+          setMessage('Akses kamera belum diberikan ke website HappyLaundry. Tekan Coba Lagi setelah memilih Allow / Izinkan pada Chrome.')
+        }else if(/NotFoundError|DevicesNotFound|not found/i.test(detail)){
+          setMessage('Kamera tidak ditemukan pada tablet ini.')
+        }else{
+          setMessage(`Kamera belum dapat diakses: ${detail}`)
+        }
+        return
       }
-      setScanning(true)
-      frameRef.current=requestAnimationFrame(scanFrame)
+
+      const scanner=new Html5Qrcode('qr-center-reader')
+      scannerRef.current=scanner
+      const backCamera=cameras.find(camera=>/back|rear|environment|belakang/i.test(camera.label))||cameras[cameras.length-1]
+      const cameraConfig=backCamera?.id?{deviceId:{exact:backCamera.id}}:{facingMode:'environment'}
+      if(backCamera?.label)setCameraName(backCamera.label)
+
+      setScanning(true);setCameraState('ready')
+      await scanner.start(
+        cameraConfig,
+        {fps:10,qrbox:{width:260,height:260},aspectRatio:1},
+        decodedText=>{
+          if(scanLockedRef.current)return
+          scanLockedRef.current=true
+          void findOrder(decodedText)
+        },
+        ()=>{}
+      )
     }catch(error){
-      const text=error instanceof Error?error.message:''
-      if(/permission|denied|notallowed/i.test(text)){
-        setMessage('Izin kamera ditolak. Izinkan akses Kamera untuk HappyLaundry, lalu coba Mulai Scan lagi.')
+      setScanning(false);setCameraState('error')
+      const err=error as {name?:string;message?:string}
+      const detail=`${err?.name||''} ${err?.message||String(error||'')}`
+      if(/NotAllowedError|PermissionDenied|permission|denied|not allowed/i.test(detail)){
+        setMessage('Izin kamera ditolak oleh Chrome. Pastikan Camera = Allow, lalu tekan Coba Lagi.')
+      }else if(/NotReadableError|TrackStartError|Could not start|in use/i.test(detail)){
+        setMessage('Kamera sedang dipakai aplikasi lain. Tutup aplikasi Kamera/Video Call, lalu tekan Coba Lagi.')
       }else{
-        setMessage(text||'Kamera tidak dapat dibuka. Gunakan pencarian manual.')
+        setMessage(`Kamera tidak dapat dibuka: ${detail}. Tekan Coba Lagi.`)
       }
-      setScanning(false)
+      try{if(scannerRef.current?.isScanning)await scannerRef.current.stop();await scannerRef.current?.clear()}catch{}
+      scannerRef.current=null
     }
   }
 
-  useEffect(()=>()=>stopCamera(),[])
+
+  useEffect(()=>()=>{void stopCamera()},[stopCamera])
 
   const submit=(event:FormEvent)=>{
     event.preventDefault()
@@ -198,24 +213,25 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
         <div className="qr-camera-head">
           <div><QrCode size={24}/><div><h2>Scan QR Nota</h2><p>Arahkan kamera ke QR pada nota HappyLaundry.</p></div></div>
           {scanning
-            ? <button className="secondary-button" onClick={stopCamera}><StopCircle size={17}/>Stop Kamera</button>
-            : <button className="primary-button" onClick={()=>void startCamera()}><Camera size={17}/>Mulai Scan</button>}
+            ? <button className="secondary-button" onClick={()=>void stopCamera()}><StopCircle size={17}/>Stop Kamera</button>
+            : <button className="primary-button" onClick={()=>void startCamera()}>
+                {cameraState==='error'?<RefreshCw size={17}/>:<Camera size={17}/>}
+                {cameraState==='requesting'?'Meminta Kamera...':cameraState==='error'?'Coba Lagi':'Mulai Scan'}
+              </button>}
         </div>
 
-        <div className={`qr-camera-box ${scanning?'active':''}`}>
-          <video ref={videoRef} playsInline muted/>
-          {!scanning&&<div className="qr-camera-placeholder">
-            <QrCode size={58}/>
-            <b>Scanner QR</b>
-            <span>Scan QR untuk mencari order langsung di aplikasi.</span>
+        <div className={`qr-camera-box qr-html5-camera ${scanning?'active':''}`}>
+          <div id="qr-center-reader" className="qr-center-reader"/>
+          {!scanning&&cameraState!=='requesting'&&<div className="qr-camera-placeholder">
+            <QrCode size={58}/><b>Scanner QR</b><span>Tekan Mulai Scan untuk membuka kamera belakang tablet.</span>
+          </div>}
+          {cameraState==='requesting'&&<div className="qr-camera-placeholder qr-camera-requesting">
+            <Camera size={52}/><b>Meminta akses kamera…</b><span>Jika Chrome meminta izin, pilih Allow / Izinkan.</span>
           </div>}
           {scanning&&<div className="qr-target"><i/><i/><i/><i/></div>}
         </div>
-
-        {!supported&&<div className="qr-browser-note">
-          <b>Untuk iPhone:</b>
-          <span>Jika scan langsung tidak tersedia, gunakan pencarian manual di sebelah atau kamera iPhone.</span>
-        </div>}
+        {scanning&&<div className="qr-camera-status success"><CheckCircle2 size={16}/><span>Kamera aktif{cameraName?` • ${cameraName}`:''}. Arahkan QR nota ke kotak scanner.</span></div>}
+        {!supported&&<div className="qr-browser-note"><b>Scanner kamera tidak tersedia:</b><span>Gunakan Chrome terbaru atau pencarian nomor order manual.</span></div>}
       </article>
 
       <article className="panel qr-manual-card qr-search-order">
