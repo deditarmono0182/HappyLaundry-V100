@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import {
-  Camera, CheckCircle2, CreditCard, ExternalLink, Eye, MessageCircle, Printer,
+  Camera, CheckCircle2, CreditCard, ExternalLink, Eye, ImageUp, MessageCircle, Printer,
   QrCode, RefreshCw, Search, StopCircle, WashingMachine
 } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
@@ -38,6 +38,8 @@ export function QRScannerPage(){
   const [cameras,setCameras]=useState<Array<{id:string;label:string}>>([])
   const [selectedCameraId,setSelectedCameraId]=useState('')
   const [cameraState,setCameraState]=useState<'idle'|'requesting'|'ready'|'error'>('idle')
+  const [cameraDiagnostics,setCameraDiagnostics]=useState<string[]>([])
+  const [scanFileBusy,setScanFileBusy]=useState(false)
 
   const stopCamera=useCallback(async()=>{
     scanLockedRef.current=false
@@ -54,155 +56,70 @@ export function QRScannerPage(){
 
   const findOrder=async(value:string)=>{
     const orderNo=extractOrderNo(value)
-    if(!orderNo){
-      setMessage('Nomor order tidak dikenali.')
-      setOrder(null)
-      return
-    }
-
-    await stopCamera()
-    setLoading(true)
-    setMessage('')
-    setOrder(null)
-    setManual(orderNo)
-
-    const {data,error}=await supabase.rpc('v110_qr_find_order',{
-      p_order_no:orderNo
-    })
-
-    if(error){
-      const text=error.message||''
-      if(/permission|not allowed|akses/i.test(text)){
-        setMessage('Akun ini tidak memiliki akses QR Center.')
-      }else{
-        setMessage('Order tidak dapat dibuka. Coba ulangi atau hubungi Owner.')
+    if(!orderNo){setMessage('Nomor order tidak dikenali.');setOrder(null);scanLockedRef.current=false;return}
+    await stopCamera();setLoading(true);setMessage('');setOrder(null);setManual(orderNo)
+    try{
+      const {data:direct,error}=await supabase.from('v100_orders')
+        .select('id,order_no,customer_id,status,payment_status,total,paid_amount,created_at')
+        .eq('order_no',orderNo).maybeSingle()
+      if(error)throw error
+      if(!direct){setMessage(`Order ${orderNo} tidak ditemukan di aplikasi.`);return}
+      let customer_name='Pelanggan',customer_phone=''
+      if(direct.customer_id){
+        const {data:c}=await supabase.from('v100_customers').select('name,phone').eq('id',direct.customer_id).maybeSingle()
+        if(c){customer_name=c.name||customer_name;customer_phone=c.phone||''}
       }
-    }else{
-      const row=(Array.isArray(data)?data[0]:data) as OrderRow|undefined|null
-      if(!row)setMessage(`Order ${orderNo} tidak ditemukan di aplikasi.`)
-      else setOrder(row)
-    }
-
-    setLoading(false)
+      setOrder({...direct,customer_name,customer_phone} as OrderRow)
+    }catch(error){
+      setMessage(`Database gagal membuka ${orderNo}: ${error instanceof Error?error.message:String(error)}`)
+    }finally{setLoading(false);scanLockedRef.current=false}
   }
+
+  const addCameraDiagnostic=(text:string)=>setCameraDiagnostics(current=>[...current.slice(-7),text])
 
   const startCamera=async(preferredCameraId?:string)=>{
-    setMessage('')
-    setOrder(null)
-    setSupported(true)
-    setCameraState('requesting')
-    scanLockedRef.current=false
-
-    if(!window.isSecureContext){
-      setCameraState('error');setSupported(false)
-      setMessage('Kamera membutuhkan koneksi HTTPS.')
-      return
-    }
-    if(!navigator.mediaDevices?.getUserMedia){
-      setCameraState('error');setSupported(false)
-      setMessage('Browser ini tidak mendukung kamera web. Gunakan Chrome terbaru atau pencarian manual.')
-      return
-    }
-
+    setMessage('');setOrder(null);setSupported(true);setCameraState('requesting');setCameraDiagnostics([]);scanLockedRef.current=false
+    if(!window.isSecureContext){setCameraState('error');setSupported(false);setMessage('Kamera membutuhkan HTTPS.');return}
+    if(!navigator.mediaDevices?.getUserMedia){setCameraState('error');setSupported(false);setMessage('Browser ini tidak menyediakan akses kamera web.');return}
     try{
-      await stopCamera()
-      setCameraState('requesting')
-
-      // Android Chrome/Samsung tablet is more reliable when permission is
-      // requested directly through getUserMedia before html5-qrcode enumerates devices.
-      let permissionStream:MediaStream|null=null
-      try{
-        permissionStream=await navigator.mediaDevices.getUserMedia({
-          audio:false,
-          video:{facingMode:{ideal:'environment'}}
-        })
-      }catch(permissionError){
-        const err=permissionError as {name?:string;message?:string}
-        const detail=`${err?.name||''} ${err?.message||String(permissionError||'')}`
-        setCameraState('error')
-        if(/NotAllowedError|PermissionDenied|permission|denied|not allowed/i.test(detail)){
-          setMessage('Chrome belum mengizinkan kamera untuk HappyLaundry. Buka izin situs Camera = Allow, lalu tekan Coba Lagi.')
-        }else if(/NotFoundError|DevicesNotFound|not found/i.test(detail)){
-          setMessage('Kamera tidak ditemukan pada tablet ini.')
-        }else if(/NotReadableError|TrackStartError|in use/i.test(detail)){
-          setMessage('Kamera sedang dipakai aplikasi lain. Tutup aplikasi Kamera/Video Call lalu coba lagi.')
-        }else{
-          setMessage(`Kamera belum dapat dibuka: ${detail}`)
-        }
-        return
-      }finally{
-        // Release the permission probe before html5-qrcode opens the real stream.
-        permissionStream?.getTracks().forEach(track=>track.stop())
-      }
+      await stopCamera();addCameraDiagnostic('Meminta izin kamera...')
+      let probe:MediaStream|null=null
+      try{probe=await navigator.mediaDevices.getUserMedia({video:true,audio:false});addCameraDiagnostic('Izin kamera berhasil.')}
+      catch(error){const d=error instanceof Error?`${error.name}: ${error.message}`:String(error);addCameraDiagnostic(d);setCameraState('error');setMessage(/NotAllowed|denied|permission/i.test(d)?'Izin kamera ditolak. Aktifkan Camera = Allow.':`Kamera tidak dapat diakses: ${d}`);return}
+      finally{probe?.getTracks().forEach(x=>x.stop())}
 
       let available:Array<{id:string;label:string}>=[]
-      try{
-        available=await Html5Qrcode.getCameras()
-      }catch{}
-      setCameras(available)
-
+      try{available=await Html5Qrcode.getCameras();setCameras(available);addCameraDiagnostic(`${available.length} kamera terdeteksi.`)}catch(e){addCameraDiagnostic(`Daftar kamera gagal: ${String(e)}`)}
+      const scanner=new Html5Qrcode('qr-center-reader',{verbose:false});scannerRef.current=scanner
       const preferred=preferredCameraId||selectedCameraId
-      const chosen=
-        available.find(camera=>camera.id===preferred)||
-        available.find(camera=>/back|rear|environment|belakang|0,\s*facing back/i.test(camera.label))||
-        available[available.length-1]
-
-      if(chosen){
-        setSelectedCameraId(chosen.id)
-        setCameraName(chosen.label||'Kamera belakang')
-      }else{
-        setCameraName('Kamera belakang')
+      const candidates:Array<{config:string|MediaTrackConstraints;label:string;id?:string}>=[]
+      if(preferred){const c=available.find(x=>x.id===preferred);candidates.push({config:preferred,label:c?.label||'Kamera pilihan',id:preferred})}
+      candidates.push({config:{facingMode:'environment'},label:'Kamera belakang'})
+      for(const c of available.filter(x=>/back|rear|environment|belakang/i.test(x.label)))if(!candidates.some(x=>x.id===c.id))candidates.push({config:c.id,label:c.label||'Kamera belakang',id:c.id})
+      for(const c of available)if(!candidates.some(x=>x.id===c.id))candidates.push({config:c.id,label:c.label||'Kamera',id:c.id})
+      let last:unknown=null
+      for(const candidate of candidates){
+        try{
+          addCameraDiagnostic(`Mencoba ${candidate.label}...`)
+          await scanner.start(candidate.config,{fps:10,qrbox:(w:number,h:number)=>{const e=Math.max(170,Math.min(280,Math.floor(Math.min(w,h)*.68)));return{width:e,height:e}}},
+            decoded=>{if(scanLockedRef.current)return;scanLockedRef.current=true;void findOrder(decoded)},()=>{})
+          setScanning(true);setCameraState('ready');setCameraName(candidate.label);if(candidate.id)setSelectedCameraId(candidate.id);addCameraDiagnostic(`${candidate.label} aktif.`);return
+        }catch(e){last=e;addCameraDiagnostic(`${candidate.label} gagal: ${String(e)}`);try{if(scanner.isScanning)await scanner.stop()}catch{}}
       }
-
-      const scanner=new Html5Qrcode('qr-center-reader',{verbose:false})
-      scannerRef.current=scanner
-
-      setScanning(true)
-      setCameraState('ready')
-
-      // Use plain device id when known. Some Android Chromium builds reject
-      // MediaTrackConstraints {deviceId:{exact:...}} passed through html5-qrcode.
-      const cameraConfig:string|MediaTrackConstraints=
-        chosen?.id ? chosen.id : {facingMode:'environment'}
-
-      await scanner.start(
-        cameraConfig,
-        {
-          fps:12,
-          qrbox:(viewWidth:number,viewHeight:number)=>{
-            const edge=Math.max(180,Math.min(300,Math.floor(Math.min(viewWidth,viewHeight)*0.72)))
-            return {width:edge,height:edge}
-          },
-          aspectRatio:1
-        },
-        decodedText=>{
-          if(scanLockedRef.current)return
-          scanLockedRef.current=true
-          void findOrder(decodedText)
-        },
-        ()=>{}
-      )
+      throw last||new Error('Semua kamera gagal dibuka.')
     }catch(error){
-      setScanning(false);setCameraState('error')
-      const err=error as {name?:string;message?:string}
-      const detail=`${err?.name||''} ${err?.message||String(error||'')}`
-      if(/NotAllowedError|PermissionDenied|permission|denied|not allowed/i.test(detail)){
-        setMessage('Izin kamera ditolak oleh Chrome. Pastikan Camera = Allow, lalu tekan Coba Lagi.')
-      }else if(/NotReadableError|TrackStartError|Could not start|in use/i.test(detail)){
-        setMessage('Kamera tidak bisa dipakai. Tutup aplikasi lain yang memakai kamera, lalu tekan Coba Lagi.')
-      }else if(/Overconstrained|constraint/i.test(detail)){
-        setMessage('Kamera yang dipilih tidak kompatibel. Pilih kamera lain lalu coba lagi.')
-      }else{
-        setMessage(`Scanner gagal membuka kamera: ${detail}. Coba pilih kamera lain atau gunakan pencarian manual.`)
-      }
-      try{
-        if(scannerRef.current?.isScanning)await scannerRef.current.stop()
-        await scannerRef.current?.clear()
-      }catch{}
-      scannerRef.current=null
+      setScanning(false);setCameraState('error');setMessage(`Kamera live gagal. Gunakan Scan dari Foto/Galeri. ${error instanceof Error?error.message:String(error)}`)
+      try{if(scannerRef.current?.isScanning)await scannerRef.current.stop();await scannerRef.current?.clear()}catch{};scannerRef.current=null
     }
   }
 
+  const scanFromFile=async(file:File|null)=>{
+    if(!file)return
+    setScanFileBusy(true);setMessage('');setOrder(null)
+    try{await stopCamera();const scanner=new Html5Qrcode('qr-center-reader',{verbose:false});scannerRef.current=scanner;const decoded=await scanner.scanFile(file,true);await findOrder(decoded)}
+    catch(error){setMessage(`QR tidak terbaca dari foto. Pastikan QR terlihat jelas. ${error instanceof Error?error.message:String(error)}`)}
+    finally{try{await scannerRef.current?.clear()}catch{};scannerRef.current=null;setScanFileBusy(false)}
+  }
 
   useEffect(()=>()=>{void stopCamera()},[stopCamera])
 
@@ -291,7 +208,14 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
           </label>
           <small>Jika QR tidak terbaca, pilih kamera belakang/rear.</small>
         </div>}
-        {!supported&&<div className="qr-browser-note"><b>Scanner kamera tidak tersedia:</b><span>Gunakan Chrome terbaru atau pencarian nomor order manual.</span></div>}
+        <div className="qr-photo-fallback">
+          <label className="secondary-button qr-photo-button"><ImageUp size={17}/>{scanFileBusy?'Membaca Foto...':'Scan dari Foto / Galeri'}
+            <input type="file" accept="image/*" disabled={scanFileBusy} onChange={e=>{const file=e.target.files?.[0]||null;void scanFromFile(file);e.currentTarget.value=''}}/>
+          </label>
+          <small>Jika kamera live tablet gagal, foto QR nota lalu pilih fotonya.</small>
+        </div>
+        {cameraDiagnostics.length>0&&<details className="qr-camera-diagnostics"><summary>Diagnostik Kamera</summary><div>{cameraDiagnostics.map((line,index)=><code key={index}>{line}</code>)}</div></details>}
+        {!supported&&<div className="qr-browser-note"><b>Scanner kamera tidak tersedia:</b><span>Gunakan Scan dari Foto/Galeri atau pencarian nomor order manual.</span></div>}
       </article>
 
       <article className="panel qr-manual-card qr-search-order">

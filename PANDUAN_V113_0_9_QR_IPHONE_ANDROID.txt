@@ -1,0 +1,1 @@
+iPhone: lookup QR langsung ke order. Android: multi-camera + Scan dari Foto/Galeri + Diagnostik Kamera. Tidak ada SQL baru.

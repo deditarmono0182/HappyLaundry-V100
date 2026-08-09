@@ -8267,3 +8267,5 @@ body{
 .qr-camera-selector select{width:100%;min-height:38px;border:1px solid #bad7e7;border-radius:9px;background:#fff;padding:0 10px;color:#244c5d;font-weight:700}
 .qr-camera-selector small{display:block;margin-top:6px;color:#708895;font-size:8.5px}
 #qr-center-reader video{object-fit:cover!important}
+
+.qr-photo-fallback{display:grid;gap:5px;margin-top:10px}.qr-photo-button{position:relative;overflow:hidden;cursor:pointer}.qr-photo-button input{position:absolute;width:1px;height:1px;opacity:0}.qr-photo-fallback small{font-size:8.5px;color:#718995}.qr-camera-diagnostics{margin-top:10px;border:1px solid #d9e5ea;border-radius:10px;background:#f9fcfd;overflow:hidden}.qr-camera-diagnostics summary{cursor:pointer;padding:9px 11px;font-size:9px;font-weight:900;color:#426576}.qr-camera-diagnostics>div{display:grid;gap:3px;padding:0 11px 10px}.qr-camera-diagnostics code{white-space:normal;word-break:break-word;font-size:8px;color:#667f8c;background:#fff;padding:4px 6px;border-radius:6px;border:1px solid #e8eff2}
