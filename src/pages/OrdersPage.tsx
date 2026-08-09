@@ -906,7 +906,7 @@ export function OrdersPage() {
                         title={profile?.role==='owner'?'Hapus Order':'Ajukan Hapus ke Owner'}
                       >
                         <Trash2 size={15}/>
-                        <span>{profile?.role==='owner'?'Hapus':'Ajukan Hapus'}</span>
+                        <span className="delete-label">{profile?.role==='owner'?'Hapus':'Ajukan Hapus'}</span>
                       </button>
 
                     </div>

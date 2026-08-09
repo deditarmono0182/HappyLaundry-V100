@@ -188,7 +188,7 @@ export function ExpenseDetailsPage(){
                 : <span className="expense-proof-empty">-</span>}</td>
               <td><b className="expense-amount">{formatRupiah(Number(r.amount))}</b></td>
               <td>{r.payment_method!=='payroll'
-                ? <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(r as ExpenseRow);setDeleteReason('');setDeletePhrase('')}}><Trash2 size={14}/>{isOwner?'Hapus':'Ajukan Hapus'}</button>
+                ? <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(r as ExpenseRow);setDeleteReason('');setDeletePhrase('')}}><Trash2 size={14}/><span className="delete-label">{isOwner?'Hapus':'Ajukan Hapus'}</span></button>
                 : <span className="expense-proof-empty">-</span>}</td>
             </tr>)}
           </tbody>

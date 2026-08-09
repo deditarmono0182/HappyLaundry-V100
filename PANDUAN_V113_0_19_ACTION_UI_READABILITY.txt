@@ -1,0 +1,16 @@
+HAPPYLAUNDRY V113.0.19 — ACTION UI READABILITY
+
+Fokus:
+Membuat tombol aksi tabel lebih jelas dan profesional.
+
+Perubahan:
+- Tombol Hapus/Ajukan Hapus lebih jelas, merah lembut, tidak transparan.
+- Teks Hapus tidak lagi terlalu kecil.
+- Cetak Ulang Nota, Konfirmasi Kurir, Lihat, dan tombol aksi lain disamakan tinggi/ukuran.
+- Icon aksi diseragamkan.
+- Badge status/pembayaran dibuat lebih terbaca.
+- Jarak antar tombol lebih nyaman.
+- Compact/Ultra Compact tetap padat tapi teks aksi tetap terbaca.
+- Tablet/mobile mendapat target tombol lebih besar agar mudah disentuh.
+
+Tidak ada SQL baru.

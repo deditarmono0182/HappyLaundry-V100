@@ -555,7 +555,7 @@ export function FinancePage(){
               <td><b>{formatRupiah(Number(row.amount))}</b></td>
               <td>{row.payment_method!=='payroll'
                 ? <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(row as ExpenseRow);setDeleteReason('');setDeletePhrase('');setMessage('')}}>
-                    <Trash2 size={14}/>{isOwner?'Hapus':'Ajukan Hapus'}
+                    <Trash2 size={14}/><span className="delete-label">{isOwner?'Hapus':'Ajukan Hapus'}</span>
                   </button>
                 : <span className="expense-proof-empty">-</span>}</td>
             </tr>)}
