@@ -78,45 +78,105 @@ export function QRScannerPage(){
   const addCameraDiagnostic=(text:string)=>setCameraDiagnostics(current=>[...current.slice(-7),text])
 
   const startCamera=async(preferredCameraId?:string)=>{
-    setMessage('');setOrder(null);setSupported(true);setCameraState('requesting');setCameraDiagnostics([]);scanLockedRef.current=false
+    setMessage('');setOrder(null);setSupported(true);setCameraDiagnostics([]);scanLockedRef.current=false
     if(!window.isSecureContext){setCameraState('error');setSupported(false);setMessage('Kamera membutuhkan HTTPS.');return}
     if(!navigator.mediaDevices?.getUserMedia){setCameraState('error');setSupported(false);setMessage('Browser ini tidak menyediakan akses kamera web.');return}
-    try{
-      await stopCamera();addCameraDiagnostic('Meminta izin kamera...')
-      let probe:MediaStream|null=null
-      try{probe=await navigator.mediaDevices.getUserMedia({video:true,audio:false});addCameraDiagnostic('Izin kamera berhasil.')}
-      catch(error){const d=error instanceof Error?`${error.name}: ${error.message}`:String(error);addCameraDiagnostic(d);setCameraState('error');setMessage(/NotAllowed|denied|permission/i.test(d)?'Izin kamera ditolak. Aktifkan Camera = Allow.':`Kamera tidak dapat diakses: ${d}`);return}
-      finally{probe?.getTracks().forEach(x=>x.stop())}
 
-      let available:Array<{id:string;label:string}>=[]
-      try{available=await Html5Qrcode.getCameras();setCameras(available);addCameraDiagnostic(`${available.length} kamera terdeteksi.`)}catch(e){addCameraDiagnostic(`Daftar kamera gagal: ${String(e)}`)}
-      const scanner=new Html5Qrcode('qr-center-reader',{
-        verbose:false,
-        formatsToSupport:[
-          Html5QrcodeSupportedFormats.QR_CODE,
-          Html5QrcodeSupportedFormats.CODE_39,
-          Html5QrcodeSupportedFormats.CODE_128
-        ]
-      });scannerRef.current=scanner
-      const preferred=preferredCameraId||selectedCameraId
-      const candidates:Array<{config:string|MediaTrackConstraints;label:string;id?:string}>=[]
-      if(preferred){const c=available.find(x=>x.id===preferred);candidates.push({config:preferred,label:c?.label||'Kamera pilihan',id:preferred})}
-      candidates.push({config:{facingMode:'environment'},label:'Kamera belakang'})
-      for(const c of available.filter(x=>/back|rear|environment|belakang/i.test(x.label)))if(!candidates.some(x=>x.id===c.id))candidates.push({config:c.id,label:c.label||'Kamera belakang',id:c.id})
-      for(const c of available)if(!candidates.some(x=>x.id===c.id))candidates.push({config:c.id,label:c.label||'Kamera',id:c.id})
-      let last:unknown=null
-      for(const candidate of candidates){
-        try{
-          addCameraDiagnostic(`Mencoba ${candidate.label}...`)
-          await scanner.start(candidate.config,{fps:10,qrbox:(w:number,h:number)=>{const e=Math.max(170,Math.min(280,Math.floor(Math.min(w,h)*.68)));return{width:e,height:e}}},
-            decoded=>{if(scanLockedRef.current)return;scanLockedRef.current=true;void findOrder(decoded)},()=>{})
-          setScanning(true);setCameraState('ready');setCameraName(candidate.label);if(candidate.id)setSelectedCameraId(candidate.id);addCameraDiagnostic(`${candidate.label} aktif.`);return
-        }catch(e){last=e;addCameraDiagnostic(`${candidate.label} gagal: ${String(e)}`);try{if(scanner.isScanning)await scanner.stop()}catch{}}
+    // Android fix: jangan melakukan probe getUserMedia() terpisah sebelum scanner.
+    // Beberapa Chrome/Samsung tablet menolak request kedua atau menyimpan state permission
+    // secara tidak konsisten. Html5Qrcode sekarang menjadi satu-satunya pemilik stream kamera.
+    await stopCamera()
+    setCameraState('requesting')
+    addCameraDiagnostic('Membuka kamera langsung melalui scanner...')
+
+    const scanner=new Html5Qrcode('qr-center-reader',{
+      verbose:false,
+      formatsToSupport:[
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.CODE_128
+      ]
+    })
+    scannerRef.current=scanner
+
+    const scanConfig={
+      fps:10,
+      qrbox:(w:number,h:number)=>{
+        const e=Math.max(170,Math.min(280,Math.floor(Math.min(w,h)*.68)))
+        return {width:e,height:e}
       }
-      throw last||new Error('Semua kamera gagal dibuka.')
-    }catch(error){
-      setScanning(false);setCameraState('error');setMessage(`Kamera live gagal. Gunakan Scan dari Foto/Galeri. ${error instanceof Error?error.message:String(error)}`)
-      try{if(scannerRef.current?.isScanning)await scannerRef.current.stop();await scannerRef.current?.clear()}catch{};scannerRef.current=null
+    }
+    const onDecoded=(decoded:string)=>{
+      if(scanLockedRef.current)return
+      scanLockedRef.current=true
+      void findOrder(decoded)
+    }
+
+    try{
+      // Request pertama dibuat sesederhana webcam test: video camera biasa.
+      // facingMode hanya preference, bukan syarat mutlak.
+      const preferred=preferredCameraId||selectedCameraId
+      if(preferred){
+        addCameraDiagnostic('Mencoba kamera pilihan...')
+        await scanner.start(preferred,scanConfig,onDecoded,()=>{})
+        setSelectedCameraId(preferred)
+        setCameraName(cameras.find(x=>x.id===preferred)?.label||'Kamera pilihan')
+      }else{
+        addCameraDiagnostic('Mencoba kamera default browser...')
+        await scanner.start({facingMode:{ideal:'environment'}},scanConfig,onDecoded,()=>{})
+        setCameraName('Kamera browser')
+      }
+
+      setScanning(true)
+      setCameraState('ready')
+      addCameraDiagnostic('Kamera aktif.')
+
+      // Daftar perangkat baru dibaca SETELAH stream berhasil dibuka.
+      try{
+        const available=await Html5Qrcode.getCameras()
+        setCameras(available)
+        addCameraDiagnostic(`${available.length} kamera terdeteksi.`)
+      }catch(e){
+        addCameraDiagnostic(`Daftar kamera tidak tersedia: ${String(e)}`)
+      }
+    }catch(firstError){
+      addCameraDiagnostic(`Kamera default gagal: ${firstError instanceof Error?`${firstError.name}: ${firstError.message}`:String(firstError)}`)
+      try{if(scanner.isScanning)await scanner.stop()}catch{}
+      try{await scanner.clear()}catch{}
+      scannerRef.current=null
+
+      // Fallback Android paling sederhana: enumerasi lalu buka device pertama tanpa
+      // memaksa rear/back camera. Ini meniru perilaku situs webcam yang sudah terbukti bekerja.
+      try{
+        addCameraDiagnostic('Fallback: mencari kamera yang tersedia...')
+        const available=await Html5Qrcode.getCameras()
+        setCameras(available)
+        if(!available.length)throw firstError
+        const rear=available.find(x=>/back|rear|environment|belakang/i.test(x.label))
+        const chosen=rear||available[0]
+        const fallbackScanner=new Html5Qrcode('qr-center-reader',{
+          verbose:false,
+          formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.CODE_128]
+        })
+        scannerRef.current=fallbackScanner
+        addCameraDiagnostic(`Fallback mencoba ${chosen.label||'kamera pertama'}...`)
+        await fallbackScanner.start(chosen.id,scanConfig,onDecoded,()=>{})
+        setSelectedCameraId(chosen.id)
+        setCameraName(chosen.label||'Kamera')
+        setScanning(true)
+        setCameraState('ready')
+        addCameraDiagnostic('Fallback kamera aktif.')
+      }catch(error){
+        setScanning(false)
+        setCameraState('error')
+        const d=error instanceof Error?`${error.name}: ${error.message}`:String(error)
+        addCameraDiagnostic(d)
+        setMessage(/NotAllowed|denied|permission/i.test(d)
+          ?'Chrome masih menolak stream kamera untuk halaman ini. Gunakan Scan dari Foto/Galeri sementara.'
+          :`Kamera live gagal: ${d}`)
+        try{if(scannerRef.current?.isScanning)await scannerRef.current.stop();await scannerRef.current?.clear()}catch{}
+        scannerRef.current=null
+      }
     }
   }
 

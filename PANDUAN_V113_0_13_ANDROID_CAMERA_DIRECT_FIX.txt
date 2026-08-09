@@ -1,0 +1,12 @@
+HAPPYLAUNDRY V113.0.13 — ANDROID CAMERA DIRECT FIX
+
+Perbaikan QR Center Android/Samsung tablet:
+- Menghapus probe getUserMedia terpisah sebelum scanner.
+- Scanner membuka satu stream kamera secara langsung.
+- Request awal memakai kamera browser dengan facingMode sebagai preference, bukan syarat keras.
+- Enumerasi kamera dilakukan setelah stream berhasil.
+- Ada fallback ke kamera belakang/pertama yang terdeteksi.
+- Scan dari Foto/Galeri tetap tersedia.
+- Tidak ada SQL baru.
+
+Setelah deploy: refresh aplikasi / tutup-buka PWA agar service worker V113.0.13 aktif.
