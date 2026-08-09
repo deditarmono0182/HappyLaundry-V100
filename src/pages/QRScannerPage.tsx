@@ -122,8 +122,8 @@ export function QRScannerPage(){
         setSelectedCameraId(preferred)
         setCameraName(cameras.find(x=>x.id===preferred)?.label||'Kamera pilihan')
       }else{
-        addCameraDiagnostic('Mencoba kamera default browser...')
-        await scanner.start({facingMode:{ideal:'environment'}},scanConfig,onDecoded,()=>{})
+        addCameraDiagnostic('Mencoba kamera belakang dengan facingMode environment...')
+        await scanner.start({facingMode:'environment'},scanConfig,onDecoded,()=>{})
         setCameraName('Kamera browser')
       }
 
@@ -145,10 +145,30 @@ export function QRScannerPage(){
       try{await scanner.clear()}catch{}
       scannerRef.current=null
 
-      // Fallback Android paling sederhana: enumerasi lalu buka device pertama tanpa
-      // memaksa rear/back camera. Ini meniru perilaku situs webcam yang sudah terbukti bekerja.
+      // Fallback 1: coba kamera depan/default sebagai string constraint sederhana.
+      // Webcam Test pada tablet terbukti membuka Camera 1 (facing front).
       try{
-        addCameraDiagnostic('Fallback: mencari kamera yang tersedia...')
+        const fallbackScanner=new Html5Qrcode('qr-center-reader',{
+          verbose:false,
+          formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.CODE_128]
+        })
+        scannerRef.current=fallbackScanner
+        addCameraDiagnostic('Fallback 1: mencoba kamera depan/default...')
+        await fallbackScanner.start({facingMode:'user'},scanConfig,onDecoded,()=>{})
+        setCameraName('Kamera depan/default')
+        setScanning(true)
+        setCameraState('ready')
+        addCameraDiagnostic('Fallback 1 berhasil: kamera aktif.')
+        return
+      }catch(frontError){
+        addCameraDiagnostic(`Fallback 1 gagal: ${frontError instanceof Error?`${frontError.name}: ${frontError.message}`:String(frontError)}`)
+        try{if(scannerRef.current?.isScanning)await scannerRef.current.stop();await scannerRef.current?.clear()}catch{}
+        scannerRef.current=null
+      }
+
+      // Fallback 2: baru enumerasi device setelah kedua facingMode sederhana dicoba.
+      try{
+        addCameraDiagnostic('Fallback 2: mencari kamera yang tersedia...')
         const available=await Html5Qrcode.getCameras()
         setCameras(available)
         if(!available.length)throw firstError
@@ -159,13 +179,13 @@ export function QRScannerPage(){
           formatsToSupport:[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.CODE_128]
         })
         scannerRef.current=fallbackScanner
-        addCameraDiagnostic(`Fallback mencoba ${chosen.label||'kamera pertama'}...`)
+        addCameraDiagnostic(`Fallback 2 mencoba ${chosen.label||'kamera pertama'}...`)
         await fallbackScanner.start(chosen.id,scanConfig,onDecoded,()=>{})
         setSelectedCameraId(chosen.id)
         setCameraName(chosen.label||'Kamera')
         setScanning(true)
         setCameraState('ready')
-        addCameraDiagnostic('Fallback kamera aktif.')
+        addCameraDiagnostic('Fallback 2 berhasil: kamera aktif.')
       }catch(error){
         setScanning(false)
         setCameraState('error')

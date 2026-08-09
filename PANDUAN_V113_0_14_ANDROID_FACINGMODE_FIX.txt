@@ -1,0 +1,25 @@
+HAPPYLAUNDRY V113.0.14 — ANDROID FACINGMODE FIX
+
+PENYEBAB V113.0.13:
+Diagnostik tablet menampilkan:
+facingMode should be string or object with exact as key
+
+PERBAIKAN:
+- Mengubah constraint dari facingMode:{ideal:'environment'}
+  menjadi facingMode:'environment'.
+- Jika kamera belakang gagal, otomatis mencoba facingMode:'user'
+  karena Webcam Test terbukti membuka kamera depan/default tablet.
+- Baru setelah itu aplikasi mencoba enumerasi device kamera.
+- Tidak ada probe getUserMedia terpisah.
+- QR, Code 39, Code 128 tetap aktif.
+- Scan dari Foto/Galeri tetap tersedia.
+
+TIDAK ADA SQL BARU.
+
+TES:
+1. Deploy V113.0.14.
+2. Tunggu Netlify Published.
+3. Tutup tab/PWA HappyLaundry di tablet.
+4. Buka kembali.
+5. QR & Barcode Center -> Mulai Scan.
+6. Lihat Diagnostik Kamera jika masih gagal.
