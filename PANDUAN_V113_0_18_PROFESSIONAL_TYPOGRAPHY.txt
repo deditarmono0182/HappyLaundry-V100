@@ -1,0 +1,23 @@
+HAPPYLAUNDRY V113.0.18 — PROFESSIONAL TYPOGRAPHY
+
+Tujuan:
+Menyamakan ukuran dan ketebalan huruf seluruh aplikasi agar lebih nyaman,
+mudah dibaca, dan terlihat profesional di desktop, tablet, serta iPhone.
+
+Perubahan utama:
+- Judul halaman dibuat konsisten dan tidak terlalu besar.
+- Heading panel/kartu memakai skala yang seragam.
+- Isi tabel dibuat sekitar 12–13 px dan tetap terbaca pada Compact/Ultra Compact.
+- Teks bantuan/small tidak lagi turun ke 7–9 px.
+- Tombol memakai ukuran dan weight konsisten.
+- Bold berlebihan dikurangi; mayoritas strong/bold menjadi weight 700.
+- Teks muted/transparan dibuat tetap jelas dengan opacity 1.
+- Placeholder dibuat lebih jelas.
+- Badge lebih rapi dan tidak terlalu kecil.
+- Modul baru seperti Persetujuan Hapus, QR Center, Finance, Payroll,
+  Tracking, dan notifikasi ikut dinormalisasi.
+- Tracking pelanggan juga dibuat lebih seimbang.
+- Density Comfort/Compact/Ultra Compact tetap mengatur kepadatan layout,
+  tetapi tidak boleh membuat tulisan hampir tidak terbaca.
+
+Tidak ada SQL baru.

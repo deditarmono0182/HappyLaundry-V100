@@ -8305,3 +8305,397 @@ body{
     font-size:11px;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.18 — Professional Typography System
+   Final override: consistent, readable, restrained typography.
+   ========================================================= */
+:root{
+  --hl-type-xs:11px;
+  --hl-type-sm:12px;
+  --hl-type-md:13px;
+  --hl-type-lg:15px;
+  --hl-type-xl:18px;
+  --hl-type-page:clamp(25px,2.2vw,32px);
+  --hl-type-stat:clamp(21px,2vw,26px);
+  --hl-text-main:#173f4a;
+  --hl-text-body:#385d67;
+  --hl-text-muted:#607c84;
+}
+
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-size:var(--hl-type-md)!important;
+  line-height:1.48!important;
+  color:var(--hl-text-main)!important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Main hierarchy */
+.main-content .page-header h1,
+.main-content .page-heading h2{
+  font-size:var(--hl-type-page)!important;
+  line-height:1.15!important;
+  letter-spacing:-.45px!important;
+  font-weight:750!important;
+  color:var(--hl-text-main)!important;
+}
+
+.main-content h2{
+  font-size:21px!important;
+  line-height:1.25!important;
+  font-weight:720!important;
+  color:var(--hl-text-main)!important;
+}
+
+.main-content h3,
+.panel-heading h3{
+  font-size:17px!important;
+  line-height:1.3!important;
+  font-weight:700!important;
+  color:var(--hl-text-main)!important;
+}
+
+.main-content h4{
+  font-size:15px!important;
+  font-weight:700!important;
+  color:var(--hl-text-main)!important;
+}
+
+/* Normal text */
+.main-content p,
+.main-content label,
+.main-content input,
+.main-content select,
+.main-content textarea,
+.main-content td,
+.main-content li{
+  font-size:var(--hl-type-md)!important;
+  line-height:1.45!important;
+}
+
+.main-content small,
+.main-content .table-sub,
+.main-content .caption,
+.main-content .description,
+.main-content .muted,
+.main-content .text-muted,
+.main-content .subtle{
+  font-size:var(--hl-type-xs)!important;
+  line-height:1.4!important;
+  color:var(--hl-text-muted)!important;
+  opacity:1!important;
+  font-weight:500!important;
+}
+
+/* Avoid excessive bold everywhere */
+.main-content b,
+.main-content strong{
+  font-weight:700!important;
+}
+
+.main-content .eyebrow,
+.page-header .eyebrow{
+  font-size:11px!important;
+  line-height:1.25!important;
+  letter-spacing:1.05px!important;
+  font-weight:700!important;
+}
+
+/* Sidebar / top navigation */
+.sidebar nav a{
+  font-size:12.5px!important;
+  line-height:1.25!important;
+  font-weight:650!important;
+}
+
+.brand b,
+.brand strong{
+  font-weight:750!important;
+}
+
+.brand span,
+.account span,
+.sidebar-footer small{
+  font-size:11px!important;
+  opacity:.96!important;
+  font-weight:500!important;
+}
+
+.topbar h1{
+  font-size:20px!important;
+  font-weight:720!important;
+}
+
+.status-chip{
+  font-size:11.5px!important;
+  font-weight:650!important;
+}
+
+/* Buttons and form controls */
+.main-content button,
+.main-content .primary-button,
+.main-content .secondary-button,
+.main-content .danger-button,
+.main-content a.button{
+  font-size:12px!important;
+  line-height:1.2!important;
+  font-weight:700!important;
+  letter-spacing:0!important;
+}
+
+.main-content input,
+.main-content select,
+.main-content textarea{
+  color:var(--hl-text-main)!important;
+  font-weight:500!important;
+}
+
+.main-content input::placeholder,
+.main-content textarea::placeholder{
+  color:#7b9399!important;
+  opacity:1!important;
+  font-weight:450!important;
+}
+
+.modal-card h3{
+  font-size:18px!important;
+  font-weight:720!important;
+}
+
+.modal-form label{
+  font-size:12px!important;
+  font-weight:650!important;
+}
+
+/* Tables */
+.main-content table th{
+  font-size:11px!important;
+  line-height:1.25!important;
+  font-weight:700!important;
+  letter-spacing:.35px!important;
+  color:#526f78!important;
+}
+
+.main-content table td{
+  font-size:12.5px!important;
+  line-height:1.4!important;
+  font-weight:500!important;
+  color:#385d67!important;
+}
+
+.main-content table td b,
+.main-content table td strong{
+  font-weight:700!important;
+  color:#173f4a!important;
+}
+
+.main-content table td small{
+  font-size:11px!important;
+  color:#6a838a!important;
+  font-weight:500!important;
+}
+
+/* Cards and KPI */
+.stat-card span,
+.stat-card small{
+  font-size:11.5px!important;
+  line-height:1.35!important;
+  color:#607c84!important;
+  font-weight:550!important;
+  opacity:1!important;
+}
+
+.stat-card strong{
+  font-size:var(--hl-type-stat)!important;
+  line-height:1.08!important;
+  font-weight:750!important;
+  letter-spacing:-.25px!important;
+  color:#133f4b!important;
+}
+
+.panel-heading p,
+.page-header p,
+.page-heading p{
+  font-size:12.5px!important;
+  line-height:1.45!important;
+  color:#607c84!important;
+  opacity:1!important;
+  font-weight:500!important;
+}
+
+/* Badges remain readable without shouting */
+.badge,
+[class*="-badge"],
+[class*="_badge"]{
+  font-size:10.5px!important;
+  line-height:1.2!important;
+  font-weight:700!important;
+  letter-spacing:0!important;
+}
+
+/* Specific newer modules that previously used 7–9 px text */
+.delete-approval-title>span,
+.delete-approval-info>small,
+.delete-approval-info p,
+.delete-snapshot span,
+.delete-approval-head>span,
+.delete-approval-toast span,
+.dashboard-delete-alert-copy small,
+.dashboard-delete-alert-action,
+.expense-proof-help,
+.expense-proof-selected small,
+.expense-proof-view,
+.employee-finance-note span,
+.qr-camera-selector small,
+.qr-photo-fallback small,
+.qr-camera-diagnostics summary,
+.qr-camera-diagnostics code,
+.payroll-expense-badge{
+  font-size:11px!important;
+  line-height:1.4!important;
+  font-weight:500!important;
+  opacity:1!important;
+}
+
+.delete-approval-title>span,
+.delete-approval-head>span,
+.dashboard-delete-alert-action,
+.expense-proof-view,
+.payroll-expense-badge{
+  font-weight:700!important;
+}
+
+/* QR Center / tracking */
+.qr-camera-head p,
+.qr-manual-card p,
+.qr-help small,
+.tracking-page p,
+.tracking-page span,
+.tracking-page small{
+  opacity:1!important;
+}
+
+.tracking-page{
+  color:#173f4a!important;
+}
+
+.tracking-page h1{
+  font-size:clamp(25px,4vw,34px)!important;
+  line-height:1.15!important;
+  font-weight:750!important;
+}
+
+.tracking-page h2{
+  font-size:18px!important;
+  font-weight:700!important;
+}
+
+.tracking-page p,
+.tracking-page span{
+  font-size:13px!important;
+  line-height:1.45!important;
+  color:#506f77!important;
+  font-weight:500!important;
+}
+
+.tracking-page small{
+  font-size:11.5px!important;
+  line-height:1.4!important;
+  color:#647f86!important;
+  font-weight:500!important;
+}
+
+.tracking-page b,
+.tracking-page strong{
+  font-weight:700!important;
+  color:#173f4a!important;
+}
+
+.tracking-page button,
+.tracking-page a{
+  font-size:12px!important;
+  font-weight:700!important;
+}
+
+/* Login */
+.login-card h1,
+.login-card h2{
+  font-weight:750!important;
+}
+
+.login-card p,
+.login-card small{
+  color:#607c84!important;
+  opacity:1!important;
+}
+
+.login-card label{
+  font-size:12.5px!important;
+  font-weight:650!important;
+}
+
+/* Density modes: spacing may change, readability must not */
+html[data-density="compact"] .main-content,
+html[data-density="ultra"] .main-content{
+  font-size:13px!important;
+}
+
+html[data-density="compact"] .main-content small,
+html[data-density="ultra"] .main-content small,
+html[data-density="compact"] .main-content .table-sub,
+html[data-density="ultra"] .main-content .table-sub{
+  font-size:11px!important;
+}
+
+html[data-density="compact"] .main-content table td,
+html[data-density="ultra"] .main-content table td{
+  font-size:12px!important;
+}
+
+html[data-density="compact"] .stat-card strong,
+html[data-density="ultra"] .stat-card strong{
+  font-size:22px!important;
+}
+
+/* Mobile / tablet keeps same hierarchy, only modest scaling */
+@media(max-width:900px){
+  .main-content .page-header h1,
+  .main-content .page-heading h2{
+    font-size:26px!important;
+  }
+
+  .main-content h2{font-size:20px!important}
+  .main-content h3,.panel-heading h3{font-size:16px!important}
+  .stat-card strong{font-size:22px!important}
+  .sidebar nav a{font-size:13px!important}
+}
+
+@media(max-width:560px){
+  .main-content .page-header h1,
+  .main-content .page-heading h2{
+    font-size:24px!important;
+  }
+
+  .main-content p,
+  .main-content label,
+  .main-content input,
+  .main-content select,
+  .main-content textarea{
+    font-size:13px!important;
+  }
+
+  .main-content button,
+  .main-content .primary-button,
+  .main-content .secondary-button,
+  .main-content .danger-button{
+    font-size:12.5px!important;
+  }
+}
