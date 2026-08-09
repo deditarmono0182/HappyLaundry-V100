@@ -1,0 +1,27 @@
+HAPPYLAUNDRY ENTERPRISE V112.9.3 — PREVIEW WHATSAPP PELANGGAN
+
+FITUR BARU:
+Pengaturan -> Template & Preview WhatsApp
+
+- Preview Order Diterima
+- Preview Siap Diambil
+- Contoh pesan langsung berubah saat template diedit
+- Menampilkan sisa tagihan contoh
+- Menampilkan QRIS aktif Owner
+- Menampilkan rekening bank aktif Owner
+- Copy Pesan
+- Kirim WhatsApp Uji
+- Tombol Atur QRIS & Rekening
+
+PENTING:
+WhatsApp deep-link hanya dapat mengirim teks + link tracking. Gambar QRIS tidak ditempel otomatis ke chat. Pelanggan membuka link tracking untuk melihat QRIS/rekening terbaru dan upload bukti pembayaran. Ini memastikan QRIS/rekening yang tampil selalu mengikuti pengaturan Owner.
+
+TIDAK ADA SQL BARU.
+SQL 032 V112.9 harus sudah pernah dijalankan.
+
+CARA PASANG:
+1. Deploy V112.9.3.
+2. Tunggu Published.
+3. Refresh aplikasi.
+4. Owner -> Pengaturan.
+5. Scroll ke Template & Preview WhatsApp.

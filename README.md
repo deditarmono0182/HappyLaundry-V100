@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.9.2 Mobile Receipt Preview Fix
+# HappyLaundry Enterprise V112.9.3 WhatsApp Preview
 
 ## Jalankan
 ```bash
@@ -310,3 +310,7 @@ Tracking pelanggan dipadatkan secara vertikal dan background biru pada baris pro
 
 ## V112.9.2
 Perbaikan preview nota di iPhone/mobile: ditambahkan meta viewport dan diperbesar agar tampilan nota tidak kecil saat selesai transaksi di Kasir maupun saat cetak ulang nota.
+
+
+## V112.9.3
+Pengaturan WhatsApp memiliki preview visual, QRIS/rekening aktif, Copy Pesan, dan Kirim WhatsApp Uji.
