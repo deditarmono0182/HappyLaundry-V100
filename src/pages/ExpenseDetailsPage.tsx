@@ -107,6 +107,7 @@ export function ExpenseDetailsPage(){
       }else{
         const {error}=await requestDelete('expense',deleteExpense.id,deleteReason.trim())
         if(error)throw error
+        window.dispatchEvent(new Event('happylaundry-delete-requests-changed'))
       }
       setDeleteExpense(null);setDeleteReason('');setDeletePhrase('')
       await load()

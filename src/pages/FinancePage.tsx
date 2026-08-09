@@ -394,6 +394,7 @@ export function FinancePage(){
       }else{
         const {error}=await requestDelete('expense',deleteExpense.id,deleteReason.trim())
         if(error)throw error
+        window.dispatchEvent(new Event('happylaundry-delete-requests-changed'))
         window.alert('Permintaan hapus pengeluaran sudah dikirim ke Owner.')
       }
       setDeleteExpense(null);setDeleteReason('');setDeletePhrase('')

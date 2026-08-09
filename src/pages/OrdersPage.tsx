@@ -530,6 +530,7 @@ export function OrdersPage() {
       }else{
         const {error}=await requestDelete('order',deleteTarget.id,deleteReason.trim())
         if(error)throw error
+        window.dispatchEvent(new Event('happylaundry-delete-requests-changed'))
         window.alert(`Permintaan hapus ${deleteTarget.order_no} sudah dikirim ke Owner.`)
       }
       setDeleteTarget(null);setDeleteReason('');setDeletePhrase('')

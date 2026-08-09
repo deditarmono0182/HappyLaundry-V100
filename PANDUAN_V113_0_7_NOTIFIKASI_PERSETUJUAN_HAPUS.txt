@@ -1,0 +1,30 @@
+HAPPYLAUNDRY V113.0.7 — DELETE APPROVAL NOTIFICATION
+
+NOTIFIKASI OWNER:
+1. Badge merah pada menu Persetujuan Hapus.
+2. Peringatan di Dashboard Owner.
+3. Toast/pop-up saat Owner masuk atau refresh jika ada permintaan pending.
+4. Toast baru muncul lagi bila jumlah permintaan pending bertambah.
+5. Badge diperbarui otomatis:
+   - Supabase Realtime
+   - saat browser kembali fokus
+   - fallback polling setiap 30 detik
+   - event langsung dari aplikasi setelah Ajukan/Setujui/Tolak.
+
+TOMBOL:
+- Toast -> Lihat -> langsung Persetujuan Hapus.
+- Dashboard warning -> langsung Persetujuan Hapus.
+
+SETELAH OWNER SETUJUI/TOLAK:
+Jumlah badge otomatis berkurang.
+
+TIDAK ADA SQL BARU.
+Tetap membutuhkan SQL 037 V113.0.6 sudah terpasang.
+
+CARA PASANG:
+1. Pastikan SQL 037 sudah Success.
+2. Deploy V113.0.7.
+3. Refresh.
+4. Login karyawan -> Ajukan Hapus.
+5. Login/refresh Owner.
+6. Badge + Dashboard alert + toast harus muncul.

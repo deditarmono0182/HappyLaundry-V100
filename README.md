@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V113.0.6 Owner Delete Approval
+# HappyLaundry Enterprise V113.0.7 Delete Approval Notification
 
 ## Jalankan
 ```bash
@@ -346,3 +346,7 @@ Tambah Pengeluaran dapat menyimpan foto/PDF nota bukti secara private dan menamp
 
 ## V113.0.6
 Penghapusan Order dan Pengeluaran memakai alur approval Owner, alasan wajib, konfirmasi kuat, audit request, dan penghapusan bukti Storage terkait.
+
+
+## V113.0.7
+Owner mendapat badge merah, Dashboard alert, dan toast untuk permintaan hapus pending. Count diperbarui via Realtime, focus, polling 30 detik, dan event lokal.

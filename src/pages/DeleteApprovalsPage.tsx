@@ -78,6 +78,7 @@ export function DeleteApprovalsPage(){
       await removeReturnedFiles(data)
       setSuccess(`${row.entity_label} berhasil dihapus setelah persetujuan Owner.`)
       await load()
+      window.dispatchEvent(new Event('happylaundry-delete-requests-changed'))
     }
     setBusyId(null)
   }
@@ -95,6 +96,7 @@ export function DeleteApprovalsPage(){
     else{
       setSuccess(`Permintaan hapus ${row.entity_label} ditolak.`)
       await load()
+      window.dispatchEvent(new Event('happylaundry-delete-requests-changed'))
     }
     setBusyId(null)
   }

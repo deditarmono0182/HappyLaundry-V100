@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Banknote, CheckCircle2, Crown, MonitorCog, PackageCheck, ShoppingBag, Users, WashingMachine } from 'lucide-react'
+import { AlertTriangle, Banknote, CheckCircle2, Crown, MonitorCog, PackageCheck, ShieldAlert, ShoppingBag, Users, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/auth'
 import type { OrderRow } from '../types/order'
 
 interface DashboardOrderItem{
@@ -21,11 +22,14 @@ interface DashboardService{
 
 export function DashboardPage() {
   const navigate=useNavigate()
+  const {profile}=useAuth()
+  const isOwner=profile?.role==='owner'
   const [orders,setOrders]=useState<OrderRow[]>([])
   const [cash,setCash]=useState<{amount:number;direction:'in'|'out';created_at:string}[]>([])
   const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>([])
   const [services,setServices]=useState<DashboardService[]>([])
   const [message,setMessage]=useState('')
+  const [pendingDeletes,setPendingDeletes]=useState(0)
   const [revenuePeriod,setRevenuePeriod]=useState<'7d'|'month'|'3m'|'6m'|'12m'>('7d')
   const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
     (localStorage.getItem('happylaundry-density') as 'comfort'|'compact'|'ultra')||'compact'
@@ -45,8 +49,17 @@ export function DashboardPage() {
       setCash(c.data||[])
       setOrderItems((i.data as DashboardOrderItem[])||[])
       setServices((s.data as DashboardService[])||[])
+      if(isOwner){
+        const {count}=await supabase
+          .from('v11306_delete_requests')
+          .select('id',{count:'exact',head:true})
+          .eq('status','pending')
+        setPendingDeletes(count||0)
+      }else{
+        setPendingDeletes(0)
+      }
     }
-  },[])
+  },[isOwner])
 
   useEffect(()=>{void load()},[load])
 
@@ -221,6 +234,18 @@ export function DashboardPage() {
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."      hideBack
     />
     {message&&<div className="error-box inline-message">{message}</div>}
+
+    {isOwner&&pendingDeletes>0&&
+      <button type="button" className="dashboard-delete-approval-alert" onClick={()=>navigate('/delete-approvals')}>
+        <span className="dashboard-delete-alert-icon"><ShieldAlert size={22}/></span>
+        <span className="dashboard-delete-alert-copy">
+          <b>Ada {pendingDeletes} permintaan hapus menunggu persetujuan</b>
+          <small>Order atau Pengeluaran belum terhapus. Klik untuk periksa dan Setujui/Tolak.</small>
+        </span>
+        <span className="dashboard-delete-alert-count">{pendingDeletes>99?'99+':pendingDeletes}</span>
+        <span className="dashboard-delete-alert-action">Periksa →</span>
+      </button>}
+
     <section className="panel dashboard-display-customizer">
       <div className="dashboard-display-title">
         <div className="dashboard-display-icon"><MonitorCog size={20}/></div>

@@ -1,10 +1,11 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
   CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign, AlertTriangle, CalendarCheck2, ScanLine, Target, ShieldAlert } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { canAccess, type PermissionKey } from '../lib/permissions'
 import { PWAInstallButton } from '../components/PWAInstallButton'
+import { supabase } from '../lib/supabase'
 
 const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; roles?: string[]; permission?: PermissionKey }> = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard' },
@@ -30,8 +31,60 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
 ]
 
 export function AppLayout() {
+  const navigate=useNavigate()
   const [open,setOpen]=useState(false)
   const [online,setOnline]=useState(navigator.onLine)
+  const [pendingDeletes,setPendingDeletes]=useState(0)
+  const [showDeleteToast,setShowDeleteToast]=useState(false)
+
+  const { profile, signOut } = useAuth()
+  const role = profile?.role ?? 'staff'
+  const isOwner=role==='owner'
+
+  const refreshPendingDeletes=useCallback(async(showToast=false)=>{
+    if(!isOwner){
+      setPendingDeletes(0)
+      setShowDeleteToast(false)
+      return
+    }
+    const {count,error}=await supabase
+      .from('v11306_delete_requests')
+      .select('id',{count:'exact',head:true})
+      .eq('status','pending')
+    if(error)return
+    const next=count||0
+    setPendingDeletes(previous=>{
+      if(next>0&&(showToast||next>previous))setShowDeleteToast(true)
+      return next
+    })
+  },[isOwner])
+
+  useEffect(()=>{
+    if(!isOwner)return
+    void refreshPendingDeletes(true)
+
+    const timer=window.setInterval(()=>{void refreshPendingDeletes(false)},30000)
+    const channel=supabase
+      .channel('owner-delete-approval-notification')
+      .on(
+        'postgres_changes',
+        {event:'*',schema:'public',table:'v11306_delete_requests'},
+        ()=>{void refreshPendingDeletes(false)}
+      )
+      .subscribe()
+
+    const onFocus=()=>{void refreshPendingDeletes(false)}
+    const onDeleteChanged=()=>{void refreshPendingDeletes(false)}
+    window.addEventListener('focus',onFocus)
+    window.addEventListener('happylaundry-delete-requests-changed',onDeleteChanged)
+
+    return()=>{
+      window.clearInterval(timer)
+      window.removeEventListener('focus',onFocus)
+      window.removeEventListener('happylaundry-delete-requests-changed',onDeleteChanged)
+      void supabase.removeChannel(channel)
+    }
+  },[isOwner,refreshPendingDeletes])
 
   useEffect(()=>{
     const yes=()=>setOnline(true)
@@ -73,20 +126,24 @@ export function AppLayout() {
       document.removeEventListener('focusin',handleFocus)
     }
   },[])
-  const { profile, signOut } = useAuth()
-  const role = profile?.role ?? 'staff'
-
   return (
     <div className="app-shell">
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.6 Delete Approval</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.7 Approval Notification</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
           {items.filter(item => item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)).map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} onClick={() => setOpen(false)}><Icon size={19} /><span>{label}</span></NavLink>
+            <NavLink key={to} to={to} onClick={() => setOpen(false)}>
+              <Icon size={19}/>
+              <span>{label}</span>
+              {to==='/delete-approvals'&&pendingDeletes>0&&
+                <b className="delete-approval-nav-badge" aria-label={`${pendingDeletes} permintaan hapus menunggu`}>
+                  {pendingDeletes>99?'99+':pendingDeletes}
+                </b>}
+            </NavLink>
           ))}
         </nav>
         <div className="sidebar-footer">
@@ -95,6 +152,21 @@ export function AppLayout() {
         </div>
       </aside>
       {open && <button className="overlay" onClick={() => setOpen(false)} aria-label="Tutup menu" />}
+
+      {isOwner&&showDeleteToast&&pendingDeletes>0&&
+        <div className="delete-approval-toast" role="status">
+          <div className="delete-approval-toast-icon"><ShieldAlert size={20}/></div>
+          <div>
+            <b>{pendingDeletes} permintaan hapus menunggu</b>
+            <span>Ada Order/Pengeluaran yang perlu persetujuan Owner.</span>
+          </div>
+          <button type="button" className="delete-toast-open" onClick={()=>{
+            setShowDeleteToast(false)
+            navigate('/delete-approvals')
+          }}>Lihat</button>
+          <button type="button" className="delete-toast-close" aria-label="Tutup notifikasi" onClick={()=>setShowDeleteToast(false)}><X size={15}/></button>
+        </div>}
+
       <main className="main-content">
         <header className="topbar">
           <button className="icon-button mobile-only" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={22} /></button>
