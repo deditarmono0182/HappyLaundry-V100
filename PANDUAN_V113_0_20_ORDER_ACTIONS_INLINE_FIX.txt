@@ -1,0 +1,11 @@
+HAPPYLAUNDRY V113.0.20 — ORDER ACTIONS INLINE FIX
+
+Perbaikan dari V113.0.19:
+- Tombol aksi Order dikembalikan sejajar satu baris.
+- Lihat + Cetak Ulang Nota + Hapus tidak turun ke baris kedua.
+- Hapus tetap lebih jelas dibanding versi lama.
+- Tinggi tombol dibuat kompak dan konsisten.
+- Di tablet, tabel boleh scroll horizontal daripada membuat tombol berantakan.
+- Hanya pada layar HP sangat kecil aksi boleh wrap.
+
+Tidak ada SQL baru.

@@ -8922,3 +8922,119 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     min-width:130px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.20 — Order Actions Inline Fix
+   Restore clean single-row alignment from earlier layout.
+   ========================================================= */
+
+/* Keep action area in one horizontal line on desktop/tablet */
+.orders-table td:last-child{
+  min-width:360px!important;
+  white-space:nowrap!important;
+}
+
+.orders-table .order-row-actions,
+.orders-table .order-actions,
+.orders-table .action-buttons{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  flex-wrap:nowrap!important;
+  gap:7px!important;
+  width:100%!important;
+}
+
+/* Never let action buttons jump to second row */
+.orders-table .order-row-actions > *,
+.orders-table .order-actions > *,
+.orders-table .action-buttons > *{
+  flex:0 0 auto!important;
+  align-self:center!important;
+  margin:0!important;
+}
+
+/* Eye button stays beside the other actions */
+.orders-table .order-view-button,
+.orders-table button[aria-label*="Lihat"],
+.orders-table button[title*="Lihat"]{
+  position:static!important;
+  float:none!important;
+  margin:0!important;
+  width:36px!important;
+  min-width:36px!important;
+  height:36px!important;
+  order:1!important;
+}
+
+/* Reprint button */
+.orders-table .order-reprint-button{
+  order:2!important;
+  min-height:36px!important;
+  height:36px!important;
+  padding:0 11px!important;
+  margin:0!important;
+}
+
+/* Delete stays inline, readable but compact */
+.orders-table .order-delete-request-button{
+  order:3!important;
+  min-height:36px!important;
+  height:36px!important;
+  padding:0 10px!important;
+  margin:0!important;
+  border:1px solid #efbbb4!important;
+  background:#fff5f3!important;
+  color:#b23d32!important;
+  border-radius:10px!important;
+}
+
+.orders-table .order-delete-request-button .delete-label,
+.orders-table .order-delete-request-button span{
+  display:inline-block!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+/* Prevent generic last-cell rules from stacking actions */
+.orders-table td:last-child{
+  display:table-cell!important;
+  vertical-align:middle!important;
+}
+
+/* Slightly reduce row height after previous oversized action treatment */
+.orders-table td{
+  padding-top:11px!important;
+  padding-bottom:11px!important;
+}
+
+/* Keep courier and date vertically centered */
+.orders-table button[title*="Kurir"],
+.orders-table button[aria-label*="Kurir"]{
+  min-height:34px!important;
+  height:34px!important;
+}
+
+/* On narrower tablets allow horizontal table scroll, not button wrapping */
+@media(max-width:1100px){
+  .orders-table{
+    min-width:1180px!important;
+  }
+  .orders-table td:last-child{
+    min-width:340px!important;
+  }
+}
+
+/* Only on small phone screens may actions wrap */
+@media(max-width:620px){
+  .orders-table .order-row-actions,
+  .orders-table .order-actions,
+  .orders-table .action-buttons{
+    flex-wrap:wrap!important;
+    justify-content:flex-start!important;
+  }
+}
