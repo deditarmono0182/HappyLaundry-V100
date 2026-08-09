@@ -1,0 +1,16 @@
+HAPPYLAUNDRY V113.0.17 — PRINT SETTINGS BUILD FIX
+
+ERROR V113.0.16:
+src/pages/PrintSettingsPage.tsx(365,1): TS1109 Expression expected
+
+PENYEBAB:
+Saat opsi Barcode dihapus dari Pengaturan Cetak, ada sisa ekspresi/array JSX yang tidak lengkap.
+
+PERBAIKAN:
+- Membersihkan sisa ekspresi JSX.
+- Membersihkan koma/entry kosong pada array pengaturan cetak.
+- Fitur QR Only dari V113.0.16 tetap dipertahankan.
+- Tidak ada SQL baru.
+
+DEPLOY:
+Deploy V113.0.17 lalu tunggu Netlify Published.

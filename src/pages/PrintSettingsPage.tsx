@@ -359,10 +359,8 @@ export function PrintSettingsPage(){
           <div className="receipt-preview-total"><span>Total</span><b>Rp 45.000</b></div>
           {form.show_paid&&<div><span>Sudah Bayar</span><b>Rp 25.000</b></div>}
           {form.show_balance&&<div><span>Sisa</span><b>Rp 20.000</b></div>}
-          {(form.show_qr||form.show_barcode)&&<hr/>}
+          {form.show_qr&&<hr/>}
           {form.show_qr&&<div className="receipt-preview-qr">QR<br/><small>Tracking</small></div>}
-          {form.show_barcode&&
-}
           {form.show_maps&&<small>Maps: HappyLaundry Babakan</small>}
           <p className="receipt-preview-footer">{form.footer_note||'Terima kasih telah menggunakan HappyLaundry.'}</p>
           {form.show_cut_line&&<div className="receipt-cut-line">✂ - - - - - - - - - - -</div>}
