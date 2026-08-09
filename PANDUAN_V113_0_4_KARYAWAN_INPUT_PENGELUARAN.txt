@@ -1,0 +1,44 @@
+HAPPYLAUNDRY ENTERPRISE V113.0.4 — KARYAWAN INPUT PENGELUARAN, BAGI HASIL OWNER ONLY
+
+TUJUAN:
+Karyawan dapat mencatat Pengeluaran tanpa mempunyai akses untuk mengatur Bagi Hasil.
+
+CARA OWNER MEMBERIKAN AKSES:
+Pengaturan -> Karyawan & Hak Akses -> pilih karyawan
+Centang:
+Keuangan / Input Pengeluaran
+
+HASIL UNTUK KARYAWAN:
+- Bisa membuka menu Keuangan.
+- Bisa klik Tambah Pengeluaran.
+- Bisa memilih kategori dan memasukkan nominal/keterangan.
+- Bisa melihat pengeluaran sesuai dashboard Keuangan.
+- Bagian Bagi Hasil per Kategori Layanan TIDAK ditampilkan.
+- Tombol Atur Persentase TIDAK ditampilkan.
+- Modal pengaturan Bagi Hasil tidak dapat dibuka.
+
+HASIL UNTUK OWNER:
+- Dashboard Keuangan tetap lengkap.
+- Bagi Hasil tetap terlihat.
+- Owner tetap dapat mengubah Persentase Bagi Hasil.
+
+KEAMANAN DATABASE:
+SQL 035 mengubah RLS:
+- Pengeluaran hanya dapat dikelola Owner atau karyawan aktif dengan finance=true.
+- Kategori pengeluaran dapat dibaca karyawan finance.
+- Perubahan kategori hanya Owner.
+- Insert/update/delete Bagi Hasil tetap hanya Owner.
+
+WAJIB SQL BARU:
+supabase/035_v113_0_4_employee_expense_owner_revenue_share.sql
+
+URUTAN:
+1. Supabase -> SQL Editor.
+2. Jalankan SQL 035.
+3. Pastikan Success.
+4. Deploy V113.0.4.
+5. Owner -> Pengaturan -> Karyawan & Hak Akses.
+6. Edit karyawan.
+7. Centang Keuangan / Input Pengeluaran.
+8. Simpan.
+9. Login sebagai karyawan untuk tes.

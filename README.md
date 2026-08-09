@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V113.0.3 Finance Payroll Expense
+# HappyLaundry Enterprise V113.0.4 Employee Expense Access
 
 ## Jalankan
 ```bash
@@ -334,3 +334,7 @@ Fix build scanner TS2339. Dashboard Laba kini otomatis memasukkan gaji (hadir+tu
 
 ## V113.0.3
 Gaji otomatis dari Absensi & Gaji sekarang masuk ke total dan detail Pengeluaran di Dashboard Keuangan, termasuk export dan kategori pengeluaran terbesar.
+
+
+## V113.0.4
+Karyawan dengan permission Keuangan dapat input pengeluaran, tetapi seluruh bagian pengaturan Bagi Hasil disembunyikan dan write access Bagi Hasil tetap Owner-only di database.

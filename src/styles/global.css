@@ -8038,3 +8038,34 @@ body{
   font-size:8.5px;
   font-weight:900;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.4 — Employee Expense Access
+   ========================================================= */
+.employee-finance-note{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  padding:10px 12px;
+  border:1px solid #c9e2f1;
+  border-radius:11px;
+  background:#f2f9fd;
+  color:#315f78;
+}
+.employee-finance-note b{
+  flex:0 0 auto;
+  color:#176b97;
+  font-size:9.5px;
+}
+.employee-finance-note span{
+  font-size:9px;
+  line-height:1.4;
+}
+@media(max-width:650px){
+  .employee-finance-note{
+    display:grid;
+    gap:3px;
+  }
+}

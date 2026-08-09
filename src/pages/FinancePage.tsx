@@ -108,7 +108,9 @@ export function FinancePage(){
       supabase.from('v100_orders_view').select('id,total,paid_amount,status'),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category'),
-      supabase.from('v110_revenue_share_settings').select('id,category,share_percent').order('category')
+      isOwner
+        ? supabase.from('v110_revenue_share_settings').select('id,category,share_percent').order('category')
+        : Promise.resolve({data:[] as RevenueShareSetting[],error:null})
     ])
 
     const error=c.error||e.error||p.error||o.error||i.error||s.error||rs.error
@@ -331,17 +333,24 @@ export function FinancePage(){
     <PageHeader
       eyebrow="FINANCE & ACCOUNTING"
       title="Keuangan"
-      description="Pantau pemasukan, pengeluaran, piutang, laba bersih, dan bagi hasil per kategori layanan."
+      description={isOwner
+        ? "Pantau pemasukan, pengeluaran, piutang, laba bersih, dan bagi hasil per kategori layanan."
+        : "Catat dan pantau pengeluaran operasional sesuai hak akses karyawan."}
       action={<div className="finance-actions">
         <button className="secondary-button" onClick={exportCSV}><FileSpreadsheet size={17}/>Export CSV</button>
         <button className="primary-button" onClick={()=>setOpen(true)}><Plus size={17}/>Tambah Pengeluaran</button>
       </div>}
     />
 
+    {!isOwner&&<div className="employee-finance-note">
+      <b>Akses Karyawan: Input Pengeluaran</b>
+      <span>Anda dapat mencatat pengeluaran. Pengaturan Bagi Hasil hanya tersedia untuk Owner.</span>
+    </div>}
+
     <section className="panel finance-filter">
       <label>Dari<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label>
       <label>Sampai<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label>
-      <div><CalendarDays size={18}/><span>Periode laporan & bagi hasil</span></div>
+      <div><CalendarDays size={18}/><span>{isOwner?'Periode laporan & bagi hasil':'Periode pengeluaran'}</span></div>
     </section>
 
     <section className="stats-grid finance-stats">
@@ -358,6 +367,7 @@ export function FinancePage(){
       <StatCard icon={ReceiptText} label="Margin" value={`${stats.margin.toFixed(1)}%`} caption="Margin laba bersih"/>
     </section>
 
+    {isOwner&&<>
     <section className="panel revenue-share-panel">
       <div className="revenue-share-heading">
         <div>
@@ -431,6 +441,7 @@ export function FinancePage(){
         </table>
       </div>
     </section>
+    </>}
 
     <section className="finance-grid">
       <article className="panel data-panel">
@@ -467,7 +478,7 @@ export function FinancePage(){
       </article>
     </section>
 
-    {shareOpen&&<Modal title="Atur Persentase Bagi Hasil" onClose={()=>setShareOpen(false)}>
+    {isOwner&&shareOpen&&<Modal title="Atur Persentase Bagi Hasil" onClose={()=>setShareOpen(false)}>
       <form className="modal-form share-settings-form" onSubmit={saveShareSettings}>
         <div className="share-settings-note">
           <Percent size={20}/>
