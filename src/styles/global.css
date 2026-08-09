@@ -9038,3 +9038,113 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     justify-content:flex-start!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.21 — Order Table Column Alignment
+   Structural fix: 10 data cells = 10 headers.
+   ========================================================= */
+.orders-table{
+  min-width:1320px!important;
+  table-layout:auto!important;
+}
+
+.orders-table th,
+.orders-table td{
+  vertical-align:middle!important;
+}
+
+.orders-table .order-actions-heading{
+  text-align:center!important;
+  min-width:270px!important;
+}
+
+.orders-table th:nth-child(8),
+.orders-table td:nth-child(8){
+  min-width:150px!important; /* Pengiriman */
+}
+
+.orders-table th:nth-child(9),
+.orders-table td:nth-child(9){
+  min-width:100px!important; /* Dibuat */
+  white-space:nowrap!important;
+}
+
+.orders-table th:nth-child(10),
+.orders-table td:nth-child(10){
+  min-width:270px!important; /* Aksi */
+  white-space:nowrap!important;
+}
+
+.orders-table td:nth-child(10) .row-actions{
+  width:100%!important;
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+}
+
+.orders-table td:nth-child(10) .row-actions > button{
+  position:static!important;
+  float:none!important;
+  margin:0!important;
+  flex:0 0 auto!important;
+  align-self:center!important;
+}
+
+.orders-table .order-view-button{
+  width:36px!important;
+  min-width:36px!important;
+  height:36px!important;
+  padding:0!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  border:1px solid #d4e2e8!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#315e70!important;
+}
+
+.orders-table .order-reprint-button,
+.orders-table .order-delete-request-button{
+  height:36px!important;
+  min-height:36px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  padding:0 10px!important;
+  border-radius:10px!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+.orders-table .order-delete-request-button{
+  min-width:76px!important;
+  color:#b23d32!important;
+  border:1px solid #efbbb4!important;
+  background:#fff5f3!important;
+}
+
+.orders-table .order-delete-request-button .delete-label{
+  font-size:11px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+/* The table scrolls horizontally on narrower screens rather than distorting columns. */
+.order-panel .table-wrap{
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+}
+
+@media(max-width:900px){
+  .orders-table{
+    min-width:1260px!important;
+  }
+}

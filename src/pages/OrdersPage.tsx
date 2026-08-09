@@ -806,7 +806,7 @@ export function OrdersPage() {
         {message && <div className="error-box inline-message">{message}</div>}
 
         <div className="table-wrap">
-          <table>
+          <table className="orders-table">
             <thead>
               <tr>
                 <th>Order</th>
@@ -816,8 +816,9 @@ export function OrdersPage() {
                 <th>Pembayaran</th>
                 <th>Total</th>
                 <th>Estimasi Selesai</th>
+                <th>Pengiriman</th>
                 <th>Dibuat</th>
-                <th />
+                <th className="order-actions-heading">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -888,7 +889,7 @@ export function OrdersPage() {
                   <td>{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
                   <td>
                     <div className="row-actions">
-                      <button onClick={() => setDetail(row)} aria-label="Detail"><Eye size={16}/></button>
+                      <button className="order-view-button" onClick={() => setDetail(row)} aria-label="Lihat Detail" title="Lihat Detail"><Eye size={16}/></button>
                       <button
                         className="order-reprint-button"
                         onClick={()=>printReceipt(row)}

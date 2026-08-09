@@ -1,0 +1,20 @@
+HAPPYLAUNDRY V113.0.21 — ORDER TABLE COLUMN ALIGNMENT
+
+Akar masalah ditemukan:
+Header tabel Order hanya mempunyai 9 kolom, tetapi setiap baris data mempunyai 10 kolom.
+
+Akibatnya:
+- Konfirmasi Kurir tampil di bawah header Dibuat.
+- Tanggal bergeser satu kolom.
+- Tombol Lihat/Cetak Ulang/Hapus terdorong dan terlihat tidak sejajar.
+
+Perbaikan:
+- Header sekarang 10 kolom:
+  Order | Pelanggan | Layanan | Status | Pembayaran | Total |
+  Estimasi Selesai | Pengiriman | Dibuat | Aksi
+- Konfirmasi Kurir berada di kolom Pengiriman.
+- Tanggal berada tepat di kolom Dibuat.
+- Lihat + Cetak Ulang Nota + Hapus berada satu baris di kolom Aksi.
+- Jika layar sempit, tabel scroll horizontal daripada merusak alignment.
+
+Tidak ada SQL baru.
