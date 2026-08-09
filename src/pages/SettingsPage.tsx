@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Activity, Building2, CalendarCheck2, CheckCircle2, ClipboardCopy, CreditCard, ExternalLink, Eye, MapPin, MessageCircle, Printer, QrCode, Save, Send, Store, UsersRound } from 'lucide-react'
+import { Activity, Award, Building2, CalendarCheck2, CheckCircle2, ClipboardCopy, CreditCard, ExternalLink, Eye, MapPin, MessageCircle, Printer, QrCode, Save, Send, Store, UsersRound } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -174,6 +174,11 @@ export function SettingsPage() {
       <section className="panel settings-card settings-wide employee-settings-link">
         <header><CreditCard size={21}/><div><b>Pembayaran Online</b><small>Owner mengatur QRIS dan rekening bank yang tampil otomatis di Tracking Pelanggan.</small></div></header>
         <button type="button" className="primary-button" onClick={()=>navigate('/settings/online-payment')}><CreditCard size={17}/>Atur QRIS & Rekening</button>
+      </section>
+
+      <section className="panel settings-card settings-wide employee-settings-link">
+        <header><Award size={21}/><div><b>Loyalty / Member</b><small>Atur program Member, perolehan poin, bonus member baru, dan nilai reward.</small></div></header>
+        <button type="button" className="primary-button" onClick={()=>navigate('/settings/loyalty')}><Award size={17}/>Atur Loyalty / Member</button>
       </section>
 
       <section className="panel settings-card settings-wide employee-settings-link">

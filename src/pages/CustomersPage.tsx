@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { CalendarPlus, Clock3, Crown, DollarSign, Pencil, Plus, Search, ShoppingBag, Trash2, UserRound, UsersRound } from 'lucide-react'
+import { Award, CalendarPlus, CheckCircle2, Clock3, Crown, DollarSign, Gift, Pencil, Plus, Search, ShoppingBag, Trash2, UserRound, UsersRound } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
@@ -20,7 +20,7 @@ type CustomerOrder={
 export function CustomersPage() {
   const [rows, setRows] = useState<Customer[]>([])
   const [orders,setOrders]=useState<CustomerOrder[]>([])
-  const [segment,setSegment]=useState<'all'|'top'|'new'|'inactive'>('all')
+  const [segment,setSegment]=useState<'all'|'member'|'top'|'new'|'inactive'>('all')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -28,13 +28,19 @@ export function CustomersPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Customer | null>(null)
   const [form, setForm] = useState(emptyForm)
+  const [memberCustomer,setMemberCustomer]=useState<Customer|null>(null)
+  const [memberTransactions,setMemberTransactions]=useState<Array<{id:string;kind:string;points:number;note:string|null;created_at:string}>>([])
+  const [memberDelta,setMemberDelta]=useState(0)
+  const [memberNote,setMemberNote]=useState('')
+  const [memberBusy,setMemberBusy]=useState(false)
+  const [memberSuccess,setMemberSuccess]=useState('')
 
   const load=useCallback(async()=>{
     setLoading(true)
     const[c,o]=await Promise.all([
       supabase
         .from('v100_customers')
-        .select('id, store_id, name, phone, address, notes, created_at')
+        .select('id, store_id, name, phone, address, notes, is_member, member_code, points_balance, member_since, created_at')
         .order('created_at',{ascending:false}),
       supabase
         .from('v100_orders')
@@ -113,6 +119,7 @@ export function CustomersPage() {
     const keyword=query.toLowerCase().trim()
 
     return analytics.filter(row=>{
+      if(segment==='member'&&!row.customer.is_member)return false
       if(segment==='top'&&!topIds.has(row.customer.id))return false
       if(segment==='new'&&new Date(row.customer.created_at)<monthStart)return false
       if(segment==='inactive'&&!(
@@ -130,6 +137,8 @@ export function CustomersPage() {
 
   const totalTransactions=analytics.reduce((sum,row)=>sum+row.transactionCount,0)
   const totalCustomerSpend=analytics.reduce((sum,row)=>sum+row.totalSpend,0)
+  const totalMembers=rows.filter(row=>row.is_member).length
+  const totalMemberPoints=rows.filter(row=>row.is_member).reduce((sum,row)=>sum+Number(row.points_balance||0),0)
   const bestCustomer=topCustomers[0]||null
 
 
@@ -175,6 +184,50 @@ export function CustomersPage() {
     else await load()
   }
 
+  const openMember=async(customer:Customer)=>{
+    setMemberCustomer(customer);setMemberDelta(0);setMemberNote('');setMemberSuccess('');setMessage('')
+    const {data,error}=await supabase.from('v11210_loyalty_transactions').select('id,kind,points,note,created_at').eq('customer_id',customer.id).order('created_at',{ascending:false}).limit(20)
+    if(error)setMessage(error.message)
+    else setMemberTransactions((data as Array<{id:string;kind:string;points:number;note:string|null;created_at:string}>)||[])
+  }
+
+  const refreshMemberCustomer=async(customerId:string)=>{
+    const [customerResult,txResult]=await Promise.all([
+      supabase.from('v100_customers').select('id,store_id,name,phone,address,notes,is_member,member_code,points_balance,member_since,created_at').eq('id',customerId).single(),
+      supabase.from('v11210_loyalty_transactions').select('id,kind,points,note,created_at').eq('customer_id',customerId).order('created_at',{ascending:false}).limit(20)
+    ])
+    if(customerResult.error||txResult.error){setMessage((customerResult.error||txResult.error)?.message||'Gagal memuat data member.');return}
+    if(customerResult.data)setMemberCustomer(customerResult.data as Customer)
+    setMemberTransactions((txResult.data as Array<{id:string;kind:string;points:number;note:string|null;created_at:string}>)||[])
+  }
+
+  const toggleMember=async()=>{
+    if(!memberCustomer)return
+    setMemberBusy(true);setMessage('');setMemberSuccess('')
+    const next=!Boolean(memberCustomer.is_member)
+    const {error}=await supabase.rpc('v11210_set_membership',{p_customer_id:memberCustomer.id,p_active:next})
+    if(error)setMessage(error.message)
+    else{
+      setMemberSuccess(next?'Pelanggan berhasil menjadi Member.':'Status Member dinonaktifkan.')
+      await load();await refreshMemberCustomer(memberCustomer.id)
+    }
+    setMemberBusy(false)
+  }
+
+  const adjustPoints=async()=>{
+    if(!memberCustomer||!memberDelta)return
+    if(!memberNote.trim()){setMessage('Alasan penyesuaian poin wajib diisi.');return}
+    setMemberBusy(true);setMessage('');setMemberSuccess('')
+    const {error}=await supabase.rpc('v11210_adjust_points',{p_customer_id:memberCustomer.id,p_delta:Math.trunc(memberDelta),p_note:memberNote.trim()})
+    if(error)setMessage(error.message)
+    else{
+      setMemberSuccess(memberDelta>0?'Poin berhasil ditambahkan.':'Poin berhasil dikurangi.')
+      setMemberDelta(0);setMemberNote('')
+      await load();await refreshMemberCustomer(memberCustomer.id)
+    }
+    setMemberBusy(false)
+  }
+
   return (
     <>
       <PageHeader
@@ -188,6 +241,10 @@ export function CustomersPage() {
         <article className="stat-card">
           <div className="stat-icon"><UsersRound size={22}/></div>
           <div><span>Total Pelanggan</span><strong>{rows.length}</strong><small>Seluruh pelanggan tersimpan</small></div>
+        </article>
+        <article className="stat-card">
+          <div className="stat-icon"><Award size={22}/></div>
+          <div><span>Member Aktif</span><strong>{totalMembers}</strong><small>{totalMemberPoints} total poin aktif</small></div>
         </article>
         <article className="stat-card">
           <div className="stat-icon"><ShoppingBag size={22}/></div>
@@ -236,6 +293,7 @@ export function CustomersPage() {
         </div>
         <div className="customer-segment-tabs">
           <button className={segment==='all'?'active':''} onClick={()=>setSegment('all')}>Semua</button>
+          <button className={segment==='member'?'active':''} onClick={()=>setSegment('member')}>Member</button>
           <button className={segment==='top'?'active':''} onClick={()=>setSegment('top')}>Top 10</button>
           <button className={segment==='new'?'active':''} onClick={()=>setSegment('new')}>Baru Bulan Ini</button>
           <button className={segment==='inactive'?'active':''} onClick={()=>setSegment('inactive')}>Tidak Kembali 60+ Hari</button>
@@ -250,16 +308,21 @@ export function CustomersPage() {
         {message && <div className="error-box inline-message">{message}</div>}
         <div className="table-wrap">
           <table>
-            <thead><tr><th>Pelanggan</th><th>WhatsApp</th><th>Transaksi</th><th>Total Belanja</th><th>Rata-rata</th><th>Terakhir Transaksi</th><th>Dibuat</th><th /></tr></thead>
+            <thead><tr><th>Pelanggan</th><th>Member / Poin</th><th>WhatsApp</th><th>Transaksi</th><th>Total Belanja</th><th>Rata-rata</th><th>Terakhir Transaksi</th><th>Dibuat</th><th /></tr></thead>
             <tbody>
-              {loading && <tr><td colSpan={8} className="table-empty">Memuat pelanggan...</td></tr>}
-              {!loading && filtered.length === 0 && <tr><td colSpan={8} className="table-empty"><UserRound size={30} />Belum ada pelanggan.</td></tr>}
+              {loading && <tr><td colSpan={9} className="table-empty">Memuat pelanggan...</td></tr>}
+              {!loading && filtered.length === 0 && <tr><td colSpan={9} className="table-empty"><UserRound size={30} />Belum ada pelanggan.</td></tr>}
               {filtered.map(row => (
                 <tr key={row.customer.id}>
                   <td>
                     <b>{row.customer.name}</b>
                     <small>{row.customer.address||'-'}</small>
                     {row.customer.notes&&<small>{row.customer.notes}</small>}
+                  </td>
+                  <td>
+                    {row.customer.is_member
+                      ? <button type="button" className="customer-member-chip" onClick={()=>void openMember(row.customer)}><Crown size={13}/><span><b>{row.customer.member_code||'MEMBER'}</b><small>{Number(row.customer.points_balance||0)} poin</small></span></button>
+                      : <button type="button" className="customer-member-add" onClick={()=>void openMember(row.customer)}><Award size={13}/>Jadikan Member</button>}
                   </td>
                   <td>{row.customer.phone}</td>
                   <td>
@@ -286,6 +349,39 @@ export function CustomersPage() {
           </table>
         </div>
       </section>
+
+      {memberCustomer&&(
+        <Modal title={`Member — ${memberCustomer.name}`} onClose={()=>setMemberCustomer(null)}>
+          <div className="member-modal">
+            <section className={`member-card-preview ${memberCustomer.is_member?'active':''}`}>
+              <div><Crown size={26}/><span><small>HAPPYLAUNDRY MEMBER</small><b>{memberCustomer.name}</b></span></div>
+              <strong>{memberCustomer.member_code||'Belum Member'}</strong>
+              <div className="member-points"><span>Saldo Poin</span><b>{Number(memberCustomer.points_balance||0)}</b></div>
+            </section>
+
+            <button type="button" className={memberCustomer.is_member?'secondary-button':'primary-button'} disabled={memberBusy} onClick={()=>void toggleMember()}>
+              <Award size={16}/>{memberCustomer.is_member?'Nonaktifkan Member':'Aktifkan Member'}
+            </button>
+
+            {memberCustomer.is_member&&<section className="member-adjust-box">
+              <header><Gift size={18}/><div><b>Tambah / Kurangi Poin</b><small>Gunakan untuk bonus, hadiah, atau koreksi manual.</small></div></header>
+              <label>Perubahan Poin<input type="number" value={memberDelta} onChange={e=>setMemberDelta(Number(e.target.value))} placeholder="Contoh: 25 atau -10"/></label>
+              <label>Alasan<input value={memberNote} onChange={e=>setMemberNote(e.target.value)} placeholder="Contoh: Bonus ulang tahun"/></label>
+              <button type="button" className="primary-button" disabled={memberBusy||!memberDelta} onClick={()=>void adjustPoints()}>Simpan Poin</button>
+            </section>}
+
+            {message&&<div className="error-box">{message}</div>}
+            {memberSuccess&&<div className="success-box"><CheckCircle2 size={17}/>{memberSuccess}</div>}
+
+            <section className="member-history">
+              <header><Clock3 size={18}/><div><b>Riwayat Poin</b><small>20 aktivitas terbaru.</small></div></header>
+              {memberTransactions.length===0
+                ? <div className="mini-empty">Belum ada aktivitas poin.</div>
+                : memberTransactions.map(tx=><div key={tx.id}><span><b>{tx.kind==='earn'?'Poin Transaksi':tx.kind==='welcome'?'Bonus Member Baru':tx.kind==='adjust'?'Penyesuaian':'Aktivitas Poin'}</b><small>{tx.note||new Date(tx.created_at).toLocaleString('id-ID')}</small></span><strong className={tx.points>=0?'plus':'minus'}>{tx.points>=0?'+':''}{tx.points}</strong></div>)}
+            </section>
+          </div>
+        </Modal>
+      )}
 
       {modalOpen && (
         <Modal title={editing ? 'Edit Pelanggan' : 'Tambah Pelanggan'} onClose={() => setModalOpen(false)}>

@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.9.3 WhatsApp Preview
+# HappyLaundry Enterprise V112.10 Loyalty / Member
 
 ## Jalankan
 ```bash
@@ -314,3 +314,7 @@ Perbaikan preview nota di iPhone/mobile: ditambahkan meta viewport dan diperbesa
 
 ## V112.9.3
 Pengaturan WhatsApp memiliki preview visual, QRIS/rekening aktif, Copy Pesan, dan Kirim WhatsApp Uji.
+
+
+## V112.10
+Loyalty/Member: kode member, poin otomatis saat lunas, bonus member baru, riwayat poin, penyesuaian poin, filter Member, dan pengaturan Owner.

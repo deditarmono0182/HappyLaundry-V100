@@ -32,6 +32,7 @@ const QRScannerPage=lazy(()=>import('./pages/QRScannerPage').then(m=>({default:m
 const AttendancePage=lazy(()=>import('./pages/AttendancePage').then(m=>({default:m.AttendancePage})))
 const AttendanceSettingsPage=lazy(()=>import('./pages/AttendanceSettingsPage').then(m=>({default:m.AttendanceSettingsPage})))
 const OnlinePaymentSettingsPage=lazy(()=>import('./pages/OnlinePaymentSettingsPage').then(m=>({default:m.OnlinePaymentSettingsPage})))
+const LoyaltySettingsPage=lazy(()=>import('./pages/LoyaltySettingsPage').then(m=>({default:m.LoyaltySettingsPage})))
 
 function Protected(){
   const {session,loading}=useAuth()
@@ -71,6 +72,7 @@ export default function App(){
       <Route path="attendance" element={<AttendancePage/>}/>
       <Route path="settings/attendance" element={<AttendanceSettingsPage/>}/>
       <Route path="settings/online-payment" element={<OnlinePaymentSettingsPage/>}/>
+      <Route path="settings/loyalty" element={<LoyaltySettingsPage/>}/>
       <Route path="settings/audit" element={<UserAuditPage/>}/>
     </Route>
     <Route path="*" element={<Navigate to="/" replace/>}/>

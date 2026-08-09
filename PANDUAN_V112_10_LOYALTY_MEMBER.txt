@@ -1,0 +1,28 @@
+HAPPYLAUNDRY ENTERPRISE V112.10 — LOYALTY / MEMBER
+
+FITUR:
+- Status Member per pelanggan
+- Kode Member otomatis HLM-XXXXXXXX
+- Saldo poin pelanggan
+- Bonus poin member baru
+- Poin otomatis ketika order Member menjadi LUNAS
+- Riwayat poin
+- Tambah/kurangi poin manual dengan alasan
+- Filter pelanggan Member
+- Owner dapat mengatur: program aktif, rupiah per poin, nilai 1 poin, minimum redeem, welcome points
+
+WAJIB SQL:
+supabase/033_v112_10_loyalty_member.sql
+
+ALUR:
+1. Jalankan SQL 033 di Supabase SQL Editor.
+2. Deploy V112.10.
+3. Owner -> Pengaturan -> Loyalty / Member.
+4. Atur contoh: Rp1.000 = 1 poin.
+5. Pelanggan -> klik Jadikan Member.
+6. Saat order Member berubah LUNAS, poin otomatis masuk satu kali.
+
+CATATAN:
+Versi ini adalah fondasi loyalty. Nilai reward sudah dapat diatur, tetapi penukaran poin langsung menjadi diskon di Kasir akan dibuat pada tahap berikutnya agar alur kas/discount tetap aman dan mudah diaudit.
+
+CACHE: happylaundry-v112-10-0

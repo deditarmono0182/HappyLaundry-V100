@@ -5,6 +5,10 @@ export interface Customer {
   phone: string
   address: string | null
   notes: string | null
+  is_member?: boolean
+  member_code?: string | null
+  points_balance?: number
+  member_since?: string | null
   created_at: string
 }
 
