@@ -35,6 +35,8 @@ export function QRScannerPage(){
   const [loading,setLoading]=useState(false)
   const [order,setOrder]=useState<OrderRow|null>(null)
   const [cameraName,setCameraName]=useState('')
+  const [cameras,setCameras]=useState<Array<{id:string;label:string}>>([])
+  const [selectedCameraId,setSelectedCameraId]=useState('')
   const [cameraState,setCameraState]=useState<'idle'|'requesting'|'ready'|'error'>('idle')
 
   const stopCamera=useCallback(async()=>{
@@ -84,7 +86,7 @@ export function QRScannerPage(){
     setLoading(false)
   }
 
-  const startCamera=async()=>{
+  const startCamera=async(preferredCameraId?:string)=>{
     setMessage('')
     setOrder(null)
     setSupported(true)
@@ -93,7 +95,7 @@ export function QRScannerPage(){
 
     if(!window.isSecureContext){
       setCameraState('error');setSupported(false)
-      setMessage('Kamera membutuhkan HTTPS. Buka https://happylaundrybabakancrb.com.')
+      setMessage('Kamera membutuhkan koneksi HTTPS.')
       return
     }
     if(!navigator.mediaDevices?.getUserMedia){
@@ -106,33 +108,73 @@ export function QRScannerPage(){
       await stopCamera()
       setCameraState('requesting')
 
-      let cameras:Array<{id:string;label:string}>=[]
+      // Android Chrome/Samsung tablet is more reliable when permission is
+      // requested directly through getUserMedia before html5-qrcode enumerates devices.
+      let permissionStream:MediaStream|null=null
       try{
-        cameras=await Html5Qrcode.getCameras()
+        permissionStream=await navigator.mediaDevices.getUserMedia({
+          audio:false,
+          video:{facingMode:{ideal:'environment'}}
+        })
       }catch(permissionError){
         const err=permissionError as {name?:string;message?:string}
         const detail=`${err?.name||''} ${err?.message||String(permissionError||'')}`
         setCameraState('error')
         if(/NotAllowedError|PermissionDenied|permission|denied|not allowed/i.test(detail)){
-          setMessage('Akses kamera belum diberikan ke website HappyLaundry. Tekan Coba Lagi setelah memilih Allow / Izinkan pada Chrome.')
+          setMessage('Chrome belum mengizinkan kamera untuk HappyLaundry. Buka izin situs Camera = Allow, lalu tekan Coba Lagi.')
         }else if(/NotFoundError|DevicesNotFound|not found/i.test(detail)){
           setMessage('Kamera tidak ditemukan pada tablet ini.')
+        }else if(/NotReadableError|TrackStartError|in use/i.test(detail)){
+          setMessage('Kamera sedang dipakai aplikasi lain. Tutup aplikasi Kamera/Video Call lalu coba lagi.')
         }else{
-          setMessage(`Kamera belum dapat diakses: ${detail}`)
+          setMessage(`Kamera belum dapat dibuka: ${detail}`)
         }
         return
+      }finally{
+        // Release the permission probe before html5-qrcode opens the real stream.
+        permissionStream?.getTracks().forEach(track=>track.stop())
       }
 
-      const scanner=new Html5Qrcode('qr-center-reader')
-      scannerRef.current=scanner
-      const backCamera=cameras.find(camera=>/back|rear|environment|belakang/i.test(camera.label))||cameras[cameras.length-1]
-      const cameraConfig=backCamera?.id?{deviceId:{exact:backCamera.id}}:{facingMode:'environment'}
-      if(backCamera?.label)setCameraName(backCamera.label)
+      let available:Array<{id:string;label:string}>=[]
+      try{
+        available=await Html5Qrcode.getCameras()
+      }catch{}
+      setCameras(available)
 
-      setScanning(true);setCameraState('ready')
+      const preferred=preferredCameraId||selectedCameraId
+      const chosen=
+        available.find(camera=>camera.id===preferred)||
+        available.find(camera=>/back|rear|environment|belakang|0,\s*facing back/i.test(camera.label))||
+        available[available.length-1]
+
+      if(chosen){
+        setSelectedCameraId(chosen.id)
+        setCameraName(chosen.label||'Kamera belakang')
+      }else{
+        setCameraName('Kamera belakang')
+      }
+
+      const scanner=new Html5Qrcode('qr-center-reader',{verbose:false})
+      scannerRef.current=scanner
+
+      setScanning(true)
+      setCameraState('ready')
+
+      // Use plain device id when known. Some Android Chromium builds reject
+      // MediaTrackConstraints {deviceId:{exact:...}} passed through html5-qrcode.
+      const cameraConfig:string|MediaTrackConstraints=
+        chosen?.id ? chosen.id : {facingMode:'environment'}
+
       await scanner.start(
         cameraConfig,
-        {fps:10,qrbox:{width:260,height:260},aspectRatio:1},
+        {
+          fps:12,
+          qrbox:(viewWidth:number,viewHeight:number)=>{
+            const edge=Math.max(180,Math.min(300,Math.floor(Math.min(viewWidth,viewHeight)*0.72)))
+            return {width:edge,height:edge}
+          },
+          aspectRatio:1
+        },
         decodedText=>{
           if(scanLockedRef.current)return
           scanLockedRef.current=true
@@ -147,11 +189,16 @@ export function QRScannerPage(){
       if(/NotAllowedError|PermissionDenied|permission|denied|not allowed/i.test(detail)){
         setMessage('Izin kamera ditolak oleh Chrome. Pastikan Camera = Allow, lalu tekan Coba Lagi.')
       }else if(/NotReadableError|TrackStartError|Could not start|in use/i.test(detail)){
-        setMessage('Kamera sedang dipakai aplikasi lain. Tutup aplikasi Kamera/Video Call, lalu tekan Coba Lagi.')
+        setMessage('Kamera tidak bisa dipakai. Tutup aplikasi lain yang memakai kamera, lalu tekan Coba Lagi.')
+      }else if(/Overconstrained|constraint/i.test(detail)){
+        setMessage('Kamera yang dipilih tidak kompatibel. Pilih kamera lain lalu coba lagi.')
       }else{
-        setMessage(`Kamera tidak dapat dibuka: ${detail}. Tekan Coba Lagi.`)
+        setMessage(`Scanner gagal membuka kamera: ${detail}. Coba pilih kamera lain atau gunakan pencarian manual.`)
       }
-      try{if(scannerRef.current?.isScanning)await scannerRef.current.stop();await scannerRef.current?.clear()}catch{}
+      try{
+        if(scannerRef.current?.isScanning)await scannerRef.current.stop()
+        await scannerRef.current?.clear()
+      }catch{}
       scannerRef.current=null
     }
   }
@@ -214,7 +261,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
           <div><QrCode size={24}/><div><h2>Scan QR Nota</h2><p>Arahkan kamera ke QR pada nota HappyLaundry.</p></div></div>
           {scanning
             ? <button className="secondary-button" onClick={()=>void stopCamera()}><StopCircle size={17}/>Stop Kamera</button>
-            : <button className="primary-button" onClick={()=>void startCamera()}>
+            : <button className="primary-button" onClick={()=>void startCamera(undefined)}>
                 {cameraState==='error'?<RefreshCw size={17}/>:<Camera size={17}/>}
                 {cameraState==='requesting'?'Meminta Kamera...':cameraState==='error'?'Coba Lagi':'Mulai Scan'}
               </button>}
@@ -231,6 +278,19 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
           {scanning&&<div className="qr-target"><i/><i/><i/><i/></div>}
         </div>
         {scanning&&<div className="qr-camera-status success"><CheckCircle2 size={16}/><span>Kamera aktif{cameraName?` • ${cameraName}`:''}. Arahkan QR nota ke kotak scanner.</span></div>}
+        {cameras.length>1&&<div className="qr-camera-selector">
+          <label>
+            <span>Pilih Kamera</span>
+            <select value={selectedCameraId} onChange={e=>{
+              const id=e.target.value
+              setSelectedCameraId(id)
+              void startCamera(id)
+            }}>
+              {cameras.map((camera,index)=><option key={camera.id} value={camera.id}>{camera.label||`Kamera ${index+1}`}</option>)}
+            </select>
+          </label>
+          <small>Jika QR tidak terbaca, pilih kamera belakang/rear.</small>
+        </div>}
         {!supported&&<div className="qr-browser-note"><b>Scanner kamera tidak tersedia:</b><span>Gunakan Chrome terbaru atau pencarian nomor order manual.</span></div>}
       </article>
 

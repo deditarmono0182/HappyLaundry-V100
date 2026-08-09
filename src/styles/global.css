@@ -8259,3 +8259,11 @@ body{
   .dashboard-delete-approval-alert{grid-template-columns:auto 1fr auto}
   .dashboard-delete-alert-action{grid-column:2/-1}
 }
+
+/* V113.0.8 Android QR Scanner */
+.qr-camera-selector{margin-top:10px;padding:10px 12px;border:1px solid #cfe3ef;border-radius:12px;background:#f8fcff}
+.qr-camera-selector label{display:flex;align-items:center;gap:10px}
+.qr-camera-selector label>span{font-size:10px;font-weight:900;color:#315a6b;white-space:nowrap}
+.qr-camera-selector select{width:100%;min-height:38px;border:1px solid #bad7e7;border-radius:9px;background:#fff;padding:0 10px;color:#244c5d;font-weight:700}
+.qr-camera-selector small{display:block;margin-top:6px;color:#708895;font-size:8.5px}
+#qr-center-reader video{object-fit:cover!important}

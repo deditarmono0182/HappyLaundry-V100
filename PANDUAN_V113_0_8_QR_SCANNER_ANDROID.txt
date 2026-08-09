@@ -1,0 +1,23 @@
+HAPPYLAUNDRY V113.0.8 — QR SCANNER ANDROID FIX
+
+Perbaikan khusus scanner QR Nota pada tablet Android:
+- Permission kamera diminta langsung melalui getUserMedia.
+- Stream pengecekan permission dilepas sebelum scanner utama dibuka.
+- Kamera belakang diprioritaskan.
+- Device ID dikirim dalam format yang lebih kompatibel dengan Android Chromium.
+- Jika tablet memiliki beberapa kamera, muncul pilihan Pilih Kamera.
+- QR box menyesuaikan ukuran video.
+- Error dibedakan: izin ditolak, kamera dipakai aplikasi lain, kamera tidak ditemukan, constraint kamera gagal.
+- QR tracking dan nomor order HL-... tetap dikenali.
+- Input order manual tetap tersedia.
+
+CARA TES:
+1. Deploy V113.0.8.
+2. Di tablet Android buka Chrome.
+3. Refresh aplikasi.
+4. QR Center -> Mulai Scan.
+5. Jika Chrome bertanya, pilih Allow.
+6. Jika ada pilihan kamera, pilih Back/Rear/Kamera belakang.
+7. Arahkan QR Nota hingga order terbuka di QR Center.
+
+Tidak ada SQL baru.
