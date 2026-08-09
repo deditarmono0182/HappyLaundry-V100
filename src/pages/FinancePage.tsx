@@ -11,6 +11,7 @@ import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
+import { loadPayrollExpenseRows, type PayrollExpenseRow } from '../lib/payrollExpense'
 
 interface ExpenseCategory{
   id:string
@@ -75,6 +76,7 @@ export function FinancePage(){
 
   const [categories,setCategories]=useState<ExpenseCategory[]>([])
   const [expenses,setExpenses]=useState<ExpenseRow[]>([])
+  const [payrollExpenses,setPayrollExpenses]=useState<PayrollExpenseRow[]>([])
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [orders,setOrders]=useState<OrderSummary[]>([])
   const [orderItems,setOrderItems]=useState<OrderItemRow[]>([])
@@ -119,14 +121,24 @@ export function FinancePage(){
       setOrderItems((i.data as OrderItemRow[])||[])
       setServices((s.data as ServiceRow[])||[])
       setShareSettings((rs.data as RevenueShareSetting[])||[])
+      try{
+        setPayrollExpenses(await loadPayrollExpenseRows(from,to))
+      }catch(payrollError){
+        setPayrollExpenses([])
+        setMessage(`Data operasional berhasil dimuat, tetapi gaji belum dapat dihitung: ${payrollError instanceof Error?payrollError.message:String(payrollError)}`)
+      }
     }
   },[from,to])
 
   useEffect(()=>{void load()},[load])
 
+  const allExpenses=useMemo(()=>
+    [...expenses,...payrollExpenses].sort((a,b)=>b.expense_date.localeCompare(a.expense_date))
+  ,[expenses,payrollExpenses])
+
   const stats=useMemo(()=>{
     const omzet=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
-    const expense=expenses.reduce((sum,e)=>sum+Number(e.amount||0),0)
+    const expense=allExpenses.reduce((sum,e)=>sum+Number(e.amount||0),0)
     const receivable=orders
       .filter(o=>o.status!=='cancelled')
       .reduce((sum,o)=>sum+Math.max(0,Number(o.total||0)-Number(o.paid_amount||0)),0)
@@ -136,19 +148,19 @@ export function FinancePage(){
       margin:omzet>0?((omzet-expense)/omzet)*100:0,
       receivable,receivableCount
     }
-  },[payments,expenses,orders])
+  },[payments,allExpenses,orders])
 
   const filtered=useMemo(()=>{
     const key=query.toLowerCase().trim()
-    if(!key)return expenses
-    return expenses.filter(e=>`${e.category_name} ${e.group_name||''} ${e.description||''} ${e.reference||''}`.toLowerCase().includes(key))
-  },[expenses,query])
+    if(!key)return allExpenses
+    return allExpenses.filter(e=>`${e.category_name} ${e.group_name||''} ${e.description||''} ${e.reference||''}`.toLowerCase().includes(key))
+  },[allExpenses,query])
 
   const grouped=useMemo(()=>{
     const map:Record<string,number>={}
-    for(const e of expenses)map[e.category_name]=(map[e.category_name]||0)+Number(e.amount||0)
+    for(const e of allExpenses)map[e.category_name]=(map[e.category_name]||0)+Number(e.amount||0)
     return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10)
-  },[expenses])
+  },[allExpenses])
 
   const revenueSharing=useMemo(()=>{
     const serviceCategory=new Map(services.map(service=>[
@@ -337,7 +349,7 @@ export function FinancePage(){
         <StatCard icon={TrendingUp} label="Pemasukan" value={formatRupiah(stats.omzet)} caption={`${payments.length} pembayaran • Klik untuk lihat`}/>
       </button>
       <button type="button" className="finance-click-stat finance-expense-click" onClick={()=>navigate('/finance/expenses')} title="Buka daftar pengeluaran">
-        <StatCard icon={TrendingDown} label="Pengeluaran" value={formatRupiah(stats.expense)} caption={`${expenses.length} transaksi • Klik untuk lihat`}/>
+        <StatCard icon={TrendingDown} label="Pengeluaran" value={formatRupiah(stats.expense)} caption={`${expenses.length} operasional + ${payrollExpenses.length} gaji • Klik untuk lihat`}/>
       </button>
       <StatCard icon={WalletCards} label="Laba Bersih" value={formatRupiah(stats.net)} caption="Pemasukan - pengeluaran"/>
       <button type="button" className="finance-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
@@ -435,7 +447,7 @@ export function FinancePage(){
               <td><b>{row.category_name}</b></td>
               <td>{row.group_name||'-'}</td>
               <td>{row.description||'-'}{row.reference&&<small className="table-sub">Ref: {row.reference}</small>}</td>
-              <td>{row.payment_method.toUpperCase()}</td>
+              <td><span className={row.payment_method==='payroll'?'payroll-expense-badge':''}>{row.payment_method==='payroll'?'GAJI':row.payment_method.toUpperCase()}</span></td>
               <td><b>{formatRupiah(Number(row.amount))}</b></td>
             </tr>)}
             {filtered.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}

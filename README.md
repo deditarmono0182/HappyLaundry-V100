@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V113.0.2 Profit Payroll Detail
+# HappyLaundry Enterprise V113.0.3 Finance Payroll Expense
 
 ## Jalankan
 ```bash
@@ -330,3 +330,7 @@ QR Center memakai html5-qrcode untuk kompatibilitas tablet Android.
 
 ## V113.0.2
 Fix build scanner TS2339. Dashboard Laba kini otomatis memasukkan gaji (hadir+tunjangan+bonus+bagi hasil) sebagai biaya dan kartu KPI dapat diklik untuk melihat detail.
+
+
+## V113.0.3
+Gaji otomatis dari Absensi & Gaji sekarang masuk ke total dan detail Pengeluaran di Dashboard Keuangan, termasuk export dan kategori pengeluaran terbesar.

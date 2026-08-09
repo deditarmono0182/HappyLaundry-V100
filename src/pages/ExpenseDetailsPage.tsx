@@ -5,6 +5,7 @@ import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
+import { loadPayrollExpenseRows, type PayrollExpenseRow } from '../lib/payrollExpense'
 
 interface ExpenseRow{
   id:string
@@ -20,6 +21,7 @@ interface ExpenseRow{
 
 export function ExpenseDetailsPage(){
   const [rows,setRows]=useState<ExpenseRow[]>([])
+  const [payrollRows,setPayrollRows]=useState<PayrollExpenseRow[]>([])
   const [query,setQuery]=useState('')
   const [from,setFrom]=useState(()=>{
     const d=new Date()
@@ -31,26 +33,44 @@ export function ExpenseDetailsPage(){
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
-    const {data,error}=await supabase
-      .from('v106_expenses_view')
-      .select('*')
-      .gte('expense_date',from)
-      .lte('expense_date',to)
-      .order('expense_date',{ascending:false})
-    if(error)setMessage(error.message)
-    else setRows((data as ExpenseRow[])||[])
+    const [expenseResult,payrollResult]=await Promise.allSettled([
+      supabase
+        .from('v106_expenses_view')
+        .select('*')
+        .gte('expense_date',from)
+        .lte('expense_date',to)
+        .order('expense_date',{ascending:false}),
+      loadPayrollExpenseRows(from,to)
+    ])
+    if(expenseResult.status==='rejected'){
+      setMessage(String(expenseResult.reason||'Gagal memuat pengeluaran.'))
+    }else if(expenseResult.value.error){
+      setMessage(expenseResult.value.error.message)
+    }else{
+      setRows((expenseResult.value.data as ExpenseRow[])||[])
+    }
+    if(payrollResult.status==='rejected'){
+      setMessage(current=>current||`Gaji belum dapat dimuat: ${String(payrollResult.reason||'error')}`)
+      setPayrollRows([])
+    }else{
+      setPayrollRows(payrollResult.value)
+    }
     setLoading(false)
   },[from,to])
 
   useEffect(()=>{void load()},[load])
 
+  const allRows=useMemo(()=>
+    [...rows,...payrollRows].sort((a,b)=>b.expense_date.localeCompare(a.expense_date))
+  ,[rows,payrollRows])
+
   const filtered=useMemo(()=>{
     const key=query.toLowerCase().trim()
-    if(!key)return rows
-    return rows.filter(r=>
+    if(!key)return allRows
+    return allRows.filter(r=>
       `${r.category_name} ${r.group_name||''} ${r.description||''} ${r.reference||''} ${r.payment_method}`.toLowerCase().includes(key)
     )
-  },[rows,query])
+  },[allRows,query])
 
   const exportRows=useMemo(()=>filtered.map(r=>[
     new Date(`${r.expense_date}T00:00:00`).toLocaleDateString('id-ID'),
@@ -74,8 +94,10 @@ export function ExpenseDetailsPage(){
     ] as Array<[string,string|number]>
   })
 
-  const total=rows.reduce((sum,r)=>sum+Number(r.amount||0),0)
-  const avg=rows.length?total/rows.length:0
+  const total=allRows.reduce((sum,r)=>sum+Number(r.amount||0),0)
+  const operationalTotal=rows.reduce((sum,r)=>sum+Number(r.amount||0),0)
+  const payrollTotal=payrollRows.reduce((sum,r)=>sum+Number(r.amount||0),0)
+  const avg=allRows.length?total/allRows.length:0
 
   return <>
     <PageHeader
@@ -95,9 +117,9 @@ export function ExpenseDetailsPage(){
     </section>
 
     <section className="stats-grid finance-detail-stats">
-      <StatCard icon={TrendingDown} label="Total Pengeluaran" value={formatRupiah(total)} caption={`${rows.length} transaksi`}/>
-      <StatCard icon={WalletCards} label="Jumlah Transaksi" value={String(rows.length)} caption="Transaksi pengeluaran"/>
-      <StatCard icon={TrendingDown} label="Rata-rata Pengeluaran" value={formatRupiah(avg)} caption="Rata-rata biaya per transaksi"/>
+      <StatCard icon={TrendingDown} label="Total Pengeluaran" value={formatRupiah(total)} caption={`Operasional ${formatRupiah(operationalTotal)} + Gaji ${formatRupiah(payrollTotal)}`}/>
+      <StatCard icon={WalletCards} label="Jumlah Biaya" value={String(allRows.length)} caption={`${rows.length} operasional + ${payrollRows.length} gaji`}/>
+      <StatCard icon={TrendingDown} label="Rata-rata Pengeluaran" value={formatRupiah(avg)} caption="Rata-rata biaya termasuk gaji"/>
     </section>
 
     <section className="panel data-panel">
@@ -117,7 +139,7 @@ export function ExpenseDetailsPage(){
               <td><b>{r.category_name}</b></td>
               <td>{r.group_name||'-'}</td>
               <td>{r.description||'-'}{r.reference&&<small className="table-sub">Ref: {r.reference}</small>}</td>
-              <td><span className="badge">{r.payment_method.toUpperCase()}</span></td>
+              <td><span className={`badge ${r.payment_method==='payroll'?'payroll-expense-badge':''}`}>{r.payment_method==='payroll'?'GAJI':r.payment_method.toUpperCase()}</span></td>
               <td><b className="expense-amount">{formatRupiah(Number(r.amount))}</b></td>
             </tr>)}
           </tbody>

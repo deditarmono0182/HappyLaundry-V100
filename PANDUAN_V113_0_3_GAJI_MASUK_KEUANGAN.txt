@@ -1,0 +1,30 @@
+HAPPYLAUNDRY ENTERPRISE V113.0.3 — GAJI MASUK KEUANGAN / PENGELUARAN
+
+PERBAIKAN:
+Sebelumnya gaji otomatis sudah mengurangi laba pada Dashboard Laba & Target,
+tetapi belum muncul pada Keuangan -> Detail Pengeluaran.
+
+Sekarang:
+1. Total Pengeluaran = Pengeluaran Operasional + Gaji Karyawan.
+2. Laba Bersih di Dashboard Keuangan otomatis dikurangi gaji.
+3. Keuangan -> tabel Pengeluaran menampilkan gaji per karyawan.
+4. Keuangan -> Detail Pengeluaran menampilkan gaji per karyawan.
+5. Rincian gaji mencakup:
+   - jumlah hadir
+   - uang kehadiran
+   - tunjangan
+   - bonus
+   - bagi hasil
+   - total gaji
+6. Pengeluaran Terbesar memasukkan kategori Gaji Karyawan.
+7. Export CSV/XLS/PDF detail pengeluaran ikut memasukkan gaji.
+8. Gaji tidak perlu diinput ulang sebagai pengeluaran manual.
+
+CATATAN:
+Gaji adalah baris virtual hasil perhitungan Absensi & Gaji.
+Tidak membuat duplikasi record pada tabel v106_expenses.
+
+TIDAK ADA SQL BARU.
+
+CARA PASANG:
+Deploy V113.0.3 -> Published -> refresh -> Keuangan.
