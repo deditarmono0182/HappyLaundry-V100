@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V113.0.4 Employee Expense Access
+# HappyLaundry Enterprise V113.0.5 Expense Receipt Proof
 
 ## Jalankan
 ```bash
@@ -338,3 +338,7 @@ Gaji otomatis dari Absensi & Gaji sekarang masuk ke total dan detail Pengeluaran
 
 ## V113.0.4
 Karyawan dengan permission Keuangan dapat input pengeluaran, tetapi seluruh bagian pengaturan Bagi Hasil disembunyikan dan write access Bagi Hasil tetap Owner-only di database.
+
+
+## V113.0.5
+Tambah Pengeluaran dapat menyimpan foto/PDF nota bukti secara private dan menampilkannya kembali dari Keuangan/Detail Pengeluaran.

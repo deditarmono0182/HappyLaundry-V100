@@ -1,0 +1,23 @@
+HAPPYLAUNDRY V113.0.5 — NOTA / BUKTI PENGELUARAN
+
+FITUR:
+- Form Tambah Pengeluaran punya Upload / Foto Nota.
+- Bisa kamera HP/tablet atau pilih file.
+- JPG, PNG, WEBP, PDF.
+- Maksimal 5 MB.
+- Preview gambar sebelum simpan.
+- Bukti tersimpan PRIVATE di Supabase Storage.
+- Tombol Lihat / Lihat Bukti di Keuangan dan Detail Pengeluaran.
+- Link bukti memakai signed URL sementara 5 menit.
+- Gaji virtual tidak mempunyai bukti nota.
+
+WAJIB SQL BARU:
+supabase/036_v113_0_5_expense_receipt_proof.sql
+
+URUTAN:
+1. Jalankan SQL 036.
+2. Deploy V113.0.5.
+3. Refresh.
+4. Keuangan -> Tambah Pengeluaran.
+5. Upload / Foto Nota.
+6. Simpan Pengeluaran.

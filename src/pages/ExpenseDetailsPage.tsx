@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { FileSpreadsheet, FileText, Search, TrendingDown, WalletCards } from 'lucide-react'
+import { Eye, FileSpreadsheet, FileText, Search, TrendingDown, WalletCards } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
@@ -17,6 +17,8 @@ interface ExpenseRow{
   description:string|null
   reference:string|null
   created_at:string
+  proof_path?:string|null
+  proof_name?:string|null
 }
 
 export function ExpenseDetailsPage(){
@@ -71,6 +73,14 @@ export function ExpenseDetailsPage(){
       `${r.category_name} ${r.group_name||''} ${r.description||''} ${r.reference||''} ${r.payment_method}`.toLowerCase().includes(key)
     )
   },[allRows,query])
+
+  const viewProof=async(row:ExpenseRow|PayrollExpenseRow)=>{
+    const proofPath='proof_path' in row?row.proof_path:null
+    if(!proofPath)return
+    const {data,error}=await supabase.storage.from('expense-proofs').createSignedUrl(proofPath,300)
+    if(error){setMessage(error.message);return}
+    window.open(data.signedUrl,'_blank','noopener,noreferrer')
+  }
 
   const exportRows=useMemo(()=>filtered.map(r=>[
     new Date(`${r.expense_date}T00:00:00`).toLocaleDateString('id-ID'),
@@ -130,16 +140,19 @@ export function ExpenseDetailsPage(){
       {message&&<div className="error-box inline-message">{message}</div>}
       <div className="table-wrap">
         <table>
-          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Nominal</th></tr></thead>
+          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th></tr></thead>
           <tbody>
-            {loading&&<tr><td colSpan={6} className="table-empty">Memuat pengeluaran...</td></tr>}
-            {!loading&&filtered.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
+            {loading&&<tr><td colSpan={7} className="table-empty">Memuat pengeluaran...</td></tr>}
+            {!loading&&filtered.length===0&&<tr><td colSpan={7} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
             {filtered.map(r=><tr key={r.id}>
               <td>{new Date(`${r.expense_date}T00:00:00`).toLocaleDateString('id-ID')}</td>
               <td><b>{r.category_name}</b></td>
               <td>{r.group_name||'-'}</td>
               <td>{r.description||'-'}{r.reference&&<small className="table-sub">Ref: {r.reference}</small>}</td>
               <td><span className={`badge ${r.payment_method==='payroll'?'payroll-expense-badge':''}`}>{r.payment_method==='payroll'?'GAJI':r.payment_method.toUpperCase()}</span></td>
+              <td>{'proof_path' in r&&r.proof_path
+                ? <button type="button" className="expense-proof-view" onClick={()=>void viewProof(r)}><Eye size={14}/>Lihat Bukti</button>
+                : <span className="expense-proof-empty">-</span>}</td>
               <td><b className="expense-amount">{formatRupiah(Number(r.amount))}</b></td>
             </tr>)}
           </tbody>

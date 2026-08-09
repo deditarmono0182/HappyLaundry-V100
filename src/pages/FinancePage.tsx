@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  AlertTriangle, CalendarDays, FileSpreadsheet, FileText, Percent, Plus,
+  AlertTriangle, CalendarDays, Eye, FileSpreadsheet, FileText, ImageUp, Percent, Plus,
   ReceiptText, Search, Settings2, TrendingDown, TrendingUp, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
@@ -30,6 +30,8 @@ interface ExpenseRow{
   description:string|null
   reference:string|null
   created_at:string
+  proof_path?:string|null
+  proof_name?:string|null
 }
 
 interface OrderSummary{
@@ -93,6 +95,8 @@ export function FinancePage(){
   const [shareBusy,setShareBusy]=useState(false)
   const [message,setMessage]=useState('')
   const [shareMessage,setShareMessage]=useState('')
+  const [proofFile,setProofFile]=useState<File|null>(null)
+  const [proofPreview,setProofPreview]=useState('')
 
   const [form,setForm]=useState({
     expense_date:today(),category_id:'',amount:'',payment_method:'cash',
@@ -290,28 +294,82 @@ export function FinancePage(){
     setShareBusy(false)
   }
 
+  const chooseExpenseProof=(file:File|null)=>{
+    if(!file)return
+    if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type)){
+      setMessage('Bukti pengeluaran harus JPG, PNG, WEBP, atau PDF.')
+      return
+    }
+    if(file.size>5*1024*1024){
+      setMessage('Ukuran bukti pengeluaran maksimal 5 MB.')
+      return
+    }
+    setProofFile(file)
+    setMessage('')
+    if(proofPreview.startsWith('blob:'))URL.revokeObjectURL(proofPreview)
+    setProofPreview(file.type==='application/pdf'?'':URL.createObjectURL(file))
+  }
+
+  const clearExpenseProof=()=>{
+    if(proofPreview.startsWith('blob:'))URL.revokeObjectURL(proofPreview)
+    setProofFile(null)
+    setProofPreview('')
+  }
+
+  const viewExpenseProof=async(row:ExpenseRow|PayrollExpenseRow)=>{
+    const proofPath='proof_path' in row?row.proof_path:null
+    if(!proofPath)return
+    const {data,error}=await supabase.storage.from('expense-proofs').createSignedUrl(proofPath,300)
+    if(error){setMessage(error.message);return}
+    window.open(data.signedUrl,'_blank','noopener,noreferrer')
+  }
+
   const save=async(event:FormEvent)=>{
     event.preventDefault()
     const category=categories.find(c=>c.id===form.category_id)
     if(!category){setMessage('Pilih kategori pengeluaran.');return}
     if(Number(form.amount)<=0){setMessage('Nominal harus lebih dari 0.');return}
+
     setBusy(true);setMessage('')
-    const {error}=await supabase.from('v106_expenses').insert({
-      expense_date:form.expense_date,
-      category_id:category.id,
-      category_name:category.name,
-      amount:Number(form.amount),
-      payment_method:form.payment_method,
-      description:form.description.trim()||null,
-      reference:form.reference.trim()||null
-    })
-    if(error)setMessage(error.message)
-    else{
+    let uploadedPath:string|null=null
+
+    try{
+      if(proofFile){
+        const ext=(proofFile.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg'
+        uploadedPath=`${form.expense_date}/${crypto.randomUUID()}.${ext}`
+        const upload=await supabase.storage.from('expense-proofs').upload(uploadedPath,proofFile,{
+          upsert:false,
+          cacheControl:'3600',
+          contentType:proofFile.type
+        })
+        if(upload.error)throw upload.error
+      }
+
+      const {error}=await supabase.from('v106_expenses').insert({
+        expense_date:form.expense_date,
+        category_id:category.id,
+        category_name:category.name,
+        amount:Number(form.amount),
+        payment_method:form.payment_method,
+        description:form.description.trim()||null,
+        reference:form.reference.trim()||null,
+        proof_path:uploadedPath,
+        proof_name:proofFile?.name||null
+      })
+      if(error)throw error
+
       setOpen(false)
       setForm({expense_date:today(),category_id:'',amount:'',payment_method:'cash',description:'',reference:''})
+      clearExpenseProof()
       await load()
+    }catch(error){
+      if(uploadedPath){
+        try{await supabase.storage.from('expense-proofs').remove([uploadedPath])}catch{}
+      }
+      setMessage(error instanceof Error?error.message:'Gagal menyimpan pengeluaran.')
+    }finally{
+      setBusy(false)
     }
-    setBusy(false)
   }
 
   const exportCSV=()=>{
@@ -451,7 +509,7 @@ export function FinancePage(){
         </div>
         {message&&<div className="error-box inline-message">{message}</div>}
         <div className="table-wrap"><table>
-          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Nominal</th></tr></thead>
+          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th></tr></thead>
           <tbody>
             {filtered.map(row=><tr key={row.id}>
               <td>{new Date(`${row.expense_date}T00:00:00`).toLocaleDateString('id-ID')}</td>
@@ -459,9 +517,12 @@ export function FinancePage(){
               <td>{row.group_name||'-'}</td>
               <td>{row.description||'-'}{row.reference&&<small className="table-sub">Ref: {row.reference}</small>}</td>
               <td><span className={row.payment_method==='payroll'?'payroll-expense-badge':''}>{row.payment_method==='payroll'?'GAJI':row.payment_method.toUpperCase()}</span></td>
+              <td>{'proof_path' in row&&row.proof_path
+                ? <button type="button" className="expense-proof-view" onClick={()=>void viewExpenseProof(row)}><Eye size={14}/>Lihat</button>
+                : <span className="expense-proof-empty">-</span>}</td>
               <td><b>{formatRupiah(Number(row.amount))}</b></td>
             </tr>)}
-            {filtered.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
+            {filtered.length===0&&<tr><td colSpan={7} className="table-empty">Belum ada pengeluaran di periode ini.</td></tr>}
           </tbody>
         </table></div>
       </article>
@@ -513,7 +574,7 @@ export function FinancePage(){
       </form>
     </Modal>}
 
-    {open&&<Modal title="Tambah Pengeluaran" onClose={()=>setOpen(false)}>
+    {open&&<Modal title="Tambah Pengeluaran" onClose={()=>{setOpen(false);clearExpenseProof()}}>
       <form className="modal-form" onSubmit={save}>
         <div className="form-grid-two">
           <label>Tanggal<input type="date" value={form.expense_date} onChange={e=>setForm({...form,expense_date:e.target.value})} required/></label>
@@ -532,8 +593,34 @@ export function FinancePage(){
         </div>
         <label>Keterangan<input value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Contoh: Gaji Agustus"/></label>
         <label>Referensi<input value={form.reference} onChange={e=>setForm({...form,reference:e.target.value})} placeholder="No. invoice / struk / slip"/></label>
+
+        <div className="expense-proof-section">
+          <span className="expense-proof-label">Nota / Bukti Pengeluaran</span>
+          <label className="expense-proof-upload">
+            <ImageUp size={22}/>
+            <span>
+              <b>{proofFile?'Ganti Bukti':'Upload / Foto Nota'}</b>
+              <small>JPG, PNG, WEBP, PDF • maksimal 5 MB</small>
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              capture="environment"
+              onChange={e=>chooseExpenseProof(e.target.files?.[0]||null)}
+            />
+          </label>
+          {proofFile&&<div className="expense-proof-selected">
+            {proofPreview
+              ? <img src={proofPreview} alt="Preview nota pengeluaran"/>
+              : <FileText size={30}/>}
+            <span><b>{proofFile.name}</b><small>{(proofFile.size/1024).toFixed(0)} KB</small></span>
+            <button type="button" onClick={clearExpenseProof}>Hapus</button>
+          </div>}
+          <small className="expense-proof-help">Opsional, tetapi disarankan untuk audit pengeluaran.</small>
+        </div>
+
         {message&&<div className="error-box">{message}</div>}
-        <div className="form-actions"><button type="button" className="secondary-button" onClick={()=>setOpen(false)}>Batal</button><button className="primary-button" disabled={busy}>{busy?'Menyimpan...':'Simpan Pengeluaran'}</button></div>
+        <div className="form-actions"><button type="button" className="secondary-button" onClick={()=>{setOpen(false);clearExpenseProof()}}>Batal</button><button className="primary-button" disabled={busy}>{busy?'Menyimpan...':'Simpan Pengeluaran'}</button></div>
       </form>
     </Modal>}
   </>
