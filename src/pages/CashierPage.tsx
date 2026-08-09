@@ -6,6 +6,7 @@ import {
 import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
+import { code39Svg } from '../lib/code39'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
 import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
 import type { StoreSettings } from '../types/settings'
@@ -221,10 +222,7 @@ export function CashierPage() {
     const title=size==='a4'?'INVOICE LAUNDRY':'NOTA LAUNDRY'
     const statusUrl=`${window.location.origin}/track/${encodeURIComponent(data.orderNo)}`
     const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(statusUrl)}`
-    const barcode=data.orderNo.replace(/[^A-Z0-9]/gi,'').split('').map((ch,i)=>{
-      const n=ch.charCodeAt(0)
-      return `<i style="display:inline-block;width:${(n+i)%3+1}px;height:42px;background:#111;margin-right:1px"></i>`
-    }).join('')
+    const barcode=code39Svg(data.orderNo,size==='a4'?64:52,2,size==='58'?4:5)
     const logoAlign=printSettings.logo_align==='left'?'left':printSettings.logo_align==='right'?'right':'center'
     const logoMarginLeft=logoAlign==='left'?'0':'auto'
     const logoMarginRight=logoAlign==='right'?'0':'auto'
@@ -245,7 +243,7 @@ export function CashierPage() {
       .items{width:100%;border-collapse:collapse}.items th{border-bottom:1px solid #222;padding:5px 0;text-align:left}.items th:last-child,.items td:last-child{text-align:right}
       .items td{padding:6px 0;border-bottom:1px dotted #aaa}.items small{display:block;color:#555;margin-top:2px}
       .grand{font-size:${size==='a4'?'20px':'14px'};font-weight:800}.qr{width:${size==='a4'?'105px':'82px'};height:${size==='a4'?'105px':'82px'};margin:6px auto;display:block}
-      .barcode{height:45px;display:flex;justify-content:center;overflow:hidden;margin:7px 0 3px}.order-code{text-align:center;font-size:10px;letter-spacing:1px}
+      .barcode{min-height:45px;display:flex;justify-content:center;overflow:hidden;margin:7px 0 3px}.barcode svg{max-width:100%;height:auto}.order-code{text-align:center;font-size:10px;letter-spacing:1px}
       .a4-grid{${size==='a4'?'display:grid;grid-template-columns:1fr 130px;gap:22px;align-items:start':''}}
       .footer{margin-top:9px;text-align:center}
       .no-print{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
@@ -281,7 +279,7 @@ export function CashierPage() {
         .small{font-size:12px!important;line-height:1.4!important}
         .qr{width:132px!important;height:132px!important;margin:10px auto!important}
         .barcode{height:56px!important;margin-top:10px!important}
-        .barcode i{height:54px!important}
+        .barcode svg{max-height:58px!important;width:auto!important}
         .order-code{font-size:11px!important}
         .footer{font-size:12px!important;margin-top:12px!important}
         .line{margin:11px 0!important}

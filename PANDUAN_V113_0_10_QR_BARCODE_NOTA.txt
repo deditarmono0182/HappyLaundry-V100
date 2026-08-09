@@ -1,0 +1,20 @@
+HAPPYLAUNDRY V113.0.10 — QR + BARCODE NOTA
+
+PERBAIKAN:
+1. Cetak Ulang Nota sekarang menampilkan QR tracking/order.
+2. Cetak Ulang Nota juga menampilkan Barcode Code 39 yang valid.
+3. Barcode lama di Kasir sebelumnya hanya pola garis visual; sekarang diganti Code 39 asli.
+4. Isi barcode = nomor order, contoh HL-260809-00021.
+5. QR Center sekarang membaca:
+   - QR Code
+   - Code 39
+   - Code 128
+6. Jadi QR maupun barcode pada nota bisa digunakan untuk mencari order.
+7. Pengaturan Print Nota tetap dapat aktif/nonaktifkan QR dan Barcode.
+
+CATATAN:
+QR berisi link tracking pelanggan.
+Barcode berisi nomor order.
+Keduanya mengarah ke order yang sama ketika dipindai di QR Center.
+
+Tidak ada SQL baru.

@@ -3,7 +3,7 @@ import {
   Camera, CheckCircle2, CreditCard, ExternalLink, Eye, ImageUp, MessageCircle, Printer,
   QrCode, RefreshCw, Search, StopCircle, WashingMachine
 } from 'lucide-react'
-import { Html5Qrcode } from 'html5-qrcode'
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
@@ -90,7 +90,14 @@ export function QRScannerPage(){
 
       let available:Array<{id:string;label:string}>=[]
       try{available=await Html5Qrcode.getCameras();setCameras(available);addCameraDiagnostic(`${available.length} kamera terdeteksi.`)}catch(e){addCameraDiagnostic(`Daftar kamera gagal: ${String(e)}`)}
-      const scanner=new Html5Qrcode('qr-center-reader',{verbose:false});scannerRef.current=scanner
+      const scanner=new Html5Qrcode('qr-center-reader',{
+        verbose:false,
+        formatsToSupport:[
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.CODE_128
+        ]
+      });scannerRef.current=scanner
       const preferred=preferredCameraId||selectedCameraId
       const candidates:Array<{config:string|MediaTrackConstraints;label:string;id?:string}>=[]
       if(preferred){const c=available.find(x=>x.id===preferred);candidates.push({config:preferred,label:c?.label||'Kamera pilihan',id:preferred})}
@@ -116,7 +123,14 @@ export function QRScannerPage(){
   const scanFromFile=async(file:File|null)=>{
     if(!file)return
     setScanFileBusy(true);setMessage('');setOrder(null)
-    try{await stopCamera();const scanner=new Html5Qrcode('qr-center-reader',{verbose:false});scannerRef.current=scanner;const decoded=await scanner.scanFile(file,true);await findOrder(decoded)}
+    try{await stopCamera();const scanner=new Html5Qrcode('qr-center-reader',{
+        verbose:false,
+        formatsToSupport:[
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.CODE_128
+        ]
+      });scannerRef.current=scanner;const decoded=await scanner.scanFile(file,true);await findOrder(decoded)}
     catch(error){setMessage(`QR tidak terbaca dari foto. Pastikan QR terlihat jelas. ${error instanceof Error?error.message:String(error)}`)}
     finally{try{await scannerRef.current?.clear()}catch{};scannerRef.current=null;setScanFileBusy(false)}
   }
@@ -168,14 +182,14 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
   return <>
     <PageHeader
       eyebrow="ENTERPRISE QR CENTER"
-      title="QR Center"
-      description="Scan QR yang sama dari nota pelanggan untuk membuka order di aplikasi; pelanggan memakai QR itu untuk tracking."
+      title="QR & Barcode Center"
+      description="Scan QR atau barcode pada nota untuk membuka order langsung di aplikasi."
     />
 
     <section className="qr-center-grid">
       <article className="panel qr-camera-card">
         <div className="qr-camera-head">
-          <div><QrCode size={24}/><div><h2>Scan QR Nota</h2><p>Arahkan kamera ke QR pada nota HappyLaundry.</p></div></div>
+          <div><QrCode size={24}/><div><h2>Scan QR / Barcode Nota</h2><p>Arahkan kamera ke QR atau barcode Code 39 pada nota HappyLaundry.</p></div></div>
           {scanning
             ? <button className="secondary-button" onClick={()=>void stopCamera()}><StopCircle size={17}/>Stop Kamera</button>
             : <button className="primary-button" onClick={()=>void startCamera(undefined)}>
@@ -194,7 +208,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
           </div>}
           {scanning&&<div className="qr-target"><i/><i/><i/><i/></div>}
         </div>
-        {scanning&&<div className="qr-camera-status success"><CheckCircle2 size={16}/><span>Kamera aktif{cameraName?` • ${cameraName}`:''}. Arahkan QR nota ke kotak scanner.</span></div>}
+        {scanning&&<div className="qr-camera-status success"><CheckCircle2 size={16}/><span>Kamera aktif{cameraName?` • ${cameraName}`:''}. Arahkan QR atau barcode nota ke kotak scanner.</span></div>}
         {cameras.length>1&&<div className="qr-camera-selector">
           <label>
             <span>Pilih Kamera</span>

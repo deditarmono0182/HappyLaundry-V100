@@ -25,6 +25,7 @@ import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import { code39Svg } from '../lib/code39'
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft, OrderRow, OrderStatus } from '../types/order'
@@ -555,6 +556,9 @@ export function OrdersPage() {
       .join('')
 
     const closeFallback=`${window.location.origin}/orders?order=${encodeURIComponent(row.order_no)}`
+    const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
+    const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(trackingUrl)}`
+    const barcodeSvg=code39Svg(row.order_no,54,2,5)
 
     printWindow.document.write(`
       <!doctype html>
@@ -588,6 +592,12 @@ export function OrdersPage() {
           .service-row span{max-width:65%}
           .strong{font-weight:800;font-size:13px}
           .small{font-size:10px}
+          .receipt-qr{width:92px;height:92px;display:block;margin:8px auto 4px}
+          .receipt-barcode{display:flex;justify-content:center;overflow:hidden;margin:9px 0 2px}
+          .receipt-barcode svg{max-width:100%;height:auto}
+          .scan-caption{text-align:center;font-size:9px;margin:2px 0}
+          .tracking-link{text-align:center;font-size:8px;word-break:break-all;margin:2px 0}
+
           .reprint-label{
             display:block;
             width:max-content;
@@ -644,7 +654,7 @@ export function OrdersPage() {
             h2{font-size:24px!important}
             .row,.service-row{font-size:14px!important;margin:7px 0!important}
             .strong{font-size:18px!important}
-            .small{font-size:12px!important}
+            .small{font-size:12px!important}.receipt-qr{width:130px!important;height:130px!important}.scan-caption{font-size:11px!important}.tracking-link{font-size:9px!important}
             .line{margin:11px 0!important}
             .reprint-label{font-size:10px!important;padding:5px 9px!important}
             .preview-actions{margin-top:18px!important}
@@ -689,6 +699,11 @@ export function OrdersPage() {
         <div class="row"><span>Sisa</span><span>${formatRupiah(Math.max(0,row.total-row.paid_amount))}</span></div>
 
         <div class="line"></div>
+        <img class="receipt-qr" src="${qrUrl}" alt="QR tracking ${row.order_no}">
+        <p class="scan-caption"><b>Scan QR untuk tracking / buka order</b></p>
+        <p class="tracking-link">${trackingUrl}</p>
+        <div class="receipt-barcode">${barcodeSvg}</div>
+        <p class="scan-caption"><b>Barcode Order: ${row.order_no}</b></p>
         <p class="small">Terima kasih telah menggunakan HappyLaundry.</p>
 
         <div class="preview-actions">

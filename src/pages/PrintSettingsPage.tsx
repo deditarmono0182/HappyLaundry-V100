@@ -281,7 +281,7 @@ export function PrintSettingsPage(){
             {[
               ['show_logo','Logo'],
               ['show_qr','QR Tracking'],
-              ['show_barcode','Barcode'],
+              ['show_barcode','Barcode Order (bisa discan)'],
               ['show_customer_phone','Telepon'],
               ['show_due_at','Estimasi Selesai'],
               ['show_payment_method','Metode Pembayaran'],
@@ -361,7 +361,7 @@ export function PrintSettingsPage(){
           {form.show_balance&&<div><span>Sisa</span><b>Rp 20.000</b></div>}
           {(form.show_qr||form.show_barcode)&&<hr/>}
           {form.show_qr&&<div className="receipt-preview-qr">QR<br/><small>Tracking</small></div>}
-          {form.show_barcode&&<div className="receipt-preview-barcode">|||| ||| || |||| | |||</div>}
+          {form.show_barcode&&<div className="receipt-preview-barcode">▌▌ ▌ ▌▌▌ ▌▌ ▌ ▌▌ ▌▌▌</div>}
           {form.show_maps&&<small>Maps: HappyLaundry Babakan</small>}
           <p className="receipt-preview-footer">{form.footer_note||'Terima kasih telah menggunakan HappyLaundry.'}</p>
           {form.show_cut_line&&<div className="receipt-cut-line">✂ - - - - - - - - - - -</div>}
