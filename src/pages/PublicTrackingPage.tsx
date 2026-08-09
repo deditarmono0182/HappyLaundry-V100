@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Check, Clock3, MapPin, MessageCircle, PackageCheck, Search,
-  Sparkles, WashingMachine
+  Building2, Check, CheckCircle2, Clock3, CreditCard, ImageUp, MapPin, MessageCircle, PackageCheck, QrCode, Search,
+  Sparkles, Upload, WashingMachine
 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { formatIDR } from '../lib/format'
@@ -31,6 +31,31 @@ interface TrackingData {
   operational_hours: string
 }
 
+
+interface PublicBank{
+  id:string
+  bank_name:string
+  account_number:string
+  account_name:string
+}
+interface OnlinePaymentOptions{
+  order_no:string
+  remaining:number
+  qris_enabled:boolean
+  qris_image_url:string|null
+  qris_merchant_name:string
+  qris_note:string
+  transfer_enabled:boolean
+  banks:PublicBank[]
+  pending_proof:{
+    id:string
+    method:'qris'|'transfer'
+    amount:number
+    status:string
+    submitted_at:string
+  }|null
+}
+
 const stages:Array<{key:OrderStatus;label:string}>=[
   {key:'received',label:'Diterima'},
   {key:'washing',label:'Dicuci'},
@@ -58,6 +83,23 @@ export function PublicTrackingPage(){
   const [loading,setLoading]=useState(false)
   const [message,setMessage]=useState('')
   const [now,setNow]=useState(Date.now())
+  const [payOptions,setPayOptions]=useState<OnlinePaymentOptions|null>(null)
+  const [payMethod,setPayMethod]=useState<'qris'|'transfer'>('qris')
+  const [bankId,setBankId]=useState('')
+  const [proofFile,setProofFile]=useState<File|null>(null)
+  const [proofPreview,setProofPreview]=useState('')
+  const [proofBusy,setProofBusy]=useState(false)
+  const [proofMessage,setProofMessage]=useState('')
+
+  const loadPaymentOptions=async(order:string)=>{
+    const {data:result,error}=await supabase.rpc('v1129_public_payment_options',{p_order_no:order})
+    if(error){setPayOptions(null);return}
+    const options=result as OnlinePaymentOptions|null
+    setPayOptions(options)
+    if(options?.qris_enabled)setPayMethod('qris')
+    else if(options?.transfer_enabled)setPayMethod('transfer')
+    setBankId(options?.banks?.[0]?.id||'')
+  }
 
   const load=async(value:string)=>{
     const normalized=value.trim().toUpperCase()
@@ -66,7 +108,10 @@ export function PublicTrackingPage(){
     const {data:result,error}=await supabase.rpc('v103_public_order_tracking',{p_order_no:normalized})
     if(error)setMessage('Status order belum tersedia. Pastikan SQL V103 sudah dijalankan.')
     else if(!result)setMessage('Nomor order tidak ditemukan.')
-    else setData(result as TrackingData)
+    else{
+      setData(result as TrackingData)
+      await loadPaymentOptions(normalized)
+    }
     setLoading(false)
   }
 
@@ -126,6 +171,51 @@ export function PublicTrackingPage(){
       `https://wa.me/${phone}?text=${encodeURIComponent(`Halo ${data.business_name}, saya ingin menanyakan order ${data.order_no}.`)}`,
       '_blank'
     )
+  }
+
+  const chooseProof=(file:File|null)=>{
+    if(!file)return
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
+      setProofMessage('Bukti pembayaran harus JPG, PNG, atau WEBP.');return
+    }
+    if(file.size>5*1024*1024){setProofMessage('Ukuran foto maksimal 5 MB.');return}
+    setProofFile(file)
+    setProofMessage('')
+    const url=URL.createObjectURL(file)
+    setProofPreview(current=>{
+      if(current.startsWith('blob:'))URL.revokeObjectURL(current)
+      return url
+    })
+  }
+
+  const submitOnlinePayment=async()=>{
+    if(!data||!payOptions||!proofFile)return
+    if(payMethod==='transfer'&&!bankId){setProofMessage('Pilih rekening tujuan.');return}
+    setProofBusy(true);setProofMessage('')
+    try{
+      const ext=(proofFile.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg'
+      const safeOrder=data.order_no.replace(/[^a-zA-Z0-9_-]/g,'_')
+      const path=`${safeOrder}/${Date.now()}-${crypto.randomUUID()}.${ext}`
+      const upload=await supabase.storage.from('payment-proofs').upload(path,proofFile,{
+        cacheControl:'3600',upsert:false,contentType:proofFile.type
+      })
+      if(upload.error)throw upload.error
+      const submit=await supabase.rpc('v1129_submit_payment_proof',{
+        p_order_no:data.order_no,
+        p_method:payMethod,
+        p_bank_account_id:payMethod==='transfer'?bankId:null,
+        p_photo_path:path
+      })
+      if(submit.error){
+        await supabase.storage.from('payment-proofs').remove([path])
+        throw submit.error
+      }
+      if(proofPreview.startsWith('blob:'))URL.revokeObjectURL(proofPreview)
+      setProofFile(null);setProofPreview('')
+      setProofMessage('Bukti pembayaran berhasil dikirim. Menunggu konfirmasi HappyLaundry.')
+      await loadPaymentOptions(data.order_no)
+    }catch(e){setProofMessage(e instanceof Error?e.message:'Bukti pembayaran gagal dikirim.')}
+    finally{setProofBusy(false)}
   }
 
   const isReady=data?.status==='ready'||data?.status==='completed'
@@ -203,6 +293,62 @@ export function PublicTrackingPage(){
           </span>
         </div>
       </div>
+
+
+      {payOptions&&Number(payOptions.remaining)>0&&(payOptions.qris_enabled||payOptions.transfer_enabled)&&
+        <div className="tracking-online-payment">
+          <div className="tracking-payment-head">
+            <div>
+              <span>Pembayaran Online</span>
+              <h2>Sisa {formatIDR(Number(payOptions.remaining))}</h2>
+              <small>Bayar sesuai nominal sisa tagihan, lalu upload bukti.</small>
+            </div>
+            <CreditCard size={25}/>
+          </div>
+
+          {payOptions.pending_proof
+            ? <div className="tracking-payment-pending">
+                <CheckCircle2 size={22}/>
+                <div>
+                  <b>Menunggu Konfirmasi</b>
+                  <span>Bukti {payOptions.pending_proof.method==='qris'?'QRIS':'Transfer Bank'} sebesar {formatIDR(Number(payOptions.pending_proof.amount))} sudah diterima.</span>
+                  <small>{new Date(payOptions.pending_proof.submitted_at).toLocaleString('id-ID')}</small>
+                </div>
+              </div>
+            : <>
+                <div className="tracking-pay-methods">
+                  {payOptions.qris_enabled&&<button type="button" className={payMethod==='qris'?'active':''} onClick={()=>setPayMethod('qris')}><QrCode size={18}/>QRIS</button>}
+                  {payOptions.transfer_enabled&&payOptions.banks.length>0&&<button type="button" className={payMethod==='transfer'?'active':''} onClick={()=>setPayMethod('transfer')}><Building2 size={18}/>Transfer Bank</button>}
+                </div>
+
+                {payMethod==='qris'&&payOptions.qris_enabled&&<div className="tracking-qris-box">
+                  {payOptions.qris_image_url&&<img src={payOptions.qris_image_url} alt="QRIS HappyLaundry"/>}
+                  <b>{payOptions.qris_merchant_name||'HappyLaundry'}</b>
+                  <span>{payOptions.qris_note||'Scan QRIS untuk melakukan pembayaran.'}</span>
+                  <strong>{formatIDR(Number(payOptions.remaining))}</strong>
+                </div>}
+
+                {payMethod==='transfer'&&payOptions.transfer_enabled&&<div className="tracking-bank-options">
+                  {payOptions.banks.map(bank=><label className={`tracking-bank-card ${bankId===bank.id?'active':''}`} key={bank.id}>
+                    <input type="radio" name="bank" value={bank.id} checked={bankId===bank.id} onChange={()=>setBankId(bank.id)}/>
+                    <span><b>{bank.bank_name}</b><strong>{bank.account_number}</strong><small>a.n. {bank.account_name}</small></span>
+                  </label>)}
+                  <div className="tracking-transfer-amount">Transfer tepat: <b>{formatIDR(Number(payOptions.remaining))}</b></div>
+                </div>}
+
+                <label className="tracking-proof-upload">
+                  <ImageUp size={20}/>
+                  <span><b>{proofFile?'Ganti Bukti Pembayaran':'Upload Bukti Pembayaran'}</b><small>JPG, PNG, WEBP • maksimal 5 MB</small></span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>chooseProof(e.target.files?.[0]||null)}/>
+                </label>
+                {proofPreview&&<img className="tracking-proof-preview" src={proofPreview} alt="Preview bukti pembayaran"/>}
+                {proofMessage&&<div className={proofMessage.startsWith('Bukti pembayaran berhasil')?'tracking-payment-success':'tracking-error'}>{proofMessage}</div>}
+                <button type="button" className="tracking-submit-proof" disabled={proofBusy||!proofFile} onClick={()=>void submitOnlinePayment()}>
+                  <Upload size={17}/>{proofBusy?'Mengirim...':'Kirim Bukti Pembayaran'}
+                </button>
+                <p className="tracking-payment-note">Pembayaran baru dinyatakan <b>LUNAS</b> setelah dikonfirmasi Owner/karyawan HappyLaundry.</p>
+              </>}
+        </div>}
 
       <div className="tracking-items">
         <h2>Rincian Cucian</h2>

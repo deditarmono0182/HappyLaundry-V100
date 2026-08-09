@@ -1,4 +1,4 @@
-# HappyLaundry Enterprise V112.8.6 Tracking in Order Detail
+# HappyLaundry Enterprise V112.9 Online Payment QRIS & Transfer
 
 ## Jalankan
 ```bash
@@ -298,3 +298,7 @@ Order mendapat Konfirmasi Kurir dengan foto bukti per nomor order. Foto/waktu/ak
 
 ## V112.8.6
 Detail Order mendapat tombol Buka Tracking Pelanggan yang membuka /track/<nomor-order> di tab baru.
+
+
+## V112.9
+QRIS & rekening dapat dikelola Owner, tampil otomatis di Tracking Pelanggan, pelanggan upload bukti bayar, dan Owner/karyawan mengonfirmasi dari menu Pembayaran.

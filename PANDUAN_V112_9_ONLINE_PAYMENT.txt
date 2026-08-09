@@ -1,0 +1,63 @@
+HAPPYLAUNDRY ENTERPRISE V112.9 — ONLINE PAYMENT QRIS & TRANSFER
+
+FITUR OWNER:
+Pengaturan -> Pembayaran Online
+- Aktif/nonaktif QRIS
+- Upload / ganti QRIS kapan saja
+- Nama merchant dan petunjuk QRIS
+- Aktif/nonaktif transfer bank
+- Tambah banyak rekening
+- Edit bank, nomor rekening, atas nama
+- Aktif/nonaktif tiap rekening
+- Hanya Owner yang dapat mengubah
+
+TRACKING PELANGGAN:
+Jika order belum lunas, tampil Pembayaran Online:
+- Sisa tagihan
+- Pilihan QRIS / Transfer Bank
+- QRIS terbaru dari Owner
+- Rekening aktif terbaru dari Owner
+- Upload foto bukti pembayaran
+- Status Menunggu Konfirmasi
+
+PRIVASI:
+- Gambar QRIS bersifat public agar dapat tampil di tracking pelanggan.
+- Bukti pembayaran disimpan di bucket PRIVATE payment-proofs.
+- Pelanggan dapat upload, tetapi tidak dapat membuka/menelusuri bukti yang sudah tersimpan.
+- Owner/karyawan yang login dapat membuka bukti melalui signed URL sementara.
+
+MENU PEMBAYARAN:
+Ada panel baru Konfirmasi Pembayaran Online:
+- Lihat Bukti
+- Konfirmasi Lunas
+- Tolak
+
+KONFIRMASI LUNAS:
+Setelah Owner/karyawan klik Konfirmasi Lunas:
+- pembayaran masuk ke sistem melalui v100_add_payment
+- status pembayaran order ikut diperbarui
+- bukti ditandai confirmed
+
+TOLAK:
+Bukti ditandai rejected.
+Pelanggan dapat upload bukti baru dari tracking.
+
+WAJIB SQL:
+supabase/032_v112_9_online_payment_qris_transfer.sql
+
+URUTAN PASANG:
+1. Supabase -> SQL Editor
+2. Jalankan SQL 032
+3. Pastikan Success
+4. Deploy V112.9
+5. Refresh
+6. Login Owner -> Pengaturan -> Pembayaran Online
+7. Upload QRIS dan/atau tambah rekening
+8. Aktifkan metode yang diinginkan
+9. Simpan
+10. Buka Tracking Pelanggan pada order belum lunas
+11. Coba upload bukti
+12. Login aplikasi -> Pembayaran -> Konfirmasi Pembayaran Online
+
+CACHE:
+happylaundry-v112-9-0

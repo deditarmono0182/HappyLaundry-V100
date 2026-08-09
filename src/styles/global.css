@@ -7670,3 +7670,59 @@ body{
     width:100%;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V112.9 — Online Payment QRIS & Transfer
+   ========================================================= */
+.settings-toggle{display:flex!important;grid-template-columns:none!important;align-items:center;gap:9px!important}
+.settings-toggle input{width:18px!important;height:18px!important}
+.owner-qris-preview{display:block;width:min(280px,100%);max-height:360px;object-fit:contain;margin:auto;border:1px solid #d6e7ef;border-radius:15px;padding:10px;background:#fff}
+.owner-qris-empty{min-height:190px;display:grid;place-items:center;align-content:center;gap:8px;border:2px dashed #c8dce8;border-radius:15px;color:#6d8b9d}
+.online-upload-button{position:relative;display:flex!important;align-items:center!important;justify-content:center;gap:7px!important;min-height:42px;border:1px solid #a9cfe5;border-radius:10px;background:#eef8ff;color:#176a9f;cursor:pointer}
+.online-upload-button input{position:absolute!important;width:1px!important;height:1px!important;opacity:0}
+.owner-bank-list{display:grid;gap:10px}
+.owner-bank-card{border:1px solid #d9e7ee;border-radius:13px;padding:11px;background:#fbfdfe}
+.owner-bank-grid{display:grid;grid-template-columns:1fr 1.2fr 1.2fr auto;gap:9px;align-items:end}
+.owner-bank-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:9px}
+.bank-active{padding-bottom:10px}
+.danger-button{display:inline-flex;align-items:center;gap:6px;border:1px solid #efc3bd;border-radius:9px;background:#fff5f3;color:#a44437;padding:9px 12px;font-weight:800;cursor:pointer}
+
+.tracking-online-payment{margin-top:19px;padding:17px;border:1px solid #c9e1ee;border-radius:17px;background:linear-gradient(180deg,#f4fbff,#fff)}
+.tracking-payment-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.tracking-payment-head>div{display:grid;gap:3px}.tracking-payment-head span{color:#638395;font-size:11px}.tracking-payment-head h2{margin:0;color:#165e8b;font-size:20px}.tracking-payment-head small{color:#748c99}
+.tracking-payment-head>svg{color:#1887c9}
+.tracking-pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.tracking-pay-methods button{min-height:46px;border:1px solid #bfd8e7;border-radius:11px;background:#fff;color:#356a88;font-weight:850;display:flex;align-items:center;justify-content:center;gap:7px}
+.tracking-pay-methods button.active{border-color:#1788ca;background:#eaf7ff;color:#126a9f;box-shadow:0 0 0 3px rgba(23,136,202,.09)}
+.tracking-qris-box{display:grid;justify-items:center;gap:7px;margin-top:13px;padding:15px;border-radius:14px;background:#fff;border:1px solid #d6e7ef;text-align:center}
+.tracking-qris-box img{width:min(300px,88%);max-height:350px;object-fit:contain}
+.tracking-qris-box span{font-size:11px;color:#6e8795}.tracking-qris-box strong{font-size:20px;color:#0b7a57}
+.tracking-bank-options{display:grid;gap:8px;margin-top:12px}
+.tracking-bank-card{display:flex;gap:10px;align-items:center;padding:11px;border:1px solid #d4e4ec;border-radius:12px;background:#fff;cursor:pointer}
+.tracking-bank-card.active{border-color:#1788ca;background:#edf8ff}
+.tracking-bank-card input{width:18px;height:18px}.tracking-bank-card span{display:grid;gap:2px}.tracking-bank-card b{font-size:12px}.tracking-bank-card strong{font-size:16px;letter-spacing:.5px}.tracking-bank-card small{color:#718896}
+.tracking-transfer-amount{padding:10px;border-radius:10px;background:#edf9f4;text-align:center;color:#507769}.tracking-transfer-amount b{color:#087a55}
+.tracking-proof-upload{position:relative;margin-top:12px;display:flex;align-items:center;gap:10px;padding:12px;border:2px dashed #afcfe1;border-radius:12px;background:#fff;color:#236e97;cursor:pointer}
+.tracking-proof-upload span{display:grid;gap:2px}.tracking-proof-upload b{font-size:11px}.tracking-proof-upload small{font-size:9px;color:#718896}
+.tracking-proof-upload input{position:absolute;width:1px;height:1px;opacity:0}
+.tracking-proof-preview{display:block;width:100%;max-height:330px;object-fit:contain;margin-top:10px;border-radius:12px;border:1px solid #d8e6ed;background:#fff}
+.tracking-submit-proof{width:100%;min-height:48px;margin-top:10px;border:0;border-radius:11px;background:#087e59;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;gap:7px}
+.tracking-submit-proof:disabled{opacity:.5}.tracking-payment-note{text-align:center;font-size:9.5px;color:#6f8794;margin:9px 0 0}
+.tracking-payment-success{margin-top:10px;padding:10px;border-radius:10px;background:#eaf8f1;color:#087b56;border:1px solid #bfe2d1}
+.tracking-payment-pending{display:flex;gap:11px;align-items:flex-start;margin-top:13px;padding:13px;border:1px solid #f0d89a;border-radius:12px;background:#fff9e9;color:#7d641d}
+.tracking-payment-pending>div{display:grid;gap:3px}.tracking-payment-pending span,.tracking-payment-pending small{font-size:10px}
+
+.online-proof-panel{margin-bottom:15px}.online-proof-title{display:flex;justify-content:space-between;gap:10px;align-items:center;padding-bottom:11px;border-bottom:1px solid #e3ecef}
+.online-proof-title>div{display:grid;gap:3px}.online-proof-title small{color:#718994}.online-proof-title>span{padding:5px 9px;border-radius:999px;background:#fff5d9;color:#866713;font-size:9px;font-weight:900}
+.online-proof-list{display:grid;gap:9px;margin-top:11px}.online-proof-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px;border:1px solid #dae8ee;border-radius:12px;background:#fbfdfe}
+.online-proof-main{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;flex:1}.online-proof-main>svg{color:#1a87c4}.online-proof-main span{display:grid;gap:2px}.online-proof-main small{color:#718994;font-size:9px}.online-proof-main strong{color:#087b56}
+.online-proof-actions{display:flex;gap:6px;flex-wrap:wrap}.proof-reject{color:#a74438!important;border-color:#efc7c1!important}
+
+@media(max-width:760px){
+  .owner-bank-grid{grid-template-columns:1fr}
+  .tracking-pay-methods{grid-template-columns:1fr}
+  .online-proof-card{align-items:stretch;flex-direction:column}
+  .online-proof-actions{display:grid;grid-template-columns:1fr}
+  .online-proof-actions button{width:100%}
+}

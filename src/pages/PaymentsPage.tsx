@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, CircleDollarSign, CreditCard, PackageCheck, Search, WalletCards } from 'lucide-react'
+import { CheckCircle2, CircleDollarSign, CreditCard, Eye, Image, PackageCheck, Search, WalletCards, XCircle } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
@@ -10,6 +10,19 @@ import type { OrderRow } from '../types/order'
 
 type Method='cash'|'qris'|'transfer'|'other'
 const methodLabels:Record<Method,string>={cash:'Tunai',qris:'QRIS',transfer:'Transfer',other:'Lainnya'}
+
+type OnlineProof={
+  id:string
+  order_id:string
+  order_no:string
+  method:'qris'|'transfer'
+  bank_account_id:string|null
+  amount:number
+  photo_path:string
+  status:'pending'|'confirmed'|'rejected'
+  submitted_at:string
+}
+
 
 export function PaymentsPage(){
   const [searchParams]=useSearchParams()
@@ -22,11 +35,20 @@ export function PaymentsPage(){
   const [busy,setBusy]=useState(false)
   const [paymentAction,setPaymentAction]=useState<'pay'|'pickup'>('pay')
   const [success,setSuccess]=useState('')
+  const [proofs,setProofs]=useState<OnlineProof[]>([])
+  const [proofBusyId,setProofBusyId]=useState<string|null>(null)
 
   const load=useCallback(async()=>{
-    const {data,error}=await supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false})
+    const [ordersResult,proofResult]=await Promise.all([
+      supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
+      supabase.from('v1129_payment_proofs').select('id,order_id,order_no,method,bank_account_id,amount,photo_path,status,submitted_at').eq('status','pending').order('submitted_at',{ascending:true})
+    ])
+    const error=ordersResult.error||proofResult.error
     if(error)setMessage(error.message)
-    else setRows(((data as OrderRow[])||[]).filter(r=>Number(r.paid_amount)<Number(r.total)))
+    else{
+      setRows((((ordersResult.data as OrderRow[])||[]).filter(r=>Number(r.paid_amount)<Number(r.total))))
+      setProofs((proofResult.data as OnlineProof[])||[])
+    }
   },[])
   useEffect(()=>{void load()},[load])
   useEffect(()=>{
@@ -105,6 +127,31 @@ export function PaymentsPage(){
     setBusy(false)
   }
 
+  const viewProof=async(proof:OnlineProof)=>{
+    const {data,error}=await supabase.storage.from('payment-proofs').createSignedUrl(proof.photo_path,300)
+    if(error){setMessage(error.message);return}
+    window.open(data.signedUrl,'_blank','noopener,noreferrer')
+  }
+
+  const confirmProof=async(proof:OnlineProof)=>{
+    if(!window.confirm(`${proof.order_no}\nKonfirmasi pembayaran online ${formatIDR(Number(proof.amount))} sebagai LUNAS?`))return
+    setProofBusyId(proof.id);setMessage('');setSuccess('')
+    const {error}=await supabase.rpc('v1129_confirm_payment_proof',{p_proof_id:proof.id})
+    if(error)setMessage(error.message)
+    else{setSuccess(`${proof.order_no} berhasil dikonfirmasi LUNAS.`);await load()}
+    setProofBusyId(null)
+  }
+
+  const rejectProof=async(proof:OnlineProof)=>{
+    const reason=window.prompt('Alasan menolak bukti pembayaran:','Bukti pembayaran belum sesuai.')
+    if(reason===null)return
+    setProofBusyId(proof.id);setMessage('');setSuccess('')
+    const {error}=await supabase.rpc('v1129_reject_payment_proof',{p_proof_id:proof.id,p_reason:reason})
+    if(error)setMessage(error.message)
+    else{setSuccess(`Bukti ${proof.order_no} ditolak. Pelanggan dapat upload ulang.`);await load()}
+    setProofBusyId(null)
+  }
+
   return <>
     <PageHeader eyebrow="KASIR" title="Pembayaran" description="Terima pembayaran atau selesaikan pembayaran sekaligus saat barang diambil pelanggan."/>
     <section className="stats-grid compact-stats">
@@ -113,6 +160,27 @@ export function PaymentsPage(){
       <article className="stat-card"><div className="stat-icon"><CreditCard size={22}/></div><div><span>Metode Pembayaran</span><strong>4</strong><small>Tunai, QRIS, transfer, lainnya</small></div></article>
     </section>
     {success&&<div className="success-box payment-success-banner"><CheckCircle2 size={18}/>{success}</div>}
+    <section className="panel online-proof-panel">
+      <div className="online-proof-title">
+        <div><b>Konfirmasi Pembayaran Online</b><small>Bukti dari Tracking Pelanggan yang menunggu pengecekan.</small></div>
+        <span>{proofs.length} menunggu</span>
+      </div>
+      {proofs.length===0
+        ? <div className="mini-empty">Belum ada bukti pembayaran online yang menunggu konfirmasi.</div>
+        : <div className="online-proof-list">{proofs.map(proof=><article className="online-proof-card" key={proof.id}>
+            <div className="online-proof-main">
+              <Image size={20}/>
+              <span><b>{proof.order_no}</b><small>{proof.method==='qris'?'QRIS':'Transfer Bank'} • {new Date(proof.submitted_at).toLocaleString('id-ID')}</small></span>
+              <strong>{formatIDR(Number(proof.amount))}</strong>
+            </div>
+            <div className="online-proof-actions">
+              <button type="button" className="secondary-button" onClick={()=>void viewProof(proof)}><Eye size={15}/>Lihat Bukti</button>
+              <button type="button" className="primary-button" disabled={proofBusyId===proof.id} onClick={()=>void confirmProof(proof)}><CheckCircle2 size={15}/>Konfirmasi Lunas</button>
+              <button type="button" className="secondary-button proof-reject" disabled={proofBusyId===proof.id} onClick={()=>void rejectProof(proof)}><XCircle size={15}/>Tolak</button>
+            </div>
+          </article>)}</div>}
+    </section>
+
     <section className="panel data-panel"><div className="toolbar"><label className="search-box"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari order atau pelanggan"/></label><span className="record-count">{filtered.length} tagihan</span></div>
       {message&&<div className="error-box inline-message">{message}</div>}
       <div className="table-wrap"><table><thead><tr><th>Order</th><th>Pelanggan</th><th>Total</th><th>Sudah Bayar</th><th>Sisa</th><th>Status</th><th/></tr></thead><tbody>

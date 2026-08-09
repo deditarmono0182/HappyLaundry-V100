@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Activity, CalendarCheck2, CheckCircle2, ExternalLink, MapPin, MessageCircle, Printer, Save, Store, UsersRound } from 'lucide-react'
+import { Activity, CalendarCheck2, CheckCircle2, CreditCard, ExternalLink, MapPin, MessageCircle, Printer, Save, Store, UsersRound } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -95,6 +95,11 @@ export function SettingsPage() {
       <section className="panel settings-card settings-wide employee-settings-link">
         <header><Printer size={21}/><div><b>Pengaturan Print Nota</b><small>Atur thermal 58/80 mm, A4, template, font, QR tracking, barcode, copy, dan preview nota.</small></div></header>
         <button type="button" className="primary-button" onClick={()=>navigate('/settings/print')}><Printer size={17}/>Buka Pengaturan Print</button>
+      </section>
+
+      <section className="panel settings-card settings-wide employee-settings-link">
+        <header><CreditCard size={21}/><div><b>Pembayaran Online</b><small>Owner mengatur QRIS dan rekening bank yang tampil otomatis di Tracking Pelanggan.</small></div></header>
+        <button type="button" className="primary-button" onClick={()=>navigate('/settings/online-payment')}><CreditCard size={17}/>Atur QRIS & Rekening</button>
       </section>
 
       <section className="panel settings-card settings-wide employee-settings-link">
