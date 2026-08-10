@@ -19,6 +19,7 @@ interface AttendanceSettings{
   attendance_start:string
   attendance_end:string
   enforce_time:boolean
+  auto_logout_grace_minutes:number
   updated_at:string
 }
 
@@ -31,9 +32,10 @@ const defaults:AttendanceSettings={
   qr_token:'',
   qr_version:1,
   qr_generated_at:new Date().toISOString(),
-  attendance_start:'06:00',
-  attendance_end:'11:00',
-  enforce_time:false,
+  attendance_start:'07:00',
+  attendance_end:'21:00',
+  enforce_time:true,
+  auto_logout_grace_minutes:15,
   updated_at:new Date().toISOString()
 }
 
@@ -99,6 +101,7 @@ export function AttendanceSettingsPage(){
       attendance_start:form.attendance_start,
       attendance_end:form.attendance_end,
       enforce_time:Boolean(form.enforce_time),
+      auto_logout_grace_minutes:Math.max(0,Math.min(120,Number(form.auto_logout_grace_minutes)||15)),
       updated_at:new Date().toISOString()
     }
     const{error}=await supabase.from('v112_attendance_settings').update(payload).eq('id',1)
@@ -173,8 +176,8 @@ export function AttendanceSettingsPage(){
   return <>
     <PageHeader
       eyebrow="OWNER • SMART ATTENDANCE"
-      title="Pengaturan Absensi"
-      description="Atur QR toko, koordinat GPS, radius absensi, dan aturan jam. Owner dapat mengelola pengaturan ini dari mana saja."
+      title="Pengaturan Absensi & Jam Kerja"
+      description="Atur QR + GPS, jam kerja karyawan, dan toleransi logout otomatis. Pengecualian absensi dipilih per karyawan."
     />
 
     <div className="attendance-settings-grid">
@@ -209,21 +212,33 @@ export function AttendanceSettingsPage(){
 
         <div className="attendance-config-divider"/>
 
-        <header><ShieldCheck size={21}/><div><b>Aturan Waktu</b><small>GPS dan QR selalu wajib. Batas waktu bisa diaktifkan atau dimatikan.</small></div></header>
+        <header><ShieldCheck size={21}/><div><b>Jam Kerja Karyawan</b><small>Berlaku hanya untuk karyawan yang ditandai Wajib Absensi.</small></div></header>
 
         <label className="print-switch">
           <input type="checkbox" checked={form.enforce_time} onChange={e=>setForm({...form,enforce_time:e.target.checked})}/>
-          <span><b>Batasi jam absen masuk</b><small>Jika aktif, scan di luar jam akan ditolak.</small></span>
+          <span><b>Aktifkan Jam Kerja</b><small>Jika aktif, absensi dan akses kerja mengikuti jam mulai sampai jam selesai.</small></span>
         </label>
 
         <div className="form-grid-two">
-          <label>Mulai
+          <label>Mulai Kerja
             <input type="time" value={form.attendance_start} onChange={e=>setForm({...form,attendance_start:e.target.value})}/>
           </label>
-          <label>Sampai
+          <label>Selesai Kerja
             <input type="time" value={form.attendance_end} onChange={e=>setForm({...form,attendance_end:e.target.value})}/>
           </label>
         </div>
+
+        <label>Toleransi Logout Otomatis
+          <select value={form.auto_logout_grace_minutes} onChange={e=>setForm({...form,auto_logout_grace_minutes:Number(e.target.value)})}>
+            <option value={0}>Tepat saat jam kerja selesai</option>
+            <option value={5}>5 menit</option>
+            <option value={10}>10 menit</option>
+            <option value={15}>15 menit (disarankan)</option>
+            <option value={30}>30 menit</option>
+            <option value={60}>60 menit</option>
+          </select>
+          <small>Karyawan wajib absensi akan logout otomatis setelah jam selesai + toleransi. Owner dan karyawan Bebas Absensi tidak terkena.</small>
+        </label>
 
         {message&&<div className="error-box">{message}</div>}
         {success&&<div className="success-box"><CheckCircle2 size={17}/>{success}</div>}

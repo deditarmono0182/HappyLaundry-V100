@@ -9148,3 +9148,24 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     min-width:1260px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.22 — Attendance Work Hours
+   ========================================================= */
+.employee-attendance-rule-box{
+  display:grid;gap:10px;padding:12px;border:1px solid #cfe1e9;border-radius:12px;background:#f7fbfd
+}
+.employee-attendance-rule-box>header{display:flex;align-items:center;gap:8px;color:#265f79}
+.employee-attendance-rule-box>header>div{display:grid;gap:2px}
+.attendance-required-badge{background:#e8f6ef;color:#176b4e;border:1px solid #c6e5d5}
+.attendance-exempt-badge{background:#eef5ff;color:#295f94;border:1px solid #cadef1}
+.attendance-access-notice{
+  margin-bottom:12px;padding:11px 13px;border:1px solid #e9c77e;border-radius:11px;
+  background:#fff8e8;color:#79591f;font-size:12px;font-weight:650
+}
+.attendance-exempt-card{
+  min-height:180px;display:flex;align-items:center;justify-content:center;gap:12px;text-align:left;color:#315f73
+}
+.attendance-exempt-card>div{display:grid;gap:4px}
+.attendance-exempt-card b{font-size:18px}.attendance-exempt-card span{color:#607d88}

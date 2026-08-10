@@ -1,0 +1,34 @@
+HAPPYLAUNDRY V113.0.22 — JAM KERJA & ABSENSI PER KARYAWAN
+
+ALUR KARYAWAN WAJIB ABSENSI:
+1. Login.
+2. Jika belum Absen Masuk hari ini, hanya menu Absen yang dapat digunakan.
+3. Scan QR toko + GPS dalam jam kerja.
+4. Setelah berhasil, menu sesuai Hak Akses terbuka.
+5. Sebelum pulang, buka Absen dan scan QR + GPS lagi -> Absen Pulang.
+6. Setelah Absen Pulang, akses kerja hari itu ditutup.
+7. Jika lupa Absen Pulang, sesi otomatis logout setelah Jam Selesai + toleransi.
+8. Besok login kembali dan wajib Absen Masuk baru.
+
+OWNER:
+- Tidak wajib absensi.
+- Tidak terkena auto logout.
+- Pengaturan Karyawan -> Wajib Absensi Harian ON/OFF.
+- Karyawan dengan Wajib Absensi OFF tetap memakai hak akses menu biasa,
+  tetapi tidak wajib QR/GPS dan tidak dibatasi jam kerja.
+
+PENGATURAN JAM:
+Pengaturan -> Absensi:
+- Aktifkan Jam Kerja
+- Mulai Kerja
+- Selesai Kerja
+- Toleransi Logout Otomatis
+
+DEFAULT BARU:
+07:00 - 21:00
+Toleransi 15 menit.
+
+WAJIB SQL:
+supabase/038_v113_0_22_attendance_work_hours.sql
+
+Tidak menghapus histori absensi lama.

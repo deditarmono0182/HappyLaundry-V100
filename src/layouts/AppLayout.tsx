@@ -36,6 +36,8 @@ export function AppLayout() {
   const [online,setOnline]=useState(navigator.onLine)
   const [pendingDeletes,setPendingDeletes]=useState(0)
   const [showDeleteToast,setShowDeleteToast]=useState(false)
+  const [attendanceGate,setAttendanceGate]=useState<{attendance_required:boolean;attended_today:boolean;checked_out:boolean;within_work_hours:boolean;logout_at:string|null;work_start:string;work_end:string}|null>(null)
+  const [attendanceNotice,setAttendanceNotice]=useState('')
 
   const { profile, signOut } = useAuth()
   const role = profile?.role ?? 'staff'
@@ -94,6 +96,56 @@ export function AppLayout() {
   },[])
 
   useEffect(()=>{
+    if(role!=='employee'){
+      setAttendanceGate(null)
+      setAttendanceNotice('')
+      return
+    }
+    let active=true
+    let timer:number|undefined
+
+    const checkAttendance=async()=>{
+      const{data,error}=await supabase.rpc('v11322_current_attendance_state')
+      if(!active||error||!data)return
+      const state=(Array.isArray(data)?data[0]:data) as typeof attendanceGate
+      if(!state)return
+      setAttendanceGate(state)
+
+      if(state.attendance_required&&!state.attended_today){
+        setAttendanceNotice(state.within_work_hours
+          ?'Anda belum Absen Masuk hari ini. Scan QR + GPS untuk membuka akses kerja.'
+          :`Akses kerja belum aktif. Jam kerja ${state.work_start}–${state.work_end}.`)
+        if(window.location.pathname!=='/attendance')navigate('/attendance',{replace:true})
+      }else if(state.attendance_required&&state.checked_out){
+        setAttendanceNotice('Absen Pulang sudah tercatat. Sesi kerja hari ini telah selesai.')
+        if(window.location.pathname!=='/attendance')navigate('/attendance',{replace:true})
+      }else{
+        setAttendanceNotice('')
+      }
+
+      if(state.attendance_required&&state.logout_at){
+        const logoutAt=new Date(state.logout_at).getTime()
+        if(Date.now()>=logoutAt){
+          await signOut()
+          navigate('/login',{replace:true})
+        }
+      }
+    }
+
+    void checkAttendance()
+    timer=window.setInterval(()=>{void checkAttendance()},30000)
+    const changed=()=>{void checkAttendance()}
+    window.addEventListener('focus',changed)
+    window.addEventListener('happylaundry-attendance-changed',changed)
+    return()=>{
+      active=false
+      if(timer)window.clearInterval(timer)
+      window.removeEventListener('focus',changed)
+      window.removeEventListener('happylaundry-attendance-changed',changed)
+    }
+  },[role,navigate,signOut])
+
+  useEffect(()=>{
     const prepare=(root:ParentNode=document)=>{
       root.querySelectorAll<HTMLInputElement>('input[type="number"]').forEach(input=>{
         input.inputMode='decimal'
@@ -131,11 +183,16 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.21 Table Alignment</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.22 Attendance Work Hours</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
-          {items.filter(item => item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)).map(({ to, label, icon: Icon }) => (
+          {items.filter(item => {
+            const allowed=item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)
+            if(!allowed)return false
+            if(role==='employee'&&attendanceGate?.attendance_required&&(!attendanceGate.attended_today||attendanceGate.checked_out))return to==='/attendance'
+            return true
+          }).map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} onClick={() => setOpen(false)}>
               <Icon size={19}/>
               <span>{label}</span>
@@ -173,7 +230,10 @@ export function AppLayout() {
           <div><span className="eyebrow">HAPPYLAUNDRY BABAKAN</span><h1>Sistem Operasional Laundry</h1></div>
           <div className="topbar-actions"><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
         </header>
-        <div className="page-container"><Outlet /></div>
+        <div className="page-container">
+          {role==='employee'&&attendanceNotice&&<div className="attendance-access-notice">{attendanceNotice}</div>}
+          <Outlet />
+        </div>
       </main>
     </div>
   )

@@ -12,6 +12,8 @@ type AttendanceResult={
   distance_meters?:number
   attendance_date?:string
   check_in_at?:string
+  check_out_at?:string
+  action?:'check_in'|'check_out'
   message?:string
 }
 
@@ -33,6 +35,7 @@ export function AttendancePage(){
   const[message,setMessage]=useState('')
   const[result,setResult]=useState<AttendanceResult|null>(null)
   const[locationText,setLocationText]=useState('GPS belum diperiksa')
+  const[attendanceState,setAttendanceState]=useState<{attendance_required?:boolean;attended_today?:boolean;checked_out?:boolean;work_start?:string;work_end?:string}|null>(null)
 
   const stopScanner=async()=>{
     const scanner=scannerRef.current
@@ -47,6 +50,18 @@ export function AttendancePage(){
   }
 
   useEffect(()=>()=>{void stopScanner()},[])
+
+  useEffect(()=>{
+    let active=true
+    const loadState=async()=>{
+      const{data}=await supabase.rpc('v11322_current_attendance_state')
+      if(!active||!data)return
+      const row=(Array.isArray(data)?data[0]:data) as typeof attendanceState
+      setAttendanceState(row)
+    }
+    void loadState()
+    return()=>{active=false}
+  },[])
 
   const getLocation=()=>new Promise<GeolocationPosition>((resolve,reject)=>{
     if(!navigator.geolocation){
@@ -104,6 +119,9 @@ export function AttendancePage(){
     const row=(Array.isArray(data)?data[0]:data) as AttendanceResult|null
     if(row?.ok){
       setResult(row)
+      const{data:state}=await supabase.rpc('v11322_current_attendance_state')
+      if(state)setAttendanceState((Array.isArray(state)?state[0]:state) as typeof attendanceState)
+      window.dispatchEvent(new Event('happylaundry-attendance-changed'))
     }else{
       setMessage(row?.message||'Absensi tidak berhasil.')
     }
@@ -137,11 +155,18 @@ export function AttendancePage(){
     return <div className="error-box">Menu Absen digunakan untuk akun karyawan.</div>
   }
 
+  if(attendanceState?.attendance_required===false){
+    return <section className="panel attendance-exempt-card">
+      <ShieldCheck size={32}/>
+      <div><b>Bebas Absensi</b><span>Owner menetapkan akun ini tidak wajib QR/GPS dan tidak dibatasi jam kerja.</span></div>
+    </section>
+  }
+
   return <>
     <PageHeader
       eyebrow="SMART ATTENDANCE"
-      title="Absen Karyawan"
-      description="Scan QR yang ditempel di toko. Sistem akan memverifikasi QR aktif dan lokasi GPS sebelum mencatat Hadir."
+      title={attendanceState?.attended_today&&!attendanceState?.checked_out?"Absen Pulang":"Absen Karyawan"}
+      description={attendanceState?.attended_today&&!attendanceState?.checked_out?"Scan QR toko + GPS untuk mencatat jam pulang.":"Scan QR toko + GPS untuk mencatat kehadiran hari ini."}
     />
 
     <section className="attendance-employee-grid">
@@ -149,7 +174,7 @@ export function AttendancePage(){
         <div className="attendance-scan-heading">
           <div className="attendance-scan-icon"><ScanLine size={28}/></div>
           <div>
-            <h2>Scan QR Absen</h2>
+            <h2>{attendanceState?.attended_today&&!attendanceState?.checked_out?'Scan QR Absen Pulang':'Scan QR Absen Masuk'}</h2>
             <p>Pastikan Anda berada di area HappyLaundry dan Location/GPS aktif.</p>
           </div>
         </div>
@@ -164,7 +189,7 @@ export function AttendancePage(){
 
         <div className="attendance-scan-actions">
           {!scanning
-            ? <button className="primary-button attendance-big-button" disabled={busy} onClick={()=>void startScanner()}><ScanLine size={20}/>{busy?'Memeriksa...':'SCAN QR ABSEN'}</button>
+            ? <button className="primary-button attendance-big-button" disabled={busy} onClick={()=>void startScanner()}><ScanLine size={20}/>{busy?'Memeriksa...':attendanceState?.attended_today&&!attendanceState?.checked_out?'SCAN QR ABSEN PULANG':'SCAN QR ABSEN MASUK'}</button>
             : <button className="secondary-button" onClick={()=>void stopScanner()}><StopCircle size={17}/>Batalkan Scan</button>}
         </div>
 
@@ -183,9 +208,9 @@ export function AttendancePage(){
     {result&&<section className="panel attendance-success-card">
       <div className="attendance-success-icon"><CheckCircle2 size={38}/></div>
       <div>
-        <span>ABSENSI BERHASIL</span>
+        <span>{result.action==='check_out'?'ABSEN PULANG BERHASIL':'ABSEN MASUK BERHASIL'}</span>
         <h2>{profile.full_name}</h2>
-        <p>Hadir • {result.check_in_at?new Date(result.check_in_at).toLocaleString('id-ID'):'Baru saja'}</p>
+        <p>{result.action==='check_out'?'Pulang':'Hadir'} • {result.action==='check_out'&&result.check_out_at?new Date(result.check_out_at).toLocaleString('id-ID'):result.check_in_at?new Date(result.check_in_at).toLocaleString('id-ID'):'Baru saja'}</p>
       </div>
       <div className="attendance-success-distance">
         <span>Jarak dari toko</span>

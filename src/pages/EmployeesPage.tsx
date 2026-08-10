@@ -13,6 +13,7 @@ interface EmployeeRow{
   login_id:string
   phone:string|null
   is_active:boolean
+  attendance_required:boolean
   dashboard:boolean
   cashier:boolean
   orders:boolean
@@ -51,7 +52,7 @@ const permissionOptions=[
 ] as const
 
 const emptyForm={
-  full_name:'',login_id:'',phone:'',is_active:true,
+  full_name:'',login_id:'',phone:'',is_active:true,attendance_required:true,
   dashboard:true,cashier:true,orders:true,qr_center:true,
   production:false,customers:true,services:true,
   payments:true,receivables:false,finance:false,cash:false,reports:false,backup:false,settings:false,
@@ -108,7 +109,7 @@ export function EmployeesPage(){
     setEditing(row)
     setForm({
       full_name:row.full_name,login_id:row.login_id,phone:row.phone||'',
-      is_active:row.is_active,dashboard:row.dashboard,cashier:row.cashier,
+      is_active:row.is_active,attendance_required:row.attendance_required!==false,dashboard:row.dashboard,cashier:row.cashier,
       orders:row.orders,qr_center:row.qr_center,production:row.production,
       customers:row.customers,services:row.services,payments:row.payments,
       receivables:row.receivables,finance:row.finance,cash:row.cash,
@@ -143,13 +144,23 @@ export function EmployeesPage(){
       if(editing){
         const{error}=await supabase.rpc('v109_update_employee',{p_id:editing.id,...common})
         if(error)throw error
-        setSuccess('Data karyawan dan hak akses berhasil diperbarui.')
+        const{error:attendanceError}=await supabase.rpc('v11322_set_employee_attendance_required',{
+          p_employee_id:editing.id,p_required:form.attendance_required
+        })
+        if(attendanceError)throw attendanceError
+        setSuccess('Data karyawan, hak akses, dan aturan absensi berhasil diperbarui.')
       }else{
         if(form.password.length<8)throw new Error('Password minimal 8 karakter.')
         if(form.password!==form.confirm_password)throw new Error('Konfirmasi password tidak sama.')
 
-        const{error}=await supabase.rpc('v109_create_employee',{...common,p_password:form.password})
+        const{data:newId,error}=await supabase.rpc('v109_create_employee',{...common,p_password:form.password})
         if(error)throw error
+        if(newId){
+          const{error:attendanceError}=await supabase.rpc('v11322_set_employee_attendance_required',{
+            p_employee_id:newId,p_required:form.attendance_required
+          })
+          if(attendanceError)throw attendanceError
+        }
         setSuccess(`Akun ${loginId} berhasil dibuat.`)
       }
 
@@ -218,17 +229,18 @@ export function EmployeesPage(){
         <table>
           <thead>
             <tr>
-              <th>Karyawan</th><th>ID Akun</th><th>Status</th><th>Login Terakhir</th>
+              <th>Karyawan</th><th>ID Akun</th><th>Status</th><th>Absensi</th><th>Login Terakhir</th>
               <th>Hak Akses</th><th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            {loading&&<tr><td colSpan={6} className="table-empty">Memuat karyawan...</td></tr>}
-            {!loading&&rows.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada karyawan.</td></tr>}
+            {loading&&<tr><td colSpan={7} className="table-empty">Memuat karyawan...</td></tr>}
+            {!loading&&rows.length===0&&<tr><td colSpan={7} className="table-empty">Belum ada karyawan.</td></tr>}
             {rows.map(row=><tr key={row.id}>
               <td><b>{row.full_name}</b>{row.phone&&<small>{row.phone}</small>}</td>
               <td><b className="employee-login-id">{row.login_id}</b></td>
               <td><span className={`badge ${row.is_active?'success-badge':'danger-badge'}`}>{row.is_active?'Aktif':'Nonaktif'}</span></td>
+              <td><span className={`badge ${row.attendance_required!==false?'attendance-required-badge':'attendance-exempt-badge'}`}>{row.attendance_required!==false?'Wajib':'Bebas'}</span></td>
               <td>{row.last_login_at?new Date(row.last_login_at).toLocaleString('id-ID'):'Belum pernah'}</td>
               <td><div className="permission-mini-list">{permissionOptions.filter(([key])=>row[key]).map(([key,label])=><span key={key}>{label}</span>)}</div></td>
               <td><div className="row-actions employee-row-actions">
@@ -278,6 +290,14 @@ export function EmployeesPage(){
               <span>{label}</span>
             </label>)}
           </div>
+        </div>
+
+        <div className="employee-attendance-rule-box">
+          <header><ShieldCheck size={19}/><div><b>Aturan Absensi</b><small>Hak akses menu tetap terpisah dari kewajiban absensi.</small></div></header>
+          <label className="print-switch">
+            <input type="checkbox" checked={form.attendance_required} onChange={e=>setForm({...form,attendance_required:e.target.checked})}/>
+            <span><b>Wajib Absensi Harian</b><small>Jika aktif: wajib QR + GPS, mengikuti jam kerja, dan auto logout. Jika nonaktif: dapat bekerja sesuai hak akses tanpa absensi/jam kerja.</small></span>
+          </label>
         </div>
 
         <label className="checkbox-label"><input type="checkbox" checked={form.is_active} onChange={e=>setForm({...form,is_active:e.target.checked})}/>Karyawan aktif</label>
