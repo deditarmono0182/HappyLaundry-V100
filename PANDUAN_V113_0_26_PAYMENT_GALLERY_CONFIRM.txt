@@ -1,0 +1,24 @@
+HAPPYLAUNDRY V113.0.26 — PAYMENT PROOF GALLERY + CONFIRM MODES
+
+PERUBAHAN:
+1. Tracking pelanggan -> bukti pembayaran QRIS/Transfer:
+   - Pilih dari Galeri
+   - Ambil Foto Kamera
+2. Owner/Kasir pada Konfirmasi Pembayaran Online:
+   - Konfirmasi Lunas:
+     pembayaran dilunasi, status produksi TIDAK berubah.
+     Contoh: sedang Dicuci tetap Dicuci.
+   - Lunas & Ambil Barang:
+     hanya tersedia jika status order sudah Siap Diambil.
+     pembayaran dilunasi dan order menjadi Selesai.
+3. Jika laundry masih diproses, tombol Lunas & Ambil tidak ditampilkan.
+4. Audit log membedakan konfirmasi lunas biasa dan lunas + pickup.
+
+SQL BARU:
+supabase/040_v113_0_26_payment_gallery_confirm_modes.sql
+
+Urutan:
+- SQL 039 sudah ada
+- Jalankan SQL 040
+- Deploy V113.0.26
+- Refresh aplikasi / PWA

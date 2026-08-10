@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft, Building2, Check, CheckCircle2, Clock3, CreditCard, ImageUp, MapPin, MessageCircle, PackageCheck, QrCode, Search,
+  ArrowLeft, Building2, Camera, Check, CheckCircle2, Clock3, CreditCard, Images, MapPin, MessageCircle, PackageCheck, QrCode, Search,
   Sparkles, Upload, WashingMachine
 } from 'lucide-react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -358,11 +358,23 @@ export function PublicTrackingPage(){
                   <div className="tracking-transfer-amount">Transfer tepat: <b>{formatIDR(Number(payOptions.remaining))}</b></div>
                 </div>}
 
-                <label className="tracking-proof-upload">
-                  <ImageUp size={20}/>
-                  <span><b>{proofFile?'Ganti Bukti Pembayaran':'Upload Bukti Pembayaran'}</b><small>JPG, PNG, WEBP • maksimal 5 MB</small></span>
-                  <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>chooseProof(e.target.files?.[0]||null)}/>
-                </label>
+                <div className="tracking-proof-upload-block">
+                  <div className="tracking-proof-upload-title">
+                    <span><b>{proofFile?'Ganti Bukti Pembayaran':'Upload Bukti Pembayaran'}</b><small>Pilih dari galeri atau ambil foto langsung • JPG, PNG, WEBP • maksimal 5 MB</small></span>
+                  </div>
+                  <div className="tracking-proof-source-actions">
+                    <label className="tracking-proof-source-button">
+                      <Images size={19}/>
+                      <span>Pilih dari Galeri</span>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>chooseProof(e.target.files?.[0]||null)}/>
+                    </label>
+                    <label className="tracking-proof-source-button">
+                      <Camera size={19}/>
+                      <span>Ambil Foto Kamera</span>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>chooseProof(e.target.files?.[0]||null)}/>
+                    </label>
+                  </div>
+                </div>
                 {proofPreview&&<img className="tracking-proof-preview" src={proofPreview} alt="Preview bukti pembayaran"/>}
                 {proofMessage&&<div className={proofMessage.startsWith('Bukti pembayaran berhasil')?'tracking-payment-success':'tracking-error'}>{proofMessage}</div>}
                 <button type="button" className="tracking-submit-proof" disabled={proofBusy||!proofFile} onClick={()=>void submitOnlinePayment()}>

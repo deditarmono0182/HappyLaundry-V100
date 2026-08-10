@@ -133,12 +133,33 @@ export function PaymentsPage(){
     window.open(data.signedUrl,'_blank','noopener,noreferrer')
   }
 
-  const confirmProof=async(proof:OnlineProof)=>{
-    if(!window.confirm(`${proof.order_no}\nKonfirmasi pembayaran online ${formatIDR(Number(proof.amount))} sebagai LUNAS?`))return
+  const confirmProof=async(proof:OnlineProof,completeOrder=false)=>{
+    const order=rows.find(row=>row.id===proof.order_id)
+    if(completeOrder&&order?.status!=='ready'){
+      setMessage(`${proof.order_no} belum berstatus Siap Diambil. Gunakan Konfirmasi Lunas agar status cucian tetap ${order?.status||'diproses'}.`)
+      return
+    }
+
+    const confirmation=completeOrder
+      ? `${proof.order_no}\nKonfirmasi pembayaran ${formatIDR(Number(proof.amount))} sebagai LUNAS dan barang SUDAH DIAMBIL? Order akan menjadi Selesai.`
+      : `${proof.order_no}\nKonfirmasi pembayaran ${formatIDR(Number(proof.amount))} sebagai LUNAS? Status proses laundry TIDAK akan berubah.`
+
+    if(!window.confirm(confirmation))return
+
     setProofBusyId(proof.id);setMessage('');setSuccess('')
-    const {error}=await supabase.rpc('v1129_confirm_payment_proof',{p_proof_id:proof.id})
+    const {error}=await supabase.rpc('v11326_confirm_payment_proof',{
+      p_proof_id:proof.id,
+      p_complete_order:completeOrder
+    })
     if(error)setMessage(error.message)
-    else{setSuccess(`${proof.order_no} berhasil dikonfirmasi LUNAS.`);await load()}
+    else{
+      setSuccess(
+        completeOrder
+          ? `${proof.order_no} LUNAS dan barang tercatat SUDAH DIAMBIL / SELESAI.`
+          : `${proof.order_no} berhasil LUNAS. Status proses laundry tetap tidak berubah.`
+      )
+      await load()
+    }
     setProofBusyId(null)
   }
 
@@ -175,7 +196,10 @@ export function PaymentsPage(){
             </div>
             <div className="online-proof-actions">
               <button type="button" className="secondary-button" onClick={()=>void viewProof(proof)}><Eye size={15}/>Lihat Bukti</button>
-              <button type="button" className="primary-button" disabled={proofBusyId===proof.id} onClick={()=>void confirmProof(proof)}><CheckCircle2 size={15}/>Konfirmasi Lunas</button>
+              <button type="button" className="primary-button" disabled={proofBusyId===proof.id} onClick={()=>void confirmProof(proof,false)}><CheckCircle2 size={15}/>Konfirmasi Lunas</button>
+              {rows.find(row=>row.id===proof.order_id)?.status==='ready'
+                ? <button type="button" className="primary-button proof-pickup-button" disabled={proofBusyId===proof.id} onClick={()=>void confirmProof(proof,true)}><PackageCheck size={15}/>Lunas & Ambil Barang</button>
+                : <span className="proof-production-note">Laundry masih diproses • Konfirmasi Lunas tidak mengubah status cucian</span>}
               <button type="button" className="secondary-button proof-reject" disabled={proofBusyId===proof.id} onClick={()=>void rejectProof(proof)}><XCircle size={15}/>Tolak</button>
             </div>
           </article>)}</div>}
