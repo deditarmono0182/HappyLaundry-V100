@@ -1,0 +1,28 @@
+HAPPYLAUNDRY V113.0.23 — ATTENDANCE BUILD FIX
+
+ERROR V113.0.22:
+src/layouts/AppLayout.tsx: Cannot find name 'to'
+
+PENYEBAB:
+Di filter menu karyawan, kode memakai:
+return to==='/attendance'
+
+Padahal di scope filter variabel yang tersedia adalah:
+item
+
+PERBAIKAN:
+return item.to==='/attendance'
+
+Semua fitur V113.0.22 tetap dipertahankan:
+- Wajib Absensi per karyawan
+- Bebas Absensi per karyawan
+- Jam kerja
+- Absen Masuk QR + GPS
+- Absen Pulang QR + GPS
+- Auto logout setelah jam kerja + toleransi
+
+SQL:
+Tetap gunakan:
+supabase/038_v113_0_22_attendance_work_hours.sql
+
+Tidak ada SQL tambahan untuk V113.0.23.

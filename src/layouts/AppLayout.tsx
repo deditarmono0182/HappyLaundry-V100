@@ -183,14 +183,14 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.22 Attendance Work Hours</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.23 Attendance Build Fix</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
           {items.filter(item => {
             const allowed=item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)
             if(!allowed)return false
-            if(role==='employee'&&attendanceGate?.attendance_required&&(!attendanceGate.attended_today||attendanceGate.checked_out))return to==='/attendance'
+            if(role==='employee'&&attendanceGate?.attendance_required&&(!attendanceGate.attended_today||attendanceGate.checked_out))return item.to==='/attendance'
             return true
           }).map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} onClick={() => setOpen(false)}>
