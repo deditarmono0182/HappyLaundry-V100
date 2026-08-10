@@ -26,10 +26,10 @@ export function DailyClosingPage(){
   <section className="panel daily-closing-date"><label><CalendarDays size={18}/>Tanggal Closing<input type="date" value={date} max={localDate()} onChange={e=>setDate(e.target.value)}/></label>{existing&&<span className="badge success-badge"><LockKeyhole size={14}/> Sudah Closing</span>}</section>
   {message&&<div className="error-box inline-message">{message}</div>}{success&&<div className="success-box inline-message">{success}</div>}
   <section className="stats-grid compact-stats closing-payment-stats">
-   <StatCard label="Tunai" value={formatIDR(Number(summary?.payment_cash||0))} note="Pembayaran order" icon={Banknote}/>
-   <StatCard label="QRIS" value={formatIDR(Number(summary?.payment_qris||0))} note="Pembayaran order" icon={Smartphone}/>
-   <StatCard label="Transfer" value={formatIDR(Number(summary?.payment_transfer||0))} note="Pembayaran order" icon={Landmark}/>
-   <StatCard label="Total Pemasukan" value={formatIDR(Number(summary?.total_income||0))} note="Semua metode pembayaran" icon={WalletCards}/>
+   <StatCard label="Tunai" value={formatIDR(Number(summary?.payment_cash||0))} caption="Pembayaran order" icon={Banknote}/>
+   <StatCard label="QRIS" value={formatIDR(Number(summary?.payment_qris||0))} caption="Pembayaran order" icon={Smartphone}/>
+   <StatCard label="Transfer" value={formatIDR(Number(summary?.payment_transfer||0))} caption="Pembayaran order" icon={Landmark}/>
+   <StatCard label="Total Pemasukan" value={formatIDR(Number(summary?.total_income||0))} caption="Semua metode pembayaran" icon={WalletCards}/>
   </section>
   <section className="closing-grid">
    <article className="panel closing-recap-card"><header><ReceiptText size={20}/><div><b>Rekap Hari Ini</b><small>Angka diambil otomatis dari transaksi aplikasi.</small></div></header>

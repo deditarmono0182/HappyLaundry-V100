@@ -1,0 +1,5 @@
+V113.0.25 — Daily Closing Build Fix
+Perbaikan error TypeScript: prop 'note' pada StatCard tidak valid.
+Semua fitur Closing Harian tetap dipertahankan.
+SQL tetap: supabase/039_v113_0_24_daily_closing.sql
+Tidak ada SQL tambahan.
