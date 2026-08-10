@@ -9198,3 +9198,14 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   .online-proof-actions{align-items:stretch}
   .proof-production-note{max-width:none}
 }
+
+
+/* V113.0.27 — Android Gallery upload hardening */
+.tracking-proof-preview{
+  display:block;
+  max-width:100%;
+  max-height:360px;
+  object-fit:contain;
+  border-radius:12px;
+  background:#f4f8fa;
+}

@@ -1,0 +1,19 @@
+HAPPYLAUNDRY V113.0.27 — ANDROID GALLERY UPLOAD FIX
+
+Perbaikan:
+- File dari Samsung Gallery / Android Photo Picker dibaca penuh ke memory terlebih dahulu.
+- Dibuat ulang sebagai File browser-native sebelum preview.
+- Saat upload ke Supabase dikirim sebagai Uint8Array, bukan object File content:// langsung.
+- Preview foto dibuat dari file yang sudah dinormalisasi.
+- Pesan error "Failed to fetch" dibuat lebih jelas.
+- Kamera tetap bisa dipakai seperti sebelumnya.
+
+SQL:
+Jalankan supabase/041_v113_0_27_android_gallery_upload_fix.sql
+SQL ini hanya memastikan ulang policy bucket payment-proofs dan aman dijalankan ulang.
+
+Urutan:
+1. SQL 041 -> Success.
+2. Deploy V113.0.27.
+3. Refresh/close-open PWA atau Chrome.
+4. Tracking pelanggan -> QRIS/Transfer -> Pilih dari Galeri -> pilih JPG/PNG/WEBP -> cek preview -> Kirim Bukti.

@@ -191,19 +191,65 @@ export function PublicTrackingPage(){
     )
   }
 
-  const chooseProof=(file:File|null)=>{
+  const chooseProof=async(file:File|null)=>{
     if(!file)return
-    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
-      setProofMessage('Bukti pembayaran harus JPG, PNG, atau WEBP.');return
+
+    setProofMessage('Menyiapkan foto dari perangkat...')
+
+    try{
+      // Android Photo Picker / Samsung Gallery kadang memberikan File yang masih
+      // terhubung ke content:// URI. Baca seluruh byte lebih dulu lalu buat File
+      // browser-native agar preview dan upload Supabase stabil.
+      const rawType=(file.type||'').toLowerCase()
+      const extFromName=(file.name.split('.').pop()||'').toLowerCase()
+      const inferredType=
+        rawType||
+        (['jpg','jpeg'].includes(extFromName)?'image/jpeg':
+         extFromName==='png'?'image/png':
+         extFromName==='webp'?'image/webp':'')
+
+      if(!['image/jpeg','image/png','image/webp'].includes(inferredType)){
+        setProofMessage('Format galeri belum didukung. Pilih JPG, PNG, atau WEBP.')
+        return
+      }
+
+      const bytes=await file.arrayBuffer()
+      if(bytes.byteLength<=0){
+        setProofMessage('Foto dari galeri tidak dapat dibaca. Pilih foto lain.')
+        return
+      }
+      if(bytes.byteLength>5*1024*1024){
+        setProofMessage('Ukuran foto maksimal 5 MB.')
+        return
+      }
+
+      const safeExt=inferredType==='image/png'?'png':inferredType==='image/webp'?'webp':'jpg'
+      const normalized=new File(
+        [bytes],
+        `bukti-pembayaran-${Date.now()}.${safeExt}`,
+        {type:inferredType,lastModified:Date.now()}
+      )
+
+      setProofFile(normalized)
+      setProofMessage('')
+
+      const url=URL.createObjectURL(normalized)
+      setProofPreview(current=>{
+        if(current.startsWith('blob:'))URL.revokeObjectURL(current)
+        return url
+      })
+    }catch(error){
+      setProofFile(null)
+      setProofPreview(current=>{
+        if(current.startsWith('blob:'))URL.revokeObjectURL(current)
+        return ''
+      })
+      setProofMessage(
+        error instanceof Error
+          ? `Foto galeri gagal dibaca: ${error.message}`
+          : 'Foto galeri gagal dibaca. Coba pilih foto lain.'
+      )
     }
-    if(file.size>5*1024*1024){setProofMessage('Ukuran foto maksimal 5 MB.');return}
-    setProofFile(file)
-    setProofMessage('')
-    const url=URL.createObjectURL(file)
-    setProofPreview(current=>{
-      if(current.startsWith('blob:'))URL.revokeObjectURL(current)
-      return url
-    })
   }
 
   const submitOnlinePayment=async()=>{
@@ -214,8 +260,14 @@ export function PublicTrackingPage(){
       const ext=(proofFile.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg'
       const safeOrder=data.order_no.replace(/[^a-zA-Z0-9_-]/g,'_')
       const path=`${safeOrder}/${Date.now()}-${crypto.randomUUID()}.${ext}`
-      const upload=await supabase.storage.from('payment-proofs').upload(path,proofFile,{
-        cacheControl:'3600',upsert:false,contentType:proofFile.type
+      // Salin kembali menjadi byte array sebelum upload. Ini menghindari
+      // "Failed to fetch" pada beberapa Android/Samsung ketika File berasal
+      // langsung dari Gallery / Photo Picker.
+      const uploadBytes=new Uint8Array(await proofFile.arrayBuffer())
+      const upload=await supabase.storage.from('payment-proofs').upload(path,uploadBytes,{
+        cacheControl:'3600',
+        upsert:false,
+        contentType:proofFile.type||'image/jpeg'
       })
       if(upload.error)throw upload.error
       const submit=await supabase.rpc('v1129_submit_payment_proof',{
@@ -232,7 +284,13 @@ export function PublicTrackingPage(){
       setProofFile(null);setProofPreview('')
       setProofMessage('Bukti pembayaran berhasil dikirim. Menunggu konfirmasi HappyLaundry.')
       await loadPaymentOptions(data.order_no)
-    }catch(e){setProofMessage(e instanceof Error?e.message:'Bukti pembayaran gagal dikirim.')}
+    }catch(e){
+      const raw=e instanceof Error?e.message:'Bukti pembayaran gagal dikirim.'
+      const friendly=/failed to fetch/i.test(raw)
+        ? 'Upload ke server gagal terhubung. Coba sekali lagi. Jika tetap gagal, gunakan foto kamera atau pilih foto yang tersimpan langsung di perangkat.'
+        : raw
+      setProofMessage(friendly)
+    }
     finally{setProofBusy(false)}
   }
 
@@ -366,12 +424,12 @@ export function PublicTrackingPage(){
                     <label className="tracking-proof-source-button">
                       <Images size={19}/>
                       <span>Pilih dari Galeri</span>
-                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>chooseProof(e.target.files?.[0]||null)}/>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>void chooseProof(e.target.files?.[0]||null)}/>
                     </label>
                     <label className="tracking-proof-source-button">
                       <Camera size={19}/>
                       <span>Ambil Foto Kamera</span>
-                      <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>chooseProof(e.target.files?.[0]||null)}/>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e=>void chooseProof(e.target.files?.[0]||null)}/>
                     </label>
                   </div>
                 </div>
