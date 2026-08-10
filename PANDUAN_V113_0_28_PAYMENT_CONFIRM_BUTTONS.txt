@@ -1,0 +1,18 @@
+V113.0.28 PAYMENT CONFIRM BUTTONS FIX
+
+Pada bukti pembayaran online sekarang selalu terlihat:
+1. Konfirmasi Lunas
+   - Melunasi pembayaran.
+   - Status proses laundry tidak berubah.
+
+2. Lunas & Ambil Barang
+   - Selalu terlihat.
+   - Hanya aktif saat status laundry = Siap Diambil.
+   - Saat dipilih: pembayaran lunas dan order menjadi Selesai.
+
+3. Tolak
+   - Menolak bukti pembayaran.
+
+SQL:
+Tidak ada SQL baru.
+Tetap membutuhkan SQL 040 dan 041 dari versi sebelumnya.

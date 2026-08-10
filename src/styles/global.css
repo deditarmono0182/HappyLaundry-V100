@@ -9209,3 +9209,11 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   border-radius:12px;
   background:#f4f8fa;
 }
+
+/* V113.0.28 — tombol konfirmasi pembayaran selalu jelas */
+.online-proof-actions .proof-confirm-button,
+.online-proof-actions .proof-pickup-button{min-height:38px}
+.online-proof-actions .proof-pickup-button:disabled{
+  opacity:.48;cursor:not-allowed;filter:saturate(.55)
+}
+.proof-production-note{flex-basis:100%}
