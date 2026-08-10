@@ -1,0 +1,8 @@
+V113.0.24 CLOSING HARIAN
+1. Jalankan SQL 039 setelah SQL 038.
+2. Deploy V113.0.24.
+3. Menu Closing Harian memakai hak akses Kas.
+4. Kas Seharusnya = pembayaran order tunai - pengeluaran tunai.
+5. Input Kas Aktual -> Selisih otomatis.
+6. Satu tanggal hanya bisa closing satu kali dan snapshot terkunci.
+7. Closing tidak menghapus/mengubah transaksi.

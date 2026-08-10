@@ -19,6 +19,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/suppliers', label: 'Supplier', icon: Truck, roles: ['owner', 'staff'] },
   { to: '/payments', label: 'Pembayaran', icon: CreditCard, permission: 'payments' },
   { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
+  { to: '/daily-closing', label: 'Closing Harian', icon: CalendarCheck2, permission: 'cash' },
   { to: '/finance', label: 'Keuangan', icon: CircleDollarSign, permission: 'finance' },
   { to: '/profit-target', label: 'Laba & Target', icon: Target, roles: ['owner'] },
   { to: '/delete-approvals', label: 'Persetujuan Hapus', icon: ShieldAlert, roles: ['owner'] },
@@ -183,7 +184,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.23 Attendance Build Fix</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.24 Daily Closing</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

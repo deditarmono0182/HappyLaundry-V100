@@ -15,6 +15,7 @@ const OrdersPage=lazy(()=>import('./pages/OrdersPage').then(m=>({default:m.Order
 const ProductionPage=lazy(()=>import('./pages/ProductionPage').then(m=>({default:m.ProductionPage})))
 const PaymentsPage=lazy(()=>import('./pages/PaymentsPage').then(m=>({default:m.PaymentsPage})))
 const CashPage=lazy(()=>import('./pages/CashPage').then(m=>({default:m.CashPage})))
+const DailyClosingPage=lazy(()=>import('./pages/DailyClosingPage').then(m=>({default:m.DailyClosingPage})))
 const CashierPage=lazy(()=>import('./pages/CashierPage').then(m=>({default:m.CashierPage})))
 const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.SettingsPage})))
 const PrintSettingsPage=lazy(()=>import('./pages/PrintSettingsPage').then(m=>({default:m.PrintSettingsPage})))
@@ -61,6 +62,7 @@ export default function App(){
       <Route path="suppliers" element={<SuppliersPage/>}/>
       <Route path="payments" element={<PermissionRoute permission="payments"><PaymentsPage/></PermissionRoute>}/>
       <Route path="cash" element={<PermissionRoute permission="cash"><CashPage/></PermissionRoute>}/>
+      <Route path="daily-closing" element={<PermissionRoute permission="cash"><DailyClosingPage/></PermissionRoute>}/>
       <Route path="finance" element={<PermissionRoute permission="finance"><FinancePage/></PermissionRoute>}/>
       <Route path="profit-target" element={<ProfitTargetDashboardPage/>}/>
       <Route path="delete-approvals" element={<DeleteApprovalsPage/>}/>
