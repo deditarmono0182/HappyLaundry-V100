@@ -135,11 +135,6 @@ export function PaymentsPage(){
 
   const confirmProof=async(proof:OnlineProof,completeOrder=false)=>{
     const order=rows.find(row=>row.id===proof.order_id)
-    if(completeOrder&&order?.status!=='ready'){
-      setMessage(`${proof.order_no} belum berstatus Siap Diambil. Gunakan Konfirmasi Lunas agar status cucian tetap ${order?.status||'diproses'}.`)
-      return
-    }
-
     const confirmation=completeOrder
       ? `${proof.order_no}\nKonfirmasi pembayaran ${formatIDR(Number(proof.amount))} sebagai LUNAS dan barang SUDAH DIAMBIL? Order akan menjadi Selesai.`
       : `${proof.order_no}\nKonfirmasi pembayaran ${formatIDR(Number(proof.amount))} sebagai LUNAS? Status proses laundry TIDAK akan berubah.`
@@ -208,18 +203,13 @@ export function PaymentsPage(){
               <button
                 type="button"
                 className="primary-button proof-pickup-button"
-                disabled={proofBusyId===proof.id || rows.find(row=>row.id===proof.order_id)?.status!=='ready'}
+                disabled={proofBusyId===proof.id}
                 onClick={()=>void confirmProof(proof,true)}
-                title={rows.find(row=>row.id===proof.order_id)?.status==='ready'
-                  ? 'Konfirmasi lunas dan barang sudah diambil'
-                  : 'Aktif setelah status laundry Siap Diambil'}
+                title="Konfirmasi pembayaran lunas dan barang sudah diterima/diambil pelanggan" 
               >
                 <PackageCheck size={15}/>
                 Lunas & Ambil Barang
               </button>
-              {rows.find(row=>row.id===proof.order_id)?.status!=='ready'&&(
-                <span className="proof-production-note">Belum Siap Diambil • gunakan Konfirmasi Lunas agar status cucian tetap berjalan</span>
-              )}
               <button type="button" className="secondary-button proof-reject" disabled={proofBusyId===proof.id} onClick={()=>void rejectProof(proof)}><XCircle size={15}/>Tolak</button>
             </div>
           </article>)}</div>}

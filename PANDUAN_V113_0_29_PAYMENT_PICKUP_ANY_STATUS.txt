@@ -1,0 +1,21 @@
+V113.0.29 — PAYMENT PICKUP ANY STATUS
+
+Alur disesuaikan dengan operasional HappyLaundry:
+- Barang dapat dikirim/diterima pelanggan lebih dahulu.
+- Pelanggan kemudian bayar QRIS/Transfer.
+- Owner melihat bukti pembayaran.
+
+Tombol:
+1. Konfirmasi Lunas
+   -> pembayaran Lunas
+   -> status laundry tidak berubah.
+
+2. Lunas & Ambil Barang
+   -> aktif pada status produksi apa pun
+   -> pembayaran Lunas
+   -> order langsung Selesai.
+
+SQL baru:
+supabase/042_v113_0_29_payment_pickup_any_status.sql
+
+Jalankan SQL 042 lalu deploy V113.0.29.
