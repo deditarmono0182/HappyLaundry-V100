@@ -1,0 +1,14 @@
+V113.0.30 — KAS HARIAN EXPORT XLS
+
+Fitur baru:
+- Export XLS Kas Harian.
+- Filter: Hari Ini, 7 Hari, Bulan Ini, Pilih Tanggal.
+- Export mengikuti periode aktif.
+- Kolom export:
+  Tanggal/Waktu, Jenis, Kategori, Keterangan, Metode, Nominal.
+- Ringkasan export:
+  Kas Masuk, Kas Keluar, Saldo.
+
+SQL:
+Tidak ada SQL baru.
+Langsung deploy V113.0.30.
