@@ -1,0 +1,12 @@
+V113.0.34 RESET ALL DATA FIX
+
+Perbaikan error:
+DELETE requires a WHERE clause
+
+WAJIB:
+1. Jalankan supabase/043_v113_0_34_safe_reset_all_data.sql
+2. Setelah Success, deploy V113.0.34.
+3. Refresh aplikasi.
+4. Reset tetap hanya dilakukan Owner dan wajib konfirmasi RESET ALL DATA.
+
+Akun Owner/Karyawan dan pengaturan utama tidak dihapus.
