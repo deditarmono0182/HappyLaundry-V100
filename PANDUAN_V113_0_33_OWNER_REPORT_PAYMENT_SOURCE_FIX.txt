@@ -1,0 +1,15 @@
+V113.0.33 — OWNER REPORT PAYMENT SOURCE FIX
+
+Masalah:
+Dashboard masih membaca method dari v100_cash_entries.
+Padahal tabel tersebut tidak memiliki kolom method.
+
+Perbaikan yang benar:
+- v100_cash_entries -> hanya amount, direction, created_at
+- v100_payments -> amount, method, created_at
+- Tunai / QRIS / Transfer Dashboard Owner dihitung langsung dari v100_payments.
+- Kas Masuk / Kas Keluar tetap memakai sumber kas yang sudah ada.
+
+Tidak ada SQL baru.
+Langsung deploy V113.0.33.
+Setelah deploy, lakukan hard refresh / tutup-buka PWA agar service worker lama tidak tertahan.

@@ -26,7 +26,8 @@ export function DashboardPage() {
   const {profile}=useAuth()
   const isOwner=profile?.role==='owner'
   const [orders,setOrders]=useState<OrderRow[]>([])
-  const [cash,setCash]=useState<{amount:number;direction:'in'|'out';method?:string;created_at:string}[]>([])
+  const [cash,setCash]=useState<{amount:number;direction:'in'|'out';created_at:string}[]>([])
+  const [payments,setPayments]=useState<{amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[]>([])
   const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>([])
   const [services,setServices]=useState<DashboardService[]>([])
   const [message,setMessage]=useState('')
@@ -37,17 +38,18 @@ export function DashboardPage() {
   )
 
   const load=useCallback(async()=>{
-    const start=new Date(); start.setHours(0,0,0,0)
-    const [o,c,i,s]=await Promise.all([
+    const [o,c,pay,i,s]=await Promise.all([
       supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
-      supabase.from('v100_cash_entries').select('amount,direction,method,created_at').order('created_at',{ascending:false}),
+      supabase.from('v100_cash_entries').select('amount,direction,created_at').order('created_at',{ascending:false}),
+      supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
-    if(o.error||c.error||i.error||s.error)setMessage((o.error||c.error||i.error||s.error)?.message||'Gagal memuat data')
+    if(o.error||c.error||pay.error||i.error||s.error)setMessage((o.error||c.error||pay.error||i.error||s.error)?.message||'Gagal memuat data')
     else {
       setOrders((o.data as OrderRow[])||[])
       setCash(c.data||[])
+      setPayments((pay.data as {amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[])||[])
       setOrderItems((i.data as DashboardOrderItem[])||[])
       setServices((s.data as DashboardService[])||[])
       if(isOwner){
@@ -215,9 +217,10 @@ export function DashboardPage() {
   const ownerIncome=ownerPeriodCash.filter(r=>r.direction==='in').reduce((s,r)=>s+Number(r.amount),0)
   const ownerExpense=ownerPeriodCash.filter(r=>r.direction==='out').reduce((s,r)=>s+Number(r.amount),0)
   const ownerProfit=ownerIncome-ownerExpense
-  const ownerCash=ownerPeriodCash.filter(r=>r.direction==='in'&&r.method==='cash').reduce((s,r)=>s+Number(r.amount),0)
-  const ownerQris=ownerPeriodCash.filter(r=>r.direction==='in'&&r.method==='qris').reduce((s,r)=>s+Number(r.amount),0)
-  const ownerTransfer=ownerPeriodCash.filter(r=>r.direction==='in'&&r.method==='transfer').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerPeriodPayments=useMemo(()=>payments.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[payments,ownerPeriodStart])
+  const ownerCash=ownerPeriodPayments.filter(r=>r.method==='cash').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerQris=ownerPeriodPayments.filter(r=>r.method==='qris').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerTransfer=ownerPeriodPayments.filter(r=>r.method==='transfer').reduce((s,r)=>s+Number(r.amount),0)
   const ownerAverage=ownerPeriodOrders.length?ownerPeriodOrders.reduce((s,r)=>s+Number(r.total||0),0)/ownerPeriodOrders.length:0
 
   const exportOwnerReport=()=>{
