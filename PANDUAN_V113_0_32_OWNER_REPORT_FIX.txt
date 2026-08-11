@@ -1,0 +1,13 @@
+V113.0.32 — OWNER REPORT FIX
+
+Memperbaiki error:
+column v100_cash_entries.method does not exist
+
+Perbaikan:
+- Dashboard tidak lagi meminta kolom method dari v100_cash_entries.
+- Kas masuk/keluar tetap berasal dari v100_cash_entries.
+- Rincian Tunai / QRIS / Transfer dihitung dari data pembayaran order.
+- Tidak perlu menambah kolom database.
+- Tidak ada SQL baru.
+
+Langsung deploy V113.0.32.
