@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Banknote, CheckCircle2, Crown, MonitorCog, PackageCheck, ShieldAlert, ShoppingBag, Users, WashingMachine } from 'lucide-react'
+import { AlertTriangle, Banknote, CheckCircle2, Crown, FileSpreadsheet, Landmark, MonitorCog, PackageCheck, ShieldAlert, ShoppingBag, Smartphone, TrendingUp, Users, WalletCards, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
+import { downloadXls } from '../lib/exportData'
 import type { OrderRow } from '../types/order'
 
 interface DashboardOrderItem{
@@ -25,12 +26,12 @@ export function DashboardPage() {
   const {profile}=useAuth()
   const isOwner=profile?.role==='owner'
   const [orders,setOrders]=useState<OrderRow[]>([])
-  const [cash,setCash]=useState<{amount:number;direction:'in'|'out';created_at:string}[]>([])
+  const [cash,setCash]=useState<{amount:number;direction:'in'|'out';method?:string;created_at:string}[]>([])
   const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>([])
   const [services,setServices]=useState<DashboardService[]>([])
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
-  const [revenuePeriod,setRevenuePeriod]=useState<'7d'|'month'|'3m'|'6m'|'12m'>('7d')
+  const [revenuePeriod,setRevenuePeriod]=useState<'today'|'7d'|'month'|'3m'|'6m'|'12m'>('7d')
   const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
     (localStorage.getItem('happylaundry-density') as 'comfort'|'compact'|'ultra')||'compact'
   )
@@ -39,7 +40,7 @@ export function DashboardPage() {
     const start=new Date(); start.setHours(0,0,0,0)
     const [o,c,i,s]=await Promise.all([
       supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
-      supabase.from('v100_cash_entries').select('amount,direction,created_at').gte('created_at',start.toISOString()),
+      supabase.from('v100_cash_entries').select('amount,direction,method,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
@@ -83,6 +84,11 @@ export function DashboardPage() {
 
   const chart=useMemo(()=>{
     const now=new Date()
+
+    if(revenuePeriod==='today'){
+      const d=new Date(now);d.setHours(0,0,0,0);const n=new Date(d);n.setDate(n.getDate()+1)
+      return [{label:'Hari Ini',total:orders.filter(r=>{const x=new Date(r.created_at);return x>=d&&x<n}).reduce((s,r)=>s+Number(r.paid_amount||0),0)}]
+    }
 
     if(revenuePeriod==='7d'){
       return Array.from({length:7},(_,i)=>{
@@ -147,7 +153,9 @@ export function DashboardPage() {
     return{points,line,area,width,height}
   },[chart,max])
 
-  const periodTitle=revenuePeriod==='7d'
+  const periodTitle=revenuePeriod==='today'
+    ?'Omzet Hari Ini'
+    :revenuePeriod==='7d'
     ?'Omzet 7 Hari'
     :revenuePeriod==='month'
       ?'Omzet Bulan Ini'
@@ -160,6 +168,7 @@ export function DashboardPage() {
   const categoryRevenue=useMemo(()=>{
     const now=new Date()
     const periodStart=(()=>{
+      if(revenuePeriod==='today'){const d=new Date(now);d.setHours(0,0,0,0);return d}
       if(revenuePeriod==='7d'){const d=new Date(now);d.setDate(d.getDate()-6);d.setHours(0,0,0,0);return d}
       if(revenuePeriod==='month')return new Date(now.getFullYear(),now.getMonth(),1)
       const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
@@ -190,6 +199,49 @@ export function DashboardPage() {
       .map(([category,amount])=>({category,amount,percentage:total>0?(amount/total)*100:0}))
       .sort((a,b)=>b.amount-a.amount)
   },[orders,orderItems,services,revenuePeriod])
+
+
+  const ownerPeriodStart=useMemo(()=>{
+    const now=new Date()
+    if(revenuePeriod==='today'){now.setHours(0,0,0,0);return now}
+    if(revenuePeriod==='7d'){now.setDate(now.getDate()-6);now.setHours(0,0,0,0);return now}
+    if(revenuePeriod==='month')return new Date(now.getFullYear(),now.getMonth(),1)
+    const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
+    return new Date(now.getFullYear(),now.getMonth()-(count-1),1)
+  },[revenuePeriod])
+
+  const ownerPeriodOrders=useMemo(()=>orders.filter(r=>new Date(r.created_at)>=ownerPeriodStart&&r.status!=='cancelled'),[orders,ownerPeriodStart])
+  const ownerPeriodCash=useMemo(()=>cash.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[cash,ownerPeriodStart])
+  const ownerIncome=ownerPeriodCash.filter(r=>r.direction==='in').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerExpense=ownerPeriodCash.filter(r=>r.direction==='out').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerProfit=ownerIncome-ownerExpense
+  const ownerCash=ownerPeriodCash.filter(r=>r.direction==='in'&&r.method==='cash').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerQris=ownerPeriodCash.filter(r=>r.direction==='in'&&r.method==='qris').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerTransfer=ownerPeriodCash.filter(r=>r.direction==='in'&&r.method==='transfer').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerAverage=ownerPeriodOrders.length?ownerPeriodOrders.reduce((s,r)=>s+Number(r.total||0),0)/ownerPeriodOrders.length:0
+
+  const exportOwnerReport=()=>{
+    downloadXls({
+      title:'Laporan Owner HappyLaundry',
+      filename:`laporan-owner-${new Date().toISOString().slice(0,10)}`,
+      subtitle:periodTitle,
+      headers:['Indikator','Nilai'],
+      rows:[
+        ['Omzet / Kas Masuk',ownerIncome],
+        ['Pengeluaran',ownerExpense],
+        ['Laba Bersih',ownerProfit],
+        ['Piutang Aktif',receivable],
+        ['Tunai',ownerCash],
+        ['QRIS',ownerQris],
+        ['Transfer',ownerTransfer],
+        ['Jumlah Order',ownerPeriodOrders.length],
+        ['Rata-rata Nilai Order',ownerAverage],
+        ['Sedang Diproses',processing],
+        ['Siap Diambil',ready]
+      ],
+      summary:[['Kas Masuk',ownerIncome],['Kas Keluar',ownerExpense],['Laba Bersih',ownerProfit]]
+    })
+  }
 
 
   const topCustomers=useMemo(()=>{
@@ -231,7 +283,8 @@ export function DashboardPage() {
 
 
   return <>
-    <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, order, proses cucian, dan piutang."      hideBack
+    <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, keuangan, pembayaran, order, proses cucian, dan piutang." hideBack
+      action={isOwner?<button type="button" className="secondary-button" onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:undefined}
     />
     {message&&<div className="error-box inline-message">{message}</div>}
 
@@ -277,6 +330,25 @@ export function DashboardPage() {
         <StatCard label="Total Piutang" value={formatIDR(receivable)} caption="Sisa tagihan • Klik untuk lihat" icon={AlertTriangle}/>
       </button>
     </section>
+    {isOwner&&<section className="panel owner-business-report">
+      <div className="panel-heading">
+        <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Ringkasan keuangan mengikuti periode grafik omzet yang dipilih.</p></div>
+      </div>
+      <div className="owner-business-kpis">
+        <div><span>Kas Masuk</span><strong>{formatIDR(ownerIncome)}</strong></div>
+        <div><span>Pengeluaran</span><strong>{formatIDR(ownerExpense)}</strong></div>
+        <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih</span><strong>{formatIDR(ownerProfit)}</strong></div>
+        <div><span>Piutang Aktif</span><strong>{formatIDR(receivable)}</strong></div>
+      </div>
+      <div className="owner-payment-breakdown">
+        <div><Banknote size={18}/><span>Tunai</span><b>{formatIDR(ownerCash)}</b></div>
+        <div><Smartphone size={18}/><span>QRIS</span><b>{formatIDR(ownerQris)}</b></div>
+        <div><Landmark size={18}/><span>Transfer</span><b>{formatIDR(ownerTransfer)}</b></div>
+        <div><ShoppingBag size={18}/><span>Order</span><b>{ownerPeriodOrders.length}</b></div>
+        <div><WalletCards size={18}/><span>Rata-rata Order</span><b>{formatIDR(ownerAverage)}</b></div>
+      </div>
+    </section>}
+
     <section className="dashboard-grid">
       <article className="panel">
         <div className="panel-heading dashboard-revenue-heading">
@@ -285,6 +357,7 @@ export function DashboardPage() {
             <p>{revenuePeriod==='month'?'Ringkasan omzet per minggu pada bulan berjalan.':'Berdasarkan pembayaran order.'}</p>
           </div>
           <div className="revenue-period-tabs">
+            <button className={revenuePeriod==='today'?'active':''} onClick={()=>setRevenuePeriod('today')}>Hari Ini</button>
             <button className={revenuePeriod==='7d'?'active':''} onClick={()=>setRevenuePeriod('7d')}>7 Hari</button>
             <button className={revenuePeriod==='month'?'active':''} onClick={()=>setRevenuePeriod('month')}>Bulan Ini</button>
             <button className={revenuePeriod==='3m'?'active':''} onClick={()=>setRevenuePeriod('3m')}>3 Bulan</button>

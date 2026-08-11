@@ -1,0 +1,13 @@
+V113.0.31 — OWNER BUSINESS REPORT
+Dashboard Owner lama ditingkatkan, bukan membuat menu Owner baru.
+
+Tambahan:
+- Kontrol Bisnis Owner: Kas Masuk, Pengeluaran, Laba Bersih, Piutang.
+- Rincian Tunai, QRIS, Transfer.
+- Jumlah order dan rata-rata nilai order.
+- Periode: Hari Ini, 7 Hari, Bulan Ini, 3 Bulan, 6 Bulan, 12 Bulan.
+- Export Laporan Owner XLS.
+- Grafik omzet, kategori layanan, pelanggan teraktif, status order dan order terbaru tetap dipertahankan.
+
+Tidak ada SQL baru.
+Langsung deploy V113.0.31.
