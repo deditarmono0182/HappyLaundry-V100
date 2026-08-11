@@ -9243,3 +9243,31 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .owner-payment-breakdown b{grid-column:2;font-size:12px;color:#294f60}
 @media(max-width:900px){.owner-business-kpis{grid-template-columns:1fr 1fr}.owner-payment-breakdown{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.owner-business-kpis{grid-template-columns:1fr 1fr}.owner-payment-breakdown{grid-template-columns:1fr}.owner-business-kpis strong{font-size:14px}}
+
+
+/* V113.0.37 — Safety Snapshot & Restore */
+.safety-snapshot-panel{margin:14px 0;display:grid;gap:13px}
+.safety-snapshot-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.safety-snapshot-heading h2{display:flex;align-items:center;gap:7px;margin:3px 0}
+.safety-snapshot-heading p{margin:0;color:#647b85;font-size:12px}
+.safety-snapshot-actions{display:flex;gap:8px;flex-wrap:wrap}
+.safety-snapshot-warning{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:#eef9f4;color:#2f6d55;font-size:12px}
+.safety-snapshot-table table{min-width:970px}
+.snapshot-restore-button{min-height:34px;padding:7px 10px}
+.restore-confirm-box{display:grid;gap:11px;padding:14px;border:1px solid #edc6c0;border-radius:12px;background:#fff6f4}
+.restore-confirm-title{display:flex;align-items:center;gap:9px;color:#95483f}
+.restore-confirm-title>div{display:grid;gap:2px}
+.restore-confirm-title span{font-size:11px;color:#7c6a67}
+.restore-confirm-box p{margin:0;color:#695b58;font-size:12px;line-height:1.5}
+.restore-confirm-box label{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:9px;font-size:12px;font-weight:700}
+.restore-confirm-box label strong{padding:7px 10px;border-radius:8px;background:#ffe5df;color:#ad4338}
+.restore-confirm-box label input{min-width:260px}
+.restore-confirm-actions{display:flex;justify-content:flex-end;gap:8px}
+.restore-danger-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;padding:10px 14px;background:#c94135;color:white;font-weight:800;cursor:pointer}
+.restore-danger-button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:760px){
+ .safety-snapshot-heading{flex-direction:column}
+ .safety-snapshot-actions{width:100%}
+ .restore-confirm-box label{grid-template-columns:1fr}
+ .restore-confirm-box label input{min-width:0;width:100%}
+}

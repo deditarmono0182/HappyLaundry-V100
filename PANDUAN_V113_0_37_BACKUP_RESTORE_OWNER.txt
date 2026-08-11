@@ -1,0 +1,24 @@
+HappyLaundry V113.0.37 — Backup & Restore Owner
+
+WAJIB:
+1. SQL 045 harus sudah Success.
+2. Jalankan supabase/046_v113_0_37_backup_restore_owner.sql
+3. Pastikan Success.
+4. Deploy V113.0.37.
+5. Hard refresh.
+
+FITUR:
+- Safety Snapshot manual khusus Owner.
+- Snapshot menyimpan:
+  Pelanggan, Layanan, Order, Item Order, Pembayaran, Kas.
+- Riwayat 50 snapshot terakhir.
+- Jumlah data tiap snapshot terlihat sebelum Restore.
+- Restore hanya Owner.
+- Wajib mengetik: RESTORE SNAPSHOT <ID>
+- Sebelum Restore, sistem OTOMATIS membuat snapshot kondisi data saat ini.
+- Restore berjalan dalam satu transaksi database; jika ada tahap gagal, perubahan rollback.
+- Akun Owner/Karyawan dan pengaturan toko tidak ikut diganti.
+
+CATATAN PENTING:
+Restore dipakai untuk keadaan darurat, bukan pekerjaan harian.
+Tetap simpan Backup JSON eksternal secara berkala.

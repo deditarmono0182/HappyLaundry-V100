@@ -1,11 +1,23 @@
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import {
-  AlertTriangle, CheckCircle2, DatabaseBackup, Download, FileUp,
-  RotateCcw, ShieldAlert, ShieldCheck, Trash2
+  AlertTriangle, CheckCircle2, DatabaseBackup, Download, FileUp, History,
+  LockKeyhole, RefreshCw, RotateCcw, ShieldAlert, ShieldCheck, Trash2
 } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
+
+interface SafetySnapshot {
+  id:number
+  label:string
+  created_at:string
+  created_by:string|null
+  customer_count:number
+  service_count:number
+  order_count:number
+  payment_count:number
+  cash_count:number
+}
 
 interface BackupData {
   version:string
@@ -64,12 +76,86 @@ export function BackupPage(){
   const [resetBusy,setResetBusy]=useState(false)
   const [resetStatus,setResetStatus]=useState('')
   const [resetResult,setResetResult]=useState('')
+  const [snapshots,setSnapshots]=useState<SafetySnapshot[]>([])
+  const [snapshotBusy,setSnapshotBusy]=useState(false)
+  const [restoreTarget,setRestoreTarget]=useState<SafetySnapshot|null>(null)
+  const [restoreConfirm,setRestoreConfirm]=useState('')
+  const [restoreBusy,setRestoreBusy]=useState(false)
   const [orderDiagnostic,setOrderDiagnostic]=useState<{
     table_count:number
     view_count:number
     rpc_version?:string
   }|null>(null)
 
+
+  const loadSafetySnapshots=useCallback(async()=>{
+    if(!isOwner){setSnapshots([]);return}
+    const {data,error}=await supabase.rpc('v113037_list_safety_snapshots')
+    if(error){
+      setMessage(`Riwayat Safety Snapshot gagal dimuat: ${error.message}`)
+      return
+    }
+    setSnapshots(((data||[]) as SafetySnapshot[]))
+  },[isOwner])
+
+  useEffect(()=>{void loadSafetySnapshots()},[loadSafetySnapshots])
+
+  const createSafetySnapshot=async()=>{
+    if(!isOwner){setMessage('Hanya Owner yang dapat membuat Safety Snapshot.');return}
+    setSnapshotBusy(true);setMessage('');setSuccess('')
+    const {data,error}=await supabase.rpc('v113037_create_safety_snapshot',{
+      p_label:`Manual • ${new Date().toLocaleString('id-ID')}`
+    })
+    if(error)setMessage(`Safety Snapshot gagal: ${error.message}`)
+    else{
+      setSuccess(`Safety Snapshot #${data} berhasil dibuat.`)
+      await loadSafetySnapshots()
+    }
+    setSnapshotBusy(false)
+  }
+
+  const openRestore=(snapshot:SafetySnapshot)=>{
+    if(!isOwner){setMessage('Hanya Owner yang dapat melakukan Restore.');return}
+    setRestoreTarget(snapshot)
+    setRestoreConfirm('')
+    setMessage('')
+    setSuccess('')
+  }
+
+  const executeRestore=async()=>{
+    if(!restoreTarget)return
+    const phrase=`RESTORE SNAPSHOT ${restoreTarget.id}`
+    if(restoreConfirm.trim().toUpperCase()!==phrase){
+      setMessage(`Ketik tepat: ${phrase}`)
+      return
+    }
+    if(!window.confirm(
+      `RESTORE SNAPSHOT #${restoreTarget.id}?\n\nSistem akan membuat snapshot data SAAT INI terlebih dahulu, lalu mengganti data operasional dengan isi snapshot yang dipilih.`
+    ))return
+
+    setRestoreBusy(true);setMessage('');setSuccess('')
+    const {data,error}=await supabase.rpc('v113037_restore_safety_snapshot',{
+      p_snapshot_id:restoreTarget.id,
+      p_confirmation:phrase
+    })
+    if(error){
+      setMessage(`RESTORE GAGAL: ${error.message}`)
+    }else{
+      const result=(Array.isArray(data)?data[0]:data) as {
+        restored_snapshot_id?:number
+        pre_restore_snapshot_id?:number
+        orders_restored?:number
+        message?:string
+      }|null
+      setSuccess(
+        `${result?.message||'Restore berhasil.'} Snapshot pengaman sebelum restore: #${result?.pre_restore_snapshot_id||'-'}.`
+      )
+      setRestoreTarget(null)
+      setRestoreConfirm('')
+      await loadSafetySnapshots()
+    }
+    setRestoreBusy(false)
+  }
 
   const exportBackup=async()=>{
     setBusy(true);setMessage('');setSuccess('')
@@ -267,6 +353,86 @@ export function BackupPage(){
         </ul>
       </article>
     </section>
+
+    {isOwner&&<section className="panel safety-snapshot-panel">
+      <div className="safety-snapshot-heading">
+        <div>
+          <span className="eyebrow">PRODUCTION SAFETY • OWNER ONLY</span>
+          <h2><DatabaseBackup size={20}/> Safety Snapshot & Restore</h2>
+          <p>Snapshot menyimpan data inti operasional. Sebelum Restore, sistem otomatis membuat snapshot kondisi terbaru.</p>
+        </div>
+        <div className="safety-snapshot-actions">
+          <button type="button" className="secondary-button" onClick={()=>void loadSafetySnapshots()} disabled={snapshotBusy||restoreBusy}>
+            <RefreshCw size={16}/> Refresh
+          </button>
+          <button type="button" className="primary-button" onClick={()=>void createSafetySnapshot()} disabled={snapshotBusy||restoreBusy}>
+            <DatabaseBackup size={16}/>{snapshotBusy?'Membuat...':'Buat Snapshot Sekarang'}
+          </button>
+        </div>
+      </div>
+
+      <div className="safety-snapshot-warning">
+        <ShieldCheck size={18}/>
+        <span><b>Restore aman berlapis.</b> Data saat ini diamankan terlebih dahulu sebelum snapshot lama dipulihkan.</span>
+      </div>
+
+      <div className="table-wrap safety-snapshot-table">
+        <table>
+          <thead><tr><th>ID</th><th>Label</th><th>Dibuat</th><th>Pelanggan</th><th>Layanan</th><th>Order</th><th>Pembayaran</th><th>Kas</th><th/></tr></thead>
+          <tbody>
+            {snapshots.length===0&&<tr><td colSpan={9} className="table-empty">Belum ada Safety Snapshot.</td></tr>}
+            {snapshots.map(row=><tr key={row.id}>
+              <td><b>#{row.id}</b></td>
+              <td>{row.label}</td>
+              <td>{new Date(row.created_at).toLocaleString('id-ID')}</td>
+              <td>{row.customer_count}</td>
+              <td>{row.service_count}</td>
+              <td>{row.order_count}</td>
+              <td>{row.payment_count}</td>
+              <td>{row.cash_count}</td>
+              <td>
+                <button type="button" className="secondary-button snapshot-restore-button" onClick={()=>openRestore(row)} disabled={restoreBusy}>
+                  <History size={15}/> Restore
+                </button>
+              </td>
+            </tr>)}
+          </tbody>
+        </table>
+      </div>
+
+      {restoreTarget&&<div className="restore-confirm-box">
+        <div className="restore-confirm-title">
+          <LockKeyhole size={22}/>
+          <div>
+            <b>Restore Safety Snapshot #{restoreTarget.id}</b>
+            <span>{restoreTarget.label} • {new Date(restoreTarget.created_at).toLocaleString('id-ID')}</span>
+          </div>
+        </div>
+        <p>Restore akan mengganti data pelanggan, layanan, order, item order, pembayaran, dan kas dengan isi snapshot ini.</p>
+        <label>
+          Untuk konfirmasi ketik
+          <strong>RESTORE SNAPSHOT {restoreTarget.id}</strong>
+          <input
+            value={restoreConfirm}
+            onChange={e=>setRestoreConfirm(e.target.value)}
+            placeholder={`RESTORE SNAPSHOT ${restoreTarget.id}`}
+            disabled={restoreBusy}
+            autoComplete="off"
+          />
+        </label>
+        <div className="restore-confirm-actions">
+          <button type="button" className="secondary-button" onClick={()=>{setRestoreTarget(null);setRestoreConfirm('')}} disabled={restoreBusy}>Batal</button>
+          <button
+            type="button"
+            className="restore-danger-button"
+            onClick={()=>void executeRestore()}
+            disabled={restoreBusy||restoreConfirm.trim().toUpperCase()!==`RESTORE SNAPSHOT ${restoreTarget.id}`}
+          >
+            <History size={16}/>{restoreBusy?'Memulihkan...':'RESTORE SNAPSHOT'}
+          </button>
+        </div>
+      </div>}
+    </section>}
 
     <section className="panel reset-diagnostic-panel">
       <div>
