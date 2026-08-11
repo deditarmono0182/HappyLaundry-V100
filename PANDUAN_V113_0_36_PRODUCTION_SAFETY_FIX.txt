@@ -1,0 +1,6 @@
+V113.0.36 Production Safety Fix
+1. Tidak perlu ulang SQL 044.
+2. Jalankan supabase/045_v113_0_36_production_safety_fix.sql
+3. Pastikan Success.
+4. Deploy V113.0.36 dan hard refresh.
+SQL 045 hanya memasang audit trigger pada TABLE. v100_cash_entries yang berupa VIEW otomatis dilewati. Safety Snapshot tetap dapat membaca view kas.

@@ -1,0 +1,14 @@
+V113.0.35 PRODUCTION SAFETY
+WAJIB:
+1. Jalankan supabase/044_v113_0_35_production_safety.sql sampai Success.
+2. Deploy V113.0.35.
+3. Hard refresh aplikasi.
+
+Safety aktif di database:
+- Audit perubahan INSERT/UPDATE/DELETE pada order, pembayaran, dan kas.
+- Audit hanya dapat dibaca Owner.
+- Tabel Safety Snapshot khusus Owner.
+- Fungsi v113035_create_safety_snapshot tersedia untuk snapshot order/pembayaran/kas.
+
+Tidak mengubah alur transaksi frontend V113.0.34 sehingga risiko regresi lebih kecil.
+Snapshot ini pengaman tambahan, bukan pengganti backup penuh Supabase.
