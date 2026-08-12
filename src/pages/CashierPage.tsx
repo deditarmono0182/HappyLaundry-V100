@@ -52,6 +52,8 @@ type SuccessData = {
   method: PayMethod
   notes: string
   items: OrderItemDraft[]
+  workerName: string
+  courierName: string
 }
 
 const methods: Array<{ value: PayMethod; label: string }> = [
@@ -344,6 +346,8 @@ export function CashierPage() {
           ${printSettings.show_customer_phone?`<tr><td>WhatsApp</td><td>${data.phone}</td></tr>`:''}
           ${printSettings.show_due_at?`<tr><td>Estimasi</td><td>${data.due||'-'}</td></tr>`:''}
           ${printSettings.show_payment_method?`<tr><td>Metode</td><td>${methodLabels[data.method]}</td></tr>`:''}
+          <tr><td>Dikerjakan oleh</td><td>${data.workerName||'-'}</td></tr>
+          <tr><td>Kurir</td><td>${data.courierName||'-'}</td></tr>
         </table>
         <div class="line"></div>
         <table class="items"><thead><tr><th>Layanan</th><th>Jumlah</th></tr></thead><tbody>${rows}</tbody></table>
@@ -450,7 +454,9 @@ export function CashierPage() {
         orderId:result.order_id,orderNo:result.order_no,total,subtotal,discount,paid,
         customer:selectedName,phone:selectedPhone,
         due:dueAt?new Date(dueAt).toLocaleString('id-ID'):'-',
-        method,notes:notes.trim(),items:[...items]
+        method,notes:notes.trim(),items:[...items],
+        workerName:commissionEmployees.find(employee=>employee.id===workerId)?.full_name||'-',
+        courierName:commissionEmployees.find(employee=>employee.id===courierId)?.full_name||'-'
       }
       setSuccess(saved)
       if(printSettings.auto_print){

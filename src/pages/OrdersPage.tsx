@@ -57,6 +57,18 @@ type DeliveryProof={
   confirmed_by_name:string|null
 }
 
+type OrderCommissionAssignment={
+  order_id:string
+  worker_id:string|null
+  courier_id:string|null
+}
+
+type CommissionEmployeeName={
+  id:string
+  full_name:string
+  login_id:string
+}
+
 export function OrdersPage() {
   const navigate=useNavigate()
   const [searchParams]=useSearchParams()
@@ -78,6 +90,8 @@ export function OrdersPage() {
   const [items, setItems] = useState<OrderItemDraft[]>([])
   const [quantityDraft, setQuantityDraft] = useState<Record<string,string>>({})
   const [deliveryProofs,setDeliveryProofs]=useState<DeliveryProof[]>([])
+  const [commissionAssignments,setCommissionAssignments]=useState<OrderCommissionAssignment[]>([])
+  const [commissionEmployeeNames,setCommissionEmployeeNames]=useState<CommissionEmployeeName[]>([])
   const [deliveryOrder,setDeliveryOrder]=useState<OrderRow|null>(null)
   const [deliveryFile,setDeliveryFile]=useState<File|null>(null)
   const [deliveryPreview,setDeliveryPreview]=useState('')
@@ -91,7 +105,7 @@ export function OrdersPage() {
   const load = useCallback(async () => {
     setLoading(true)
     setMessage('')
-    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult] = await Promise.all([
+    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionEmployeesResult] = await Promise.all([
       supabase
         .from('v100_orders_view')
         .select('*')
@@ -112,10 +126,14 @@ export function OrdersPage() {
       supabase
         .from('v112_delivery_proofs')
         .select('id,order_id,order_no,photo_url,photo_path,note,delivered_at,confirmed_by_name')
-        .order('delivered_at',{ascending:false})
+        .order('delivered_at',{ascending:false}),
+      supabase
+        .from('v113_order_commissions')
+        .select('order_id,worker_id,courier_id'),
+      supabase.from('v109_users').select('id,full_name,login_id')
     ])
 
-    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error
+    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionEmployeesResult.error
     if (error) setMessage(error.message)
     else {
       setRows((ordersResult.data as OrderRow[]) || [])
@@ -123,6 +141,8 @@ export function OrdersPage() {
       setServices((servicesResult.data as Service[]) || [])
       setOrderServiceItems((orderItemsResult.data as OrderServiceItem[]) || [])
       setDeliveryProofs((deliveryResult.data as DeliveryProof[]) || [])
+      setCommissionAssignments((commissionResult.data as OrderCommissionAssignment[]) || [])
+      setCommissionEmployeeNames((commissionEmployeesResult.data as CommissionEmployeeName[]) || [])
     }
     setLoading(false)
   }, [])
@@ -540,6 +560,9 @@ export function OrdersPage() {
     }finally{setDeleteBusy(false)}
   }
 
+  const commissionAssignmentMap=useMemo(()=>new Map(commissionAssignments.map(item=>[item.order_id,item])),[commissionAssignments])
+  const commissionEmployeeNameMap=useMemo(()=>new Map(commissionEmployeeNames.map(item=>[item.id,item.full_name])),[commissionEmployeeNames])
+
   const printReceipt=(row:OrderRow)=>{
     const printWindow=window.open('','_blank','width=520,height=850')
     if(!printWindow)return
@@ -557,6 +580,9 @@ export function OrdersPage() {
     const closeFallback=`${window.location.origin}/orders?order=${encodeURIComponent(row.order_no)}`
     const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
     const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(trackingUrl)}`
+    const commissionAssignment=commissionAssignmentMap.get(row.id)
+    const workerName=commissionAssignment?.worker_id?commissionEmployeeNameMap.get(commissionAssignment.worker_id)||'-':'-'
+    const courierName=commissionAssignment?.courier_id?commissionEmployeeNameMap.get(commissionAssignment.courier_id)||'-':'-'
 
     printWindow.document.write(`
       <!doctype html>
@@ -682,6 +708,8 @@ export function OrdersPage() {
         <div class="row"><span>WhatsApp</span><span>${row.customer_phone}</span></div>
         <div class="row"><span>Status Cucian</span><b>${statusLabels[row.status]}</b></div>
         <div class="row"><span>Pembayaran</span><b>${paymentLabels[row.payment_status]}</b></div>
+        <div class="row"><span>Dikerjakan oleh</span><b>${workerName}</b></div>
+        <div class="row"><span>Kurir</span><b>${courierName}</b></div>
 
         <div class="line"></div>
         <b>Layanan</b>

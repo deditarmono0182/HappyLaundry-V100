@@ -9283,3 +9283,16 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .partial-reset-all-locked span{display:grid;gap:3px}.partial-reset-all-locked small{font-size:10px}
 .reset-snapshot-note{display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:9px;background:#edf8f3;color:#2d6f56;font-size:12px}
 @media(max-width:900px){.partial-reset-options{grid-template-columns:1fr 1fr}}@media(max-width:560px){.partial-reset-options{grid-template-columns:1fr}}
+
+
+/* V113.0.43 — employee commission audit detail */
+.payroll-row-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.payroll-detail-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.payroll-detail-summary>div{border:1px solid #dbe8ee;background:#f8fbfd;border-radius:12px;padding:11px 12px;display:grid;gap:4px}
+.payroll-detail-summary span{font-size:12px;color:#617985;font-weight:700}
+.payroll-detail-summary b{font-size:16px;color:#153f50}
+.payroll-detail-head{display:grid;gap:3px;margin:8px 0 10px}.payroll-detail-head small{color:#69808a}
+.payroll-commission-detail-wrap{max-height:52vh;overflow:auto;border:1px solid #e0ebef;border-radius:12px}
+.payroll-commission-detail{min-width:760px;width:100%;border-collapse:collapse}
+.payroll-commission-detail th{position:sticky;top:0;z-index:1;background:#f2f8f6}
+@media(max-width:650px){.payroll-detail-summary{grid-template-columns:1fr}.payroll-row-actions{min-width:150px}}

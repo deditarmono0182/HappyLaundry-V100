@@ -1,0 +1,9 @@
+HappyLaundry Enterprise V113.0.43 — Receipt Worker/Courier + Payroll Audit Detail
+
+Perubahan:
+1. Nota order baru otomatis menampilkan Dikerjakan oleh dan Kurir.
+2. Cetak ulang nota dari Daftar Order juga menampilkan Dikerjakan oleh dan Kurir.
+3. Daftar Gaji memiliki tombol Detail per karyawan.
+4. Detail menampilkan sumber komisi per order: nomor order, peran Produksi/Kurir, nilai order, persentase, nilai komisi, dan waktu komisi menjadi hak.
+5. Tidak ada SQL baru. Tetap menggunakan SQL 049 dan SQL 050 yang sudah dijalankan.
+6. Tidak mengubah perhitungan komisi, reset data, Safety Snapshot, atau fitur operasional lain.

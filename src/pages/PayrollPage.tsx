@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CalendarCheck2, CheckCircle2, FileSpreadsheet, FileText, Gift,
-  HandCoins, Plus, Save, Search, Settings2, Trash2, UsersRound, WalletCards
+  HandCoins, Plus, ReceiptText, Save, Search, Settings2, Trash2, UsersRound, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
@@ -122,6 +122,7 @@ export function PayrollPage(){
   const[loading,setLoading]=useState(true)
   const[busy,setBusy]=useState(false)
   const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
+  const[detailEmployee,setDetailEmployee]=useState<Employee|null>(null)
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
     monthly_allowance:'0',
@@ -277,6 +278,7 @@ export function PayrollPage(){
       attendanceRate,attendancePay,allowance,
       shareDetails,revenueShare,productionCommission,courierCommission,orderCommission,
       commissionOrderCount:new Set(employeeLedger.map(item=>item.order_id)).size,
+      commissionDetails:[...employeeLedger].sort((a,b)=>new Date(b.earned_at).getTime()-new Date(a.earned_at).getTime()),
       bonus,total
     }
   }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap])
@@ -640,7 +642,12 @@ export function PayrollPage(){
                   </div>
                 </td>
                 <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
-                <td><button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button></td>
+                <td>
+                  <div className="payroll-row-actions">
+                    <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
+                    <button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button>
+                  </div>
+                </td>
               </tr>)}
               {filteredPayroll.length===0&&<tr><td colSpan={10} className="table-empty">Belum ada karyawan aktif.</td></tr>}
             </tbody>
@@ -648,6 +655,40 @@ export function PayrollPage(){
         </div>
       </section>
     </>}
+
+    {detailEmployee&&(()=>{
+      const row=payrollRows.find(item=>item.employee.id===detailEmployee.id)
+      const details=row?.commissionDetails||[]
+      return <Modal title={`Detail Gaji & Komisi — ${detailEmployee.full_name}`} onClose={()=>setDetailEmployee(null)}>
+        <div className="payroll-detail-summary">
+          <div><span>Total Komisi Order</span><b>{formatRupiah(row?.orderCommission||0)}</b></div>
+          <div><span>Produksi</span><b>{formatRupiah(row?.productionCommission||0)}</b></div>
+          <div><span>Kurir</span><b>{formatRupiah(row?.courierCommission||0)}</b></div>
+          <div><span>Total Gaji</span><b>{formatRupiah(row?.total||0)}</b></div>
+        </div>
+        <div className="payroll-detail-head">
+          <b>Sumber Komisi dari Order</b>
+          <small>Gunakan rincian ini untuk pengecekan jika ada komplain pekerjaan atau komisi karyawan.</small>
+        </div>
+        <div className="table-wrap payroll-commission-detail-wrap">
+          <table className="payroll-commission-detail">
+            <thead><tr><th>Order</th><th>Peran</th><th>Nilai Order</th><th>%</th><th>Komisi</th><th>Tanggal Hak</th></tr></thead>
+            <tbody>
+              {details.map((item,index)=><tr key={`${item.order_id}-${item.commission_type}-${index}`}>
+                <td><b>{item.order_no}</b></td>
+                <td>{item.commission_type==='production'?'Produksi':'Kurir'}</td>
+                <td>{formatRupiah(Number(item.base_amount||0))}</td>
+                <td>{Number(item.percent||0).toFixed(2)}%</td>
+                <td><b>{formatRupiah(Number(item.amount||0))}</b></td>
+                <td>{new Date(item.earned_at).toLocaleString('id-ID')}</td>
+              </tr>)}
+              {details.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada komisi order pada periode ini.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+        <div className="modal-actions"><button className="secondary-button" onClick={()=>setDetailEmployee(null)}>Tutup</button></div>
+      </Modal>
+    })()}
 
     {overrideTarget&&<Modal
       title={`Ubah Absensi — ${overrideTarget.employee.full_name}`}
