@@ -548,7 +548,7 @@ export function CashierPage() {
                 <option value="">Tanpa kurir</option>
                 {commissionEmployees.map(employee=><option key={employee.id} value={employee.id}>{employee.full_name} — {employee.login_id}</option>)}
               </select>
-              <small>{courierId?`Komisi kurir ${courierPercent.toFixed(2)}% = ${formatIDR(courierCommission)}`:'Opsional. Komisi kurir aktif setelah pengiriman dikonfirmasi.'}</small>
+              <small>{courierId?`Komisi kurir ${courierPercent.toFixed(2)}% = ${formatIDR(courierCommission)}`:'Opsional. Komisi kurir menjadi hak setelah order Selesai & Lunas.'}</small>
             </label>
           </div>
         </section>

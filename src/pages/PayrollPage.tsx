@@ -599,7 +599,7 @@ export function PayrollPage(){
 
       <section className="panel payroll-formula">
         <HandCoins size={21}/>
-        <div><b>Rumus Gaji</b><span>Total Gaji = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil Kategori + Komisi Order. Komisi produksi masuk setelah order Selesai & Lunas; komisi kurir masuk setelah bukti pengiriman dikonfirmasi & order Lunas.</span></div>
+        <div><b>Rumus Gaji</b><span>Total Gaji = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil Kategori + Komisi Order. Komisi produksi dan komisi kurir masuk setelah order Selesai & Lunas.</span></div>
       </section>
 
       <section className="panel data-panel">

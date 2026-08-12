@@ -1,0 +1,12 @@
+HappyLaundry Enterprise V113.0.42 — Courier Commission Fix
+
+Perbaikan:
+- Komisi kurir masuk otomatis ketika order Selesai + Lunas.
+- Tidak lagi wajib menunggu bukti Konfirmasi Kurir untuk masuk daftar gaji.
+- SQL 050 melakukan backfill order lama yang sudah Selesai + Lunas tetapi komisi kurir belum tercatat.
+
+Langkah:
+1. Jalankan supabase/050_v113_0_42_courier_commission_completed_fix.sql SATU KALI setelah SQL 049.
+2. Deploy ZIP V113.0.42 ke Netlify.
+3. Refresh aplikasi, lalu buka Absensi & Gaji.
+4. Cek baris karyawan kurir: nilai Kurir harus masuk untuk order Selesai + Lunas yang memiliki courier_id dan courier_percent > 0.
