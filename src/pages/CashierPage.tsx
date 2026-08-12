@@ -17,6 +17,18 @@ type PayMethod = 'cash' | 'qris' | 'transfer' | 'other'
 type DiscountMode = 'nominal' | 'percent'
 type ReceiptSize = '58' | '80' | 'a4'
 
+type CommissionEmployee = {
+  id: string
+  full_name: string
+  login_id: string
+}
+
+type CommissionSetting = {
+  employee_id: string
+  production_percent: number
+  courier_percent: number
+}
+
 type TodayOrder = {
   id: string
   order_no: string
@@ -58,6 +70,10 @@ export function CashierPage() {
   const [customers,setCustomers]=useState<Customer[]>([])
   const [services,setServices]=useState<Service[]>([])
   const [todayOrders,setTodayOrders]=useState<TodayOrder[]>([])
+  const [commissionEmployees,setCommissionEmployees]=useState<CommissionEmployee[]>([])
+  const [commissionSettings,setCommissionSettings]=useState<CommissionSetting[]>([])
+  const [workerId,setWorkerId]=useState('')
+  const [courierId,setCourierId]=useState('')
   const [customerId,setCustomerId]=useState('')
   const [newCustomer,setNewCustomer]=useState(false)
   const [customerName,setCustomerName]=useState('')
@@ -83,21 +99,25 @@ export function CashierPage() {
 
   const load=useCallback(async()=>{
     const start=new Date(); start.setHours(0,0,0,0)
-    const [c,s,o,settings,print]=await Promise.all([
+    const [c,s,o,settings,print,employees,commission]=await Promise.all([
       supabase.from('v100_customers').select('*').order('name'),
       supabase.from('v100_services').select('*').eq('is_active',true).order('name'),
       supabase.from('v100_orders_view')
         .select('id,order_no,customer_name,total,paid_amount,payment_status,created_at')
         .gte('created_at',start.toISOString()).order('created_at',{ascending:false}),
       supabase.from('v100_store_settings').select('*').eq('id',1).maybeSingle(),
-      supabase.from('v110_receipt_print_settings').select('*').eq('id',1).maybeSingle()
+      supabase.from('v110_receipt_print_settings').select('*').eq('id',1).maybeSingle(),
+      supabase.rpc('v113_list_commission_employees'),
+      supabase.from('v113_employee_commission_settings').select('employee_id,production_percent,courier_percent')
     ])
-    const error=c.error||s.error||o.error||settings.error
+    const error=c.error||s.error||o.error||settings.error||employees.error||commission.error
     if(error)setMessage(error.message)
     else{
       setCustomers((c.data as Customer[])||[])
       setServices((s.data as Service[])||[])
       setTodayOrders((o.data as TodayOrder[])||[])
+      setCommissionEmployees((employees.data as CommissionEmployee[])||[])
+      setCommissionSettings((commission.data as CommissionSetting[])||[])
       setStoreSettings((settings.data as StoreSettings|null)||null)
       if(print.data)setPrintSettings({...defaultReceiptPrintSettings,...print.data} as ReceiptPrintSettings)
     }
@@ -149,6 +169,12 @@ export function CashierPage() {
     return customers.filter(c=>`${c.name} ${c.phone}`.toLowerCase().includes(key))
   },[customers,query])
 
+  const commissionSettingMap=useMemo(()=>new Map(commissionSettings.map(row=>[row.employee_id,row])),[commissionSettings])
+  const workerPercent=Number(commissionSettingMap.get(workerId)?.production_percent||0)
+  const courierPercent=Number(commissionSettingMap.get(courierId)?.courier_percent||0)
+  const workerCommission=total*(workerPercent/100)
+  const courierCommission=total*(courierPercent/100)
+
   const addItem=(service?:Service)=>{
     const selected=service||filteredServices[0]||services[0]
     if(!selected){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
@@ -197,7 +223,7 @@ export function CashierPage() {
   const reset=()=>{
     setCustomerId('');setNewCustomer(false);setCustomerName('');setCustomerPhone('');setCustomerAddress('')
     setItems([]);setQuantityDraft({});setDiscountValue(0);setDiscountMode('nominal');setPaymentAmount(0)
-    setMethod('cash');setDueAt('');setNotes('');setQuery('');setMessage('')
+    setMethod('cash');setDueAt('');setNotes('');setQuery('');setWorkerId('');setCourierId('');setMessage('')
   }
 
   const confirmReset=()=>{
@@ -409,6 +435,17 @@ export function CashierPage() {
         })
         if(pay.error)throw pay.error
       }
+      let commissionWarning=''
+      if(workerId||courierId){
+        const assignment=await supabase.from('v113_order_commissions').insert({
+          order_id:result.order_id,
+          worker_id:workerId||null,
+          worker_percent:workerId?workerPercent:0,
+          courier_id:courierId||null,
+          courier_percent:courierId?courierPercent:0
+        })
+        if(assignment.error)commissionWarning=`Order tersimpan, tetapi komisi belum tercatat: ${assignment.error.message}`
+      }
       const saved:SuccessData={
         orderId:result.order_id,orderNo:result.order_no,total,subtotal,discount,paid,
         customer:selectedName,phone:selectedPhone,
@@ -419,7 +456,7 @@ export function CashierPage() {
       if(printSettings.auto_print){
         window.setTimeout(()=>printReceipt(saved,printSettings.paper_size),150)
       }
-      reset(); await load()
+      reset(); if(commissionWarning)setMessage(commissionWarning); await load()
     }catch(err){setMessage(err instanceof Error?err.message:'Transaksi gagal.')}
     finally{setBusy(false)}
   }
@@ -496,7 +533,29 @@ export function CashierPage() {
 
         <section className="cashier-section">
           <div className="cashier-section-title">
-            <div><b>3. Pembayaran</b><small>Diskon, metode pembayaran, dan estimasi selesai.</small></div>
+            <div><b>3. Penanggung Jawab & Komisi</b><small>Pilih karyawan produksi dan kurir. Persentase diambil otomatis dari pengaturan gaji.</small></div>
+          </div>
+          <div className="form-grid-two">
+            <label>Dikerjakan oleh
+              <select value={workerId} onChange={e=>setWorkerId(e.target.value)}>
+                <option value="">Tidak ditentukan</option>
+                {commissionEmployees.map(employee=><option key={employee.id} value={employee.id}>{employee.full_name} — {employee.login_id}</option>)}
+              </select>
+              <small>{workerId?`Komisi produksi ${workerPercent.toFixed(2)}% = ${formatIDR(workerCommission)}`:'Opsional. Pilih karyawan yang mengerjakan order ini.'}</small>
+            </label>
+            <label>Kurir
+              <select value={courierId} onChange={e=>setCourierId(e.target.value)}>
+                <option value="">Tanpa kurir</option>
+                {commissionEmployees.map(employee=><option key={employee.id} value={employee.id}>{employee.full_name} — {employee.login_id}</option>)}
+              </select>
+              <small>{courierId?`Komisi kurir ${courierPercent.toFixed(2)}% = ${formatIDR(courierCommission)}`:'Opsional. Komisi kurir aktif setelah pengiriman dikonfirmasi.'}</small>
+            </label>
+          </div>
+        </section>
+
+        <section className="cashier-section">
+          <div className="cashier-section-title">
+            <div><b>4. Pembayaran</b><small>Diskon, metode pembayaran, dan estimasi selesai.</small></div>
           </div>
           <div className="form-grid-two">
             <label>Jenis Diskon

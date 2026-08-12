@@ -1,0 +1,26 @@
+HappyLaundry Enterprise V113.0.41 — Order Commission
+
+FITUR BARU
+1. Komisi karyawan produksi dihitung dari persentase setiap order yang ditugaskan kepadanya.
+2. Komisi kurir tetap menggunakan persentase setiap order.
+3. Persentase default diatur Owner dari menu Absensi & Gaji > Daftar Gaji > Atur.
+4. Kasir dapat memilih "Dikerjakan oleh" dan "Kurir" saat membuat order.
+5. Persentase dan dasar omzet disimpan sebagai snapshot per order, sehingga perubahan persentase berikutnya tidak mengubah order lama.
+6. Komisi produksi menjadi hak karyawan setelah order berstatus SELESAI dan LUNAS.
+7. Komisi kurir menjadi hak kurir setelah bukti pengiriman dikonfirmasi dan order LUNAS.
+8. Komisi yang sudah menjadi hak otomatis terakumulasi per bulan di menu Absensi & Gaji.
+9. Laporan gaji menampilkan Komisi Produksi, Komisi Kurir, dan Total Komisi Order.
+10. Sistem bagi hasil kategori lama tetap tersedia sebagai opsi dan tidak dihapus.
+
+URUTAN DEPLOY
+A. Supabase SQL Editor: jalankan supabase/049_v113_0_41_order_employee_courier_commission.sql SATU KALI.
+B. Setelah SQL berhasil, deploy ZIP V113.0.41 ke Netlify.
+C. Login Owner > Absensi & Gaji > Daftar Gaji > Atur.
+D. Isi Komisi Produksi (%) dan Komisi Kurir (%) untuk tiap karyawan.
+E. Buat order percobaan dari Kasir dan pilih karyawan/kurir.
+
+CATATAN
+- SQL 047 dan 048 tetap dipakai dan tidak perlu dijalankan ulang.
+- RESET ALL DATA tetap dikunci sesuai V113.0.40.
+- Fitur reset parsial dan Safety Snapshot tidak diubah.
+- WhatsApp Cloud API belum diaktifkan.

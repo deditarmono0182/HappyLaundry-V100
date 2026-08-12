@@ -51,6 +51,23 @@ interface PayrollAdjustment{
   bonus:number
 }
 
+interface EmployeeCommissionSetting{
+  employee_id:string
+  production_percent:number
+  courier_percent:number
+}
+
+interface CommissionLedgerRow{
+  order_id:string
+  order_no:string
+  employee_id:string
+  commission_type:'production'|'courier'
+  base_amount:number
+  percent:number
+  amount:number
+  earned_at:string
+}
+
 interface Payment{
   order_id:string
   amount:number
@@ -91,6 +108,8 @@ export function PayrollPage(){
   const[settings,setSettings]=useState<PayrollSetting[]>([])
   const[shares,setShares]=useState<PayrollShare[]>([])
   const[adjustments,setAdjustments]=useState<PayrollAdjustment[]>([])
+  const[employeeCommissionSettings,setEmployeeCommissionSettings]=useState<EmployeeCommissionSetting[]>([])
+  const[commissionLedger,setCommissionLedger]=useState<CommissionLedgerRow[]>([])
   const[payments,setPayments]=useState<Payment[]>([])
   const[orderItems,setOrderItems]=useState<OrderItem[]>([])
   const[services,setServices]=useState<Service[]>([])
@@ -105,7 +124,9 @@ export function PayrollPage(){
   const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
-    monthly_allowance:'0'
+    monthly_allowance:'0',
+    production_percent:'0',
+    courier_percent:'0'
   })
   const[shareDraft,setShareDraft]=useState<Array<{category:string;share_percent:string}>>([])
   const[bonusDraft,setBonusDraft]=useState<Record<string,string>>({})
@@ -115,17 +136,19 @@ export function PayrollPage(){
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
     const range=monthRange(month)
-    const [e,a,s,shr,adj,p,oi,sv]=await Promise.all([
+    const [e,a,s,shr,adj,ecs,ledger,p,oi,sv]=await Promise.all([
       supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
       supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
       supabase.from('v111_employee_payroll_settings').select('*'),
       supabase.from('v111_employee_revenue_shares').select('*'),
       supabase.from('v111_payroll_adjustments').select('*').eq('payroll_month',range.start),
+      supabase.from('v113_employee_commission_settings').select('*'),
+      supabase.from('v113_commission_ledger').select('*').gte('earned_at',`${range.start}T00:00:00`).lte('earned_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
-    const error=e.error||a.error||s.error||shr.error||adj.error||p.error||oi.error||sv.error
+    const error=e.error||a.error||s.error||shr.error||adj.error||ecs.error||ledger.error||p.error||oi.error||sv.error
     if(error)setMessage(error.message)
     else{
       setEmployees((e.data as Employee[])||[])
@@ -133,6 +156,8 @@ export function PayrollPage(){
       setSettings((s.data as PayrollSetting[])||[])
       setShares((shr.data as PayrollShare[])||[])
       setAdjustments((adj.data as PayrollAdjustment[])||[])
+      setEmployeeCommissionSettings((ecs.data as EmployeeCommissionSetting[])||[])
+      setCommissionLedger((ledger.data as CommissionLedgerRow[])||[])
       setPayments((p.data as Payment[])||[])
       setOrderItems((oi.data as OrderItem[])||[])
       setServices((sv.data as Service[])||[])
@@ -152,6 +177,7 @@ export function PayrollPage(){
   },[attendance])
 
   const settingMap=useMemo(()=>new Map(settings.map(s=>[s.employee_id,s])),[settings])
+  const employeeCommissionSettingMap=useMemo(()=>new Map(employeeCommissionSettings.map(s=>[s.employee_id,s])),[employeeCommissionSettings])
 
   const sharesByEmployee=useMemo(()=>{
     const map=new Map<string,PayrollShare[]>()
@@ -234,15 +260,26 @@ export function PayrollPage(){
     })
     const revenueShare=shareDetails.reduce((sum,item)=>sum+item.amount,0)
 
+    const employeeLedger=commissionLedger.filter(item=>item.employee_id===employee.id)
+    const productionCommission=employeeLedger
+      .filter(item=>item.commission_type==='production')
+      .reduce((sum,item)=>sum+Number(item.amount||0),0)
+    const courierCommission=employeeLedger
+      .filter(item=>item.commission_type==='courier')
+      .reduce((sum,item)=>sum+Number(item.amount||0),0)
+    const orderCommission=productionCommission+courierCommission
+
     const bonus=Number(bonusDraft[employee.id]??adjustmentMap.get(employee.id)?.bonus??0)
-    const total=attendancePay+allowance+bonus+revenueShare
+    const total=attendancePay+allowance+bonus+revenueShare+orderCommission
 
     return{
       employee,presentDays,permissionDays,sickDays,absentDays,
       attendanceRate,attendancePay,allowance,
-      shareDetails,revenueShare,bonus,total
+      shareDetails,revenueShare,productionCommission,courierCommission,orderCommission,
+      commissionOrderCount:new Set(employeeLedger.map(item=>item.order_id)).size,
+      bonus,total
     }
-  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,bonusDraft,adjustmentMap])
+  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap])
 
   const filteredEmployees=useMemo(()=>{
     const key=query.toLowerCase().trim()
@@ -305,9 +342,12 @@ export function PayrollPage(){
   const openSettings=(employee:Employee)=>{
     const row=settingMap.get(employee.id)
     setSettingsEmployee(employee)
+    const commissionRow=employeeCommissionSettingMap.get(employee.id)
     setSettingForm({
       attendance_rate:String(Number(row?.attendance_rate||0)),
-      monthly_allowance:String(Number(row?.monthly_allowance||0))
+      monthly_allowance:String(Number(row?.monthly_allowance||0)),
+      production_percent:String(Number(commissionRow?.production_percent||0)),
+      courier_percent:String(Number(commissionRow?.courier_percent||0))
     })
     const employeeShares=sharesByEmployee.get(employee.id)||[]
     setShareDraft(
@@ -350,6 +390,21 @@ export function PayrollPage(){
 
     if(settingsResult.error){
       setMessage(settingsResult.error.message)
+      setBusy(false)
+      return
+    }
+
+    const commissionSettingsResult=await supabase
+      .from('v113_employee_commission_settings')
+      .upsert({
+        employee_id:settingsEmployee.id,
+        production_percent:Math.max(0,Math.min(100,Number(settingForm.production_percent)||0)),
+        courier_percent:Math.max(0,Math.min(100,Number(settingForm.courier_percent)||0)),
+        updated_at:new Date().toISOString()
+      },{onConflict:'employee_id'})
+
+    if(commissionSettingsResult.error){
+      setMessage(commissionSettingsResult.error.message)
       setBusy(false)
       return
     }
@@ -421,14 +476,14 @@ export function PayrollPage(){
     title:'Daftar Gaji Karyawan',
     filename:`gaji-karyawan-${month}`,
     subtitle:`Periode ${month} • Omzet aktual ${formatRupiah(monthlyRevenue)}`,
-    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Rincian Bagi Hasil','Total Bagi Hasil','Total Gaji'],
+    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Bagi Hasil Kategori','Komisi Produksi','Komisi Kurir','Total Gaji'],
     rows:filteredPayroll.map(r=>[
       r.employee.full_name,r.presentDays,r.attendanceRate,
       Math.round(r.attendancePay),Math.round(r.allowance),Math.round(r.bonus),
       r.shareDetails.length
         ? r.shareDetails.map(item=>`${item.category} ${item.percent.toFixed(2)}% x ${Math.round(item.baseRevenue)} = ${Math.round(item.amount)}`).join(' | ')
         : '-',
-      Math.round(r.revenueShare),Math.round(r.total)
+      Math.round(r.productionCommission),Math.round(r.courierCommission),Math.round(r.total)
     ]),
     summary:[
       ['Omzet Bulan',Math.round(monthlyRevenue)],
@@ -438,13 +493,13 @@ export function PayrollPage(){
 
   const totalPayroll=payrollRows.reduce((sum,r)=>sum+r.total,0)
   const totalPresent=payrollRows.reduce((sum,r)=>sum+r.presentDays,0)
-  const totalShare=payrollRows.reduce((sum,r)=>sum+r.revenueShare,0)
+  const totalOrderCommission=payrollRows.reduce((sum,r)=>sum+r.orderCommission,0)
 
   return <>
     <PageHeader
       eyebrow="HR & PAYROLL"
       title="Absensi & Penggajian"
-      description="Kelola kehadiran dan hitung gaji dari uang hadir, tunjangan, bonus, dan bagi hasil omzet."
+      description="Kelola kehadiran dan hitung gaji dari uang hadir, tunjangan, bonus, bagi hasil kategori, serta komisi per order."
       action={<div className="payroll-page-actions">
         <button className="secondary-button" onClick={()=>downloadXls(tab==='attendance'?attendanceExport():payrollExport())}><FileSpreadsheet size={16}/>XLS</button>
         <button className="secondary-button" onClick={()=>printPdf(tab==='attendance'?attendanceExport():payrollExport())}><FileText size={16}/>PDF</button>
@@ -539,24 +594,24 @@ export function PayrollPage(){
       <section className="stats-grid payroll-stats">
         <StatCard icon={HandCoins} label="Omzet Bulan" value={formatRupiah(monthlyRevenue)} caption="Pembayaran aktual"/>
         <StatCard icon={WalletCards} label="Total Gaji" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
-        <StatCard icon={Gift} label="Total Bagi Hasil" value={formatRupiah(totalShare)} caption="Berdasarkan persentase karyawan"/>
+        <StatCard icon={Gift} label="Komisi Order" value={formatRupiah(totalOrderCommission)} caption="Produksi + kurir yang sudah menjadi hak"/>
       </section>
 
       <section className="panel payroll-formula">
         <HandCoins size={21}/>
-        <div><b>Rumus Gaji</b><span>Bagi Hasil = Omzet kategori layanan terpilih × Persentase. Total Gaji = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil.</span></div>
+        <div><b>Rumus Gaji</b><span>Total Gaji = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil Kategori + Komisi Order. Komisi produksi masuk setelah order Selesai & Lunas; komisi kurir masuk setelah bukti pengiriman dikonfirmasi & order Lunas.</span></div>
       </section>
 
       <section className="panel data-panel">
         <div className="payroll-table-head">
-          <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Bagi hasil menggunakan omzet pembayaran aktual dari kategori layanan yang dipilih untuk setiap karyawan.</small></div>
+          <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Komisi per order otomatis terakumulasi sesuai karyawan produksi dan kurir yang dipilih saat transaksi.</small></div>
           <button className="primary-button" onClick={()=>void saveBonuses()} disabled={busy}><Save size={16}/>{busy?'Menyimpan...':'Simpan Bonus'}</button>
         </div>
         <div className="table-wrap">
           <table className="payroll-table">
             <thead><tr>
               <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>
-              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil</th><th>Total Gaji</th><th>Atur</th>
+              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Total Gaji</th><th>Atur</th>
             </tr></thead>
             <tbody>
               {filteredPayroll.map(r=><tr key={r.employee.id}>
@@ -576,10 +631,18 @@ export function PayrollPage(){
                       </div>
                     : <small>Belum ada kategori bagi hasil</small>}
                 </td>
+                <td>
+                  <b>{formatRupiah(r.orderCommission)}</b>
+                  <div className="payroll-share-lines">
+                    <small>Produksi: {formatRupiah(r.productionCommission)}</small>
+                    <small>Kurir: {formatRupiah(r.courierCommission)}</small>
+                    <small>{r.commissionOrderCount} order</small>
+                  </div>
+                </td>
                 <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
                 <td><button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button></td>
               </tr>)}
-              {filteredPayroll.length===0&&<tr><td colSpan={9} className="table-empty">Belum ada karyawan aktif.</td></tr>}
+              {filteredPayroll.length===0&&<tr><td colSpan={10} className="table-empty">Belum ada karyawan aktif.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -636,6 +699,22 @@ export function PayrollPage(){
         <label>Tunjangan Bulanan
           <input type="number" min="0" value={settingForm.monthly_allowance} onChange={e=>setSettingForm({...settingForm,monthly_allowance:e.target.value})}/>
         </label>
+        <div className="multi-share-section">
+          <div className="multi-share-heading">
+            <div>
+              <b>Komisi per Order</b>
+              <small>Persentase ini otomatis di-snapshot ke nota/order saat karyawan atau kurir dipilih di Kasir.</small>
+            </div>
+          </div>
+          <div className="form-grid-two">
+            <label>Komisi Produksi (%)
+              <input type="number" min="0" max="100" step="0.01" value={settingForm.production_percent} onChange={e=>setSettingForm({...settingForm,production_percent:e.target.value})}/>
+            </label>
+            <label>Komisi Kurir (%)
+              <input type="number" min="0" max="100" step="0.01" value={settingForm.courier_percent} onChange={e=>setSettingForm({...settingForm,courier_percent:e.target.value})}/>
+            </label>
+          </div>
+        </div>
         <div className="multi-share-section">
           <div className="multi-share-heading">
             <div>
