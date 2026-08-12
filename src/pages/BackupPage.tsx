@@ -485,7 +485,7 @@ export function BackupPage(){
           </div>
         </div>}
       </section>
-{isOwner&&<section className="panel production-lock-panel">
+      <section className="panel production-lock-panel">
       <div className="production-lock-icon"><LockKeyhole size={24}/></div>
       <div className="production-lock-copy">
         <span className="eyebrow">PRODUCTION LOCK • OWNER</span>
@@ -497,7 +497,8 @@ export function BackupPage(){
         </div>
         <small>Reset hanya dibuka kembali melalui versi Maintenance khusus pengujian.</small>
       </div>
-    </section>}
+    </section>
+    </>}
 
     {message&&<div className="error-box inline-message">{message}</div>}
     {success&&<div className="success-box inline-message"><CheckCircle2 size={18}/>{success}</div>}

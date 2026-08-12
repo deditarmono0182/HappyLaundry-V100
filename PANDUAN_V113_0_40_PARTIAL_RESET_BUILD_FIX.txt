@@ -1,0 +1,12 @@
+V113.0.40 — Partial Reset Build Fix
+
+Perbaikan:
+- Menutup JSX fragment Owner yang terputus di BackupPage.tsx.
+- Reset Order/Pelanggan/Layanan tetap tersedia.
+- RESET ALL DATA tetap dikunci.
+- Safety Snapshot otomatis sebelum reset tetap dipertahankan.
+
+SQL:
+Tidak ada SQL baru. Tetap gunakan SQL 047 dan 048 yang sudah dijalankan.
+
+Deploy V113.0.40 lalu hard refresh.
