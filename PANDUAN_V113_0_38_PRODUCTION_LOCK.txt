@@ -1,0 +1,5 @@
+V113.0.38 PRODUCTION LOCK
+1. Jalankan supabase/047_v113_0_38_production_lock.sql sampai Success.
+2. Deploy V113.0.38.
+3. Hard refresh.
+Hasil: semua tombol Reset Data dihilangkan dari UI produksi dan izin RPC reset dicabut untuk role aplikasi. Safety Snapshot & Restore Owner tetap aktif. Data yang sudah ada tidak dihapus.

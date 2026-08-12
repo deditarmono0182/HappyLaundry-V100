@@ -9271,3 +9271,15 @@ html[data-density="ultra"] .main-content .expense-delete-request{
  .restore-confirm-box label{grid-template-columns:1fr}
  .restore-confirm-box label input{min-width:0;width:100%}
 }
+
+/* V113.0.38 Production Lock */
+.production-lock-panel{display:flex;align-items:flex-start;gap:14px;margin-top:14px;border:1px solid #b8d8c9;background:#f5fbf8}
+.production-lock-icon{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:12px;background:#e3f4ec;color:#247456}
+.production-lock-copy{display:grid;gap:7px}.production-lock-copy h2{margin:0;color:#174f42}.production-lock-copy p{margin:0;color:#60766f;line-height:1.5}.production-lock-copy small{color:#72837d}
+.production-lock-status{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:#e9f7f0;color:#2e6f58;font-size:12px}
+
+.partial-reset-options{grid-template-columns:repeat(4,minmax(0,1fr))}
+.partial-reset-all-locked{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #cfd9dc;border-radius:12px;background:#f2f5f6;color:#728087}
+.partial-reset-all-locked span{display:grid;gap:3px}.partial-reset-all-locked small{font-size:10px}
+.reset-snapshot-note{display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:9px;background:#edf8f3;color:#2d6f56;font-size:12px}
+@media(max-width:900px){.partial-reset-options{grid-template-columns:1fr 1fr}}@media(max-width:560px){.partial-reset-options{grid-template-columns:1fr}}

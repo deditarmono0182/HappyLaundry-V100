@@ -269,7 +269,16 @@ export function BackupPage(){
     setMessage('')
     setSuccess('')
 
-    const{data,error}=await supabase.rpc('v110_reset_data_v5',{
+    const {data:preSnapshot,error:snapshotError}=await supabase.rpc('v113037_create_safety_snapshot',{
+      p_label:`AUTO sebelum reset ${selectedReset} • ${new Date().toLocaleString('id-ID')}`
+    })
+    if(snapshotError){
+      setResetStatus('')
+      setResetBusy(false)
+      setResetResult(`RESET GAGAL: Safety Snapshot tidak berhasil dibuat: ${snapshotError.message}`)
+      return
+    }
+    const{data,error}=await supabase.rpc('v113039_safe_partial_reset',{
       p_reset_type:selectedReset,
       p_confirmation:info.confirm
     })
@@ -308,7 +317,7 @@ export function BackupPage(){
     ].filter(Boolean)
 
     setResetBusy(false)
-    setResetResult(parts.join(' • '))
+    setResetResult(`${parts.join(' • ')} • Safety Snapshot: #${preSnapshot}`)
     setConfirmation('')
   }
 
@@ -452,113 +461,43 @@ export function BackupPage(){
       </div>}
     </section>
 
-    <section className="panel reset-data-panel">
-      <div className="reset-data-heading">
-        <div className="reset-danger-icon"><ShieldAlert size={24}/></div>
-        <div>
-          <span className="eyebrow">OWNER ONLY • DANGER ZONE</span>
-          <h2>Reset Data</h2>
-          <p>Pilih data yang ingin dibersihkan. <b>Download Backup</b> terlebih dahulu.</p>
+    {isOwner&&<>
+      <section className="panel reset-data-panel">
+        <div className="reset-data-heading">
+          <div className="reset-danger-icon"><ShieldAlert size={24}/></div>
+          <div><span className="eyebrow">OWNER ONLY • SAFE RESET</span><h2>Reset Data Terpilih</h2><p>Order, Pelanggan, dan Layanan masih dapat di-reset. Safety Snapshot otomatis dibuat lebih dulu.</p></div>
         </div>
-      </div>
-
-      <div className="reset-data-options">
-        <button
-          type="button"
-          className={selectedReset==='orders'?'selected':''}
-          onClick={()=>openReset('orders')}
-          disabled={!isOwner||resetBusy}
-        >
-          <RotateCcw size={21}/>
-          <span><b>Data Order</b><small>Order, pembayaran, item, dan kas terkait order.</small></span>
-        </button>
-
-        <button
-          type="button"
-          className={selectedReset==='customers'?'selected':''}
-          onClick={()=>openReset('customers')}
-          disabled={!isOwner||resetBusy}
-        >
-          <RotateCcw size={21}/>
-          <span><b>Data Pelanggan</b><small>Pelanggan + order/transaksi yang bergantung padanya.</small></span>
-        </button>
-
-        <button
-          type="button"
-          className={selectedReset==='services'?'selected':''}
-          onClick={()=>openReset('services')}
-          disabled={!isOwner||resetBusy}
-        >
-          <RotateCcw size={21}/>
-          <span><b>Data Layanan</b><small>Hapus daftar layanan untuk dibuat ulang.</small></span>
-        </button>
-
-        <button
-          type="button"
-          className={`reset-all-button ${selectedReset==='all'?'selected':''}`}
-          onClick={()=>openReset('all')}
-          disabled={!isOwner||resetBusy}
-        >
-          <Trash2 size={21}/>
-          <span><b>ALL DATA</b><small>Reset seluruh data operasional. Akun login tetap aman.</small></span>
-        </button>
-      </div>
-
-      {selectedReset&&<div className={`reset-inline-confirm ${selectedReset==='all'?'critical':''}`}>
-        <div className="reset-inline-info">
-          <AlertTriangle size={24}/>
-          <div>
-            <b>{resetInfo[selectedReset].title}</b>
-            <span>{resetInfo[selectedReset].description}</span>
-            <small>{resetInfo[selectedReset].warning}</small>
+        <div className="reset-data-options partial-reset-options">
+          <button type="button" className={selectedReset==='orders'?'selected':''} onClick={()=>openReset('orders')} disabled={resetBusy}><RotateCcw size={21}/><span><b>Data Order</b><small>Order, item, pembayaran, dan transaksi terkait.</small></span></button>
+          <button type="button" className={selectedReset==='customers'?'selected':''} onClick={()=>openReset('customers')} disabled={resetBusy}><RotateCcw size={21}/><span><b>Data Pelanggan</b><small>Pelanggan + order/transaksi terkait.</small></span></button>
+          <button type="button" className={selectedReset==='services'?'selected':''} onClick={()=>openReset('services')} disabled={resetBusy}><RotateCcw size={21}/><span><b>Data Layanan</b><small>Hapus master layanan untuk dibuat ulang.</small></span></button>
+          <div className="partial-reset-all-locked"><LockKeyhole size={21}/><span><b>ALL DATA Dikunci</b><small>Tidak tersedia di mode produksi.</small></span></div>
+        </div>
+        {selectedReset&&selectedReset!=='all'&&<div className="reset-inline-confirm">
+          <div className="reset-inline-info"><AlertTriangle size={24}/><div><b>{resetInfo[selectedReset].title}</b><span>{resetInfo[selectedReset].description}</span><small>{resetInfo[selectedReset].warning}</small></div></div>
+          <div className="reset-snapshot-note"><ShieldCheck size={17}/><span>Safety Snapshot otomatis dibuat sebelum reset.</span></div>
+          <label>Untuk konfirmasi ketik <strong>{resetInfo[selectedReset].confirm}</strong><input value={confirmation} onChange={e=>setConfirmation(e.target.value)} placeholder={resetInfo[selectedReset].confirm} disabled={resetBusy}/></label>
+          {resetStatus&&<div className="reset-running-status">{resetStatus}</div>}
+          {resetResult&&<div className={`direct-reset-message ${resetResult.startsWith('RESET GAGAL')?'error':''}`}>{resetResult}</div>}
+          <div className="reset-inline-actions">
+            <button type="button" className="secondary-button" onClick={()=>{setSelectedReset(null);setConfirmation('');setResetResult('')}} disabled={resetBusy}>Batal</button>
+            <button type="button" className="reset-confirm-button" onClick={()=>void executeSelectedReset()} disabled={resetBusy||confirmation.trim().toUpperCase()!==resetInfo[selectedReset].confirm}><Trash2 size={17}/>{resetBusy?'Mengamankan & Menghapus...':'RESET DATA TERPILIH'}</button>
           </div>
-        </div>
-
-        <label>
-          Untuk konfirmasi ketik
-          <strong>{resetInfo[selectedReset].confirm}</strong>
-          <input
-            value={confirmation}
-            onChange={e=>setConfirmation(e.target.value)}
-            placeholder={resetInfo[selectedReset].confirm}
-            autoComplete="off"
-            disabled={resetBusy}
-          />
-        </label>
-
-        {resetStatus&&<div className="reset-running-status">{resetStatus}</div>}
-        {resetResult&&<div className={`direct-reset-message ${resetResult.startsWith('RESET GAGAL')?'error':''}`}>
-          {resetResult}
         </div>}
-
-        <div className="reset-inline-actions">
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={()=>{
-              setSelectedReset(null)
-              setConfirmation('')
-              setResetResult('')
-            }}
-            disabled={resetBusy}
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            className="reset-confirm-button"
-            onClick={()=>void executeSelectedReset()}
-            disabled={resetBusy||confirmation.trim().toUpperCase()!==resetInfo[selectedReset].confirm}
-          >
-            <Trash2 size={17}/>{resetBusy?'Menghapus...':'RESET SEKARANG'}
-          </button>
+      </section>
+{isOwner&&<section className="panel production-lock-panel">
+      <div className="production-lock-icon"><LockKeyhole size={24}/></div>
+      <div className="production-lock-copy">
+        <span className="eyebrow">PRODUCTION LOCK • OWNER</span>
+        <h2>Reset Data Dikunci</h2>
+        <p>Aplikasi sedang dalam mode produksi. Penghapusan data operasional dinonaktifkan untuk mencegah transaksi nyata terhapus tidak sengaja.</p>
+        <div className="production-lock-status">
+          <ShieldCheck size={17}/>
+          <span><b>Safety Snapshot & Restore tetap aktif.</b> Gunakan Restore jika perlu kembali ke kondisi sebelumnya.</span>
         </div>
-      </div>}
-
-      {!isOwner&&<div className="reset-owner-note">
-        <AlertTriangle size={17}/>Reset Data hanya tersedia untuk akun Owner.
-      </div>}
-    </section>
+        <small>Reset hanya dibuka kembali melalui versi Maintenance khusus pengujian.</small>
+      </div>
+    </section>}
 
     {message&&<div className="error-box inline-message">{message}</div>}
     {success&&<div className="success-box inline-message"><CheckCircle2 size={18}/>{success}</div>}
