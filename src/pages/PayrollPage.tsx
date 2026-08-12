@@ -493,6 +493,35 @@ export function PayrollPage(){
     ] as Array<[string,string|number]>
   })
 
+  const commissionDetailExport=(employee:Employee)=>{
+    const row=payrollRows.find(item=>item.employee.id===employee.id)
+    const details=row?.commissionDetails||[]
+    return{
+      title:`Detail Gaji & Komisi — ${employee.full_name}`,
+      filename:`detail-gaji-komisi-${employee.login_id||employee.full_name}-${month}`,
+      subtitle:`Periode ${month} • ID Akun ${employee.login_id||'-'}`,
+      headers:['No. Order','Peran','Nilai Order','Persentase','Komisi','Tanggal Hak'],
+      rows:details.map(item=>[
+        item.order_no,
+        item.commission_type==='production'?'Produksi':'Kurir',
+        Math.round(Number(item.base_amount||0)),
+        `${Number(item.percent||0).toFixed(2)}%`,
+        Math.round(Number(item.amount||0)),
+        new Date(item.earned_at).toLocaleString('id-ID')
+      ]),
+      summary:[
+        ['Uang Kehadiran',Math.round(row?.attendancePay||0)],
+        ['Tunjangan',Math.round(row?.allowance||0)],
+        ['Bonus',Math.round(row?.bonus||0)],
+        ['Bagi Hasil Kategori',Math.round(row?.revenueShare||0)],
+        ['Komisi Produksi',Math.round(row?.productionCommission||0)],
+        ['Komisi Kurir',Math.round(row?.courierCommission||0)],
+        ['Total Komisi Order',Math.round(row?.orderCommission||0)],
+        ['Total Gaji',Math.round(row?.total||0)]
+      ] as Array<[string,string|number]>
+    }
+  }
+
   const totalPayroll=payrollRows.reduce((sum,r)=>sum+r.total,0)
   const totalPresent=payrollRows.reduce((sum,r)=>sum+r.presentDays,0)
   const totalOrderCommission=payrollRows.reduce((sum,r)=>sum+r.orderCommission,0)
@@ -686,7 +715,11 @@ export function PayrollPage(){
             </tbody>
           </table>
         </div>
-        <div className="modal-actions"><button className="secondary-button" onClick={()=>setDetailEmployee(null)}>Tutup</button></div>
+        <div className="modal-actions">
+          <button className="secondary-button" onClick={()=>downloadXls(commissionDetailExport(detailEmployee))}><FileSpreadsheet size={16}/>Export XLS</button>
+          <button className="secondary-button" onClick={()=>printPdf(commissionDetailExport(detailEmployee))}><FileText size={16}/>Cetak / PDF</button>
+          <button className="secondary-button" onClick={()=>setDetailEmployee(null)}>Tutup</button>
+        </div>
       </Modal>
     })()}
 

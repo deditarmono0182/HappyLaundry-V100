@@ -1,0 +1,8 @@
+HappyLaundry V113.0.44 – Payroll Detail Print & Export
+
+Perubahan:
+- Detail Gaji & Komisi per karyawan dapat Export XLS.
+- Detail Gaji & Komisi per karyawan dapat Cetak / Simpan PDF.
+- Export mencantumkan nomor order, peran Produksi/Kurir, nilai order, persentase, nilai komisi, tanggal hak.
+- Ringkasan export mencakup uang kehadiran, tunjangan, bonus, bagi hasil kategori, komisi produksi, komisi kurir, total komisi, dan total gaji.
+- Tidak memerlukan SQL baru. Tetap menggunakan SQL 049 dan 050.
