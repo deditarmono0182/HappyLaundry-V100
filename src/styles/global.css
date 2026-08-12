@@ -9312,3 +9312,21 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .payroll-payment-history-head{margin-top:16px!important}
 .payroll-payment-history-wrap{max-height:230px}
 @media(max-width:650px){.payroll-payment-card{grid-template-columns:1fr}.payroll-row-actions{min-width:220px}}
+
+/* V113.0.46 - Daily Order Problem Alert */
+.daily-order-alert{padding:18px 20px 20px;display:grid;gap:14px}
+.daily-order-alert-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.daily-order-alert-summary>div{padding:13px;border:1px solid #dce8e5;border-radius:13px;background:#f8fbfa;display:grid;gap:5px}
+.daily-order-alert-summary span{font-size:9px;font-weight:850;color:#667e80;text-transform:uppercase;letter-spacing:.45px}
+.daily-order-alert-summary b{font-size:24px;color:#234f55}
+.daily-order-alert-summary>div.danger{background:#fff1f1;border-color:#f0caca}.daily-order-alert-summary>div.danger b{color:#b33131}
+.daily-order-alert-summary>div.warning{background:#fff8e7;border-color:#eedca8}.daily-order-alert-summary>div.warning b{color:#a46a00}
+.daily-order-alert-summary>div.info{background:#edf7ff;border-color:#c9dfef}.daily-order-alert-summary>div.info b{color:#246a99}
+.daily-order-alert-note{margin:0;padding:9px 11px;border-radius:10px;background:#f4f8f7;color:#60777a;font-size:10px;line-height:1.5}
+.daily-order-alert-list{display:grid;border:1px solid #e1ebe8;border-radius:13px;overflow:hidden;max-height:360px;overflow-y:auto}
+.daily-order-alert-list article{display:flex;justify-content:space-between;gap:16px;padding:11px 12px;border-bottom:1px solid #edf2f1;background:#fff}
+.daily-order-alert-list article:last-child{border-bottom:0}.daily-order-alert-list article>div{display:grid;gap:3px}.daily-order-alert-list article>div:last-child{text-align:right;align-content:start}
+.daily-order-alert-list b{font-size:11px;color:#234f55}.daily-order-alert-list span{font-size:10px;color:#516e72}.daily-order-alert-list small{font-size:8.5px;color:#7e9194}
+.daily-order-alert-more,.daily-order-alert-empty{padding:12px;text-align:center;font-size:10px;font-weight:800;color:#647d80;background:#f7faf9}
+.daily-order-alert-actions{display:flex;justify-content:flex-end;gap:9px}
+@media(max-width:620px){.daily-order-alert-summary{grid-template-columns:1fr}.daily-order-alert-list article{display:grid}.daily-order-alert-list article>div:last-child{text-align:left}.daily-order-alert-actions{display:grid;grid-template-columns:1fr 1fr}.daily-order-alert-actions button{width:100%}}

@@ -1,0 +1,15 @@
+HappyLaundry V113.0.46 - Daily Order Alert
+
+Fitur:
+- Owner mendapat peringatan otomatis satu kali setiap hari saat masuk aplikasi jika ada order bermasalah.
+- Kategori yang diperiksa:
+  1. Terlambat: estimasi selesai sudah lewat dan order belum Ready/Selesai.
+  2. Belum Lunas / DP: masih ada sisa pembayaran.
+  3. Siap Diambil: order sudah ready tetapi belum selesai/pengambilan.
+- Modal menampilkan nomor order, pelanggan, alasan peringatan, sisa pembayaran, dan estimasi selesai.
+- Tombol "Buka Daftar Order" langsung membuka halaman Order.
+- Tidak membutuhkan SQL baru. Menggunakan data v100_orders_view yang sudah tersedia.
+
+Catatan:
+- Peringatan disimpan per Owner + tanggal pada browser, sehingga tidak mengganggu dengan popup berulang-ulang pada hari yang sama.
+- Besok saat Owner masuk aplikasi, sistem akan memeriksa ulang otomatis.

@@ -1,10 +1,13 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
   CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign, AlertTriangle, CalendarCheck2, ScanLine, Target, ShieldAlert } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { canAccess, type PermissionKey } from '../lib/permissions'
 import { PWAInstallButton } from '../components/PWAInstallButton'
+import { Modal } from '../components/Modal'
+import { formatIDR } from '../lib/format'
+import type { OrderRow } from '../types/order'
 import { supabase } from '../lib/supabase'
 
 const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; roles?: string[]; permission?: PermissionKey }> = [
@@ -39,10 +42,29 @@ export function AppLayout() {
   const [showDeleteToast,setShowDeleteToast]=useState(false)
   const [attendanceGate,setAttendanceGate]=useState<{attendance_required:boolean;attended_today:boolean;checked_out:boolean;within_work_hours:boolean;logout_at:string|null;work_start:string;work_end:string}|null>(null)
   const [attendanceNotice,setAttendanceNotice]=useState('')
+  const [problemOrders,setProblemOrders]=useState<OrderRow[]>([])
+  const [problemAlertOpen,setProblemAlertOpen]=useState(false)
+  const [problemAlertLoading,setProblemAlertLoading]=useState(false)
 
   const { profile, signOut } = useAuth()
   const role = profile?.role ?? 'staff'
   const isOwner=role==='owner'
+
+  const problemSummary=useMemo(()=>{
+    const now=Date.now()
+    const overdue=problemOrders.filter(row=>Boolean(row.due_at)&&!['ready','completed','cancelled'].includes(row.status)&&new Date(row.due_at as string).getTime()<now)
+    const unpaid=problemOrders.filter(row=>row.status!=='cancelled'&&Math.max(0,Number(row.total)-Number(row.paid_amount))>0)
+    const ready=problemOrders.filter(row=>row.status==='ready')
+    return{overdue,unpaid,ready}
+  },[problemOrders])
+
+  const problemReasons=(row:OrderRow)=>{
+    const reasons:string[]=[]
+    if(row.due_at&&!['ready','completed','cancelled'].includes(row.status)&&new Date(row.due_at).getTime()<Date.now())reasons.push('Terlambat')
+    if(row.status==='ready')reasons.push('Siap diambil')
+    if(row.status!=='cancelled'&&Math.max(0,Number(row.total)-Number(row.paid_amount))>0)reasons.push('Belum lunas')
+    return reasons
+  }
 
   const refreshPendingDeletes=useCallback(async(showToast=false)=>{
     if(!isOwner){
@@ -88,6 +110,44 @@ export function AppLayout() {
       void supabase.removeChannel(channel)
     }
   },[isOwner,refreshPendingDeletes])
+
+  useEffect(()=>{
+    if(!isOwner||!profile?.id)return
+    let active=true
+
+    const checkDailyProblemOrders=async()=>{
+      const today=new Date().toLocaleDateString('en-CA')
+      const reminderKey=`happylaundry-order-problem-reminder:${profile.id}:${today}`
+      if(localStorage.getItem(reminderKey)==='shown')return
+
+      setProblemAlertLoading(true)
+      const{data,error}=await supabase
+        .from('v100_orders_view')
+        .select('*')
+        .neq('status','cancelled')
+        .order('created_at',{ascending:false})
+      if(!active){setProblemAlertLoading(false);return}
+      if(error){setProblemAlertLoading(false);return}
+
+      const now=Date.now()
+      const rows=((data as OrderRow[])||[]).filter(row=>{
+        const overdue=Boolean(row.due_at)&&!['ready','completed','cancelled'].includes(row.status)&&new Date(row.due_at as string).getTime()<now
+        const unpaid=row.status!=='cancelled'&&Math.max(0,Number(row.total)-Number(row.paid_amount))>0
+        const ready=row.status==='ready'
+        return overdue||unpaid||ready
+      })
+
+      setProblemOrders(rows)
+      setProblemAlertLoading(false)
+      if(rows.length>0){
+        localStorage.setItem(reminderKey,'shown')
+        setProblemAlertOpen(true)
+      }
+    }
+
+    const timer=window.setTimeout(()=>{void checkDailyProblemOrders()},500)
+    return()=>{active=false;window.clearTimeout(timer)}
+  },[isOwner,profile?.id])
 
   useEffect(()=>{
     const yes=()=>setOnline(true)
@@ -184,7 +244,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.42 Courier Commission Fix</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.46 Daily Order Alert</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
@@ -224,6 +284,41 @@ export function AppLayout() {
           }}>Lihat</button>
           <button type="button" className="delete-toast-close" aria-label="Tutup notifikasi" onClick={()=>setShowDeleteToast(false)}><X size={15}/></button>
         </div>}
+
+      {isOwner&&problemAlertOpen&&
+        <Modal title="⚠ Peringatan Order Hari Ini" onClose={()=>setProblemAlertOpen(false)}>
+          <div className="daily-order-alert">
+            <div className="daily-order-alert-summary">
+              <div className={problemSummary.overdue.length?'danger':''}><span>Terlambat</span><b>{problemSummary.overdue.length}</b></div>
+              <div className={problemSummary.unpaid.length?'warning':''}><span>Belum Lunas / DP</span><b>{problemSummary.unpaid.length}</b></div>
+              <div className={problemSummary.ready.length?'info':''}><span>Siap Diambil</span><b>{problemSummary.ready.length}</b></div>
+            </div>
+            <p className="daily-order-alert-note">Peringatan ini muncul otomatis satu kali setiap hari ketika Owner masuk ke aplikasi.</p>
+            {problemAlertLoading?<div className="daily-order-alert-empty">Memeriksa order...</div>:
+              <div className="daily-order-alert-list">
+                {problemOrders.slice(0,12).map(row=>{
+                  const outstanding=Math.max(0,Number(row.total)-Number(row.paid_amount))
+                  const reasons=problemReasons(row)
+                  return <article key={row.id}>
+                    <div>
+                      <b>{row.order_no}</b>
+                      <span>{row.customer_name}</span>
+                      <small>{reasons.join(' • ')}</small>
+                    </div>
+                    <div>
+                      {outstanding>0&&<b>{formatIDR(outstanding)}</b>}
+                      <small>{row.due_at?`Estimasi ${new Date(row.due_at).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}`:'Tanpa estimasi'}</small>
+                    </div>
+                  </article>
+                })}
+                {problemOrders.length>12&&<div className="daily-order-alert-more">+ {problemOrders.length-12} order lainnya perlu dicek.</div>}
+              </div>}
+            <div className="daily-order-alert-actions">
+              <button type="button" className="secondary-button" onClick={()=>setProblemAlertOpen(false)}>Nanti</button>
+              <button type="button" className="primary-button" onClick={()=>{setProblemAlertOpen(false);navigate('/orders')}}>Buka Daftar Order</button>
+            </div>
+          </div>
+        </Modal>}
 
       <main className="main-content">
         <header className="topbar">
