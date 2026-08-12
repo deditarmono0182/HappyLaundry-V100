@@ -112,7 +112,7 @@ export function AppLayout() {
   },[isOwner,refreshPendingDeletes])
 
   useEffect(()=>{
-    if(!isOwner||!profile?.id)return
+    if(!profile?.id)return
     let active=true
 
     const checkDailyProblemOrders=async()=>{
@@ -147,7 +147,7 @@ export function AppLayout() {
 
     const timer=window.setTimeout(()=>{void checkDailyProblemOrders()},500)
     return()=>{active=false;window.clearTimeout(timer)}
-  },[isOwner,profile?.id])
+  },[profile?.id])
 
   useEffect(()=>{
     const yes=()=>setOnline(true)
@@ -285,7 +285,7 @@ export function AppLayout() {
           <button type="button" className="delete-toast-close" aria-label="Tutup notifikasi" onClick={()=>setShowDeleteToast(false)}><X size={15}/></button>
         </div>}
 
-      {isOwner&&problemAlertOpen&&
+      {problemAlertOpen&&
         <Modal title="⚠ Peringatan Order Hari Ini" onClose={()=>setProblemAlertOpen(false)}>
           <div className="daily-order-alert">
             <div className="daily-order-alert-summary">
@@ -293,7 +293,7 @@ export function AppLayout() {
               <div className={problemSummary.unpaid.length?'warning':''}><span>Belum Lunas / DP</span><b>{problemSummary.unpaid.length}</b></div>
               <div className={problemSummary.ready.length?'info':''}><span>Siap Diambil</span><b>{problemSummary.ready.length}</b></div>
             </div>
-            <p className="daily-order-alert-note">Peringatan ini muncul otomatis satu kali setiap hari ketika Owner masuk ke aplikasi.</p>
+            <p className="daily-order-alert-note">Peringatan ini muncul otomatis satu kali setiap hari ketika akun masuk ke aplikasi, baik Owner maupun Karyawan.</p>
             {problemAlertLoading?<div className="daily-order-alert-empty">Memeriksa order...</div>:
               <div className="daily-order-alert-list">
                 {problemOrders.slice(0,12).map(row=>{
