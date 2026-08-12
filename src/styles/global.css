@@ -9296,3 +9296,19 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .payroll-commission-detail{min-width:760px;width:100%;border-collapse:collapse}
 .payroll-commission-detail th{position:sticky;top:0;z-index:1;background:#f2f8f6}
 @media(max-width:650px){.payroll-detail-summary{grid-template-columns:1fr}.payroll-row-actions{min-width:150px}}
+
+/* V113.0.45 Payroll Payment Status & History */
+.payroll-payment-status{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:900;white-space:nowrap}
+.payroll-payment-status.unpaid{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
+.payroll-payment-status.partial{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.payroll-payment-status.paid{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.payroll-outstanding{color:#b45309}
+.payroll-paid{color:#047857}
+.payroll-pay-button{border-color:#a7f3d0!important;background:#ecfdf5!important;color:#047857!important}
+.payroll-payment-card{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:8px}
+.payroll-payment-card>div{display:grid;gap:4px;padding:12px;border:1px solid #d8e7ef;border-radius:12px;background:#f8fbfd}
+.payroll-payment-card span{font-size:10px;color:#667f90;font-weight:800}
+.payroll-payment-card b{font-size:15px;color:#153f59}
+.payroll-payment-history-head{margin-top:16px!important}
+.payroll-payment-history-wrap{max-height:230px}
+@media(max-width:650px){.payroll-payment-card{grid-template-columns:1fr}.payroll-row-actions{min-width:220px}}

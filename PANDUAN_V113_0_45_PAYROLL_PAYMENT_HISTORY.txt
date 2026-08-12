@@ -1,0 +1,17 @@
+HAPPYLAUNDRY V113.0.45 — PAYROLL PAYMENT STATUS & HISTORY
+
+FITUR:
+- Status gaji per karyawan: Belum Dibayar / Sebagian / Lunas.
+- Kolom Sudah Dibayar dan Sisa Gaji.
+- Tombol Bayar untuk mencatat pembayaran gaji.
+- Mendukung pembayaran sebagian/cicilan sampai total gaji lunas.
+- Riwayat pembayaran per karyawan: tanggal, metode, nominal, catatan.
+- Detail & export gaji ikut menampilkan total dibayar, sisa, status, dan riwayat pembayaran.
+- Riwayat dibuat append-only dari aplikasi untuk audit dan mencegah pembayaran dobel.
+
+WAJIB:
+1. Jalankan supabase/051_v113_0_45_payroll_payment_history.sql satu kali.
+2. Setelah Success, deploy V113.0.45.
+3. Refresh aplikasi dan buka Absensi & Gaji > Daftar Gaji.
+
+SQL lama 049 dan 050 tetap dipakai dan tidak perlu dijalankan ulang.

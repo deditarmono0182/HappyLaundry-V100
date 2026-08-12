@@ -51,6 +51,17 @@ interface PayrollAdjustment{
   bonus:number
 }
 
+interface PayrollPayment{
+  id:string
+  employee_id:string
+  payroll_month:string
+  amount:number
+  payment_method:string
+  note:string|null
+  paid_at:string
+  created_by:string|null
+}
+
 interface EmployeeCommissionSetting{
   employee_id:string
   production_percent:number
@@ -108,6 +119,7 @@ export function PayrollPage(){
   const[settings,setSettings]=useState<PayrollSetting[]>([])
   const[shares,setShares]=useState<PayrollShare[]>([])
   const[adjustments,setAdjustments]=useState<PayrollAdjustment[]>([])
+  const[payrollPayments,setPayrollPayments]=useState<PayrollPayment[]>([])
   const[employeeCommissionSettings,setEmployeeCommissionSettings]=useState<EmployeeCommissionSetting[]>([])
   const[commissionLedger,setCommissionLedger]=useState<CommissionLedgerRow[]>([])
   const[payments,setPayments]=useState<Payment[]>([])
@@ -123,6 +135,8 @@ export function PayrollPage(){
   const[busy,setBusy]=useState(false)
   const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
   const[detailEmployee,setDetailEmployee]=useState<Employee|null>(null)
+  const[paymentEmployee,setPaymentEmployee]=useState<Employee|null>(null)
+  const[paymentForm,setPaymentForm]=useState({amount:'0',payment_method:'Transfer',note:''})
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
     monthly_allowance:'0',
@@ -137,19 +151,20 @@ export function PayrollPage(){
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
     const range=monthRange(month)
-    const [e,a,s,shr,adj,ecs,ledger,p,oi,sv]=await Promise.all([
+    const [e,a,s,shr,adj,payrollPay,ecs,ledger,p,oi,sv]=await Promise.all([
       supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
       supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
       supabase.from('v111_employee_payroll_settings').select('*'),
       supabase.from('v111_employee_revenue_shares').select('*'),
       supabase.from('v111_payroll_adjustments').select('*').eq('payroll_month',range.start),
+      supabase.from('v113_payroll_payments').select('*').eq('payroll_month',range.start).order('paid_at',{ascending:false}),
       supabase.from('v113_employee_commission_settings').select('*'),
       supabase.from('v113_commission_ledger').select('*').gte('earned_at',`${range.start}T00:00:00`).lte('earned_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
-    const error=e.error||a.error||s.error||shr.error||adj.error||ecs.error||ledger.error||p.error||oi.error||sv.error
+    const error=e.error||a.error||s.error||shr.error||adj.error||payrollPay.error||ecs.error||ledger.error||p.error||oi.error||sv.error
     if(error)setMessage(error.message)
     else{
       setEmployees((e.data as Employee[])||[])
@@ -157,6 +172,7 @@ export function PayrollPage(){
       setSettings((s.data as PayrollSetting[])||[])
       setShares((shr.data as PayrollShare[])||[])
       setAdjustments((adj.data as PayrollAdjustment[])||[])
+      setPayrollPayments((payrollPay.data as PayrollPayment[])||[])
       setEmployeeCommissionSettings((ecs.data as EmployeeCommissionSetting[])||[])
       setCommissionLedger((ledger.data as CommissionLedgerRow[])||[])
       setPayments((p.data as Payment[])||[])
@@ -272,6 +288,10 @@ export function PayrollPage(){
 
     const bonus=Number(bonusDraft[employee.id]??adjustmentMap.get(employee.id)?.bonus??0)
     const total=attendancePay+allowance+bonus+revenueShare+orderCommission
+    const paymentHistory=payrollPayments.filter(item=>item.employee_id===employee.id)
+    const paidAmount=paymentHistory.reduce((sum,item)=>sum+Number(item.amount||0),0)
+    const outstanding=Math.max(0,total-paidAmount)
+    const paymentStatus=paidAmount<=0?'unpaid':outstanding>0?'partial':'paid'
 
     return{
       employee,presentDays,permissionDays,sickDays,absentDays,
@@ -279,9 +299,9 @@ export function PayrollPage(){
       shareDetails,revenueShare,productionCommission,courierCommission,orderCommission,
       commissionOrderCount:new Set(employeeLedger.map(item=>item.order_id)).size,
       commissionDetails:[...employeeLedger].sort((a,b)=>new Date(b.earned_at).getTime()-new Date(a.earned_at).getTime()),
-      bonus,total
+      bonus,total,paymentHistory,paidAmount,outstanding,paymentStatus
     }
-  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap])
+  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap,payrollPayments])
 
   const filteredEmployees=useMemo(()=>{
     const key=query.toLowerCase().trim()
@@ -459,6 +479,42 @@ export function PayrollPage(){
     setBusy(false)
   }
 
+  const openPayrollPayment=(employee:Employee)=>{
+    const row=payrollRows.find(item=>item.employee.id===employee.id)
+    const outstanding=Math.max(0,Number(row?.outstanding||0))
+    setPaymentEmployee(employee)
+    setPaymentForm({amount:String(Math.round(outstanding)),payment_method:'Transfer',note:''})
+    setMessage('')
+    setSuccess('')
+  }
+
+  const savePayrollPayment=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!paymentEmployee)return
+    const row=payrollRows.find(item=>item.employee.id===paymentEmployee.id)
+    const outstanding=Math.max(0,Number(row?.outstanding||0))
+    const amount=Math.max(0,Number(paymentForm.amount)||0)
+    if(amount<=0){setMessage('Nominal pembayaran harus lebih dari Rp 0.');return}
+    if(amount>outstanding+0.01){setMessage(`Nominal melebihi sisa gaji ${formatRupiah(outstanding)}.`);return}
+    setBusy(true);setMessage('');setSuccess('')
+    const range=monthRange(month)
+    const{error}=await supabase.from('v113_payroll_payments').insert({
+      employee_id:paymentEmployee.id,
+      payroll_month:range.start,
+      amount,
+      payment_method:paymentForm.payment_method,
+      note:paymentForm.note.trim()||null,
+      paid_at:new Date().toISOString()
+    })
+    if(error){setMessage(error.message);setBusy(false);return}
+    const employeeName=paymentEmployee.full_name
+    setPaymentEmployee(null)
+    setPaymentForm({amount:'0',payment_method:'Transfer',note:''})
+    setSuccess(`Pembayaran gaji ${employeeName} sebesar ${formatRupiah(amount)} berhasil dicatat.`)
+    await load()
+    setBusy(false)
+  }
+
   const attendanceExport=()=>({
     title:'Daftar Hadir Karyawan',
     filename:`absensi-${month}`,
@@ -478,14 +534,15 @@ export function PayrollPage(){
     title:'Daftar Gaji Karyawan',
     filename:`gaji-karyawan-${month}`,
     subtitle:`Periode ${month} • Omzet aktual ${formatRupiah(monthlyRevenue)}`,
-    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Bagi Hasil Kategori','Komisi Produksi','Komisi Kurir','Total Gaji'],
+    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Bagi Hasil Kategori','Komisi Produksi','Komisi Kurir','Total Gaji','Sudah Dibayar','Sisa','Status'],
     rows:filteredPayroll.map(r=>[
       r.employee.full_name,r.presentDays,r.attendanceRate,
       Math.round(r.attendancePay),Math.round(r.allowance),Math.round(r.bonus),
       r.shareDetails.length
         ? r.shareDetails.map(item=>`${item.category} ${item.percent.toFixed(2)}% x ${Math.round(item.baseRevenue)} = ${Math.round(item.amount)}`).join(' | ')
         : '-',
-      Math.round(r.productionCommission),Math.round(r.courierCommission),Math.round(r.total)
+      Math.round(r.productionCommission),Math.round(r.courierCommission),Math.round(r.total),
+      Math.round(r.paidAmount),Math.round(r.outstanding),r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'
     ]),
     summary:[
       ['Omzet Bulan',Math.round(monthlyRevenue)],
@@ -517,7 +574,14 @@ export function PayrollPage(){
         ['Komisi Produksi',Math.round(row?.productionCommission||0)],
         ['Komisi Kurir',Math.round(row?.courierCommission||0)],
         ['Total Komisi Order',Math.round(row?.orderCommission||0)],
-        ['Total Gaji',Math.round(row?.total||0)]
+        ['Total Gaji',Math.round(row?.total||0)],
+        ['Sudah Dibayar',Math.round(row?.paidAmount||0)],
+        ['Sisa Gaji',Math.round(row?.outstanding||0)],
+        ['Status Pembayaran',row?.paymentStatus==='paid'?'Lunas':row?.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'],
+        ...((row?.paymentHistory||[]).map((payment,index)=>[
+          `Pembayaran ${index+1}`,
+          `${new Date(payment.paid_at).toLocaleString('id-ID')} • ${payment.payment_method} • ${formatRupiah(Number(payment.amount||0))}${payment.note?` • ${payment.note}`:''}`
+        ] as [string,string|number]))
       ] as Array<[string,string|number]>
     }
   }
@@ -525,6 +589,8 @@ export function PayrollPage(){
   const totalPayroll=payrollRows.reduce((sum,r)=>sum+r.total,0)
   const totalPresent=payrollRows.reduce((sum,r)=>sum+r.presentDays,0)
   const totalOrderCommission=payrollRows.reduce((sum,r)=>sum+r.orderCommission,0)
+  const totalPaidPayroll=payrollRows.reduce((sum,r)=>sum+r.paidAmount,0)
+  const totalOutstandingPayroll=payrollRows.reduce((sum,r)=>sum+r.outstanding,0)
 
   return <>
     <PageHeader
@@ -626,6 +692,7 @@ export function PayrollPage(){
         <StatCard icon={HandCoins} label="Omzet Bulan" value={formatRupiah(monthlyRevenue)} caption="Pembayaran aktual"/>
         <StatCard icon={WalletCards} label="Total Gaji" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
         <StatCard icon={Gift} label="Komisi Order" value={formatRupiah(totalOrderCommission)} caption="Produksi + kurir yang sudah menjadi hak"/>
+        <StatCard icon={CheckCircle2} label="Gaji Dibayar" value={formatRupiah(totalPaidPayroll)} caption={`Sisa ${formatRupiah(totalOutstandingPayroll)}`}/>
       </section>
 
       <section className="panel payroll-formula">
@@ -642,7 +709,7 @@ export function PayrollPage(){
           <table className="payroll-table">
             <thead><tr>
               <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>
-              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Total Gaji</th><th>Atur</th>
+              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Total Gaji</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
             </tr></thead>
             <tbody>
               {filteredPayroll.map(r=><tr key={r.employee.id}>
@@ -671,14 +738,18 @@ export function PayrollPage(){
                   </div>
                 </td>
                 <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
+                <td><b>{formatRupiah(r.paidAmount)}</b></td>
+                <td><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
+                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
                 <td>
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
+                    {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
                     <button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button>
                   </div>
                 </td>
               </tr>)}
-              {filteredPayroll.length===0&&<tr><td colSpan={10} className="table-empty">Belum ada karyawan aktif.</td></tr>}
+              {filteredPayroll.length===0&&<tr><td colSpan={13} className="table-empty">Belum ada karyawan aktif.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -694,6 +765,8 @@ export function PayrollPage(){
           <div><span>Produksi</span><b>{formatRupiah(row?.productionCommission||0)}</b></div>
           <div><span>Kurir</span><b>{formatRupiah(row?.courierCommission||0)}</b></div>
           <div><span>Total Gaji</span><b>{formatRupiah(row?.total||0)}</b></div>
+          <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
+          <div><span>Sisa Gaji</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
         </div>
         <div className="payroll-detail-head">
           <b>Sumber Komisi dari Order</b>
@@ -715,11 +788,59 @@ export function PayrollPage(){
             </tbody>
           </table>
         </div>
+        <div className="payroll-detail-head payroll-payment-history-head">
+          <b>Riwayat Pembayaran Gaji</b>
+          <small>Catatan pembayaran tersimpan per periode untuk mencegah pembayaran dobel.</small>
+        </div>
+        <div className="table-wrap payroll-payment-history-wrap">
+          <table className="payroll-commission-detail">
+            <thead><tr><th>Tanggal</th><th>Metode</th><th>Nominal</th><th>Catatan</th></tr></thead>
+            <tbody>
+              {(row?.paymentHistory||[]).map(payment=><tr key={payment.id}>
+                <td>{new Date(payment.paid_at).toLocaleString('id-ID')}</td>
+                <td>{payment.payment_method}</td>
+                <td><b>{formatRupiah(Number(payment.amount||0))}</b></td>
+                <td>{payment.note||'-'}</td>
+              </tr>)}
+              {(row?.paymentHistory||[]).length===0&&<tr><td colSpan={4} className="table-empty">Belum ada pembayaran gaji pada periode ini.</td></tr>}
+            </tbody>
+          </table>
+        </div>
         <div className="modal-actions">
+          {(row?.outstanding||0)>0&&<button className="primary-button" onClick={()=>{setDetailEmployee(null);openPayrollPayment(detailEmployee)}}><HandCoins size={16}/>Catat Pembayaran</button>}
           <button className="secondary-button" onClick={()=>downloadXls(commissionDetailExport(detailEmployee))}><FileSpreadsheet size={16}/>Export XLS</button>
           <button className="secondary-button" onClick={()=>printPdf(commissionDetailExport(detailEmployee))}><FileText size={16}/>Cetak / PDF</button>
           <button className="secondary-button" onClick={()=>setDetailEmployee(null)}>Tutup</button>
         </div>
+      </Modal>
+    })()}
+
+    {paymentEmployee&&(()=>{
+      const row=payrollRows.find(item=>item.employee.id===paymentEmployee.id)
+      return <Modal title={`Pembayaran Gaji — ${paymentEmployee.full_name}`} onClose={()=>!busy&&setPaymentEmployee(null)}>
+        <form className="modal-form" onSubmit={savePayrollPayment}>
+          <div className="payroll-payment-card">
+            <div><span>Total Gaji</span><b>{formatRupiah(row?.total||0)}</b></div>
+            <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
+            <div><span>Sisa</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
+          </div>
+          <label>Nominal Pembayaran
+            <input type="number" min="1" max={Math.max(0,Math.floor(Number(row?.outstanding||0)))} value={paymentForm.amount} onChange={e=>setPaymentForm({...paymentForm,amount:e.target.value})}/>
+          </label>
+          <label>Metode Pembayaran
+            <select value={paymentForm.payment_method} onChange={e=>setPaymentForm({...paymentForm,payment_method:e.target.value})}>
+              <option>Transfer</option><option>Tunai</option><option>QRIS</option><option>Lainnya</option>
+            </select>
+          </label>
+          <label>Catatan
+            <textarea rows={3} value={paymentForm.note} onChange={e=>setPaymentForm({...paymentForm,note:e.target.value})} placeholder="Opsional, contoh: Transfer BCA 13 Agustus"/>
+          </label>
+          {message&&<div className="error-box">{message}</div>}
+          <div className="form-actions">
+            <button type="button" className="secondary-button" onClick={()=>setPaymentEmployee(null)} disabled={busy}>Batal</button>
+            <button className="primary-button" disabled={busy||Number(paymentForm.amount)<=0}><Save size={16}/>{busy?'Menyimpan...':'Catat Pembayaran'}</button>
+          </div>
+        </form>
       </Modal>
     })()}
 
