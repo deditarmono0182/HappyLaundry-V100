@@ -1,0 +1,18 @@
+HappyLaundry V113.0.49 - Riwayat Koreksi Penanggung Jawab
+
+Perubahan:
+- Owner dapat melihat Riwayat Koreksi Penanggung Jawab langsung di Detail Order.
+- Menampilkan Dikerjakan oleh lama -> baru.
+- Menampilkan Kurir lama -> baru.
+- Menampilkan alasan koreksi, siapa yang mengoreksi, serta tanggal/jam.
+- Riwayat hanya terlihat oleh Owner.
+- Menggunakan tabel audit dari SQL 052 yang sudah ada.
+- TIDAK perlu SQL baru jika SQL 052 sudah dijalankan.
+- Fitur komisi, payroll, nota, reset, dan alert harian tidak diubah.
+
+Cara uji:
+1. Login Owner.
+2. Buka Daftar Order -> Detail pada order yang pernah dikoreksi.
+3. Scroll ke bawah bagian Riwayat Koreksi Penanggung Jawab.
+4. Pastikan nama lama -> baru, alasan, Owner, dan waktu tampil.
+5. Login Karyawan dan pastikan riwayat koreksi tidak ditampilkan.

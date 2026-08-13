@@ -9330,3 +9330,18 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .daily-order-alert-more,.daily-order-alert-empty{padding:12px;text-align:center;font-size:10px;font-weight:800;color:#647d80;background:#f7faf9}
 .daily-order-alert-actions{display:flex;justify-content:flex-end;gap:9px}
 @media(max-width:620px){.daily-order-alert-summary{grid-template-columns:1fr}.daily-order-alert-list article{display:grid}.daily-order-alert-list article>div:last-child{text-align:left}.daily-order-alert-actions{display:grid;grid-template-columns:1fr 1fr}.daily-order-alert-actions button{width:100%}}
+
+
+/* V113.0.49 - Riwayat Koreksi Penanggung Jawab */
+.order-correction-history{grid-column:1/-1;margin-top:6px;padding:14px;border:1px solid var(--border,#dbe5ea);border-radius:14px;background:#f8fbfc}
+.order-correction-history-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.order-correction-history-title span{font-weight:800;color:#12384a}
+.order-correction-history-title b{font-size:12px;color:#56717f}
+.order-correction-history-empty{margin:0;color:#6b7f89;font-size:13px}
+.order-correction-history-list{display:grid;gap:10px}
+.order-correction-history-item{padding:12px;background:#fff;border:1px solid #e2eaee;border-radius:12px;display:grid;gap:8px}
+.order-correction-history-item>div{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.order-correction-history-item span{color:#617985;font-size:13px}
+.order-correction-history-item b{text-align:right;color:#12384a;font-size:13px}
+.order-correction-history-meta{padding-bottom:7px;border-bottom:1px dashed #dce5e9}
+@media(max-width:640px){.order-correction-history-item>div{display:grid;gap:3px}.order-correction-history-item b{text-align:left}.order-correction-history-title{align-items:flex-start}}

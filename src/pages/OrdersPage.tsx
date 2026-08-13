@@ -70,6 +70,18 @@ type CommissionEmployeeName={
   login_id:string
 }
 
+type AssignmentCorrectionHistory={
+  id:string
+  order_id:string
+  old_worker_id:string|null
+  new_worker_id:string|null
+  old_courier_id:string|null
+  new_courier_id:string|null
+  reason:string
+  changed_by:string
+  changed_at:string
+}
+
 export function OrdersPage() {
   const navigate=useNavigate()
   const [searchParams]=useSearchParams()
@@ -93,6 +105,7 @@ export function OrdersPage() {
   const [deliveryProofs,setDeliveryProofs]=useState<DeliveryProof[]>([])
   const [commissionAssignments,setCommissionAssignments]=useState<OrderCommissionAssignment[]>([])
   const [commissionEmployeeNames,setCommissionEmployeeNames]=useState<CommissionEmployeeName[]>([])
+  const [assignmentCorrectionHistory,setAssignmentCorrectionHistory]=useState<AssignmentCorrectionHistory[]>([])
   const [deliveryOrder,setDeliveryOrder]=useState<OrderRow|null>(null)
   const [deliveryFile,setDeliveryFile]=useState<File|null>(null)
   const [deliveryPreview,setDeliveryPreview]=useState('')
@@ -111,7 +124,7 @@ export function OrdersPage() {
   const load = useCallback(async () => {
     setLoading(true)
     setMessage('')
-    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionEmployeesResult] = await Promise.all([
+    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionEmployeesResult, correctionHistoryResult] = await Promise.all([
       supabase
         .from('v100_orders_view')
         .select('*')
@@ -136,10 +149,11 @@ export function OrdersPage() {
       supabase
         .from('v113_order_commissions')
         .select('order_id,worker_id,courier_id'),
-      supabase.from('v109_users').select('id,full_name,login_id')
+      supabase.from('v109_users').select('id,full_name,login_id'),
+      supabase.from('v113_order_assignment_corrections').select('id,order_id,old_worker_id,new_worker_id,old_courier_id,new_courier_id,reason,changed_by,changed_at').order('changed_at',{ascending:false})
     ])
 
-    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionEmployeesResult.error
+    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionEmployeesResult.error || correctionHistoryResult.error
     if (error) setMessage(error.message)
     else {
       setRows((ordersResult.data as OrderRow[]) || [])
@@ -149,6 +163,7 @@ export function OrdersPage() {
       setDeliveryProofs((deliveryResult.data as DeliveryProof[]) || [])
       setCommissionAssignments((commissionResult.data as OrderCommissionAssignment[]) || [])
       setCommissionEmployeeNames((commissionEmployeesResult.data as CommissionEmployeeName[]) || [])
+      setAssignmentCorrectionHistory((correctionHistoryResult.data as AssignmentCorrectionHistory[]) || [])
     }
     setLoading(false)
   }, [])
@@ -607,6 +622,15 @@ export function OrdersPage() {
 
   const commissionAssignmentMap=useMemo(()=>new Map(commissionAssignments.map(item=>[item.order_id,item])),[commissionAssignments])
   const commissionEmployeeNameMap=useMemo(()=>new Map(commissionEmployeeNames.map(item=>[item.id,item.full_name])),[commissionEmployeeNames])
+  const correctionHistoryByOrder=useMemo(()=>{
+    const map=new Map<string,AssignmentCorrectionHistory[]>()
+    for(const item of assignmentCorrectionHistory){
+      const list=map.get(item.order_id)||[]
+      list.push(item)
+      map.set(item.order_id,list)
+    }
+    return map
+  },[assignmentCorrectionHistory])
 
   const printReceipt=(row:OrderRow)=>{
     const printWindow=window.open('','_blank','width=520,height=850')
@@ -1243,6 +1267,33 @@ export function OrdersPage() {
               <span>Tracking Pelanggan</span>
               <b>/track/{detail.order_no}</b>
             </div>
+            {profile?.role==='owner'&&<div className="order-correction-history">
+              <div className="order-correction-history-title">
+                <span>Riwayat Koreksi Penanggung Jawab</span>
+                <b>{(correctionHistoryByOrder.get(detail.id)||[]).length} koreksi</b>
+              </div>
+              {(correctionHistoryByOrder.get(detail.id)||[]).length===0
+                ? <p className="order-correction-history-empty">Belum ada koreksi penanggung jawab untuk order ini.</p>
+                : <div className="order-correction-history-list">
+                    {(correctionHistoryByOrder.get(detail.id)||[]).map((item,index)=>{
+                      const oldWorker=item.old_worker_id?commissionEmployeeNameMap.get(item.old_worker_id)||'Karyawan tidak ditemukan':'-'
+                      const newWorker=item.new_worker_id?commissionEmployeeNameMap.get(item.new_worker_id)||'Karyawan tidak ditemukan':'-'
+                      const oldCourier=item.old_courier_id?commissionEmployeeNameMap.get(item.old_courier_id)||'Karyawan tidak ditemukan':'-'
+                      const newCourier=item.new_courier_id?commissionEmployeeNameMap.get(item.new_courier_id)||'Karyawan tidak ditemukan':'-'
+                      const changedBy=commissionEmployeeNameMap.get(item.changed_by)||'Owner'
+                      return <div className="order-correction-history-item" key={item.id}>
+                        <div className="order-correction-history-meta">
+                          <b>Koreksi #{(correctionHistoryByOrder.get(detail.id)||[]).length-index}</b>
+                          <span>{new Date(item.changed_at).toLocaleString('id-ID')}</span>
+                        </div>
+                        <div><span>Dikerjakan oleh</span><b>{oldWorker} → {newWorker}</b></div>
+                        <div><span>Kurir</span><b>{oldCourier} → {newCourier}</b></div>
+                        <div><span>Alasan</span><b>{item.reason}</b></div>
+                        <div><span>Dikoreksi oleh</span><b>{changedBy}</b></div>
+                      </div>
+                    })}
+                  </div>}
+            </div>}
             <div className="form-actions order-detail-actions">
               {profile?.role==='owner'&&detail.status!=='cancelled'&&<button
                 type="button"
