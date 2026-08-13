@@ -12,6 +12,7 @@ import {
   PackageCheck,
   Plus,
   Printer,
+  Pencil,
   Search,
   Truck,
   ShoppingBag,
@@ -101,6 +102,11 @@ export function OrdersPage() {
   const [deleteReason,setDeleteReason]=useState('')
   const [deletePhrase,setDeletePhrase]=useState('')
   const [deleteBusy,setDeleteBusy]=useState(false)
+  const [correctionOrder,setCorrectionOrder]=useState<OrderRow|null>(null)
+  const [correctionWorkerId,setCorrectionWorkerId]=useState('')
+  const [correctionCourierId,setCorrectionCourierId]=useState('')
+  const [correctionReason,setCorrectionReason]=useState('')
+  const [correctionBusy,setCorrectionBusy]=useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -220,6 +226,45 @@ export function OrdersPage() {
       if(current.startsWith('blob:'))URL.revokeObjectURL(current)
       return url
     })
+  }
+
+  const openAssignmentCorrection=(row:OrderRow)=>{
+    const current=commissionAssignments.find(item=>item.order_id===row.id)
+    setCorrectionOrder(row)
+    setCorrectionWorkerId(current?.worker_id||'')
+    setCorrectionCourierId(current?.courier_id||'')
+    setCorrectionReason('')
+    setMessage('')
+    setDetail(null)
+  }
+
+  const submitAssignmentCorrection=async()=>{
+    if(!correctionOrder)return
+    if(correctionReason.trim().length<5){
+      setMessage('Alasan koreksi minimal 5 karakter.')
+      return
+    }
+    if(!window.confirm(`${correctionOrder.order_no}\nSimpan koreksi Dikerjakan oleh / Kurir? Komisi order akan dihitung ulang.`))return
+
+    setCorrectionBusy(true)
+    setMessage('')
+    try{
+      const {error}=await supabase.rpc('v113_correct_order_assignment',{
+        p_order_id:correctionOrder.id,
+        p_worker_id:correctionWorkerId||null,
+        p_courier_id:correctionCourierId||null,
+        p_reason:correctionReason.trim()
+      })
+      if(error)throw error
+      setCorrectionOrder(null)
+      setCorrectionReason('')
+      await load()
+      window.alert(`${correctionOrder.order_no} berhasil dikoreksi. Komisi dan nota sekarang memakai penanggung jawab yang baru.`)
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Koreksi penanggung jawab gagal.')
+    }finally{
+      setCorrectionBusy(false)
+    }
   }
 
   const submitDelivery=async()=>{
@@ -1109,6 +1154,47 @@ export function OrdersPage() {
         </Modal>
       )}
 
+      {correctionOrder&&profile?.role==='owner'&&(
+        <Modal title={`Koreksi Penanggung Jawab — ${correctionOrder.order_no}`} onClose={()=>setCorrectionOrder(null)}>
+          <div className="modal-form">
+            <div className="delete-request-warning">
+              <AlertTriangle size={20}/>
+              <div>
+                <b>Koreksi khusus Owner</b>
+                <span>Nama pada nota dan sumber komisi akan dipindahkan ke karyawan/kurir yang benar. Riwayat koreksi disimpan.</span>
+              </div>
+            </div>
+            <label>Dikerjakan oleh
+              <select value={correctionWorkerId} onChange={e=>setCorrectionWorkerId(e.target.value)}>
+                <option value="">- Tidak ada -</option>
+                {commissionEmployeeNames.map(employee=><option key={`worker-${employee.id}`} value={employee.id}>{employee.full_name} ({employee.login_id})</option>)}
+              </select>
+            </label>
+            <label>Kurir
+              <select value={correctionCourierId} onChange={e=>setCorrectionCourierId(e.target.value)}>
+                <option value="">- Tidak ada -</option>
+                {commissionEmployeeNames.map(employee=><option key={`courier-${employee.id}`} value={employee.id}>{employee.full_name} ({employee.login_id})</option>)}
+              </select>
+            </label>
+            <label>Alasan Koreksi
+              <textarea rows={3} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Contoh: salah pilih nama saat input order"/>
+            </label>
+            <div className="order-total-box">
+              <div><span>Status Order</span><b>{statusLabels[correctionOrder.status]}</b></div>
+              <div><span>Pembayaran</span><b>{paymentLabels[correctionOrder.payment_status]}</b></div>
+              <div><span>Total</span><b>{formatRupiah(correctionOrder.total)}</b></div>
+            </div>
+            {message&&<div className="error-box">{message}</div>}
+            <div className="form-actions">
+              <button type="button" className="secondary-button" onClick={()=>setCorrectionOrder(null)}>Batal</button>
+              <button type="button" className="primary-button" disabled={correctionBusy} onClick={()=>void submitAssignmentCorrection()}>
+                <Pencil size={16}/>{correctionBusy?'Menyimpan...':'Simpan Koreksi'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {detail && (
         <Modal title={`Detail ${detail.order_no}`} onClose={() => setDetail(null)}>
           <div className="order-detail">
@@ -1144,6 +1230,8 @@ export function OrdersPage() {
                     <Truck size={15}/>Konfirmasi Kurir
                   </button>}
             </div>
+            <div><span>Dikerjakan oleh</span><b>{commissionAssignmentMap.get(detail.id)?.worker_id?commissionEmployeeNameMap.get(commissionAssignmentMap.get(detail.id)!.worker_id!)||'-':'-'}</b></div>
+            <div><span>Kurir</span><b>{commissionAssignmentMap.get(detail.id)?.courier_id?commissionEmployeeNameMap.get(commissionAssignmentMap.get(detail.id)!.courier_id!)||'-':'-'}</b></div>
             <div><span>Status Cucian</span><b>{statusLabels[detail.status]}</b></div>
             <div><span>Status Pembayaran</span><b>{paymentLabels[detail.payment_status]}</b></div>
             <div><span>Estimasi Selesai</span><b className={isOverdue(detail)?'order-detail-overdue':''}>{detail.due_at?new Date(detail.due_at).toLocaleString('id-ID'):'Belum diatur'}{isOverdue(detail)?' • TERLAMBAT':''}</b></div>
@@ -1156,6 +1244,13 @@ export function OrdersPage() {
               <b>/track/{detail.order_no}</b>
             </div>
             <div className="form-actions order-detail-actions">
+              {profile?.role==='owner'&&detail.status!=='cancelled'&&<button
+                type="button"
+                className="secondary-button"
+                onClick={()=>openAssignmentCorrection(detail)}
+              >
+                <Pencil size={16}/>Koreksi Penanggung Jawab
+              </button>}
               <button
                 type="button"
                 className="secondary-button order-detail-tracking"

@@ -1,0 +1,17 @@
+HappyLaundry V113.0.48 - Koreksi Penanggung Jawab Order
+
+FITUR BARU
+- Owner dapat mengoreksi Dikerjakan oleh dan Kurir dari Detail Order.
+- Bisa dipakai saat status Siap Diambil maupun tahap lain selama order tidak dibatalkan.
+- Snapshot persen dan nilai komisi dihitung ulang sesuai pengaturan karyawan/kurir baru.
+- Jika order sudah Selesai + Lunas, hak komisi dipindahkan ke penanggung jawab baru.
+- Jika periode gaji penanggung jawab lama sudah pernah dibayar, koreksi diblok untuk mencegah selisih pembayaran diam-diam.
+- Semua koreksi dicatat di v113_order_assignment_corrections beserta alasan, akun Owner, dan waktu.
+- Nota cetak ulang otomatis membaca penanggung jawab terbaru.
+
+INSTALASI
+1. Jalankan supabase/052_v113_0_48_order_assignment_correction.sql sekali di Supabase SQL Editor.
+2. Deploy ZIP V113.0.48 ke Netlify.
+3. Login Owner > Daftar Order > Detail > Koreksi Penanggung Jawab.
+
+SQL lama 049, 050, 051 tidak perlu diulang.
