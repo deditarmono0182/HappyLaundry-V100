@@ -1,4 +1,4 @@
-HappyLaundry V113.0.52 - WIB Business Time Fix
+HappyLaundry V113.0.53 - Payroll Status Nihil Fix
 
 # HappyLaundry Enterprise V113.0.7 Delete Approval Notification
 
@@ -352,3 +352,9 @@ Penghapusan Order dan Pengeluaran memakai alur approval Owner, alasan wajib, kon
 
 ## V113.0.7
 Owner mendapat badge merah, Dashboard alert, dan toast untuk permintaan hapus pending. Count diperbarui via Realtime, focus, polling 30 detik, dan event lokal.
+
+
+V113.0.53
+- Total Gaji Rp0 + Dibayar Rp0 sekarang berstatus Nihil, bukan Belum Dibayar.
+- Status Belum Dibayar hanya untuk Total Gaji > Rp0 dan belum ada pembayaran.
+- Tidak mengubah perhitungan gaji, riwayat pembayaran, komisi, atau database.

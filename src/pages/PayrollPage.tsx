@@ -310,7 +310,7 @@ export function PayrollPage(){
     const paymentHistory=payrollPayments.filter(item=>item.employee_id===employee.id)
     const paidAmount=paymentHistory.reduce((sum,item)=>sum+Number(item.amount||0),0)
     const outstanding=Math.max(0,total-paidAmount)
-    const paymentStatus=paidAmount<=0?'unpaid':outstanding>0?'partial':'paid'
+    const paymentStatus=total<=0&&paidAmount<=0?'nil':paidAmount<=0?'unpaid':outstanding>0?'partial':'paid'
 
     return{
       employee,presentDays,permissionDays,sickDays,absentDays,
@@ -561,7 +561,7 @@ export function PayrollPage(){
         ? r.shareDetails.map(item=>`${item.category} ${item.percent.toFixed(2)}% x ${Math.round(item.baseRevenue)} = ${Math.round(item.amount)}`).join(' | ')
         : '-',
       Math.round(r.productionCommission),Math.round(r.courierCommission),Math.round(r.total),
-      Math.round(r.paidAmount),Math.round(r.outstanding),r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'
+      Math.round(r.paidAmount),Math.round(r.outstanding),r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'
     ]),
     summary:[
       ['Omzet Bulan',Math.round(monthlyRevenue)],
@@ -596,7 +596,7 @@ export function PayrollPage(){
         ['Total Gaji',Math.round(row?.total||0)],
         ['Sudah Dibayar',Math.round(row?.paidAmount||0)],
         ['Sisa Gaji',Math.round(row?.outstanding||0)],
-        ['Status Pembayaran',row?.paymentStatus==='paid'?'Lunas':row?.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'],
+        ['Status Pembayaran',row?.paymentStatus==='nil'?'Nihil':row?.paymentStatus==='paid'?'Lunas':row?.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'],
         ...((row?.paymentHistory||[]).map((payment,index)=>[
           `Pembayaran ${index+1}`,
           `${new Date(payment.paid_at).toLocaleString('id-ID')} • ${payment.payment_method} • ${formatRupiah(Number(payment.amount||0))}${payment.note?` • ${payment.note}`:''}`
@@ -759,7 +759,7 @@ export function PayrollPage(){
                 <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
                 <td><b>{formatRupiah(r.paidAmount)}</b></td>
                 <td><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
-                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
+                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
                 <td>
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>

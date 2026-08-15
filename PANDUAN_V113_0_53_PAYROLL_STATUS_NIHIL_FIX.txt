@@ -1,0 +1,9 @@
+HappyLaundry V113.0.53 - Payroll Status Nihil Fix
+
+Perubahan:
+1. Jika Total Gaji = Rp0 dan Dibayar = Rp0, status menjadi NIHIL.
+2. Jika Total Gaji > Rp0 dan Dibayar = Rp0, status tetap BELUM DIBAYAR.
+3. Jika pembayaran sebagian, status SEBAGIAN.
+4. Jika sudah lunas, status LUNAS.
+5. Tidak ada SQL baru.
+6. Tidak mengubah perhitungan gaji, komisi, absensi, order, nota, atau riwayat pembayaran.

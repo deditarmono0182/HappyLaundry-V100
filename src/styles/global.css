@@ -9302,6 +9302,7 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .payroll-payment-status.unpaid{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
 .payroll-payment-status.partial{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
 .payroll-payment-status.paid{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.payroll-payment-status.nil{background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1}
 .payroll-outstanding{color:#b45309}
 .payroll-paid{color:#047857}
 .payroll-pay-button{border-color:#a7f3d0!important;background:#ecfdf5!important;color:#047857!important}
