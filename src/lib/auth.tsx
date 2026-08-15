@@ -146,6 +146,7 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       if(!raw)throw new Error('ID Akun wajib diisi.')
 
       if(raw.includes('@')){
+        localStorage.removeItem('happylaundry-employee-session-start')
         const{error}=await supabase.auth.signInWithPassword({email:raw.toLowerCase(),password})
         if(error)throw new Error('Email Owner atau password salah.')
         return
@@ -183,9 +184,11 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       // V112.0: employee login only opens the app.
       // Attendance is recorded separately through QR + GPS.
 
+      localStorage.setItem('happylaundry-employee-session-start',String(Date.now()))
       await supabase.auth.refreshSession()
     },
     signOut:async()=>{
+      localStorage.removeItem('happylaundry-employee-session-start')
       try{await supabase.rpc('v109_employee_logout')}catch{}
       await supabase.auth.signOut()
     }

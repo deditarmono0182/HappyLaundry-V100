@@ -1,0 +1,12 @@
+HappyLaundry V113.0.50 - Employee Auto Logout 21:00
+
+FITUR
+- Semua akun Karyawan otomatis logout setelah melewati pukul 21:00 waktu perangkat.
+- Owner tidak terkena auto logout pukul 21:00.
+- Jika aplikasi tetap terbuka, pengecekan dilakukan berkala dan sesi diputus sekitar pukul 21:00.
+- Jika aplikasi/HP ditutup sebelum pukul 21:00, saat dibuka kembali setelah batas sesi lama langsung diputus dan karyawan harus login ulang.
+- Jika karyawan sengaja login kembali setelah pukul 21:00, sesi baru berlaku sampai batas pukul 21:00 berikutnya.
+- Tidak memerlukan SQL baru.
+
+CATATAN
+Fitur ini memakai waktu lokal perangkat karyawan. Pastikan pengaturan tanggal, jam, dan zona waktu HP benar.

@@ -206,6 +206,65 @@ export function AppLayout() {
     }
   },[role,navigate,signOut])
 
+  // V113.0.50 - Auto logout karyawan setiap melewati batas pukul 21:00.
+  // Marker sesi disimpan saat login sehingga jika aplikasi ditutup pada jam 21:00,
+  // sesi lama tetap diputus saat aplikasi dibuka kembali setelah melewati batas.
+  useEffect(()=>{
+    if(role!=='employee')return
+
+    let active=true
+    let signingOut=false
+    const markerKey='happylaundry-employee-session-start'
+
+    const nextNinePmAfter=(startedAt:number)=>{
+      const started=new Date(startedAt)
+      const cutoff=new Date(started)
+      cutoff.setHours(21,0,0,0)
+      if(started.getTime()>=cutoff.getTime())cutoff.setDate(cutoff.getDate()+1)
+      return cutoff.getTime()
+    }
+
+    const enforceNightlyLogout=async()=>{
+      if(!active||signingOut)return
+      const now=Date.now()
+      let startedAt=Number(localStorage.getItem(markerKey)||0)
+
+      // Sesi lama dari versi sebelum V113.0.50 belum memiliki marker.
+      // Jika pertama kali terdeteksi sudah lewat pukul 21:00, putuskan langsung.
+      if(!Number.isFinite(startedAt)||startedAt<=0){
+        const current=new Date(now)
+        if(current.getHours()>=21){
+          signingOut=true
+          await signOut()
+          if(active)navigate('/login',{replace:true})
+          return
+        }
+        startedAt=now
+        localStorage.setItem(markerKey,String(startedAt))
+      }
+
+      if(now>=nextNinePmAfter(startedAt)){
+        signingOut=true
+        await signOut()
+        if(active)navigate('/login',{replace:true})
+      }
+    }
+
+    void enforceNightlyLogout()
+    const timer=window.setInterval(()=>{void enforceNightlyLogout()},30000)
+    const onFocus=()=>{void enforceNightlyLogout()}
+    const onVisibility=()=>{if(document.visibilityState==='visible')void enforceNightlyLogout()}
+    window.addEventListener('focus',onFocus)
+    document.addEventListener('visibilitychange',onVisibility)
+
+    return()=>{
+      active=false
+      window.clearInterval(timer)
+      window.removeEventListener('focus',onFocus)
+      document.removeEventListener('visibilitychange',onVisibility)
+    }
+  },[role,navigate,signOut])
+
   useEffect(()=>{
     const prepare=(root:ParentNode=document)=>{
       root.querySelectorAll<HTMLInputElement>('input[type="number"]').forEach(input=>{
