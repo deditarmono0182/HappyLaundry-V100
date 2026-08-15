@@ -1,0 +1,19 @@
+HAPPYLAUNDRY V113.0.51 - PERFORMANCE + STABILITY FIX
+
+Fokus:
+1. Login Owner/Karyawan retry otomatis saat koneksi putus sementara.
+2. Timeout request login agar tidak loading tanpa akhir.
+3. Error Boundary: error render tidak lagi menjadi layar putih kosong; tampil tombol Coba Lagi.
+4. Order awal hanya 100 terbaru, tombol Muat 100 Order Lagi untuk pertumbuhan data.
+5. Pemeriksaan alert order ditunda setelah halaman utama tampil agar tidak berebut saat startup.
+6. Pemeriksaan absensi tetap diprioritaskan tetapi tidak memblokir render awal.
+7. Service Worker dipaksa ke versi 113.0.51 agar cache lama lebih cepat diperbarui.
+
+Tidak ada SQL baru. Tidak mengubah rumus order, komisi, payroll, absensi, reset, nota, atau struktur database.
+
+Tes setelah deploy:
+- Login 3-5 akun karyawan bergantian.
+- Coba Wi-Fi dan seluler.
+- Buka Dashboard lalu Absensi.
+- Putus-sambung internet singkat saat login; aplikasi harus memberi pesan jelas/retry, bukan blank.
+- Buka Order dan pastikan 100 terbaru tampil; tombol Muat Lagi muncul bila data >100.

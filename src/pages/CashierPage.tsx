@@ -9,6 +9,7 @@ import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
 import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
+import { businessDayStart, businessDateTimeLabel } from '../lib/businessTime'
 import type { StoreSettings } from '../types/settings'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft } from '../types/order'
@@ -100,7 +101,7 @@ export function CashierPage() {
   const customerSearchRef=useRef<HTMLInputElement|null>(null)
 
   const load=useCallback(async()=>{
-    const start=new Date(); start.setHours(0,0,0,0)
+    const start=businessDayStart()
     const [c,s,o,settings,print,employees,commission]=await Promise.all([
       supabase.from('v100_customers').select('*').order('name'),
       supabase.from('v100_services').select('*').eq('is_active',true).order('name'),
@@ -341,7 +342,7 @@ export function CashierPage() {
       <div class="a4-grid"><div>
         <table class="meta">
           <tr><td>No. Order</td><td>${data.orderNo}</td></tr>
-          <tr><td>Tanggal</td><td>${new Date().toLocaleString('id-ID')}</td></tr>
+          <tr><td>Tanggal</td><td>${businessDateTimeLabel()}</td></tr>
           <tr><td>Pelanggan</td><td>${data.customer}</td></tr>
           ${printSettings.show_customer_phone?`<tr><td>WhatsApp</td><td>${data.phone}</td></tr>`:''}
           ${printSettings.show_due_at?`<tr><td>Estimasi</td><td>${data.due||'-'}</td></tr>`:''}

@@ -2,6 +2,7 @@ import{FormEvent,useState}from'react'
 import{Navigate}from'react-router-dom'
 import{useAuth}from'../lib/auth'
 import{isSupabaseConfigured}from'../lib/supabase'
+import{friendlyNetworkError}from'../lib/network'
 
 export function LoginPage(){
   const{session,profile,signIn}=useAuth()
@@ -19,7 +20,7 @@ export function LoginPage(){
     try{
       await signIn(loginId,password)
     }catch(r){
-      setError(r instanceof Error?r.message:'Login gagal.')
+      setError(friendlyNetworkError(r,'Login gagal karena koneksi ke server terputus.'))
     }finally{
       setBusy(false)
     }

@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { downloadXls } from '../lib/exportData'
 import type { OrderRow } from '../types/order'
+import { addBusinessDays, businessDateKey, businessDateLabel, businessMonthKey, businessParts, businessPeriodStart } from '../lib/businessTime'
 
 interface DashboardOrderItem{
   order_id:string
@@ -33,6 +34,7 @@ export function DashboardPage() {
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
   const [revenuePeriod,setRevenuePeriod]=useState<'today'|'7d'|'month'|'3m'|'6m'|'12m'>('7d')
+  const [businessClock,setBusinessClock]=useState(()=>Date.now())
   const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
     (localStorage.getItem('happylaundry-density') as 'comfort'|'compact'|'ultra')||'compact'
   )
@@ -67,6 +69,14 @@ export function DashboardPage() {
   useEffect(()=>{void load()},[load])
 
   useEffect(()=>{
+    const tick=()=>setBusinessClock(Date.now())
+    const timer=window.setInterval(tick,60000)
+    const onFocus=()=>tick()
+    window.addEventListener('focus',onFocus)
+    return()=>{window.clearInterval(timer);window.removeEventListener('focus',onFocus)}
+  },[])
+
+  useEffect(()=>{
     document.documentElement.dataset.density=density
   },[density])
 
@@ -76,63 +86,58 @@ export function DashboardPage() {
     document.documentElement.dataset.density=value
   }
 
-  const today=useMemo(()=>{const d=new Date();d.setHours(0,0,0,0);return orders.filter(r=>new Date(r.created_at)>=d)},[orders])
-  const omzet=cash.reduce((s,r)=>s+(r.direction==='in'?Number(r.amount):0),0)
-  const expense=cash.reduce((s,r)=>s+(r.direction==='out'?Number(r.amount):0),0)
+  const businessToday=businessDateKey(businessClock)
+  const today=useMemo(()=>orders.filter(r=>businessDateKey(r.created_at)===businessToday),[orders,businessToday])
+  const todayCash=useMemo(()=>cash.filter(r=>businessDateKey(r.created_at)===businessToday),[cash,businessToday])
+  const omzet=todayCash.reduce((s,r)=>s+(r.direction==='in'?Number(r.amount):0),0)
+  const expense=todayCash.reduce((s,r)=>s+(r.direction==='out'?Number(r.amount):0),0)
   const processing=orders.filter(r=>['received','washing','drying','ironing','packing'].includes(r.status)).length
   const ready=orders.filter(r=>r.status==='ready').length
   const completed=today.filter(r=>r.status==='completed').length
   const receivable=orders.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)
 
   const chart=useMemo(()=>{
-    const now=new Date()
+    const now=new Date(businessClock)
+    const todayKey=businessDateKey(now)
 
     if(revenuePeriod==='today'){
-      const d=new Date(now);d.setHours(0,0,0,0);const n=new Date(d);n.setDate(n.getDate()+1)
-      return [{label:'Hari Ini',total:orders.filter(r=>{const x=new Date(r.created_at);return x>=d&&x<n}).reduce((s,r)=>s+Number(r.paid_amount||0),0)}]
+      return [{label:'Hari Ini',total:orders.filter(r=>businessDateKey(r.created_at)===todayKey).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)}]
     }
 
     if(revenuePeriod==='7d'){
       return Array.from({length:7},(_,i)=>{
-        const d=new Date(now); d.setDate(d.getDate()-(6-i)); d.setHours(0,0,0,0)
-        const n=new Date(d); n.setDate(n.getDate()+1)
+        const key=addBusinessDays(todayKey,-(6-i))
         return {
-          label:d.toLocaleDateString('id-ID',{weekday:'short'}),
-          total:orders
-            .filter(r=>{const x=new Date(r.created_at);return x>=d&&x<n})
-            .reduce((s,r)=>s+Number(r.paid_amount||0),0)
+          label:businessDateLabel(`${key}T12:00:00+07:00`,{weekday:'short'}),
+          total:orders.filter(r=>businessDateKey(r.created_at)===key).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)
         }
       })
     }
 
     if(revenuePeriod==='month'){
-      const year=now.getFullYear(),month=now.getMonth()
+      const currentMonth=businessMonthKey(now)
       return Array.from({length:5},(_,i)=>{
         const startDay=i*7+1
         const endDay=i===4?31:startDay+6
-        const total=orders
-          .filter(r=>{
-            const x=new Date(r.created_at)
-            return x.getFullYear()===year&&x.getMonth()===month&&x.getDate()>=startDay&&x.getDate()<=endDay
-          })
-          .reduce((s,r)=>s+Number(r.paid_amount||0),0)
+        const total=orders.filter(r=>{
+          if(businessMonthKey(r.created_at)!==currentMonth)return false
+          const day=businessParts(r.created_at).day
+          return day>=startDay&&day<=endDay
+        }).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)
         return {label:`M${i+1}`,total}
       })
     }
 
     const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
+    const current=businessParts(now)
     return Array.from({length:count},(_,i)=>{
-      const d=new Date(now.getFullYear(),now.getMonth()-(count-1-i),1)
-      const year=d.getFullYear(),month=d.getMonth()
-      const total=orders
-        .filter(r=>{
-          const x=new Date(r.created_at)
-          return x.getFullYear()===year&&x.getMonth()===month
-        })
-        .reduce((s,r)=>s+Number(r.paid_amount||0),0)
-      return {label:d.toLocaleDateString('id-ID',{month:'short'}),total}
+      const anchor=new Date(Date.UTC(current.year,current.month-1-(count-1-i),1,12,0,0))
+      const y=anchor.getUTCFullYear(),m=anchor.getUTCMonth()+1
+      const key=`${y}-${String(m).padStart(2,'0')}`
+      const total=orders.filter(r=>businessMonthKey(r.created_at)===key).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)
+      return {label:new Intl.DateTimeFormat('id-ID',{month:'short',timeZone:'UTC'}).format(anchor),total}
     })
-  },[orders,revenuePeriod])
+  },[orders,revenuePeriod,businessClock])
 
   const max=Math.max(1,...chart.map(x=>x.total))
 
@@ -168,14 +173,7 @@ export function DashboardPage() {
           :'Omzet 12 Bulan'
 
   const categoryRevenue=useMemo(()=>{
-    const now=new Date()
-    const periodStart=(()=>{
-      if(revenuePeriod==='today'){const d=new Date(now);d.setHours(0,0,0,0);return d}
-      if(revenuePeriod==='7d'){const d=new Date(now);d.setDate(d.getDate()-6);d.setHours(0,0,0,0);return d}
-      if(revenuePeriod==='month')return new Date(now.getFullYear(),now.getMonth(),1)
-      const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
-      return new Date(now.getFullYear(),now.getMonth()-(count-1),1)
-    })()
+    const periodStart=businessPeriodStart(revenuePeriod,new Date(businessClock))
 
     const relevantOrders=orders.filter(o=>new Date(o.created_at)>=periodStart&&o.status!=='cancelled')
     const orderMap=new Map(relevantOrders.map(o=>[o.id,o]))
@@ -200,17 +198,10 @@ export function DashboardPage() {
     return Object.entries(grouped)
       .map(([category,amount])=>({category,amount,percentage:total>0?(amount/total)*100:0}))
       .sort((a,b)=>b.amount-a.amount)
-  },[orders,orderItems,services,revenuePeriod])
+  },[orders,orderItems,services,revenuePeriod,businessClock])
 
 
-  const ownerPeriodStart=useMemo(()=>{
-    const now=new Date()
-    if(revenuePeriod==='today'){now.setHours(0,0,0,0);return now}
-    if(revenuePeriod==='7d'){now.setDate(now.getDate()-6);now.setHours(0,0,0,0);return now}
-    if(revenuePeriod==='month')return new Date(now.getFullYear(),now.getMonth(),1)
-    const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
-    return new Date(now.getFullYear(),now.getMonth()-(count-1),1)
-  },[revenuePeriod])
+  const ownerPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
 
   const ownerPeriodOrders=useMemo(()=>orders.filter(r=>new Date(r.created_at)>=ownerPeriodStart&&r.status!=='cancelled'),[orders,ownerPeriodStart])
   const ownerPeriodCash=useMemo(()=>cash.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[cash,ownerPeriodStart])
@@ -226,7 +217,7 @@ export function DashboardPage() {
   const exportOwnerReport=()=>{
     downloadXls({
       title:'Laporan Owner HappyLaundry',
-      filename:`laporan-owner-${new Date().toISOString().slice(0,10)}`,
+      filename:`laporan-owner-${businessDateKey()}`,
       subtitle:periodTitle,
       headers:['Indikator','Nilai'],
       rows:[

@@ -9345,3 +9345,6 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .order-correction-history-item b{text-align:right;color:#12384a;font-size:13px}
 .order-correction-history-meta{padding-bottom:7px;border-bottom:1px dashed #dce5e9}
 @media(max-width:640px){.order-correction-history-item>div{display:grid;gap:3px}.order-correction-history-item b{text-align:left}.order-correction-history-title{align-items:flex-start}}
+
+/* V113.0.51 Stability fallback */
+.app-fallback-error{min-height:100vh;display:grid;place-items:center;padding:24px;background:#f8fafc;font-family:inherit}.app-fallback-error>div{max-width:520px;background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:24px;box-shadow:0 12px 40px rgba(15,23,42,.08)}.app-fallback-error h2{margin:0 0 10px}.app-fallback-error p{color:#475569}.app-fallback-error button{width:100%;margin:8px 0 10px}.app-fallback-error small{display:block;color:#64748b;text-align:center}

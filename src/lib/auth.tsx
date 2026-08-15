@@ -2,6 +2,7 @@ import{createContext,useContext,useEffect,useMemo,useState}from'react'
 import type{Session}from'@supabase/supabase-js'
 import{isSupabaseConfigured,supabase}from'./supabase'
 import type{EmployeePermissions,UserProfile}from'../types/auth'
+import{retry,withTimeout}from'./network'
 
 interface EmployeeSessionRow{
   id:string
@@ -120,12 +121,12 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       if(mounted)setProfile(null)
     }
 
-    supabase.auth.getSession().then(async({data})=>{
+    retry(()=>withTimeout(supabase.auth.getSession(),10000,'Memuat sesi'),2).then(async({data})=>{
       if(!mounted)return
       setSession(data.session)
       await loadProfile(data.session)
       setLoading(false)
-    })
+    }).catch(()=>{if(mounted){setSession(null);setProfile(null);setLoading(false)}})
 
     const{data:s}=supabase.auth.onAuthStateChange(async(_event,next)=>{
       setSession(next)
@@ -147,7 +148,7 @@ export function AuthProvider({children}:{children:React.ReactNode}){
 
       if(raw.includes('@')){
         localStorage.removeItem('happylaundry-employee-session-start')
-        const{error}=await supabase.auth.signInWithPassword({email:raw.toLowerCase(),password})
+        const{error}=await retry(()=>withTimeout(supabase.auth.signInWithPassword({email:raw.toLowerCase(),password}),12000,'Login Owner'),3)
         if(error)throw new Error('Email Owner atau password salah.')
         return
       }
@@ -155,26 +156,26 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       const current=(await supabase.auth.getSession()).data.session
       if(current)await supabase.auth.signOut()
 
-      const{data:loginData,error:loginError}=await supabase.rpc('v109_employee_login',{
+      const{data:loginData,error:loginError}=await retry(()=>withTimeout(supabase.rpc('v109_employee_login',{
         p_login_id:raw.toUpperCase(),
         p_password:password,
         p_device:deviceLabel()
-      })
+      }),12000,'Login Karyawan'),3)
       if(loginError)throw new Error(loginError.message)
 
       const result=(Array.isArray(loginData)?loginData[0]:loginData) as EmployeeLoginResult|undefined
       if(!result?.ok||!result.login_token)throw new Error(result?.message||'ID Akun atau password salah.')
 
-      const{error:anonymousError}=await supabase.auth.signInAnonymously({
+      const{error:anonymousError}=await retry(()=>withTimeout(supabase.auth.signInAnonymously({
         options:{data:{happylaundry_employee:true}}
-      })
+      }),12000,'Membuka sesi Karyawan'),2)
       if(anonymousError){
         throw new Error('Anonymous Sign-In Supabase belum aktif. Aktifkan Authentication → Sign In / Providers → Anonymous.')
       }
 
-      const{data:bindData,error:bindError}=await supabase.rpc('v109_bind_employee_session',{
+      const{data:bindData,error:bindError}=await retry(()=>withTimeout(supabase.rpc('v109_bind_employee_session',{
         p_login_token:result.login_token
-      })
+      }),12000,'Mengaktifkan sesi Karyawan'),2)
       if(bindError||bindData!==true){
         await supabase.auth.signOut()
         throw new Error(bindError?.message||'Gagal mengaktifkan sesi karyawan.')

@@ -38,6 +38,8 @@ const emptyOrder = {
   due_at: ''
 }
 
+const ORDER_PAGE_SIZE=100
+
 const statusFlow: OrderStatus[] = ['received', 'washing', 'drying', 'ironing', 'packing', 'ready', 'completed']
 
 type OrderServiceItem={
@@ -95,6 +97,8 @@ export function OrdersPage() {
   const [statusFilter,setStatusFilter]=useState<'all'|OrderStatus>('all')
   const [statusBusyId,setStatusBusyId]=useState<string|null>(null)
   const [loading, setLoading] = useState(true)
+  const [orderLimit,setOrderLimit]=useState(ORDER_PAGE_SIZE)
+  const [mayHaveMore,setMayHaveMore]=useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -128,7 +132,8 @@ export function OrdersPage() {
       supabase
         .from('v100_orders_view')
         .select('*')
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .limit(orderLimit+1),
       supabase
         .from('v100_customers')
         .select('id, store_id, name, phone, address, notes, created_at')
@@ -156,7 +161,9 @@ export function OrdersPage() {
     const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionEmployeesResult.error || correctionHistoryResult.error
     if (error) setMessage(error.message)
     else {
-      setRows((ordersResult.data as OrderRow[]) || [])
+      const fetched=((ordersResult.data as OrderRow[])||[])
+      setMayHaveMore(fetched.length>orderLimit)
+      setRows(fetched.slice(0,orderLimit))
       setCustomers((customersResult.data as Customer[]) || [])
       setServices((servicesResult.data as Service[]) || [])
       setOrderServiceItems((orderItemsResult.data as OrderServiceItem[]) || [])
@@ -166,7 +173,7 @@ export function OrdersPage() {
       setAssignmentCorrectionHistory((correctionHistoryResult.data as AssignmentCorrectionHistory[]) || [])
     }
     setLoading(false)
-  }, [])
+  }, [orderLimit])
 
   useEffect(() => { void load() }, [load])
   useEffect(()=>{
@@ -1218,6 +1225,8 @@ export function OrdersPage() {
           </div>
         </Modal>
       )}
+
+      {!loading&&mayHaveMore&&<div style={{display:'flex',justifyContent:'center',padding:'12px 0 20px'}}><button className="secondary-button" onClick={()=>setOrderLimit(v=>v+ORDER_PAGE_SIZE)}>Muat {ORDER_PAGE_SIZE} Order Lagi</button></div>}
 
       {detail && (
         <Modal title={`Detail ${detail.order_no}`} onClose={() => setDetail(null)}>

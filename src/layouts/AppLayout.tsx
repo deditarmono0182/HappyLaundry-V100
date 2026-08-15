@@ -9,6 +9,7 @@ import { Modal } from '../components/Modal'
 import { formatIDR } from '../lib/format'
 import type { OrderRow } from '../types/order'
 import { supabase } from '../lib/supabase'
+import { businessCutoffForSession, businessDateKey, businessParts } from '../lib/businessTime'
 
 const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; roles?: string[]; permission?: PermissionKey }> = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard' },
@@ -116,7 +117,7 @@ export function AppLayout() {
     let active=true
 
     const checkDailyProblemOrders=async()=>{
-      const today=new Date().toLocaleDateString('en-CA')
+      const today=businessDateKey()
       const reminderKey=`happylaundry-order-problem-reminder:${profile.id}:${today}`
       if(localStorage.getItem(reminderKey)==='shown')return
 
@@ -145,7 +146,7 @@ export function AppLayout() {
       }
     }
 
-    const timer=window.setTimeout(()=>{void checkDailyProblemOrders()},500)
+    const timer=window.setTimeout(()=>{void checkDailyProblemOrders()},2500)
     return()=>{active=false;window.clearTimeout(timer)}
   },[profile?.id])
 
@@ -193,13 +194,14 @@ export function AppLayout() {
       }
     }
 
-    void checkAttendance()
+    const firstCheck=window.setTimeout(()=>{void checkAttendance()},250)
     timer=window.setInterval(()=>{void checkAttendance()},30000)
     const changed=()=>{void checkAttendance()}
     window.addEventListener('focus',changed)
     window.addEventListener('happylaundry-attendance-changed',changed)
     return()=>{
       active=false
+      window.clearTimeout(firstCheck)
       if(timer)window.clearInterval(timer)
       window.removeEventListener('focus',changed)
       window.removeEventListener('happylaundry-attendance-changed',changed)
@@ -216,13 +218,7 @@ export function AppLayout() {
     let signingOut=false
     const markerKey='happylaundry-employee-session-start'
 
-    const nextNinePmAfter=(startedAt:number)=>{
-      const started=new Date(startedAt)
-      const cutoff=new Date(started)
-      cutoff.setHours(21,0,0,0)
-      if(started.getTime()>=cutoff.getTime())cutoff.setDate(cutoff.getDate()+1)
-      return cutoff.getTime()
-    }
+    const nextNinePmAfter=(startedAt:number)=>businessCutoffForSession(startedAt,21,0)
 
     const enforceNightlyLogout=async()=>{
       if(!active||signingOut)return
@@ -232,8 +228,8 @@ export function AppLayout() {
       // Sesi lama dari versi sebelum V113.0.50 belum memiliki marker.
       // Jika pertama kali terdeteksi sudah lewat pukul 21:00, putuskan langsung.
       if(!Number.isFinite(startedAt)||startedAt<=0){
-        const current=new Date(now)
-        if(current.getHours()>=21){
+        const current=businessParts(now)
+        if(current.hour>=21){
           signingOut=true
           await signOut()
           if(active)navigate('/login',{replace:true})
@@ -303,7 +299,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.48 Assignment Correction</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.51 Performance + Stability</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

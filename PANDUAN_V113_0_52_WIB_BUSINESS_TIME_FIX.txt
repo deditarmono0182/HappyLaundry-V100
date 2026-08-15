@@ -1,0 +1,21 @@
+HappyLaundry V113.0.52 - WIB Business Time Fix
+
+Tujuan:
+- Semua batas hari operasional utama mengikuti Asia/Jakarta (WIB), bukan zona waktu perangkat.
+- Daftar Hadir Owner otomatis berganti tanggal setelah 00:00 WIB.
+- Status karyawan hari baru kembali Belum Absen sampai absensi hari itu tercatat.
+- Auto logout karyawan pukul 21:00 mengikuti WIB.
+- Reminder order harian menggunakan tanggal WIB.
+- Dashboard Order Hari Ini / Omzet Hari Ini menggunakan batas hari WIB.
+- Kasir mengambil Order Hari Ini mulai 00:00 WIB.
+- Filter tanggal awal Keuangan mengikuti tanggal/bulan WIB.
+- Kas Harian tetap menggunakan WIB dan tampilan waktunya juga WIB.
+
+Database absensi sebelumnya sudah menggunakan Asia/Jakarta pada RPC server, sehingga versi ini tidak membutuhkan SQL baru.
+
+Uji setelah deploy:
+1. Buka Absensi & Gaji dari perangkat dengan timezone non-WIB. Tanggal harus tetap mengikuti Indonesia.
+2. Setelah 00:00 WIB, daftar hadir otomatis pindah ke tanggal baru maksimal sekitar 30 detik / saat aplikasi kembali fokus.
+3. Karyawan yang belum absen pada tanggal baru tampil Belum Absen.
+4. Auto logout karyawan mengikuti 21:00 WIB.
+5. Dashboard Order Hari Ini dan Omzet Hari Ini mengikuti transaksi tanggal WIB.

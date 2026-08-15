@@ -4,6 +4,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
+import { businessDateTimeLabel } from '../lib/businessTime'
 
 type AttendanceResult={
   ok?:boolean
@@ -210,7 +211,7 @@ export function AttendancePage(){
       <div>
         <span>{result.action==='check_out'?'ABSEN PULANG BERHASIL':'ABSEN MASUK BERHASIL'}</span>
         <h2>{profile.full_name}</h2>
-        <p>{result.action==='check_out'?'Pulang':'Hadir'} • {result.action==='check_out'&&result.check_out_at?new Date(result.check_out_at).toLocaleString('id-ID'):result.check_in_at?new Date(result.check_in_at).toLocaleString('id-ID'):'Baru saja'}</p>
+        <p>{result.action==='check_out'?'Pulang':'Hadir'} • {result.action==='check_out'&&result.check_out_at?businessDateTimeLabel(result.check_out_at):result.check_in_at?businessDateTimeLabel(result.check_in_at):'Baru saja'}</p>
       </div>
       <div className="attendance-success-distance">
         <span>Jarak dari toko</span>

@@ -12,6 +12,7 @@ import { formatRupiah } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
 import { loadPayrollExpenseRows, type PayrollExpenseRow } from '../lib/payrollExpense'
+import { businessDateKey, businessMonthStartKey } from '../lib/businessTime'
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 
 interface ExpenseCategory{
@@ -66,11 +67,8 @@ interface RevenueShareSetting{
   share_percent:number
 }
 
-const today=()=>new Date().toISOString().slice(0,10)
-const monthStart=()=>{
-  const d=new Date()
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`
-}
+const today=()=>businessDateKey()
+const monthStart=()=>businessMonthStartKey()
 
 export function FinancePage(){
   const navigate=useNavigate()

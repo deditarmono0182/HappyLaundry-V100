@@ -9,6 +9,7 @@ import { StatCard } from '../components/StatCard'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { formatRupiah } from '../lib/format'
 import { supabase } from '../lib/supabase'
+import { BUSINESS_TIME_ZONE, businessDateKey, businessMonthKey } from '../lib/businessTime'
 
 type AttendanceStatus='present'|'permission'|'sick'|'absent'
 
@@ -103,8 +104,8 @@ const statusLabels:Record<AttendanceStatus,string>={
   absent:'Alpha'
 }
 
-const today=()=>new Date().toISOString().slice(0,10)
-const currentMonth=()=>new Date().toISOString().slice(0,7)
+const today=()=>businessDateKey()
+const currentMonth=()=>businessMonthKey()
 const monthRange=(month:string)=>{
   const [y,m]=month.split('-').map(Number)
   const start=`${month}-01`
@@ -186,6 +187,24 @@ export function PayrollPage(){
   },[month])
 
   useEffect(()=>{void load()},[load])
+
+  // V113.0.52 - Owner dashboard mengikuti pergantian hari operasional WIB,
+  // bukan zona waktu perangkat Owner. Jika halaman tetap terbuka melewati 00:00 WIB,
+  // tanggal absensi otomatis pindah ke hari baru.
+  useEffect(()=>{
+    let lastDate=businessDateKey()
+    const syncBusinessDate=()=>{
+      const nextDate=businessDateKey()
+      if(nextDate===lastDate)return
+      lastDate=nextDate
+      setAttendanceDate(nextDate)
+      setMonth(businessMonthKey())
+    }
+    const timer=window.setInterval(syncBusinessDate,30000)
+    const onFocus=()=>syncBusinessDate()
+    window.addEventListener('focus',onFocus)
+    return()=>{window.clearInterval(timer);window.removeEventListener('focus',onFocus)}
+  },[])
 
   const attendanceMap=useMemo(()=>{
     const map=new Map<string,Attendance>()
@@ -633,7 +652,7 @@ export function PayrollPage(){
 
       <section className="panel data-panel">
         <div className="attendance-date-title">
-          <div><b>Absensi {new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</b><small>Klik status untuk mencatat atau mengubah kehadiran.</small></div>
+          <div><b>Absensi {new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(`${attendanceDate}T12:00:00+07:00`))}</b><small>Klik status untuk mencatat atau mengubah kehadiran.</small></div>
         </div>
         <div className="table-wrap">
           <table>
@@ -652,7 +671,7 @@ export function PayrollPage(){
                       <small className="attendance-auto-note">
                         Auto Login
                         {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.check_in_at
-                          ? ` • ${new Date(attendanceMap.get(`${employee.id}|${attendanceDate}`)!.check_in_at!).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`
+                          ? ` • ${new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,hour:'2-digit',minute:'2-digit'}).format(new Date(attendanceMap.get(`${employee.id}|${attendanceDate}`)!.check_in_at!))}`
                           : ''}
                       </small>}
                     {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.attendance_source==='owner_override'&&
@@ -666,7 +685,7 @@ export function PayrollPage(){
                       <small className="attendance-qr-gps-note">
                         QR + GPS
                         {attendanceMap.get(`${employee.id}|${attendanceDate}`)?.check_in_at
-                          ? ` • ${new Date(attendanceMap.get(`${employee.id}|${attendanceDate}`)!.check_in_at!).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`
+                          ? ` • ${new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,hour:'2-digit',minute:'2-digit'}).format(new Date(attendanceMap.get(`${employee.id}|${attendanceDate}`)!.check_in_at!))}`
                           : ''}
                       </small>}
                   </td>
@@ -853,7 +872,7 @@ export function PayrollPage(){
           <CalendarCheck2 size={22}/>
           <div>
             <b>Status: {statusLabels[overrideTarget.status]}</b>
-            <span>{new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span>
+            <span>{new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(`${attendanceDate}T12:00:00+07:00`))}</span>
           </div>
         </div>
 

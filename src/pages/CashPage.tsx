@@ -5,6 +5,7 @@ import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { downloadXls } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
+import { addBusinessDays, businessDateKey, businessDateTimeLabel } from '../lib/businessTime'
 
 type CashKind = 'income' | 'expense'
 type PaymentMethod = 'cash' | 'qris' | 'transfer' | 'other'
@@ -23,12 +24,8 @@ const methodLabels: Record<PaymentMethod,string> = {
   cash:'Tunai', qris:'QRIS', transfer:'Transfer', other:'Lainnya'
 }
 
-const localDate=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta'}).format(new Date())
-const shiftDate=(date:string,days:number)=>{
-  const d=new Date(`${date}T12:00:00`)
-  d.setDate(d.getDate()+days)
-  return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta'}).format(d)
-}
+const localDate=()=>businessDateKey()
+const shiftDate=(date:string,days:number)=>addBusinessDays(date,days)
 const monthStart=(date:string)=>`${date.slice(0,7)}-01`
 
 export function CashPage(){
@@ -62,7 +59,7 @@ export function CashPage(){
   }
 
   const periodRows=useMemo(()=>rows.filter(r=>{
-    const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta'}).format(new Date(r.created_at))
+    const date=businessDateKey(r.created_at)
     return date>=from&&date<=to
   }),[rows,from,to])
 
@@ -82,7 +79,7 @@ export function CashPage(){
       subtitle:`Periode ${from} s/d ${to}`,
       headers:['Tanggal/Waktu','Jenis','Kategori','Keterangan','Metode','Nominal'],
       rows:periodRows.map(r=>[
-        new Date(r.created_at).toLocaleString('id-ID'),
+        businessDateTimeLabel(r.created_at),
         r.kind==='income'?'Masuk':'Keluar',
         r.category,
         r.description,
@@ -135,7 +132,7 @@ export function CashPage(){
       <div className="table-wrap"><table><thead><tr><th>Jenis</th><th>Kategori</th><th>Keterangan</th><th>Metode</th><th>Nominal</th><th>Waktu</th></tr></thead><tbody>
         {loading&&<tr><td colSpan={6} className="table-empty">Memuat kas...</td></tr>}
         {!loading&&filtered.length===0&&<tr><td colSpan={6} className="table-empty"><Banknote size={30}/>Belum ada transaksi kas.</td></tr>}
-        {filtered.map(r=><tr key={r.id}><td><span className={`badge cash-${r.kind}`}>{r.kind==='income'?'Masuk':'Keluar'}</span></td><td><b>{r.category}</b></td><td>{r.description}</td><td>{methodLabels[r.method]}</td><td><b className={r.kind==='income'?'money-in':'money-out'}>{r.kind==='income'?'+':'-'}{formatIDR(Number(r.amount))}</b></td><td>{new Date(r.created_at).toLocaleString('id-ID')}</td></tr>)}
+        {filtered.map(r=><tr key={r.id}><td><span className={`badge cash-${r.kind}`}>{r.kind==='income'?'Masuk':'Keluar'}</span></td><td><b>{r.category}</b></td><td>{r.description}</td><td>{methodLabels[r.method]}</td><td><b className={r.kind==='income'?'money-in':'money-out'}>{r.kind==='income'?'+':'-'}{formatIDR(Number(r.amount))}</b></td><td>{businessDateTimeLabel(r.created_at)}</td></tr>)}
       </tbody></table></div>
     </section>
     {open&&<Modal title="Transaksi Kas Baru" onClose={()=>setOpen(false)}><form className="modal-form" onSubmit={submit}>

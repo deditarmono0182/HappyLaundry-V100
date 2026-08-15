@@ -39,7 +39,7 @@ const DeleteApprovalsPage=lazy(()=>import('./pages/DeleteApprovalsPage').then(m=
 
 function Protected(){
   const {session,loading}=useAuth()
-  if(loading)return <div className="app-loading">Memuat HappyLaundry V103...</div>
+  if(loading)return <div className="app-loading">Memuat HappyLaundry...</div>
   if(!session)return <Navigate to="/login" replace/>
   return <AppLayout/>
 }
