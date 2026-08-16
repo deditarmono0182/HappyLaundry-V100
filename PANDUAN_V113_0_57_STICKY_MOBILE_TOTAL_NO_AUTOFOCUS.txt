@@ -1,0 +1,10 @@
+HappyLaundry Enterprise V113.0.57 — Sticky Mobile Total + No Auto Focus
+
+Perubahan:
+1. Kartu Total Belanja ditampilkan di bagian atas halaman Kasir khusus HP/tablet.
+2. Kartu Total Belanja dibuat sticky sehingga tetap terlihat saat form kasir di-scroll.
+3. Kartu Total Belanja lama di sidebar disembunyikan pada layar <= 1050 px agar tidak dobel.
+4. Desktop tetap memakai layout sidebar seperti sebelumnya.
+5. Auto focus pada kolom pencarian layanan dihapus.
+6. Keyboard hanya muncul setelah pengguna mengetuk kolom Cari Layanan.
+7. Tidak perlu SQL baru.

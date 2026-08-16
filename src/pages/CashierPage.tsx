@@ -510,6 +510,15 @@ export function CashierPage() {
       <div className="saving-card"><span className="saving-spinner"/><b>Menyimpan transaksi...</b><small>Jangan tutup halaman.</small></div>
     </div>}
     <div className="cashier-layout">
+      <section className="panel cashier-total-card cashier-total-card-mobile">
+        <span>Total Belanja</span><strong>{formatIDR(total)}</strong>
+        <div><span>Subtotal</span><b>{formatIDR(subtotal)}</b></div>
+        <div><span>Diskon</span><b>{formatIDR(discount)}</b></div>
+        <div><span>Dibayar</span><b>{formatIDR(Math.min(paymentAmount,total))}</b></div>
+        {method==='cash'&&paymentAmount>total&&<div className="cashier-change"><span>Kembalian</span><b>{formatIDR(change)}</b></div>}
+        <div><span>Sisa Tagihan</span><b>{formatIDR(Math.max(0,total-paymentAmount))}</b></div>
+      </section>
+
       <form ref={formRef} className="panel cashier-form" onSubmit={submit} aria-busy={busy}>
         <section className="cashier-section">
           <div className="cashier-section-title">
