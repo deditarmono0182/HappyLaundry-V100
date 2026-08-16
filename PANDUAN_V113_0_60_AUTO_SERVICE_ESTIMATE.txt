@@ -1,0 +1,10 @@
+HappyLaundry Enterprise V113.0.60 — Auto Service Estimate
+
+Perubahan:
+- Estimasi Selesai pada Kasir otomatis dihitung dari duration_hours layanan yang dipilih.
+- Jika ada beberapa layanan, sistem memakai durasi TERLAMA.
+- Kasir tetap dapat mengubah estimasi secara manual.
+- Jika kolom estimasi dikosongkan/lupa diisi, saat Simpan Transaksi sistem tetap menghitung estimasi otomatis.
+- Konversi tanggal estimasi menggunakan zona waktu bisnis Asia/Jakarta (WIB), bukan timezone perangkat.
+- Tidak ada perubahan SQL/database.
+- Semua fitur V113.0.59 tetap dipertahankan.

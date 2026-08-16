@@ -10,7 +10,7 @@ import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
 import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
-import { businessDayStart, businessDateTimeLabel } from '../lib/businessTime'
+import { businessDayStart, businessDateTimeLabel, businessParts, BUSINESS_UTC_OFFSET } from '../lib/businessTime'
 import type { StoreSettings } from '../types/settings'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft } from '../types/order'
@@ -90,6 +90,7 @@ export function CashierPage() {
   const [paymentAmount,setPaymentAmount]=useState(0)
   const [method,setMethod]=useState<PayMethod>('cash')
   const [dueAt,setDueAt]=useState('')
+  const [dueAtManual,setDueAtManual]=useState(false)
   const [notes,setNotes]=useState('')
   const [query,setQuery]=useState('')
   const [serviceCategory,setServiceCategory]=useState('Semua')
@@ -184,6 +185,35 @@ export function CashierPage() {
     return customers.filter(c=>`${c.name} ${c.phone}`.toLowerCase().includes(key))
   },[customers,query])
 
+  const autoDueDurationHours=useMemo(()=>items.reduce((longest,item)=>{
+    const service=services.find(row=>row.id===item.service_id)
+    return Math.max(longest,Number(service?.duration_hours||0))
+  },0),[items,services])
+
+  const autoDueInput=useCallback(()=>{
+    if(autoDueDurationHours<=0)return ''
+    const target=new Date(Date.now()+autoDueDurationHours*60*60*1000)
+    const p=businessParts(target)
+    const pad=(value:number)=>String(value).padStart(2,'0')
+    return `${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}`
+  },[autoDueDurationHours])
+
+  useEffect(()=>{
+    if(items.length===0){
+      setDueAt('')
+      setDueAtManual(false)
+      return
+    }
+    if(dueAtManual)return
+    setDueAt(autoDueInput())
+  },[items.length,autoDueInput,dueAtManual])
+
+  const dueInputToIso=(value:string)=>{
+    if(!value)return null
+    const normalized=value.length===16?`${value}:00`:value
+    return new Date(`${normalized}${BUSINESS_UTC_OFFSET}`).toISOString()
+  }
+
   const commissionSettingMap=useMemo(()=>new Map(commissionSettings.map(row=>[row.employee_id,row])),[commissionSettings])
   const workerPercent=Number(commissionSettingMap.get(workerId)?.production_percent||0)
   const courierPercent=Number(commissionSettingMap.get(courierId)?.courier_percent||0)
@@ -258,7 +288,7 @@ export function CashierPage() {
   const reset=()=>{
     setCustomerId('');setNewCustomer(false);setCustomerName('');setCustomerPhone('');setCustomerAddress('')
     setItems([]);setQuantityDraft({});setDiscountValue(0);setDiscountMode('nominal');setPaymentAmount(0)
-    setMethod('cash');setDueAt('');setNotes('');setQuery('');setWorkerId('');setCourierId('');setMessage('')
+    setMethod('cash');setDueAt('');setDueAtManual(false);setNotes('');setQuery('');setWorkerId('');setCourierId('');setMessage('')
   }
 
   const confirmReset=()=>{
@@ -455,9 +485,11 @@ export function CashierPage() {
         selectedCustomer=data.id; selectedName=data.name; selectedPhone=data.phone
       }
       const paid=Math.min(Number(paymentAmount||0),total)
+      const effectiveDueAt=dueAt||autoDueInput()
+      const dueIso=dueInputToIso(effectiveDueAt)
       const {data,error}=await supabase.rpc('v100_create_order',{
         p_customer_id:selectedCustomer,p_discount:Number(discount),p_paid_amount:0,
-        p_notes:notes.trim()||null,p_due_at:dueAt?new Date(dueAt).toISOString():null,
+        p_notes:notes.trim()||null,p_due_at:dueIso,
         p_items:items.map(i=>({
           service_id:i.service_id,service_name:i.service_name,unit:i.unit,
           price:i.price,quantity:i.quantity
@@ -486,7 +518,7 @@ export function CashierPage() {
       const saved:SuccessData={
         orderId:result.order_id,orderNo:result.order_no,total,subtotal,discount,paid,
         customer:selectedName,phone:selectedPhone,
-        due:dueAt?new Date(dueAt).toLocaleString('id-ID'):'-',
+        due:dueIso?businessDateTimeLabel(dueIso):'-',
         method,notes:notes.trim(),items:[...items],
         workerName:commissionEmployees.find(employee=>employee.id===workerId)?.full_name||'-',
         courierName:commissionEmployees.find(employee=>employee.id===courierId)?.full_name||'-'
@@ -570,7 +602,8 @@ export function CashierPage() {
             </div>)}
           </div>
           <label className="cashier-due-after-service">Estimasi Selesai
-            <input type="datetime-local" value={dueAt} onChange={e=>setDueAt(e.target.value)}/>
+            <input type="datetime-local" value={dueAt} onChange={e=>{setDueAt(e.target.value);setDueAtManual(true)}}/>
+            <small>{autoDueDurationHours>0?`Otomatis dari estimasi layanan terlama (${autoDueDurationHours} jam). Bisa diubah manual.`:'Pilih layanan untuk mengisi estimasi otomatis.'}</small>
           </label>
         </section>
 
