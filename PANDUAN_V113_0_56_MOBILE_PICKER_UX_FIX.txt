@@ -1,0 +1,9 @@
+HappyLaundry Enterprise V113.0.56 — Mobile Picker UX Fix
+
+Perbaikan:
+1. Keyboard tidak lagi otomatis muncul saat Tambah Layanan dibuka.
+2. Picker dibuka sebagai bottom sheet 64% tinggi layar.
+3. Pengguna bisa langsung scroll daftar layanan tanpa keyboard.
+4. Keyboard hanya muncul setelah kolom Cari Layanan disentuh.
+5. Header, pencarian, dan kategori tetap di atas; hanya daftar layanan yang scroll.
+6. Tidak perlu SQL baru.

@@ -692,7 +692,7 @@ export function CashierPage() {
         <div className="service-picker-toolbar">
           <label className="service-picker-search">
             <Search size={19}/>
-            <input autoFocus value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Cari layanan, mis. bantal, bedcover, boneka..." />
+            <input value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Cari layanan, mis. bantal, bedcover, boneka..." />
           </label>
           <div className="cashier-category-tabs service-picker-tabs">
             {serviceCategories.map(category=><button type="button" key={category} className={serviceCategory===category?'active':''} onClick={()=>setServiceCategory(category)}>{category}</button>)}
