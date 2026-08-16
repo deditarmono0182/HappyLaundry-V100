@@ -1,0 +1,9 @@
+HappyLaundry Enterprise V113.0.59 — Cashier Flow Layout
+
+Perubahan:
+1. Menghapus kartu Total Belanja fixed/sticky di bagian atas HP.
+2. Estimasi Selesai dipindahkan tepat setelah bagian Pilih/Tambah Layanan.
+3. Kartu Total Belanja dipindahkan ke bagian Pembayaran, tepat di antara Metode Pembayaran dan Bayar Sekarang pada HP/tablet.
+4. Desktop tetap memakai kartu total di panel kanan.
+5. Search layanan tetap tanpa auto focus.
+6. Tidak perlu SQL baru.

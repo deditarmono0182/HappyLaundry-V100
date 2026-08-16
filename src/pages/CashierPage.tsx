@@ -510,15 +510,6 @@ export function CashierPage() {
       <div className="saving-card"><span className="saving-spinner"/><b>Menyimpan transaksi...</b><small>Jangan tutup halaman.</small></div>
     </div>}
     <div className="cashier-layout">
-      <section className="panel cashier-total-card cashier-total-card-mobile">
-        <span>Total Belanja</span><strong>{formatIDR(total)}</strong>
-        <div><span>Subtotal</span><b>{formatIDR(subtotal)}</b></div>
-        <div><span>Diskon</span><b>{formatIDR(discount)}</b></div>
-        <div><span>Dibayar</span><b>{formatIDR(Math.min(paymentAmount,total))}</b></div>
-        {method==='cash'&&paymentAmount>total&&<div className="cashier-change"><span>Kembalian</span><b>{formatIDR(change)}</b></div>}
-        <div><span>Sisa Tagihan</span><b>{formatIDR(Math.max(0,total-paymentAmount))}</b></div>
-      </section>
-
       <form ref={formRef} className="panel cashier-form" onSubmit={submit} aria-busy={busy}>
         <section className="cashier-section">
           <div className="cashier-section-title">
@@ -578,6 +569,9 @@ export function CashierPage() {
               }}><Trash2 size={17}/></button>
             </div>)}
           </div>
+          <label className="cashier-due-after-service">Estimasi Selesai
+            <input type="datetime-local" value={dueAt} onChange={e=>setDueAt(e.target.value)}/>
+          </label>
         </section>
 
         <section className="cashier-section">
@@ -621,6 +615,14 @@ export function CashierPage() {
                 {methods.map(m=><option key={m.value} value={m.value}>{m.label}</option>)}
               </select>
             </label>
+            <section className="panel cashier-total-card cashier-total-card-inline full-field">
+              <span>Total Belanja</span><strong>{formatIDR(total)}</strong>
+              <div><span>Subtotal</span><b>{formatIDR(subtotal)}</b></div>
+              <div><span>Diskon</span><b>{formatIDR(discount)}</b></div>
+              <div><span>Dibayar</span><b>{formatIDR(Math.min(paymentAmount,total))}</b></div>
+              {method==='cash'&&paymentAmount>total&&<div className="cashier-change"><span>Kembalian</span><b>{formatIDR(change)}</b></div>}
+              <div><span>Sisa Tagihan</span><b>{formatIDR(Math.max(0,total-paymentAmount))}</b></div>
+            </section>
             <label>Bayar Sekarang
               <input type="number" min="0" value={paymentAmount} onChange={e=>setPaymentAmount(Number(e.target.value))}/>
             </label>
@@ -630,7 +632,6 @@ export function CashierPage() {
               <button type="button" onClick={()=>quickPay('50k')}>Rp50.000</button>
               <button type="button" onClick={()=>quickPay('100k')}>Rp100.000</button>
             </div>
-            <label>Estimasi Selesai<input type="datetime-local" value={dueAt} onChange={e=>setDueAt(e.target.value)}/></label>
             <label className="full-field">Catatan<input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Contoh: tanpa pewangi kuat"/></label>
           </div>
         </section>

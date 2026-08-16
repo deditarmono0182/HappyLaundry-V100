@@ -9472,3 +9472,48 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   .cashier-total-card-mobile{top:88px!important;left:10px!important;right:10px!important;padding:13px 13px!important}
   .cashier-total-card-mobile>strong{font-size:26px!important}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V113.0.59 — Cashier Flow Layout
+   ========================================================= */
+.cashier-due-after-service{
+  margin-top:12px;
+  display:grid;
+  gap:7px;
+  font-size:11px;
+  font-weight:850;
+  color:#34595b;
+}
+.cashier-due-after-service input{
+  width:100%;
+  min-height:44px;
+  border:1px solid #bfd7d1;
+  border-radius:10px;
+  padding:10px 12px;
+  background:#fff;
+  color:var(--text);
+}
+.cashier-total-card-inline{display:none!important}
+
+@media(max-width:1050px){
+  .cashier-layout{padding-top:0!important}
+  .cashier-total-card-mobile{display:none!important;position:static!important}
+  .cashier-total-card-inline{
+    display:grid!important;
+    position:static!important;
+    width:100%!important;
+    margin:2px 0 4px!important;
+    padding:14px 15px!important;
+    gap:8px!important;
+    border-radius:16px!important;
+    box-shadow:0 8px 22px rgba(20,84,145,.16)!important;
+  }
+  .cashier-total-card-inline>strong{font-size:30px!important;line-height:1.05!important}
+  .cashier-total-card-inline>div{min-height:29px!important;padding-top:8px!important;font-size:11px!important}
+  .cashier-summary>.cashier-total-card{display:none!important}
+}
+
+@media(min-width:1051px){
+  .cashier-total-card-inline{display:none!important}
+}
