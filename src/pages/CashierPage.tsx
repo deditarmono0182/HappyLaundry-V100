@@ -5,6 +5,7 @@ import {
   ShoppingCart, Trash2, UserPlus, WalletCards
 } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
+import { Modal } from '../components/Modal'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
@@ -92,6 +93,9 @@ export function CashierPage() {
   const [notes,setNotes]=useState('')
   const [query,setQuery]=useState('')
   const [serviceCategory,setServiceCategory]=useState('Semua')
+  const [servicePickerOpen,setServicePickerOpen]=useState(false)
+  const [servicePickerTarget,setServicePickerTarget]=useState<string|null>(null)
+  const [serviceSearch,setServiceSearch]=useState('')
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
   const [success,setSuccess]=useState<SuccessData|null>(null)
@@ -165,6 +169,14 @@ export function CashierPage() {
 
   const serviceCategories=useMemo(()=>['Semua',...Array.from(new Set(services.map(s=>(s as any).category||'Reguler')))], [services])
   const filteredServices=useMemo(()=>serviceCategory==='Semua'?services:services.filter(s=>((s as any).category||'Reguler')===serviceCategory),[services,serviceCategory])
+  const pickerServices=useMemo(()=>{
+    const key=serviceSearch.trim().toLowerCase()
+    return filteredServices.filter(service=>{
+      if(!key)return true
+      const category=(service as any).category||'Reguler'
+      return `${service.name} ${service.unit} ${category}`.toLowerCase().includes(key)
+    })
+  },[filteredServices,serviceSearch])
 
   const filteredCustomers=useMemo(()=>{
     const key=query.trim().toLowerCase()
@@ -179,14 +191,34 @@ export function CashierPage() {
   const courierCommission=total*(courierPercent/100)
 
   const addItem=(service?:Service)=>{
-    const selected=service||filteredServices[0]||services[0]
-    if(!selected){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
+    if(!service){
+      if(services.length===0){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
+      setServicePickerTarget(null)
+      setServiceSearch('')
+      setServicePickerOpen(true)
+      return
+    }
     const key=crypto.randomUUID()
     setItems(current=>[...current,{
-      key,service_id:selected.id,service_name:selected.name,unit:selected.unit,
-      price:Number(selected.price),quantity:1,subtotal:Number(selected.price)
+      key,service_id:service.id,service_name:service.name,unit:service.unit,
+      price:Number(service.price),quantity:1,subtotal:Number(service.price)
     }])
     setQuantityDraft(current=>({...current,[key]:'1'}))
+  }
+
+  const openServicePicker=(targetKey:string|null=null)=>{
+    if(services.length===0){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
+    setServicePickerTarget(targetKey)
+    setServiceSearch('')
+    setServicePickerOpen(true)
+  }
+
+  const chooseService=(service:Service)=>{
+    if(servicePickerTarget)updateService(servicePickerTarget,service.id)
+    else addItem(service)
+    setServicePickerOpen(false)
+    setServiceSearch('')
+    setServicePickerTarget(null)
   }
 
   const updateService=(key:string,id:string)=>{
@@ -515,9 +547,10 @@ export function CashierPage() {
           <div className="cashier-items">
             {items.length===0&&<div className="cashier-empty"><ShoppingCart size={28}/>Belum ada layanan.</div>}
             {items.map(item=><div className="cashier-item" key={item.key}>
-              <select value={item.service_id} onChange={e=>updateService(item.key,e.target.value)}>
-                {filteredServices.map(s=><option key={s.id} value={s.id}>{s.name} — {formatIDR(Number(s.price))}/{s.unit}</option>)}
-              </select>
+              <button type="button" className="cashier-service-select" onClick={()=>openServicePicker(item.key)}>
+                <span>{item.service_name}</span>
+                <small>{formatIDR(Number(item.price))}/{item.unit} · Ketuk untuk ganti</small>
+              </button>
               <input
                 type="text"
                 inputMode="decimal"
@@ -648,5 +681,24 @@ export function CashierPage() {
         </div>
       </aside>
     </div>
+
+    {servicePickerOpen&&<Modal title={servicePickerTarget?'Ganti Layanan':'Pilih Layanan'} onClose={()=>{setServicePickerOpen(false);setServicePickerTarget(null);setServiceSearch('')}}>
+      <div className="service-picker">
+        <label className="service-picker-search">
+          <Search size={19}/>
+          <input autoFocus value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Cari layanan, mis. bantal, bedcover, boneka..." />
+        </label>
+        <div className="cashier-category-tabs service-picker-tabs">
+          {serviceCategories.map(category=><button type="button" key={category} className={serviceCategory===category?'active':''} onClick={()=>setServiceCategory(category)}>{category}</button>)}
+        </div>
+        <div className="service-picker-results">
+          {pickerServices.map(service=><button type="button" key={service.id} className="service-picker-option" onClick={()=>chooseService(service)}>
+            <span><b>{service.name}</b><small>{(service as any).category||'Reguler'} · {service.unit}</small></span>
+            <strong>{formatIDR(Number(service.price))}/{service.unit}</strong>
+          </button>)}
+          {pickerServices.length===0&&<div className="service-picker-empty">Layanan tidak ditemukan. Coba kata pencarian lain.</div>}
+        </div>
+      </div>
+    </Modal>}
   </>
 }

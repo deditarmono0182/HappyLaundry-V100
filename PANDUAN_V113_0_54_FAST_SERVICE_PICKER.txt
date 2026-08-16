@@ -1,0 +1,8 @@
+HappyLaundry V113.0.54 - Fast Service Picker
+
+1. Tambah Layanan sekarang membuka panel Pilih Layanan.
+2. Ketik nama seperti Bantal, Bedcover, atau Boneka untuk pencarian instan.
+3. Filter kategori tetap tersedia.
+4. Daftar hasil memiliki scroll sendiri sehingga tidak perlu menggulir dropdown panjang.
+5. Ketuk nama layanan yang sudah dipilih untuk menggantinya.
+6. Tidak ada SQL/database baru.
