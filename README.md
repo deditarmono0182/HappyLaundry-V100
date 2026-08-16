@@ -1,4 +1,4 @@
-HappyLaundry V113.0.54 - Fast Service Picker
+HappyLaundry V113.0.53 - Payroll Status Nihil Fix
 
 # HappyLaundry Enterprise V113.0.7 Delete Approval Notification
 
@@ -358,10 +358,3 @@ V113.0.53
 - Total Gaji Rp0 + Dibayar Rp0 sekarang berstatus Nihil, bukan Belum Dibayar.
 - Status Belum Dibayar hanya untuk Total Gaji > Rp0 dan belum ada pembayaran.
 - Tidak mengubah perhitungan gaji, riwayat pembayaran, komisi, atau database.
-
-
-V113.0.54
-- Pemilihan layanan di Kasir memakai panel pencarian, bukan dropdown panjang.
-- Cari nama/kategori/satuan, filter kategori tetap tersedia, dan hasil scroll di panel sendiri.
-- Layanan yang sudah dipilih dapat diganti dengan mengetuk kartu layanan.
-- Berbasis V113.0.53; tidak ada perubahan database.

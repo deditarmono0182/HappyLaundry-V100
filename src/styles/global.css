@@ -9352,17 +9352,21 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 
 
 /* =========================================================
-   HappyLaundry Enterprise V113.0.54 — Fast Service Picker
+   HappyLaundry Enterprise V113.0.55 — Stable Service Picker
    ========================================================= */
 .cashier-service-select{min-width:0!important;width:100%!important;min-height:48px!important;height:auto!important;padding:9px 12px!important;border:1px solid #bcd8ea!important;border-radius:12px!important;background:#fff!important;color:#173e56!important;text-align:left!important;display:grid!important;gap:3px!important;justify-content:stretch!important}
 .cashier-service-select span{font-weight:850;font-size:13px;white-space:normal;line-height:1.25}
 .cashier-service-select small{font-size:10px;color:#648196;font-weight:700;white-space:normal;line-height:1.25}
 .cashier-service-select:hover{background:#f5fbff!important;border-color:#79b9e6!important;transform:none!important}
-.service-picker{display:grid;gap:12px;min-width:min(560px,88vw)}
+.service-picker-modal{width:min(720px,100%);height:min(78dvh,720px);max-height:min(78dvh,720px);display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;border-radius:24px}
+.service-picker-modal>header{position:sticky;top:0;z-index:3;background:#fff}
+.service-picker-modal-body{min-height:0;overflow:hidden;padding:0 18px 18px}
+.service-picker{display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px;min-width:0;height:100%}
+.service-picker-toolbar{display:grid;gap:12px;padding-top:14px;background:#fff}
 .service-picker-search{min-height:48px;display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid #bcd8ea;border-radius:13px;background:#fff;color:#628197}
 .service-picker-search input{width:100%;min-width:0;height:46px;border:0!important;outline:0!important;box-shadow:none!important;background:transparent;font-size:14px;color:#173e56}
 .service-picker-tabs{padding-bottom:2px}
-.service-picker-results{display:grid;gap:8px;max-height:min(52vh,420px);overflow-y:auto;overscroll-behavior:contain;padding:2px 3px 4px}
+.service-picker-results{display:grid;gap:8px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 3px 4px;-webkit-overflow-scrolling:touch}
 .service-picker-option{width:100%;min-height:58px;padding:10px 12px;border:1px solid #d6e8f4;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;cursor:pointer}
 .service-picker-option:hover,.service-picker-option:focus{background:#f3f9fe;border-color:#7cbbe7;outline:none}
 .service-picker-option span{display:grid;gap:3px;min-width:0}
@@ -9370,6 +9374,7 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .service-picker-option small{font-size:10px;color:#6b8697}
 .service-picker-option strong{font-size:12px;color:#146fb1;white-space:nowrap}
 .service-picker-empty{padding:28px 14px;text-align:center;color:#6b8697;border:1px dashed #c8dce8;border-radius:12px}
+@media(max-width:768px){.service-picker-modal{width:100vw;max-width:100vw;height:min(76dvh,680px);max-height:min(76dvh,680px);align-self:end;border-radius:24px 24px 0 0}.service-picker-modal-body{padding:0 14px calc(14px + env(safe-area-inset-bottom))}.service-picker-toolbar{padding-top:12px}.service-picker-search input{font-size:16px}.service-picker-tabs{padding-bottom:0}}
 @media(max-width:520px){.service-picker{min-width:0}.service-picker-option{align-items:flex-start;flex-direction:column;gap:5px}.service-picker-option strong{white-space:normal}}
 .cashier-item .cashier-service-select{
   width:100%!important;

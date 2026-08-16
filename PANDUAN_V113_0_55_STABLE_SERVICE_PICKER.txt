@@ -1,0 +1,18 @@
+HappyLaundry Enterprise V113.0.55 — Stable Service Picker
+
+Perubahan utama:
+1. Picker layanan kasir diubah menjadi modal tetap dengan tinggi stabil.
+2. Header modal tetap terlihat.
+3. Area pencarian dan tab kategori tetap berada di atas.
+4. Hanya daftar layanan yang bisa scroll.
+5. Tampilan mobile dibuat seperti bottom sheet agar lebih nyaman saat keyboard muncul.
+6. Input pencarian memakai ukuran font mobile yang aman agar tidak zoom berlebihan di iPhone.
+
+Tujuan:
+- Mengurangi tampilan modal yang membesar penuh saat keyboard terbuka.
+- Menjaga kategori dan hasil pencarian tetap rapi dan mudah dipakai.
+- Mempercepat pemilihan layanan satuan seperti bedcover, bantal, dan boneka.
+
+Deploy:
+- Tidak perlu SQL baru.
+- Build dan deploy seperti biasa ke Netlify / hosting aplikasi.

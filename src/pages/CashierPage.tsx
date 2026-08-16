@@ -682,14 +682,21 @@ export function CashierPage() {
       </aside>
     </div>
 
-    {servicePickerOpen&&<Modal title={servicePickerTarget?'Ganti Layanan':'Pilih Layanan'} onClose={()=>{setServicePickerOpen(false);setServicePickerTarget(null);setServiceSearch('')}}>
+    {servicePickerOpen&&<Modal
+      title={servicePickerTarget?'Ganti Layanan':'Pilih Layanan'}
+      onClose={()=>{setServicePickerOpen(false);setServicePickerTarget(null);setServiceSearch('')}}
+      className="service-picker-modal"
+      bodyClassName="service-picker-modal-body"
+    >
       <div className="service-picker">
-        <label className="service-picker-search">
-          <Search size={19}/>
-          <input autoFocus value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Cari layanan, mis. bantal, bedcover, boneka..." />
-        </label>
-        <div className="cashier-category-tabs service-picker-tabs">
-          {serviceCategories.map(category=><button type="button" key={category} className={serviceCategory===category?'active':''} onClick={()=>setServiceCategory(category)}>{category}</button>)}
+        <div className="service-picker-toolbar">
+          <label className="service-picker-search">
+            <Search size={19}/>
+            <input autoFocus value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Cari layanan, mis. bantal, bedcover, boneka..." />
+          </label>
+          <div className="cashier-category-tabs service-picker-tabs">
+            {serviceCategories.map(category=><button type="button" key={category} className={serviceCategory===category?'active':''} onClick={()=>setServiceCategory(category)}>{category}</button>)}
+          </div>
         </div>
         <div className="service-picker-results">
           {pickerServices.map(service=><button type="button" key={service.id} className="service-picker-option" onClick={()=>chooseService(service)}>
