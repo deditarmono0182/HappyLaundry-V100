@@ -1,0 +1,11 @@
+HappyLaundry Enterprise V113.0.58 — Fixed Mobile Total Card
+
+Perubahan utama:
+1. Kartu Total Belanja mobile diubah dari sticky menjadi fixed agar tidak ikut hilang saat halaman kasir di-scroll.
+2. Kartu tampil tetap di bagian atas layar HP.
+3. Form kasir diberi ruang atas agar kartu tidak menutupi isi.
+4. Search layanan tetap tanpa auto focus, jadi keyboard tidak langsung muncul.
+5. Tidak perlu SQL baru.
+
+Tujuan:
+- Total, dibayar, dan sisa tagihan selalu terlihat di HP saat operasional kasir.

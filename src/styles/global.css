@@ -9422,3 +9422,53 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   .cashier-total-card-mobile>strong{font-size:28px!important;line-height:1!important}
   .cashier-total-card-mobile>div{min-height:27px!important;padding-top:7px!important;font-size:11px!important}
 }
+
+
+/* =========================================================
+   HappyLaundry Enterprise V113.0.58 — Fixed Mobile Total Card
+   ========================================================= */
+@media(max-width:700px){
+  .cashier-layout{
+    position:relative!important;
+    padding-top:232px!important;
+    gap:14px!important;
+  }
+
+  .cashier-total-card-mobile{
+    display:grid!important;
+    position:fixed!important;
+    top:92px!important;
+    left:14px!important;
+    right:14px!important;
+    z-index:95!important;
+    width:auto!important;
+    margin:0!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+    border-radius:18px!important;
+    box-shadow:0 12px 30px rgba(20,84,145,.24)!important;
+    padding:14px 15px!important;
+    gap:8px!important;
+  }
+
+  .cashier-total-card-mobile>span{font-size:11px!important}
+  .cashier-total-card-mobile>strong{font-size:28px!important;line-height:1.02!important}
+  .cashier-total-card-mobile>div{min-height:27px!important;padding-top:7px!important;font-size:11px!important}
+
+  .cashier-form,
+  .cashier-summary{
+    position:relative!important;
+    z-index:1!important;
+  }
+
+  .cashier-summary>.cashier-total-card{
+    display:none!important;
+  }
+}
+
+@media(max-width:420px){
+  .cashier-layout{padding-top:220px!important}
+  .cashier-total-card-mobile{top:88px!important;left:10px!important;right:10px!important;padding:13px 13px!important}
+  .cashier-total-card-mobile>strong{font-size:26px!important}
+}
