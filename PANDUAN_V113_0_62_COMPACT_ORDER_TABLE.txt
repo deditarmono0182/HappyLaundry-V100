@@ -1,0 +1,14 @@
+HappyLaundry Enterprise V113.0.62 — Compact Order Table
+
+Perubahan:
+- Kolom Dibuat dipadatkan ke format tanggal DD/MM/YY.
+- Kolom Kasir dan Dibuat dibuat lebih sempit.
+- Kolom Aksi dirapikan agar tombol Detail/Cetak/Hapus lebih mudah terlihat di desktop.
+- Tidak menghapus fitur apa pun dari V113.0.61.
+- Tidak membutuhkan SQL baru. SQL 056 dari V113.0.61 tetap digunakan.
+
+Deploy:
+1. Replace source V113.0.61 dengan isi paket V113.0.62.
+2. Commit + Push ke branch main GitHub.
+3. Netlify akan auto-deploy.
+4. Refresh aplikasi / hard refresh agar cache PWA diperbarui.

@@ -994,7 +994,7 @@ export function OrdersPage() {
                         </button>}
                   </td>
                   <td><b>{row.created_by_name||row.created_by_login_id||'Data lama'}</b></td>
-                  <td>{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
+                  <td className="order-created-date">{new Date(row.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit'})}</td>
                   <td>
                     <div className="row-actions">
                       <button className="order-view-button" onClick={() => setDetail(row)} aria-label="Lihat Detail" title="Lihat Detail"><Eye size={16}/></button>

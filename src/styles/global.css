@@ -9519,3 +9519,78 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 }
 
 /* HappyLaundry Enterprise V113.0.61 — Kasir / Created By Order Audit */
+
+
+/* =========================================================
+   HappyLaundry Enterprise V113.0.62 — Compact Order Table
+   Keep Kasir + Dibuat + action buttons visible on desktop.
+   No feature removal; horizontal scroll remains available on small screens.
+   ========================================================= */
+@media(min-width:1101px){
+  .orders-table{
+    min-width:1160px!important;
+    width:100%!important;
+    table-layout:auto!important;
+  }
+
+  .orders-table th,
+  .orders-table td{
+    padding-left:9px!important;
+    padding-right:9px!important;
+  }
+
+  .orders-table th:nth-child(1), .orders-table td:nth-child(1){min-width:82px!important;width:82px!important}
+  .orders-table th:nth-child(2), .orders-table td:nth-child(2){min-width:92px!important;width:92px!important}
+  .orders-table th:nth-child(3), .orders-table td:nth-child(3){min-width:180px!important}
+  .orders-table th:nth-child(4), .orders-table td:nth-child(4){min-width:82px!important;width:82px!important}
+  .orders-table th:nth-child(5), .orders-table td:nth-child(5){min-width:94px!important;width:94px!important}
+  .orders-table th:nth-child(6), .orders-table td:nth-child(6){min-width:76px!important;width:76px!important}
+  .orders-table th:nth-child(7), .orders-table td:nth-child(7){min-width:100px!important;width:100px!important}
+  .orders-table th:nth-child(8), .orders-table td:nth-child(8){min-width:132px!important;width:132px!important}
+  .orders-table th:nth-child(9), .orders-table td:nth-child(9){min-width:74px!important;width:74px!important;white-space:nowrap!important}
+  .orders-table th:nth-child(10), .orders-table td:nth-child(10){min-width:68px!important;width:68px!important;white-space:nowrap!important}
+  .orders-table th:nth-child(11), .orders-table td:nth-child(11){min-width:214px!important;width:214px!important;white-space:nowrap!important}
+
+  .orders-table td:last-child{
+    min-width:214px!important;
+  }
+
+  .orders-table .order-actions-heading{
+    min-width:214px!important;
+  }
+
+  .orders-table td:nth-child(11) .row-actions{
+    width:100%!important;
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:5px!important;
+  }
+
+  .orders-table td:nth-child(11) .row-actions > button{
+    flex:0 0 auto!important;
+    margin:0!important;
+  }
+
+  .orders-table .order-reprint-button{
+    padding:0 8px!important;
+  }
+
+  .orders-table .order-delete-request-button{
+    min-width:68px!important;
+    padding:0 8px!important;
+  }
+
+  .orders-table .order-created-date{
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.1px;
+  }
+}
+
+@media(max-width:1100px){
+  .orders-table{
+    min-width:1260px!important;
+  }
+}
