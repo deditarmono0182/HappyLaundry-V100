@@ -1,0 +1,14 @@
+HappyLaundry Enterprise V113.0.61 — Kasir / Dibuat Oleh Order
+
+Fitur:
+- Setiap order baru menyimpan snapshot nama kasir pembuat order.
+- Detail Order menampilkan Kasir / Dibuat oleh.
+- Daftar Order menampilkan kolom Kasir.
+- Nota baru dan Cetak Ulang Nota menampilkan Kasir / Dibuat oleh.
+- Export order menambahkan kolom Kasir / Dibuat Oleh.
+- Nama pembuat tidak berubah walaupun penanggung jawab produksi/kurir dikoreksi.
+
+WAJIB: Jalankan SQL 056 sebelum deploy V113.0.61.
+
+Order lama akan dicoba di-backfill dari auth UID yang masih dapat dicocokkan.
+Jika identitas historis sudah tidak dapat dicocokkan, UI menampilkan Data lama agar tidak menebak nama kasir.

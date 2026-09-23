@@ -560,7 +560,7 @@ export function OrdersPage() {
       'No. Order','Pelanggan','Telepon','Layanan',
       'Status Cucian','Status Pembayaran',
       'Subtotal','Diskon','Total','Sudah Bayar','Piutang',
-      'Estimasi Selesai','Dibuat'
+      'Estimasi Selesai','Kasir / Dibuat Oleh','Dibuat'
     ],
     rows:exportRows.map(row=>[
       row.order_no,
@@ -575,6 +575,7 @@ export function OrdersPage() {
       Number(row.paid_amount||0),
       Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),
       row.due_at?new Date(row.due_at).toLocaleString('id-ID'):'-',
+      row.created_by_name||row.created_by_login_id||'Data lama',
       new Date(row.created_at).toLocaleString('id-ID')
     ]),
     summary:[
@@ -781,6 +782,7 @@ export function OrdersPage() {
         <div class="line"></div>
         <div class="row"><span>No. Order</span><b>${row.order_no}</b></div>
         <div class="row"><span>Pelanggan</span><b>${row.customer_name}</b></div>
+        <div class="row"><span>Kasir / Dibuat oleh</span><b>${row.created_by_name||row.created_by_login_id||'Data lama'}</b></div>
         <div class="row"><span>WhatsApp</span><span>${row.customer_phone}</span></div>
         <div class="row"><span>Status Cucian</span><b>${statusLabels[row.status]}</b></div>
         <div class="row"><span>Pembayaran</span><b>${paymentLabels[row.payment_status]}</b></div>
@@ -921,14 +923,15 @@ export function OrdersPage() {
                 <th>Total</th>
                 <th>Estimasi Selesai</th>
                 <th>Pengiriman</th>
+                <th>Kasir</th>
                 <th>Dibuat</th>
                 <th className="order-actions-heading">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={10} className="table-empty">Memuat order...</td></tr>}
+              {loading && <tr><td colSpan={11} className="table-empty">Memuat order...</td></tr>}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={10} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
+                <tr><td colSpan={11} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
               )}
               {filtered.map(row => (
                 <tr key={row.id}>
@@ -990,6 +993,7 @@ export function OrdersPage() {
                           <Truck size={13}/>Konfirmasi Kurir
                         </button>}
                   </td>
+                  <td><b>{row.created_by_name||row.created_by_login_id||'Data lama'}</b></td>
                   <td>{new Date(row.created_at).toLocaleDateString('id-ID')}</td>
                   <td>
                     <div className="row-actions">
@@ -1232,6 +1236,7 @@ export function OrdersPage() {
         <Modal title={`Detail ${detail.order_no}`} onClose={() => setDetail(null)}>
           <div className="order-detail">
             <div><span>Pelanggan</span><b>{detail.customer_name}</b></div>
+            <div><span>Kasir / Dibuat oleh</span><b>{detail.created_by_name||detail.created_by_login_id||'Data lama'}</b></div>
             <div><span>WhatsApp</span><b>{detail.customer_phone}</b></div>
             <div className="order-detail-services">
               <span>Layanan</span>

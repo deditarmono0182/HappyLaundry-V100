@@ -24,6 +24,8 @@ export interface OrderRow {
   paid_amount: number
   notes: string | null
   due_at: string | null
+  created_by_name: string | null
+  created_by_login_id: string | null
   created_at: string
 }
 

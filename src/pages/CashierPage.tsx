@@ -11,6 +11,7 @@ import { supabase } from '../lib/supabase'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
 import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
 import { businessDayStart, businessDateTimeLabel, businessParts, BUSINESS_UTC_OFFSET } from '../lib/businessTime'
+import { useAuth } from '../lib/auth'
 import type { StoreSettings } from '../types/settings'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft } from '../types/order'
@@ -56,6 +57,7 @@ type SuccessData = {
   items: OrderItemDraft[]
   workerName: string
   courierName: string
+  cashierName: string
 }
 
 const methods: Array<{ value: PayMethod; label: string }> = [
@@ -71,6 +73,7 @@ const methodLabels: Record<PayMethod,string> = {
 
 export function CashierPage() {
   const navigate=useNavigate()
+  const {profile}=useAuth()
   const [customers,setCustomers]=useState<Customer[]>([])
   const [services,setServices]=useState<Service[]>([])
   const [todayOrders,setTodayOrders]=useState<TodayOrder[]>([])
@@ -406,6 +409,7 @@ export function CashierPage() {
           <tr><td>No. Order</td><td>${data.orderNo}</td></tr>
           <tr><td>Tanggal</td><td>${businessDateTimeLabel()}</td></tr>
           <tr><td>Pelanggan</td><td>${data.customer}</td></tr>
+          <tr><td>Kasir / Dibuat oleh</td><td>${data.cashierName||'-'}</td></tr>
           ${printSettings.show_customer_phone?`<tr><td>WhatsApp</td><td>${data.phone}</td></tr>`:''}
           ${printSettings.show_due_at?`<tr><td>Estimasi</td><td>${data.due||'-'}</td></tr>`:''}
           ${printSettings.show_payment_method?`<tr><td>Metode</td><td>${methodLabels[data.method]}</td></tr>`:''}
@@ -521,7 +525,8 @@ export function CashierPage() {
         due:dueIso?businessDateTimeLabel(dueIso):'-',
         method,notes:notes.trim(),items:[...items],
         workerName:commissionEmployees.find(employee=>employee.id===workerId)?.full_name||'-',
-        courierName:commissionEmployees.find(employee=>employee.id===courierId)?.full_name||'-'
+        courierName:commissionEmployees.find(employee=>employee.id===courierId)?.full_name||'-',
+        cashierName:profile?.full_name||profile?.login_id||'Kasir'
       }
       setSuccess(saved)
       if(printSettings.auto_print){
