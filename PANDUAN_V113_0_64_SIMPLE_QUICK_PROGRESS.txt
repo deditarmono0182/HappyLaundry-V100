@@ -1,0 +1,9 @@
+HappyLaundry Enterprise V113.0.64 — Simple Quick Progress
+
+PERUBAHAN
+- Mode Cepat sekarang hanya menampilkan 3 kolom: Diterima → Diproses → Siap Diambil.
+- Order dengan status lama Dicuci/Dikeringkan/Disetrika/Packing digabung ke kolom Diproses ketika Mode Cepat aktif.
+- Tombol Mode Cepat: Diterima = MULAI PROSES, Diproses = SELESAI PRODUKSI.
+- Mode Detail tetap mempertahankan 6 kolom lama: Diterima, Dicuci, Dikeringkan, Disetrika, Packing, Siap Diambil.
+- Tidak ada SQL baru. Tetap menggunakan SQL 057 dari V113.0.63.
+- Riwayat siapa yang mengubah progres dan timestamp tetap digunakan.

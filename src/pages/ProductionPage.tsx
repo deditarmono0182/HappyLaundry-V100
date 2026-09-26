@@ -10,7 +10,9 @@ import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
 import type { OrderRow, OrderStatus } from '../types/order'
 
-const columns:OrderStatus[]=['received','washing','drying','ironing','packing','ready']
+const detailedColumns:OrderStatus[]=['received','washing','drying','ironing','packing','ready']
+const quickColumns:OrderStatus[]=['received','washing','ready']
+const processingStatuses:OrderStatus[]=['washing','drying','ironing','packing']
 const next:Partial<Record<OrderStatus,OrderStatus>>={
   received:'washing',
   washing:'drying',
@@ -189,7 +191,7 @@ export function ProductionPage(){
 
   const quickTarget=(status:OrderStatus):OrderStatus|undefined=>{
     if(status==='received')return 'washing'
-    if(['washing','drying','ironing','packing'].includes(status))return 'ready'
+    if(processingStatuses.includes(status))return 'ready'
     if(status==='ready')return 'completed'
     return undefined
   }
@@ -197,9 +199,21 @@ export function ProductionPage(){
   const actionLabel=(status:OrderStatus)=>{
     if(detailedMode)return status==='ready'?'Selesaikan Order':'Tahap Berikutnya'
     if(status==='received')return 'MULAI PROSES'
-    if(['washing','drying','ironing','packing'].includes(status))return 'SELESAI PRODUKSI'
+    if(processingStatuses.includes(status))return 'SELESAI PRODUKSI'
     if(status==='ready')return 'SELESAIKAN ORDER'
     return 'Update Progres'
+  }
+
+  const displayStatusLabel=(status:OrderStatus)=>{
+    if(!detailedMode&&processingStatuses.includes(status))return 'Diproses'
+    return statusLabels[status]
+  }
+
+  const boardColumns=detailedMode?detailedColumns:quickColumns
+
+  const rowsForBoardColumn=(status:OrderStatus)=>{
+    if(!detailedMode&&status==='washing')return filtered.filter(r=>processingStatuses.includes(r.status))
+    return filtered.filter(r=>r.status===status)
   }
 
   const move=async(r:OrderRow)=>{
@@ -428,7 +442,7 @@ export function ProductionPage(){
       </div>
       <div className="production-scan-status">
         <span>Proses Sekarang</span>
-        <b>{statusLabels[scanOrder.status]}</b>
+        <b>{displayStatusLabel(scanOrder.status)}</b>
       </div>
       <button
         type="button"
@@ -454,15 +468,16 @@ export function ProductionPage(){
       </button>
     </section>}
 
-    <div className="production-board">
-      {columns.map(s=>{
-        const list=filtered.filter(r=>r.status===s)
+    <div className={`production-board ${detailedMode?'production-board-detail':'production-board-quick'}`}>
+      {boardColumns.map(s=>{
+        const list=rowsForBoardColumn(s)
+        const columnLabel=!detailedMode&&s==='washing'?'Diproses':statusLabels[s]
 
         return <section className={`production-column production-${s}`} key={s}>
           <header>
             <div>
               <span className={`status-dot status-${s}`}/>
-              <b>{statusLabels[s]}</b>
+              <b>{columnLabel}</b>
             </div>
             <span>{list.length}</span>
           </header>
