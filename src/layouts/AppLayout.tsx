@@ -56,7 +56,12 @@ export function AppLayout() {
     const overdue=problemOrders.filter(row=>Boolean(row.due_at)&&!['ready','completed','cancelled'].includes(row.status)&&new Date(row.due_at as string).getTime()<now)
     const unpaid=problemOrders.filter(row=>row.status!=='cancelled'&&Math.max(0,Number(row.total)-Number(row.paid_amount))>0)
     const ready=problemOrders.filter(row=>row.status==='ready')
-    return{overdue,unpaid,ready}
+    const stale=problemOrders.filter(row=>{
+      if(!['received','washing','drying','ironing','packing'].includes(row.status))return false
+      const anchor=row.progress_last_at||row.created_at
+      return now-new Date(anchor).getTime()>=4*60*60*1000
+    })
+    return{overdue,unpaid,ready,stale}
   },[problemOrders])
 
   const problemReasons=(row:OrderRow)=>{
@@ -64,6 +69,10 @@ export function AppLayout() {
     if(row.due_at&&!['ready','completed','cancelled'].includes(row.status)&&new Date(row.due_at).getTime()<Date.now())reasons.push('Terlambat')
     if(row.status==='ready')reasons.push('Siap diambil')
     if(row.status!=='cancelled'&&Math.max(0,Number(row.total)-Number(row.paid_amount))>0)reasons.push('Belum lunas')
+    if(['received','washing','drying','ironing','packing'].includes(row.status)){
+      const anchor=row.progress_last_at||row.created_at
+      if(Date.now()-new Date(anchor).getTime()>=4*60*60*1000)reasons.push('Belum update >4 jam')
+    }
     return reasons
   }
 
@@ -135,7 +144,9 @@ export function AppLayout() {
         const overdue=Boolean(row.due_at)&&!['ready','completed','cancelled'].includes(row.status)&&new Date(row.due_at as string).getTime()<now
         const unpaid=row.status!=='cancelled'&&Math.max(0,Number(row.total)-Number(row.paid_amount))>0
         const ready=row.status==='ready'
-        return overdue||unpaid||ready
+        const anchor=row.progress_last_at||row.created_at
+        const stale=['received','washing','drying','ironing','packing'].includes(row.status)&&now-new Date(anchor).getTime()>=4*60*60*1000
+        return overdue||unpaid||ready||stale
       })
 
       setProblemOrders(rows)
@@ -347,6 +358,7 @@ export function AppLayout() {
               <div className={problemSummary.overdue.length?'danger':''}><span>Terlambat</span><b>{problemSummary.overdue.length}</b></div>
               <div className={problemSummary.unpaid.length?'warning':''}><span>Belum Lunas / DP</span><b>{problemSummary.unpaid.length}</b></div>
               <div className={problemSummary.ready.length?'info':''}><span>Siap Diambil</span><b>{problemSummary.ready.length}</b></div>
+              <div className={problemSummary.stale.length?'danger':''}><span>Belum Update &gt;4 Jam</span><b>{problemSummary.stale.length}</b></div>
             </div>
             <p className="daily-order-alert-note">Peringatan ini muncul otomatis satu kali setiap hari ketika akun masuk ke aplikasi, baik Owner maupun Karyawan.</p>
             {problemAlertLoading?<div className="daily-order-alert-empty">Memeriksa order...</div>:
@@ -370,7 +382,7 @@ export function AppLayout() {
               </div>}
             <div className="daily-order-alert-actions">
               <button type="button" className="secondary-button" onClick={()=>setProblemAlertOpen(false)}>Nanti</button>
-              <button type="button" className="primary-button" onClick={()=>{setProblemAlertOpen(false);navigate('/orders')}}>Buka Daftar Order</button>
+              <button type="button" className="primary-button" onClick={()=>{setProblemAlertOpen(false);navigate(problemSummary.stale.length?'/production':'/orders')}}>{problemSummary.stale.length?'Buka Produksi':'Buka Daftar Order'}</button>
             </div>
           </div>
         </Modal>}

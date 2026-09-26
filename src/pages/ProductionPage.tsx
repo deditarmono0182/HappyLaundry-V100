@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Camera, CheckCircle2, ChevronRight, MessageCircle, QrCode, Search,
+  AlertTriangle, Camera, CheckCircle2, ChevronRight, MessageCircle, QrCode, Search,
   StopCircle, WashingMachine, X
 } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
@@ -57,7 +57,9 @@ export function ProductionPage(){
   const[searchParams]=useSearchParams()
   const[rows,setRows]=useState<OrderRow[]>([])
   const[query,setQuery]=useState('')
-  const[filter,setFilter]=useState<'all'|'overdue'>('all')
+  const[filter,setFilter]=useState<'all'|'overdue'|'stale'>('all')
+  const[detailedMode,setDetailedMode]=useState(false)
+  const[actionBusy,setActionBusy]=useState<string|null>(null)
   const[message,setMessage]=useState('')
   const[success,setSuccess]=useState('')
   const[scanning,setScanning]=useState(false)
@@ -134,6 +136,21 @@ export function ProductionPage(){
 
   useEffect(()=>()=>{void stopScanner()},[stopScanner])
 
+  const isStaleProgress=(row:OrderRow)=>{
+    if(!['received','washing','drying','ironing','packing'].includes(row.status))return false
+    const anchor=row.progress_last_at||row.created_at
+    const at=new Date(anchor).getTime()
+    return Number.isFinite(at)&&Date.now()-at>=4*60*60*1000
+  }
+
+  const progressAge=(row:OrderRow)=>{
+    const anchor=row.progress_last_at||row.created_at
+    const ms=Math.max(0,Date.now()-new Date(anchor).getTime())
+    const hours=Math.floor(ms/(60*60*1000))
+    const minutes=Math.floor((ms%(60*60*1000))/(60*1000))
+    return hours>0?`${hours}j ${minutes}m`:`${minutes}m`
+  }
+
   const filtered=useMemo(()=>{
     const q=query.toLowerCase().trim()
     const searched=q
@@ -142,6 +159,9 @@ export function ProductionPage(){
 
     if(filter==='overdue'){
       return searched.filter(r=>r.due_at&&new Date(r.due_at)<new Date())
+    }
+    if(filter==='stale'){
+      return searched.filter(r=>isStaleProgress(r))
     }
     return searched
   },[query,rows,filter])
@@ -167,27 +187,50 @@ export function ProductionPage(){
     window.open(`https://wa.me/${p}?text=${encodeURIComponent(text)}`,'_blank')
   }
 
+  const quickTarget=(status:OrderStatus):OrderStatus|undefined=>{
+    if(status==='received')return 'washing'
+    if(['washing','drying','ironing','packing'].includes(status))return 'ready'
+    if(status==='ready')return 'completed'
+    return undefined
+  }
+
+  const actionLabel=(status:OrderStatus)=>{
+    if(detailedMode)return status==='ready'?'Selesaikan Order':'Tahap Berikutnya'
+    if(status==='received')return 'MULAI PROSES'
+    if(['washing','drying','ironing','packing'].includes(status))return 'SELESAI PRODUKSI'
+    if(status==='ready')return 'SELESAIKAN ORDER'
+    return 'Update Progres'
+  }
+
   const move=async(r:OrderRow)=>{
-    const n=next[r.status]
+    const n=detailedMode?next[r.status]:quickTarget(r.status)
     if(!n)return
 
     setMessage('')
     setSuccess('')
+    setActionBusy(r.id)
 
-    const{error}=await supabase
-      .from('v100_orders')
-      .update({status:n,updated_at:new Date().toISOString()})
-      .eq('id',r.id)
+    const{data,error}=await supabase.rpc('v113063_update_order_progress',{
+      p_order_id:r.id,
+      p_new_status:n
+    })
+
+    setActionBusy(null)
 
     if(error){
-      setMessage(error.message)
+      setMessage(error.message.includes('v113063_update_order_progress')
+        ? 'SQL 057 belum aktif. Jalankan SQL 057 di Supabase lalu coba lagi.'
+        : error.message)
       return
     }
 
+    const result=(Array.isArray(data)?data[0]:data) as {actor_name?:string}|null
+    const actor=result?.actor_name?` oleh ${result.actor_name}`:''
+
     setSuccess(
       n==='completed'
-        ? `${r.order_no} selesai.`
-        : `${r.order_no} dipindahkan ke ${statusLabels[n]}.`
+        ? `${r.order_no} selesai${actor}.`
+        : `${r.order_no} → ${statusLabels[n]}${actor}.`
     )
 
     await load()
@@ -201,7 +244,7 @@ export function ProductionPage(){
       highlightedRef.current=null
       setQuery('')
     }else{
-      const updated={...r,status:n}
+      const updated={...r,status:n,progress_last_at:new Date().toISOString(),progress_last_by_name:result?.actor_name||r.progress_last_by_name}
       setScanOrder(updated)
       highlightedRef.current=r.order_no
       setQuery(r.order_no)
@@ -330,13 +373,23 @@ export function ProductionPage(){
           <QrCode size={17}/>Scan QR Nota
         </button>
 
+        <button
+          type="button"
+          className={`secondary-button production-mode-toggle ${detailedMode?'is-detail':'is-quick'}`}
+          onClick={()=>setDetailedMode(v=>!v)}
+          title="Mode Cepat hanya butuh Mulai Proses lalu Selesai Produksi. Mode Detail mempertahankan tahap cuci, kering, setrika, dan packing."
+        >
+          {detailedMode?'Mode Detail':'⚡ Mode Cepat'}
+        </button>
+
         <select
           value={filter}
-          onChange={e=>setFilter(e.target.value as 'all'|'overdue')}
+          onChange={e=>setFilter(e.target.value as 'all'|'overdue'|'stale')}
           aria-label="Filter produksi"
         >
           <option value="all">Semua order aktif</option>
-          <option value="overdue">Terlambat saja</option>
+          <option value="overdue">Terlambat estimasi</option>
+          <option value="stale">Belum update &gt; 4 jam</option>
         </select>
 
         <label className="search-box production-search">
@@ -357,6 +410,15 @@ export function ProductionPage(){
     {message&&<div className="error-box inline-message">{message}</div>}
     {success&&<div className="success-box production-inline-success"><CheckCircle2 size={17}/>{success}</div>}
 
+    {rows.some(isStaleProgress)&&<section className="production-stale-banner">
+      <AlertTriangle size={19}/>
+      <div>
+        <b>{rows.filter(isStaleProgress).length} order belum update progres lebih dari 4 jam</b>
+        <span>Karyawan cukup gunakan tombol besar Mode Cepat agar status tidak tertinggal.</span>
+      </div>
+      <button type="button" onClick={()=>setFilter('stale')}>Lihat Order</button>
+    </section>}
+
     {scanOrder&&<section className="panel production-scan-result">
       <div className="production-scan-result-icon"><QrCode size={24}/></div>
       <div className="production-scan-result-main">
@@ -372,8 +434,9 @@ export function ProductionPage(){
         type="button"
         className="primary-button production-scan-next"
         onClick={()=>void move(scanOrder)}
+        disabled={actionBusy===scanOrder.id}
       >
-        {scanOrder.status==='ready'?'Selesaikan Order':'Tahap Berikutnya'}
+        {actionBusy===scanOrder.id?'Menyimpan...':actionLabel(scanOrder.status)}
         <ChevronRight size={18}/>
       </button>
       <button
@@ -406,7 +469,7 @@ export function ProductionPage(){
 
           <div className="production-cards">
             {list.map(r=><article
-              className={`production-card ${isOverdue(r)?'production-overdue':''} ${scanOrder?.id===r.id?'production-card-scanned':''}`}
+              className={`production-card ${isOverdue(r)?'production-overdue':''} ${isStaleProgress(r)?'production-stale':''} ${scanOrder?.id===r.id?'production-card-scanned':''}`}
               key={r.id}
               data-production-order={r.order_no}
             >
@@ -427,12 +490,24 @@ export function ProductionPage(){
                 {new Date(r.due_at).toLocaleString('id-ID')}
               </small>}
 
+              {isStaleProgress(r)&&<div className="production-stale-note">
+                <AlertTriangle size={14}/>Belum update progres {progressAge(r)}
+              </div>}
+
+              {r.progress_last_by_name&&<small className="production-last-update">
+                Update terakhir: {r.progress_last_by_name}{r.progress_last_at?` • ${new Date(r.progress_last_at).toLocaleString('id-ID')}`:''}
+              </small>}
+
               <div className="production-card-actions">
                 <button className="whatsapp-button" onClick={()=>whatsapp(r)}>
                   <MessageCircle size={15}/>Kirim Update WA
                 </button>
-                <button onClick={()=>void move(r)}>
-                  {s==='ready'?'Selesaikan':'Tahap Berikutnya'}
+                <button
+                  className="production-quick-action"
+                  onClick={()=>void move(r)}
+                  disabled={actionBusy===r.id}
+                >
+                  {actionBusy===r.id?'Menyimpan...':actionLabel(r.status)}
                   <ChevronRight size={15}/>
                 </button>
               </div>

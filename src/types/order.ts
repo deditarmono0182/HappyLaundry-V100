@@ -26,6 +26,9 @@ export interface OrderRow {
   due_at: string | null
   created_by_name: string | null
   created_by_login_id: string | null
+  progress_last_at?: string | null
+  progress_last_by_name?: string | null
+  progress_last_by_login_id?: string | null
   created_at: string
 }
 

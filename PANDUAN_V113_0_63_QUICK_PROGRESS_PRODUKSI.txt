@@ -1,0 +1,11 @@
+HappyLaundry V113.0.63 — Quick Progress Produksi
+
+WAJIB: jalankan supabase/057_v113_0_63_quick_progress_production.sql sebelum deploy.
+
+Perubahan:
+- Mode Cepat default: Diterima -> MULAI PROSES -> proses aktif -> SELESAI PRODUKSI -> Siap Diambil -> SELESAIKAN ORDER.
+- Mode Detail tetap tersedia untuk alur lama Dicuci -> Dikeringkan -> Disetrika -> Packing.
+- Setiap perubahan progres mencatat nama akun dan waktu.
+- Order yang tidak diperbarui >4 jam diberi peringatan.
+- Peringatan harian Owner/Karyawan juga memasukkan order yang progresnya mandek >4 jam.
+- Tidak mengubah komisi, pembayaran, kasir pembuat order, kurir, atau data order lain.

@@ -9594,3 +9594,18 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     min-width:1260px!important;
   }
 }
+
+/* V113.0.63 - Quick Progress Produksi */
+.production-mode-toggle.is-quick{font-weight:900;border-color:#9bd8c0;background:#effcf5;color:#13734c}
+.production-mode-toggle.is-detail{font-weight:850}
+.production-stale-banner{display:flex;align-items:center;gap:11px;margin:0 0 14px;padding:12px 14px;border:1px solid #efc0a7;border-radius:14px;background:#fff6ee;color:#8b3d18}
+.production-stale-banner>div{display:grid;gap:2px;flex:1}.production-stale-banner b{font-size:12px}.production-stale-banner span{font-size:10px;color:#8c614c}
+.production-stale-banner button{background:#a74c22;color:#fff;padding:8px 11px;border-radius:10px;font-size:10px;font-weight:900}
+.production-card.production-stale{box-shadow:inset 0 0 0 2px #e7a17d}
+.production-stale-note{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:9px;background:#fff1e8;color:#a1441d;font-size:9px;font-weight:900}
+.production-last-update{color:#698083!important;font-size:8.5px!important}
+.production-quick-action{font-weight:950!important;letter-spacing:.15px}
+.production-card-actions .production-quick-action:disabled,.production-scan-next:disabled{opacity:.55;cursor:wait}
+.daily-order-alert-summary{grid-template-columns:repeat(4,1fr)}
+@media(max-width:820px){.daily-order-alert-summary{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.production-stale-banner{align-items:flex-start;flex-wrap:wrap}.production-stale-banner button{width:100%}.daily-order-alert-summary{grid-template-columns:1fr 1fr}}
