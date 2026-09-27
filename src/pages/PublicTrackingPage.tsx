@@ -29,6 +29,7 @@ interface TrackingData {
   address: string
   maps_url: string
   operational_hours: string
+  progress_mode?: 'quick'|'detail'|null
 }
 
 
@@ -146,12 +147,16 @@ export function PublicTrackingPage(){
     return stages.findIndex(stage=>stage.key===data.status)
   },[data])
 
+  const quickTracking=data?.progress_mode==='quick'
+  const quickProcessing=Boolean(quickTracking&&data&&['washing','drying','ironing','packing'].includes(data.status))
+
   const progress=useMemo(()=>{
     if(!data)return 0
-    if(data.status==='completed')return 100
+    if(data.status==='completed'||data.status==='ready')return 100
+    if(quickTracking&&['washing','drying','ironing','packing'].includes(data.status))return 50
     if(currentIndex<0)return 0
     return Math.round(((currentIndex+1)/stages.length)*100)
-  },[data,currentIndex])
+  },[data,currentIndex,quickTracking])
 
   const countdown=useMemo(()=>{
     if(!data?.due_at)return 'Hubungi laundry'
@@ -332,7 +337,7 @@ export function PublicTrackingPage(){
           <strong>{data.order_no}</strong>
           <small>{data.customer_name}</small>
         </div>
-        <span className={`tracking-status tracking-${data.status}`}>{statusLabel[data.status]||data.status}</span>
+        <span className={`tracking-status tracking-${data.status}`}>{quickProcessing?'Sedang Diproses':statusLabel[data.status]||data.status}</span>
       </div>
 
       <div className="tracking-progress-meter">
@@ -343,16 +348,23 @@ export function PublicTrackingPage(){
         <div className="tracking-progress-bar"><i style={{width:`${progress}%`}}/></div>
       </div>
 
-      <div className="tracking-progress">
+      <div className={`tracking-progress ${quickTracking?'tracking-progress-quick-map':''}`}>
         {stages.map((stage,index)=>{
-          const done=index<currentIndex||data.status==='completed'
-          const active=index===currentIndex&&data.status!=='completed'
-          return <div className={`tracking-step ${done?'done':''} ${active?'active':''}`} key={stage.key}>
-            <span>{done?<Check size={17}/>:active?<WashingMachine size={17}/>:index+1}</span>
+          const productionStage=index>=1&&index<=4
+          const quickActive=quickProcessing&&productionStage
+          const done=data.status==='completed'||data.status==='ready'||(!quickProcessing&&index<currentIndex)
+          const active=!quickProcessing&&index===currentIndex&&data.status!=='completed'&&data.status!=='ready'
+          return <div className={`tracking-step ${done?'done':''} ${active?'active':''} ${quickActive?'auto-processing':''}`} key={stage.key}>
+            <span>{done?<Check size={17}/>:quickActive?<WashingMachine size={15}/>:active?<WashingMachine size={17}/>:index+1}</span>
             <b>{stage.label}</b>
           </div>
         })}
       </div>
+
+      {quickProcessing&&<div className="tracking-auto-map-note">
+        <WashingMachine size={18}/>
+        <span><b>Produksi sedang berjalan.</b> Tahap Cuci, Kering, Setrika, dan Packing tetap ditampilkan untuk pelanggan dan akan otomatis ditandai selesai saat produksi selesai.</span>
+      </div>}
 
       <div className="tracking-summary tracking-summary-premium">
         <div>
@@ -465,6 +477,6 @@ export function PublicTrackingPage(){
       </div>
     </section>}
 
-    <footer className="tracking-footer">HappyLaundry Enterprise V103.2 • Status diperbarui oleh petugas laundry.</footer>
+    <footer className="tracking-footer">HappyLaundry Enterprise V113.0.65 • Status diperbarui oleh petugas laundry.</footer>
   </main>
 }

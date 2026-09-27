@@ -9623,3 +9623,13 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     grid-template-columns:repeat(3,minmax(250px,1fr));
   }
 }
+
+
+/* V113.0.65 - Customer Detail Auto Mapping */
+.tracking-step.auto-processing{color:#087654}
+.tracking-step.auto-processing span{background:#eefaf5;border-color:#35b987;color:#087654;animation:trackingPulse 1.4s infinite}
+.tracking-step.auto-processing:not(:last-child)::after{background:linear-gradient(90deg,#b8e5d4,#dceae5)}
+.tracking-auto-map-note{margin:-8px 0 20px;display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid #cce7dc;border-radius:13px;background:#f1faf6;color:#456f63;font-size:12px;line-height:1.5}
+.tracking-auto-map-note svg{flex:0 0 auto;color:#07865a;margin-top:1px}
+.tracking-auto-map-note b{color:#145c48}
+@media(max-width:650px){.tracking-auto-map-note{margin-top:0}}

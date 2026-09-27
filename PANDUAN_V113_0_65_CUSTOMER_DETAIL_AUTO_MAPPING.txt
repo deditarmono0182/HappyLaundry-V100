@@ -1,0 +1,21 @@
+HappyLaundry Enterprise V113.0.65 — Customer Detail Auto Mapping
+
+TUJUAN
+Tracking pelanggan tetap menampilkan tahapan detail:
+Diterima → Dicuci → Dikeringkan → Disetrika → Packing → Siap Diambil.
+
+MODE CEPAT KARYAWAN
+- MULAI PROSES menyimpan mode progres = quick.
+- Selama produksi, tracking pelanggan menampilkan keempat tahap produksi sebagai proses yang sedang berjalan tanpa mengklaim tahap tertentu sudah selesai.
+- SELESAI PRODUKSI memindahkan order ke Siap Diambil. Pada tracking pelanggan, Cuci/Kering/Setrika/Packing otomatis ditandai selesai.
+
+MODE DETAIL KARYAWAN
+- Tracking pelanggan mengikuti status detail satu per satu seperti sebelumnya.
+
+INSTALASI
+1. Jalankan SQL 058 di Supabase SQL Editor.
+2. Deploy source V113.0.65 ke GitHub/Netlify.
+3. Refresh aplikasi dan halaman tracking pelanggan.
+
+CATATAN
+SQL 057 tetap dipertahankan. SQL 058 hanya menambahkan penanda mode progres dan RPC baru yang kompatibel dengan alur V113.0.65.

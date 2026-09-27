@@ -224,16 +224,17 @@ export function ProductionPage(){
     setSuccess('')
     setActionBusy(r.id)
 
-    const{data,error}=await supabase.rpc('v113063_update_order_progress',{
+    const{data,error}=await supabase.rpc('v113065_update_order_progress',{
       p_order_id:r.id,
-      p_new_status:n
+      p_new_status:n,
+      p_mode:detailedMode?'detail':'quick'
     })
 
     setActionBusy(null)
 
     if(error){
-      setMessage(error.message.includes('v113063_update_order_progress')
-        ? 'SQL 057 belum aktif. Jalankan SQL 057 di Supabase lalu coba lagi.'
+      setMessage(error.message.includes('v113065_update_order_progress')
+        ? 'SQL 058 belum aktif. Jalankan SQL 058 di Supabase lalu coba lagi.'
         : error.message)
       return
     }
