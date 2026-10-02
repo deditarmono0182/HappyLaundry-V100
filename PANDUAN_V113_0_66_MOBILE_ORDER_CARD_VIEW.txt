@@ -1,0 +1,17 @@
+HappyLaundry Enterprise V113.0.66 — Mobile Order Card View
+
+Perubahan:
+- Halaman Order di HP (<=700px) sekarang memakai kartu vertikal.
+- Tidak perlu scroll horizontal untuk melihat Detail/Cetak.
+- Kartu menampilkan order, pelanggan, telepon, layanan, status, pembayaran, total, kasir, tanggal dibuat, dan estimasi.
+- Tombol Detail dan Cetak selalu terlihat.
+- Konfirmasi Kurir / Bukti Kirim serta Hapus/Ajukan Hapus tetap tersedia di mobile.
+- Tampilan desktop/tablet tetap memakai tabel seperti V113.0.65.
+- Tidak ada SQL baru. SQL 058 tetap dipakai.
+
+Deploy:
+1. Extract ZIP.
+2. Replace source di folder GitHub.
+3. Commit dan Push origin.
+4. Tunggu Netlify Published.
+5. Refresh aplikasi di HP.

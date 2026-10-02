@@ -1,0 +1,11 @@
+HappyLaundry Enterprise V113.0.67 — Mobile Header + 2x2 Summary
+
+Basis: V113.0.66 Mobile Order Card View.
+
+Perubahan:
+- Mobile Order tetap memakai card view vertikal.
+- Header Order di HP dibuat penuh agar judul dan deskripsi tidak turun per kata.
+- Tombol Export All, PDF Filter, dan Order Baru dirapikan untuk layar HP.
+- 4 kartu ringkasan Order dipaksa grid 2 x 2 pada HP.
+- Desktop tidak diubah.
+- Tidak ada SQL baru. Tetap menggunakan SQL 058 yang sudah dijalankan.

@@ -911,7 +911,78 @@ export function OrdersPage() {
 
         {message && <div className="error-box inline-message">{message}</div>}
 
-        <div className="table-wrap">
+        <div className="order-mobile-cards" aria-label="Daftar order mobile">
+          {loading && <div className="order-mobile-empty">Memuat order...</div>}
+          {!loading && filtered.length===0 && <div className="order-mobile-empty"><ShoppingBag size={28}/>Belum ada order.</div>}
+          {filtered.map(row=>{
+            const proof=deliveryProofByOrder.get(row.id)
+            const canAdvance=statusFlow.indexOf(row.status)>=0&&statusFlow.indexOf(row.status)<statusFlow.length-1
+            return (
+              <article className={`order-mobile-card ${isOverdue(row)?'is-overdue':''}`} key={`mobile-${row.id}`}>
+                <header className="order-mobile-card-head">
+                  <div>
+                    <strong>{row.order_no}</strong>
+                    <span>{row.customer_name}</span>
+                    <small>{row.customer_phone||'-'}</small>
+                  </div>
+                  {canAdvance
+                    ? <button
+                        type="button"
+                        className={`badge status-${row.status} clickable-order-status`}
+                        onClick={()=>void advanceStatus(row)}
+                        disabled={statusBusyId===row.id}
+                        title={`Klik untuk lanjut ke ${statusLabels[statusFlow[statusFlow.indexOf(row.status)+1]]}`}
+                      >
+                        {statusBusyId===row.id?'Memproses...':statusLabels[row.status]}
+                        <ChevronRight size={12}/>
+                      </button>
+                    : <span className={`badge status-${row.status}`}>{statusLabels[row.status]}</span>}
+                </header>
+
+                <div className="order-mobile-service">
+                  <span>Layanan</span>
+                  <b>{serviceSummary(row.id)}</b>
+                </div>
+
+                <div className="order-mobile-money">
+                  <div><span>Total</span><strong>{formatRupiah(row.total)}</strong></div>
+                  <div>
+                    <span>Pembayaran</span>
+                    <b className={`badge payment-${row.payment_status}`}>{paymentLabels[row.payment_status]}</b>
+                    <small>{formatRupiah(row.paid_amount)} / {formatRupiah(row.total)}</small>
+                  </div>
+                </div>
+
+                <div className="order-mobile-meta">
+                  <div><span>Kasir</span><b>{row.created_by_name||row.created_by_login_id||'Data lama'}</b></div>
+                  <div><span>Dibuat</span><b>{new Date(row.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit'})}</b></div>
+                  <div><span>Estimasi</span><b className={isOverdue(row)?'overdue-text':''}>{row.due_at?new Date(row.due_at).toLocaleDateString('id-ID'):'Belum diatur'}</b></div>
+                </div>
+
+                <div className="order-mobile-primary-actions">
+                  <button className="order-mobile-detail" onClick={()=>setDetail(row)}><Eye size={17}/>Detail</button>
+                  <button className="order-mobile-print" onClick={()=>printReceipt(row)}><Printer size={17}/>Cetak</button>
+                </div>
+
+                <div className="order-mobile-secondary-actions">
+                  {proof
+                    ? <button type="button" className="delivery-proof-badge" onClick={()=>window.open(proof.photo_url,'_blank')}><Image size={13}/>Lihat Bukti Kirim</button>
+                    : <button type="button" className="delivery-confirm-button" onClick={()=>openDelivery(row)}><Truck size={13}/>Konfirmasi Kurir</button>}
+                  <button
+                    type="button"
+                    className="order-delete-request-button"
+                    onClick={()=>{setDeleteTarget(row);setDeleteReason('');setDeletePhrase('');setMessage('')}}
+                    title={profile?.role==='owner'?'Hapus Order':'Ajukan Hapus ke Owner'}
+                  >
+                    <Trash2 size={14}/>{profile?.role==='owner'?'Hapus':'Ajukan Hapus'}
+                  </button>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+
+        <div className="table-wrap order-desktop-table">
           <table className="orders-table">
             <thead>
               <tr>
