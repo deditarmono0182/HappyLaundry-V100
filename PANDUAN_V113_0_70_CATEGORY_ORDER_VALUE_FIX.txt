@@ -1,0 +1,8 @@
+HappyLaundry Enterprise V113.0.70 — Category Order Value Fix
+
+Perubahan:
+1. Dashboard kategori mengikuti nilai barang/order masuk.
+2. Tidak lagi bergantung pada pembayaran.
+3. Satuan tampil jika ada order kategori Satuan pada periode.
+4. Diskon order dialokasikan proporsional.
+5. Tidak perlu SQL baru.

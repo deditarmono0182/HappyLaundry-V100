@@ -370,3 +370,10 @@ Laporan Owner membedakan omzet terbayar dari order masuk, mengurangi komisi prod
 - Laba Bersih = omzet barang masuk - pengeluaran - komisi produksi - komisi kurir.
 - Grafik gabungan menampilkan Omzet/Barang Masuk, Kas Masuk, Laba Bersih, dan Jumlah Order per periode.
 - Tidak memerlukan SQL baru.
+
+
+## V113.0.70 Category Order Value Fix
+- Omzet/Barang Masuk per Kategori kini dihitung dari nilai order masuk, bukan pembayaran yang sudah diterima.
+- Kategori Satuan akan muncul bila ada order Satuan pada periode terpilih, walaupun order belum dibayar.
+- Diskon dialokasikan proporsional ke item agar total kategori konsisten dengan nilai order bersih.
+- Tidak ada SQL baru.

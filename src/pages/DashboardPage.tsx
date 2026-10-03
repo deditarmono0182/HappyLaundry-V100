@@ -209,15 +209,15 @@ export function DashboardPage() {
     for(const item of orderItems){
       const order=orderMap.get(item.order_id)
       if(!order)continue
+      const orderSubtotal=Math.max(0,Number(order.subtotal||0))
       const orderTotal=Math.max(0,Number(order.total||0))
-      const paid=Math.max(0,Number(order.paid_amount||0))
-      if(orderTotal<=0||paid<=0)continue
+      if(orderTotal<=0)continue
 
-      // Omzet kategori mengikuti pembayaran aktual.
-      // Jika order baru dibayar sebagian, subtotal item dialokasikan proporsional.
-      const paidRatio=Math.min(1,paid/orderTotal)
+      // V113.0.70: kategori mengikuti NILAI BARANG MASUK, bukan hanya pembayaran.
+      // Diskon order dialokasikan proporsional agar total kategori tetap sama dengan nilai order bersih.
+      const discountRatio=orderSubtotal>0?Math.min(1,orderTotal/orderSubtotal):1
       const category=item.service_id?serviceCategory.get(item.service_id)||'Reguler':'Reguler'
-      grouped[category]=(grouped[category]||0)+(Number(item.subtotal||0)*paidRatio)
+      grouped[category]=(grouped[category]||0)+(Number(item.subtotal||0)*discountRatio)
     }
 
     const total=Object.values(grouped).reduce((sum,v)=>sum+v,0)
@@ -447,8 +447,8 @@ export function DashboardPage() {
     <section className="panel dashboard-category-revenue">
       <div className="panel-heading">
         <div>
-          <h3>Omzet per Kategori Layanan</h3>
-          <p>Jumlah rupiah dan persentase kontribusi berdasarkan periode grafik omzet di atas.</p>
+          <h3>Omzet / Barang Masuk per Kategori Layanan</h3>
+          <p>Nilai barang masuk dan persentase kontribusi berdasarkan order pada periode grafik di atas.</p>
         </div>
       </div>
       {categoryRevenue.length===0
