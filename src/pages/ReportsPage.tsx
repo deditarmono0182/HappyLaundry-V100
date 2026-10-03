@@ -133,7 +133,7 @@ export function ReportsPage(){
   const orderIds=useMemo(()=>new Set(orders.map(o=>o.id)),[orders])
 
   const report=useMemo(()=>{
-    const omzet=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
+    const cashIn=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
     const expense=cash.reduce((sum,c)=>sum+Number(c.amount||0),0)
     const productionCommission=commissions.filter(c=>c.commission_type==='production').reduce((sum,c)=>sum+Number(c.amount||0),0)
     const courierCommission=commissions.filter(c=>c.commission_type==='courier').reduce((sum,c)=>sum+Number(c.amount||0),0)
@@ -190,13 +190,14 @@ export function ReportsPage(){
     }
 
     return{
-      omzet,
+      omzet:orderValue,
+      cashIn,
       expense,
       productionCommission,
       courierCommission,
       commissionTotal,
       orderValue,
-      net:omzet-expense-commissionTotal,
+      net:orderValue-expense-commissionTotal,
       receivable,
       orders:orders.length,
       completed,
@@ -235,7 +236,8 @@ export function ReportsPage(){
     subtitle:`Periode ${appliedFrom} s/d ${appliedTo}`,
     headers:['Bagian','Nama','Qty/Jumlah','Nilai'],
     rows:[
-      ['Ringkasan','Omzet',payments.length,report.omzet],
+      ['Ringkasan','Omzet / Nilai Barang Masuk',report.orders,report.omzet],
+      ['Ringkasan','Kas Masuk (Terbayar)',payments.length,report.cashIn],
       ['Ringkasan','Pengeluaran',cash.length,report.expense],
       ['Ringkasan','Komisi Produksi','-',report.productionCommission],
       ['Ringkasan','Komisi Kurir','-',report.courierCommission],
@@ -247,7 +249,8 @@ export function ReportsPage(){
       ...report.customers.map(c=>['Pelanggan',c.name,c.orders,c.total])
     ],
     summary:[
-      ['Omzet',report.omzet],
+      ['Omzet / Nilai Barang Masuk',report.omzet],
+      ['Kas Masuk',report.cashIn],
       ['Pengeluaran',report.expense],
       ['Komisi Produksi',report.productionCommission],
       ['Komisi Kurir',report.courierCommission],
@@ -266,7 +269,8 @@ export function ReportsPage(){
       ['Periode',`${appliedFrom} s/d ${appliedTo}`],
       [],
       ['Ringkasan','Nilai'],
-      ['Omzet',report.omzet],
+      ['Omzet / Nilai Barang Masuk',report.omzet],
+      ['Kas Masuk',report.cashIn],
       ['Pengeluaran',report.expense],
       ['Komisi Produksi',report.productionCommission],
       ['Komisi Kurir',report.courierCommission],
@@ -300,7 +304,7 @@ export function ReportsPage(){
     <PageHeader
       eyebrow="ENTERPRISE REPORTING"
       title="Laporan Owner"
-      description="Analisis omzet, kas, piutang, pelanggan, dan layanan dari transaksi aktual."
+      description="Analisis omzet barang masuk, kas terbayar, laba bersih, piutang, pelanggan, dan layanan."
       action={<div className="report-actions">
         <button className="secondary-button" onClick={()=>downloadXls(ownerExportOptions())}><FileSpreadsheet size={17}/>XLS</button>
         <button className="secondary-button" onClick={()=>printPdf(ownerExportOptions())}><FileText size={17}/>PDF</button>
@@ -320,18 +324,19 @@ export function ReportsPage(){
     {message&&<div className="error-box inline-message">{message}</div>}
 
     <section className="stats-grid report-stats">
-      <StatCard icon={TrendingUp} label="Omzet Terbayar" value={formatRupiah(report.omzet)} caption={`${payments.length} pembayaran masuk`}/>
+      <StatCard icon={TrendingUp} label="Omzet / Barang Masuk" value={formatRupiah(report.omzet)} caption={`${report.orders} order masuk`}/>
+      <StatCard icon={CreditCard} label="Kas Masuk" value={formatRupiah(report.cashIn)} caption={`${payments.length} pembayaran diterima`}/>
       <StatCard icon={WalletCards} label="Pengeluaran" value={formatRupiah(report.expense)} caption="Kas keluar"/>
       <StatCard icon={CreditCard} label="Komisi Karyawan" value={formatRupiah(report.commissionTotal)} caption={`Produksi ${formatRupiah(report.productionCommission)} • Kurir ${formatRupiah(report.courierCommission)}`}/>
-      <StatCard icon={TrendingUp} label="Laba Bersih" value={formatRupiah(report.net)} caption="Omzet - pengeluaran - komisi"/>
+      <StatCard icon={TrendingUp} label="Laba Bersih" value={formatRupiah(report.net)} caption="Omzet barang masuk - pengeluaran - komisi"/>
       <StatCard icon={ReceiptText} label="Piutang" value={formatRupiah(report.receivable)} caption="Sisa tagihan"/>
-      <StatCard icon={BarChart3} label="Order Masuk" value={String(report.orders)} caption={`${report.completed} selesai/siap • ${formatRupiah(report.orderValue)}`}/>
+      <StatCard icon={BarChart3} label="Jumlah Order Masuk" value={String(report.orders)} caption={`${report.completed} selesai/siap`}/>
       <StatCard icon={TrendingUp} label="Rata-rata Order" value={formatRupiah(report.avg)} caption="Nilai rata-rata transaksi"/>
     </section>
 
     <section className="report-grid">
       <article className="panel report-card">
-        <div className="panel-heading"><div><h3>Omzet Harian</h3><p>Pembayaran masuk pada periode terpilih.</p></div></div>
+        <div className="panel-heading"><div><h3>Kas Masuk Harian</h3><p>Pembayaran yang benar-benar diterima pada periode terpilih.</p></div></div>
         {loading?<div className="table-empty">Memuat laporan...</div>:report.daily.length===0?<div className="report-empty">Belum ada pembayaran di periode ini.</div>:
         <div className="report-bars">
           {report.daily.map(([label,value])=><div className="report-bar-row" key={label}>

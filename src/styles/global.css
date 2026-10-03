@@ -9831,3 +9831,21 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     font-size:20px!important;
   }
 }
+
+/* V113.0.69 — Owner combined business graph */
+.owner-business-kpis-six{grid-template-columns:repeat(3,minmax(0,1fr))}
+.owner-combined-chart{position:relative;width:100%;padding:6px 4px 2px;overflow:hidden}
+.owner-combined-chart svg{display:block;width:100%;min-height:250px;height:auto}
+.owner-chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0 8px;font-size:10px;font-weight:800;color:#4f6e7e}
+.owner-chart-legend span{display:inline-flex;align-items:center;gap:6px}
+.owner-chart-legend span::before{content:"";width:10px;height:10px;border-radius:3px;display:inline-block}
+.legend-order-value::before{background:#1976d2}.legend-cash-in::before{background:#26a69a}.legend-net::before{background:#66bb6a}.legend-order-count::before{background:#f59e0b;border-radius:50%!important}
+.owner-bar-order-value{fill:#1976d2}.owner-bar-cash-in{fill:#26a69a}.owner-bar-net{fill:#66bb6a}
+.owner-order-line{stroke:#f59e0b;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.owner-order-point{fill:#fff;stroke:#f59e0b;stroke-width:3}
+.owner-order-count-text{font-size:10px;font-weight:900;fill:#b86c00}
+.owner-chart-labels{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:7px;margin-top:5px}
+.owner-chart-labels>div{display:grid;gap:2px;padding:7px;border-radius:9px;background:#f8fbfd;text-align:center}
+.owner-chart-labels b{font-size:10px;color:#315f7f}.owner-chart-labels span{font-size:8px;color:#627e8e;white-space:nowrap}.owner-chart-labels strong{font-size:9px;color:#b86c00}
+@media(max-width:900px){.owner-business-kpis-six{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.owner-combined-chart{overflow-x:auto}.owner-combined-chart svg{width:760px;max-width:none}.owner-chart-labels{min-width:760px}.owner-chart-legend{min-width:720px}}

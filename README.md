@@ -362,3 +362,11 @@ V113.0.53
 
 ## V113.0.68 Owner Report Order + Commission
 Laporan Owner membedakan omzet terbayar dari order masuk, mengurangi komisi produksi/kurir pada laba bersih, dan menambahkan grafik jumlah order masuk harian. Tidak ada SQL baru.
+
+
+## V113.0.69 Owner Business Graph
+- Omzet = total nilai order/barang masuk pada periode.
+- Kas Masuk = pembayaran pelanggan yang benar-benar diterima.
+- Laba Bersih = omzet barang masuk - pengeluaran - komisi produksi - komisi kurir.
+- Grafik gabungan menampilkan Omzet/Barang Masuk, Kas Masuk, Laba Bersih, dan Jumlah Order per periode.
+- Tidak memerlukan SQL baru.

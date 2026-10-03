@@ -22,6 +22,12 @@ interface DashboardService{
   category:string
 }
 
+interface DashboardCommission{
+  commission_type:string
+  amount:number
+  earned_at:string
+}
+
 export function DashboardPage() {
   const navigate=useNavigate()
   const {profile}=useAuth()
@@ -31,6 +37,7 @@ export function DashboardPage() {
   const [payments,setPayments]=useState<{amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[]>([])
   const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>([])
   const [services,setServices]=useState<DashboardService[]>([])
+  const [commissions,setCommissions]=useState<DashboardCommission[]>([])
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
   const [revenuePeriod,setRevenuePeriod]=useState<'today'|'7d'|'month'|'3m'|'6m'|'12m'>('7d')
@@ -40,20 +47,22 @@ export function DashboardPage() {
   )
 
   const load=useCallback(async()=>{
-    const [o,c,pay,i,s]=await Promise.all([
+    const [o,c,pay,i,s,commissionRes]=await Promise.all([
       supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
       supabase.from('v100_cash_entries').select('amount,direction,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
-      supabase.from('v100_services').select('id,category')
+      supabase.from('v100_services').select('id,category'),
+      supabase.from('v113_commission_ledger').select('commission_type,amount,earned_at')
     ])
-    if(o.error||c.error||pay.error||i.error||s.error)setMessage((o.error||c.error||pay.error||i.error||s.error)?.message||'Gagal memuat data')
+    if(o.error||c.error||pay.error||i.error||s.error||commissionRes.error)setMessage((o.error||c.error||pay.error||i.error||s.error||commissionRes.error)?.message||'Gagal memuat data')
     else {
       setOrders((o.data as OrderRow[])||[])
       setCash(c.data||[])
       setPayments((pay.data as {amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[])||[])
       setOrderItems((i.data as DashboardOrderItem[])||[])
       setServices((s.data as DashboardService[])||[])
+      setCommissions((commissionRes.data as DashboardCommission[])||[])
       if(isOwner){
         const {count}=await supabase
           .from('v11306_delete_requests')
@@ -89,8 +98,12 @@ export function DashboardPage() {
   const businessToday=businessDateKey(businessClock)
   const today=useMemo(()=>orders.filter(r=>businessDateKey(r.created_at)===businessToday),[orders,businessToday])
   const todayCash=useMemo(()=>cash.filter(r=>businessDateKey(r.created_at)===businessToday),[cash,businessToday])
-  const omzet=todayCash.reduce((s,r)=>s+(r.direction==='in'?Number(r.amount):0),0)
+  const todayPayments=useMemo(()=>payments.filter(r=>businessDateKey(r.created_at)===businessToday),[payments,businessToday])
+  const todayCommissions=useMemo(()=>commissions.filter(r=>businessDateKey(r.earned_at)===businessToday),[commissions,businessToday])
+  const omzet=today.reduce((s,r)=>s+Number(r.total||0),0)
+  const cashIn=todayPayments.reduce((s,r)=>s+Number(r.amount||0),0)
   const expense=todayCash.reduce((s,r)=>s+(r.direction==='out'?Number(r.amount):0),0)
+  const todayCommission=todayCommissions.reduce((s,r)=>s+Number(r.amount||0),0)
   const processing=orders.filter(r=>['received','washing','drying','ironing','packing'].includes(r.status)).length
   const ready=orders.filter(r=>r.status==='ready').length
   const completed=today.filter(r=>r.status==='completed').length
@@ -100,77 +113,90 @@ export function DashboardPage() {
     const now=new Date(businessClock)
     const todayKey=businessDateKey(now)
 
+    type Bucket={label:string;match:(value:string)=>boolean}
+    let buckets:Bucket[]=[]
+
     if(revenuePeriod==='today'){
-      return [{label:'Hari Ini',total:orders.filter(r=>businessDateKey(r.created_at)===todayKey).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)}]
-    }
-
-    if(revenuePeriod==='7d'){
-      return Array.from({length:7},(_,i)=>{
+      buckets=[{label:'Hari Ini',match:value=>businessDateKey(value)===todayKey}]
+    }else if(revenuePeriod==='7d'){
+      buckets=Array.from({length:7},(_,i)=>{
         const key=addBusinessDays(todayKey,-(6-i))
-        return {
-          label:businessDateLabel(`${key}T12:00:00+07:00`,{weekday:'short'}),
-          total:orders.filter(r=>businessDateKey(r.created_at)===key).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)
-        }
+        return {label:businessDateLabel(`${key}T12:00:00+07:00`,{weekday:'short'}),match:(value:string)=>businessDateKey(value)===key}
       })
-    }
-
-    if(revenuePeriod==='month'){
+    }else if(revenuePeriod==='month'){
       const currentMonth=businessMonthKey(now)
-      return Array.from({length:5},(_,i)=>{
+      buckets=Array.from({length:5},(_,i)=>{
         const startDay=i*7+1
         const endDay=i===4?31:startDay+6
-        const total=orders.filter(r=>{
-          if(businessMonthKey(r.created_at)!==currentMonth)return false
-          const day=businessParts(r.created_at).day
-          return day>=startDay&&day<=endDay
-        }).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)
-        return {label:`M${i+1}`,total}
+        return {
+          label:`M${i+1}`,
+          match:(value:string)=>{
+            if(businessMonthKey(value)!==currentMonth)return false
+            const day=businessParts(value).day
+            return day>=startDay&&day<=endDay
+          }
+        }
+      })
+    }else{
+      const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
+      const current=businessParts(now)
+      buckets=Array.from({length:count},(_,i)=>{
+        const anchor=new Date(Date.UTC(current.year,current.month-1-(count-1-i),1,12,0,0))
+        const y=anchor.getUTCFullYear(),m=anchor.getUTCMonth()+1
+        const key=`${y}-${String(m).padStart(2,'0')}`
+        return {label:new Intl.DateTimeFormat('id-ID',{month:'short',timeZone:'UTC'}).format(anchor),match:(value:string)=>businessMonthKey(value)===key}
       })
     }
 
-    const count=revenuePeriod==='3m'?3:revenuePeriod==='6m'?6:12
-    const current=businessParts(now)
-    return Array.from({length:count},(_,i)=>{
-      const anchor=new Date(Date.UTC(current.year,current.month-1-(count-1-i),1,12,0,0))
-      const y=anchor.getUTCFullYear(),m=anchor.getUTCMonth()+1
-      const key=`${y}-${String(m).padStart(2,'0')}`
-      const total=orders.filter(r=>businessMonthKey(r.created_at)===key).reduce((sum,r)=>sum+Number(r.paid_amount||0),0)
-      return {label:new Intl.DateTimeFormat('id-ID',{month:'short',timeZone:'UTC'}).format(anchor),total}
+    return buckets.map(bucket=>{
+      const bucketOrders=orders.filter(r=>r.status!=='cancelled'&&bucket.match(r.created_at))
+      const orderValue=bucketOrders.reduce((sum,r)=>sum+Number(r.total||0),0)
+      const cashIn=payments.filter(r=>bucket.match(r.created_at)).reduce((sum,r)=>sum+Number(r.amount||0),0)
+      const expense=cash.filter(r=>r.direction==='out'&&bucket.match(r.created_at)).reduce((sum,r)=>sum+Number(r.amount||0),0)
+      const commission=commissions.filter(r=>bucket.match(r.earned_at)).reduce((sum,r)=>sum+Number(r.amount||0),0)
+      return {
+        label:bucket.label,
+        omzet:orderValue,
+        cashIn,
+        net:orderValue-expense-commission,
+        orders:bucketOrders.length
+      }
     })
-  },[orders,revenuePeriod,businessClock])
+  },[orders,payments,cash,commissions,revenuePeriod,businessClock])
 
-  const max=Math.max(1,...chart.map(x=>x.total))
+  const maxMoney=Math.max(1,...chart.flatMap(x=>[x.omzet,x.cashIn,Math.max(0,x.net)]))
+  const maxOrders=Math.max(1,...chart.map(x=>x.orders))
 
-  const revenueLinePoints=useMemo(()=>{
-    const width=720
-    const height=220
-    const padX=28
-    const padY=26
+  const combinedChart=useMemo(()=>{
+    const width=760
+    const height=250
+    const padX=36
+    const padY=30
     const innerW=width-padX*2
     const innerH=height-padY*2
-    const points=chart.map((item,index)=>{
-      const x=padX+(chart.length<=1?innerW/2:(index/(chart.length-1))*innerW)
-      const y=padY+innerH-(Number(item.total||0)/max)*innerH
-      return{x,y,value:Number(item.total||0),label:item.label}
-    })
-    const line=points.map(point=>`${point.x},${point.y}`).join(' ')
-    const area=points.length
-      ? `${points[0].x},${height-padY} ${line} ${points[points.length-1].x},${height-padY}`
-      : ''
-    return{points,line,area,width,height}
-  },[chart,max])
+    const groupW=innerW/Math.max(1,chart.length)
+    const barW=Math.max(8,Math.min(18,groupW/5))
+    const moneyY=(value:number)=>padY+innerH-(Math.max(0,value)/maxMoney)*innerH
+    const orderPoints=chart.map((item,index)=>({
+      x:padX+groupW*(index+.5),
+      y:padY+innerH-(item.orders/maxOrders)*innerH,
+      value:item.orders,
+      label:item.label
+    }))
+    return{width,height,padX,padY,innerH,groupW,barW,moneyY,orderPoints,orderLine:orderPoints.map(p=>`${p.x},${p.y}`).join(' ')}
+  },[chart,maxMoney,maxOrders])
 
   const periodTitle=revenuePeriod==='today'
-    ?'Omzet Hari Ini'
+    ?'Omzet / Barang Masuk Hari Ini'
     :revenuePeriod==='7d'
-    ?'Omzet 7 Hari'
+    ?'Omzet / Barang Masuk 7 Hari'
     :revenuePeriod==='month'
-      ?'Omzet Bulan Ini'
+      ?'Omzet / Barang Masuk Bulan Ini'
       :revenuePeriod==='3m'
-        ?'Omzet 3 Bulan'
+        ?'Omzet / Barang Masuk 3 Bulan'
         :revenuePeriod==='6m'
-          ?'Omzet 6 Bulan'
-          :'Omzet 12 Bulan'
+          ?'Omzet / Barang Masuk 6 Bulan'
+          :'Omzet / Barang Masuk 12 Bulan'
 
   const categoryRevenue=useMemo(()=>{
     const periodStart=businessPeriodStart(revenuePeriod,new Date(businessClock))
@@ -205,10 +231,15 @@ export function DashboardPage() {
 
   const ownerPeriodOrders=useMemo(()=>orders.filter(r=>new Date(r.created_at)>=ownerPeriodStart&&r.status!=='cancelled'),[orders,ownerPeriodStart])
   const ownerPeriodCash=useMemo(()=>cash.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[cash,ownerPeriodStart])
-  const ownerIncome=ownerPeriodCash.filter(r=>r.direction==='in').reduce((s,r)=>s+Number(r.amount),0)
   const ownerExpense=ownerPeriodCash.filter(r=>r.direction==='out').reduce((s,r)=>s+Number(r.amount),0)
-  const ownerProfit=ownerIncome-ownerExpense
   const ownerPeriodPayments=useMemo(()=>payments.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[payments,ownerPeriodStart])
+  const ownerCashIn=ownerPeriodPayments.reduce((s,r)=>s+Number(r.amount||0),0)
+  const ownerOrderValue=ownerPeriodOrders.reduce((s,r)=>s+Number(r.total||0),0)
+  const ownerPeriodCommissions=useMemo(()=>commissions.filter(r=>new Date(r.earned_at)>=ownerPeriodStart),[commissions,ownerPeriodStart])
+  const ownerProductionCommission=ownerPeriodCommissions.filter(r=>r.commission_type==='production').reduce((s,r)=>s+Number(r.amount||0),0)
+  const ownerCourierCommission=ownerPeriodCommissions.filter(r=>r.commission_type==='courier').reduce((s,r)=>s+Number(r.amount||0),0)
+  const ownerCommission=ownerProductionCommission+ownerCourierCommission
+  const ownerProfit=ownerOrderValue-ownerExpense-ownerCommission
   const ownerCash=ownerPeriodPayments.filter(r=>r.method==='cash').reduce((s,r)=>s+Number(r.amount),0)
   const ownerQris=ownerPeriodPayments.filter(r=>r.method==='qris').reduce((s,r)=>s+Number(r.amount),0)
   const ownerTransfer=ownerPeriodPayments.filter(r=>r.method==='transfer').reduce((s,r)=>s+Number(r.amount),0)
@@ -221,8 +252,11 @@ export function DashboardPage() {
       subtitle:periodTitle,
       headers:['Indikator','Nilai'],
       rows:[
-        ['Omzet / Kas Masuk',ownerIncome],
+        ['Omzet / Nilai Barang Masuk',ownerOrderValue],
+        ['Kas Masuk (Terbayar)',ownerCashIn],
         ['Pengeluaran',ownerExpense],
+        ['Komisi Produksi',ownerProductionCommission],
+        ['Komisi Kurir',ownerCourierCommission],
         ['Laba Bersih',ownerProfit],
         ['Piutang Aktif',receivable],
         ['Tunai',ownerCash],
@@ -233,7 +267,7 @@ export function DashboardPage() {
         ['Sedang Diproses',processing],
         ['Siap Diambil',ready]
       ],
-      summary:[['Kas Masuk',ownerIncome],['Kas Keluar',ownerExpense],['Laba Bersih',ownerProfit]]
+      summary:[['Omzet Barang Masuk',ownerOrderValue],['Kas Masuk',ownerCashIn],['Pengeluaran',ownerExpense],['Komisi',ownerCommission],['Laba Bersih',ownerProfit]]
     })
   }
 
@@ -315,7 +349,7 @@ export function DashboardPage() {
       <small className="dashboard-display-device-note">Pengaturan tersimpan di perangkat/browser ini dan tidak mengubah tampilan pengguna lain.</small>
     </section>
     <section className="stats-grid dashboard-stats">
-      <StatCard label="Omzet Hari Ini" value={formatIDR(omzet)} caption={`Pengeluaran ${formatIDR(expense)}`} icon={Banknote}/>
+      <StatCard label="Omzet / Barang Masuk Hari Ini" value={formatIDR(omzet)} caption={`Kas masuk ${formatIDR(cashIn)}`} icon={Banknote}/>
       <StatCard label="Order Hari Ini" value={String(today.length)} caption="Order masuk hari ini" icon={ShoppingBag}/>
       <StatCard label="Sedang Diproses" value={String(processing)} caption="Belum siap diambil" icon={WashingMachine}/>
       <StatCard label="Siap Diambil" value={String(ready)} caption="Menunggu pelanggan" icon={PackageCheck}/>
@@ -326,11 +360,13 @@ export function DashboardPage() {
     </section>
     {isOwner&&<section className="panel owner-business-report">
       <div className="panel-heading">
-        <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Ringkasan keuangan mengikuti periode grafik omzet yang dipilih.</p></div>
+        <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Kas masuk menunjukkan pembayaran yang sudah diterima.</p></div>
       </div>
-      <div className="owner-business-kpis">
-        <div><span>Kas Masuk</span><strong>{formatIDR(ownerIncome)}</strong></div>
+      <div className="owner-business-kpis owner-business-kpis-six">
+        <div><span>Omzet / Barang Masuk</span><strong>{formatIDR(ownerOrderValue)}</strong></div>
+        <div><span>Kas Masuk</span><strong>{formatIDR(ownerCashIn)}</strong></div>
         <div><span>Pengeluaran</span><strong>{formatIDR(ownerExpense)}</strong></div>
+        <div><span>Komisi</span><strong>{formatIDR(ownerCommission)}</strong></div>
         <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih</span><strong>{formatIDR(ownerProfit)}</strong></div>
         <div><span>Piutang Aktif</span><strong>{formatIDR(receivable)}</strong></div>
       </div>
@@ -338,7 +374,7 @@ export function DashboardPage() {
         <div><Banknote size={18}/><span>Tunai</span><b>{formatIDR(ownerCash)}</b></div>
         <div><Smartphone size={18}/><span>QRIS</span><b>{formatIDR(ownerQris)}</b></div>
         <div><Landmark size={18}/><span>Transfer</span><b>{formatIDR(ownerTransfer)}</b></div>
-        <div><ShoppingBag size={18}/><span>Order</span><b>{ownerPeriodOrders.length}</b></div>
+        <div><ShoppingBag size={18}/><span>Jumlah Order Masuk</span><b>{ownerPeriodOrders.length}</b></div>
         <div><WalletCards size={18}/><span>Rata-rata Order</span><b>{formatIDR(ownerAverage)}</b></div>
       </div>
     </section>}
@@ -348,7 +384,7 @@ export function DashboardPage() {
         <div className="panel-heading dashboard-revenue-heading">
           <div>
             <h3>{periodTitle}</h3>
-            <p>{revenuePeriod==='month'?'Ringkasan omzet per minggu pada bulan berjalan.':'Berdasarkan pembayaran order.'}</p>
+            <p>Omzet/barang masuk, kas masuk, laba bersih, dan jumlah order pada periode yang sama.</p>
           </div>
           <div className="revenue-period-tabs">
             <button className={revenuePeriod==='today'?'active':''} onClick={()=>setRevenuePeriod('today')}>Hari Ini</button>
@@ -359,37 +395,46 @@ export function DashboardPage() {
             <button className={revenuePeriod==='12m'?'active':''} onClick={()=>setRevenuePeriod('12m')}>12 Bulan</button>
           </div>
         </div>
-        <div className="revenue-line-chart">
-          <svg viewBox={`0 0 ${revenueLinePoints.width} ${revenueLinePoints.height}`} role="img" aria-label={periodTitle}>
-            <defs>
-              <linearGradient id="revenueAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#42A5F5" stopOpacity=".34"/>
-                <stop offset="100%" stopColor="#42A5F5" stopOpacity=".03"/>
-              </linearGradient>
-              <linearGradient id="revenueLineGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#42A5F5"/>
-                <stop offset="100%" stopColor="#1565C0"/>
-              </linearGradient>
-            </defs>
-
+        <div className="owner-combined-chart">
+          <div className="owner-chart-legend">
+            <span className="legend-order-value">Omzet / Barang Masuk</span>
+            <span className="legend-cash-in">Kas Masuk</span>
+            <span className="legend-net">Laba Bersih</span>
+            <span className="legend-order-count">Jumlah Order</span>
+          </div>
+          <svg viewBox={`0 0 ${combinedChart.width} ${combinedChart.height}`} role="img" aria-label={periodTitle}>
             {[0,1,2,3,4].map(level=>{
-              const y=26+((revenueLinePoints.height-52)/4)*level
-              return <line key={level} x1="28" x2={revenueLinePoints.width-28} y1={y} y2={y} className="revenue-grid-line"/>
+              const y=combinedChart.padY+(combinedChart.innerH/4)*level
+              return <line key={level} x1={combinedChart.padX} x2={combinedChart.width-combinedChart.padX} y1={y} y2={y} className="revenue-grid-line"/>
             })}
-
-            {revenueLinePoints.area&&<polygon points={revenueLinePoints.area} fill="url(#revenueAreaGradient)"/>}
-            {revenueLinePoints.line&&<polyline points={revenueLinePoints.line} fill="none" stroke="url(#revenueLineGradient)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>}
-
-            {revenueLinePoints.points.map((point,index)=><g key={`${point.label}-${index}`}>
-              <circle cx={point.x} cy={point.y} r="7" className="revenue-point-halo"/>
-              <circle cx={point.x} cy={point.y} r="4" className="revenue-point"/>
+            {chart.map((item,index)=>{
+              const center=combinedChart.padX+combinedChart.groupW*(index+.5)
+              const values=[
+                {value:item.omzet,x:center-combinedChart.barW*1.25,cls:'owner-bar-order-value'},
+                {value:item.cashIn,x:center,cls:'owner-bar-cash-in'},
+                {value:Math.max(0,item.net),x:center+combinedChart.barW*1.25,cls:'owner-bar-net'}
+              ]
+              return <g key={`${item.label}-${index}`}>
+                {values.map((bar,barIndex)=>{
+                  const y=combinedChart.moneyY(bar.value)
+                  const h=combinedChart.padY+combinedChart.innerH-y
+                  return <rect key={barIndex} x={bar.x-combinedChart.barW/2} y={y} width={combinedChart.barW} height={Math.max(2,h)} rx="4" className={bar.cls}/>
+                })}
+              </g>
+            })}
+            {combinedChart.orderLine&&<polyline points={combinedChart.orderLine} fill="none" className="owner-order-line"/>}
+            {combinedChart.orderPoints.map((point,index)=><g key={`${point.label}-orders-${index}`}>
+              <circle cx={point.x} cy={point.y} r="5" className="owner-order-point"/>
+              <text x={point.x} y={Math.max(14,point.y-10)} textAnchor="middle" className="owner-order-count-text">{point.value}</text>
             </g>)}
           </svg>
-
-          <div className="revenue-chart-labels">
-            {revenueLinePoints.points.map((point,index)=><div key={`${point.label}-label-${index}`}>
-              <b>{point.label}</b>
-              <span>{formatIDR(point.value)}</span>
+          <div className="owner-chart-labels">
+            {chart.map((item,index)=><div key={`${item.label}-summary-${index}`}>
+              <b>{item.label}</b>
+              <span>Barang {formatIDR(item.omzet)}</span>
+              <span>Kas {formatIDR(item.cashIn)}</span>
+              <span>Laba {formatIDR(item.net)}</span>
+              <strong>{item.orders} order</strong>
             </div>)}
           </div>
         </div>

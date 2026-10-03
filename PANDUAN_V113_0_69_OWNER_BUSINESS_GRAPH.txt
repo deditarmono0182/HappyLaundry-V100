@@ -1,0 +1,13 @@
+HappyLaundry Enterprise V113.0.69 — Owner Business Graph
+
+Perubahan:
+1. Omzet / Barang Masuk = total nilai order yang dibuat pada periode.
+2. Kas Masuk = pembayaran pelanggan yang sudah diterima.
+3. Laba Bersih = Omzet Barang Masuk - Pengeluaran - Komisi Produksi - Komisi Kurir.
+4. Grafik Owner menampilkan bersama:
+   - Omzet / Barang Masuk
+   - Kas Masuk
+   - Laba Bersih
+   - Jumlah Order Masuk
+5. Nilai tiap periode dicantumkan di bawah grafik.
+6. Tidak ada SQL baru.

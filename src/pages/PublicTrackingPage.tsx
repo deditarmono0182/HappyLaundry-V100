@@ -477,6 +477,6 @@ export function PublicTrackingPage(){
       </div>
     </section>}
 
-    <footer className="tracking-footer">HappyLaundry Enterprise V113.0.68 • Status diperbarui oleh petugas laundry.</footer>
+    <footer className="tracking-footer">HappyLaundry Enterprise V113.0.69 • Status diperbarui oleh petugas laundry.</footer>
   </main>
 }
