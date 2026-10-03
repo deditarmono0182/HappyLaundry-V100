@@ -412,3 +412,9 @@ test
 - Kategori Satuan, Express, Kiloan, dan kategori lain ikut tampil sesuai order masuk walaupun belum dibayar.
 - Payroll Owner, laporan biaya payroll, dashboard target, dan Gaji Saya diselaraskan memakai dasar kategori yang sama.
 - SQL 061 memperbarui RPC Gaji Saya agar bagi hasil kategori berbasis order masuk.
+
+
+## V113.0.77 — Category Drilldown
+- Klik kategori Express/Kiloan/Satuan di Dashboard untuk melihat detail order dan layanan pada periode grafik terpilih.
+- Menampilkan tanggal, nomor order, pelanggan, layanan, qty/berat, nilai kontribusi, total kategori dan jumlah order.
+- Tidak perlu SQL baru.

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Banknote, CheckCircle2, Crown, FileSpreadsheet, Landmark, MonitorCog, PackageCheck, ShieldAlert, ShoppingBag, Smartphone, TrendingUp, Users, WalletCards, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
+import { Modal } from '../components/Modal'
 import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
 import { statusLabels } from '../lib/order'
@@ -14,6 +15,9 @@ import { addBusinessDays, businessDateKey, businessDateLabel, businessMonthKey, 
 interface DashboardOrderItem{
   order_id:string
   service_id:string|null
+  service_name:string
+  unit:string
+  quantity:number
   subtotal:number
 }
 
@@ -48,6 +52,7 @@ export function DashboardPage() {
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
   const [revenuePeriod,setRevenuePeriod]=useState<'today'|'7d'|'month'|'3m'|'6m'|'12m'>('7d')
+  const [selectedCategory,setSelectedCategory]=useState<string|null>(null)
   const [businessClock,setBusinessClock]=useState(()=>Date.now())
   const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
     (localStorage.getItem('happylaundry-density') as 'comfort'|'compact'|'ultra')||'compact'
@@ -58,7 +63,7 @@ export function DashboardPage() {
       supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
       supabase.from('v100_cash_entries').select('amount,direction,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
-      supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
+      supabase.from('v100_order_items').select('order_id,service_id,service_name,unit,quantity,subtotal'),
       supabase.from('v100_services').select('id,category'),
       supabase.from('v113_commission_ledger').select('commission_type,amount,earned_at')
     ])
@@ -262,6 +267,40 @@ export function DashboardPage() {
       .map(([category,amount])=>({category,amount,percentage:total>0?(amount/total)*100:0}))
       .sort((a,b)=>b.amount-a.amount)
   },[orders,orderItems,services,revenuePeriod,businessClock])
+
+  const categoryDetails=useMemo(()=>{
+    if(!selectedCategory)return []
+    const periodStart=businessPeriodStart(revenuePeriod,new Date(businessClock))
+    const relevantOrders=orders.filter(o=>new Date(o.created_at)>=periodStart&&o.status!=='cancelled')
+    const orderMap=new Map(relevantOrders.map(o=>[o.id,o]))
+    const serviceCategory=new Map(services.map(s=>[s.id,s.category||'Reguler']))
+
+    return orderItems.flatMap(item=>{
+      const order=orderMap.get(item.order_id)
+      if(!order)return []
+      const category=item.service_id?serviceCategory.get(item.service_id)||'Reguler':'Reguler'
+      if(category!==selectedCategory)return []
+      const orderSubtotal=Math.max(0,Number(order.subtotal||0))
+      const orderTotal=Math.max(0,Number(order.total||0))
+      const discountRatio=orderSubtotal>0?Math.min(1,orderTotal/orderSubtotal):1
+      return [{
+        orderNo:order.order_no,
+        customer:order.customer_name,
+        phone:order.customer_phone,
+        service:item.service_name||selectedCategory,
+        unit:item.unit||'',
+        quantity:Number(item.quantity||0),
+        amount:Number(item.subtotal||0)*discountRatio,
+        date:order.created_at
+      }]
+    }).sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime())
+  },[selectedCategory,orders,orderItems,services,revenuePeriod,businessClock])
+
+  const selectedCategorySummary=useMemo(()=>({
+    total:categoryDetails.reduce((sum,row)=>sum+row.amount,0),
+    ordersCount:new Set(categoryDetails.map(row=>row.orderNo)).size,
+    items:categoryDetails.length
+  }),[categoryDetails])
 
 
   const ownerPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
@@ -494,15 +533,16 @@ export function DashboardPage() {
       {categoryRevenue.length===0
         ? <div className="table-empty">Belum ada omzet kategori pada periode ini.</div>
         : <div className="category-revenue-list">
-            {categoryRevenue.map((item,index)=><div className="category-revenue-row" key={item.category}>
+            {categoryRevenue.map((item,index)=><button type="button" className="category-revenue-row category-revenue-button" key={item.category} onClick={()=>setSelectedCategory(item.category)} title={`Lihat detail ${item.category}`}>
               <span className="category-rank">{index+1}</span>
               <div className="category-revenue-name">
                 <b>{item.category}</b>
+                <small>Klik untuk lihat detail layanan & order</small>
                 <div className="category-progress"><i style={{width:`${Math.max(2,item.percentage)}%`}}/></div>
               </div>
               <strong>{formatIDR(item.amount)}</strong>
               <span className="category-percent">{item.percentage.toFixed(1)}%</span>
-            </div>)}
+            </button>)}
           </div>}
     </section>
     <section className="panel dashboard-top-customers">
@@ -553,5 +593,30 @@ export function DashboardPage() {
       <tbody>{orders.slice(0,10).map(r=><tr key={r.id}><td><b>{r.order_no}</b></td><td><b>{r.customer_name}</b><small>{r.customer_phone}</small></td><td><span className={`badge status-${r.status}`}>{statusLabels[r.status]}</span></td><td>{formatIDR(r.total)}</td><td>{formatIDR(Math.max(0,Number(r.total)-Number(r.paid_amount)))}</td><td>{new Date(r.created_at).toLocaleString('id-ID')}</td></tr>)}
       {orders.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada order.</td></tr>}</tbody></table></div>
     </section>
+    {selectedCategory&&<Modal title={`Detail Kategori ${selectedCategory} — ${selectedPeriodLabel}`} onClose={()=>setSelectedCategory(null)} className="category-detail-modal" bodyClassName="category-detail-body">
+      <div className="category-detail-summary">
+        <div><span>Total Nilai</span><b>{formatIDR(selectedCategorySummary.total)}</b></div>
+        <div><span>Order</span><b>{selectedCategorySummary.ordersCount}</b></div>
+        <div><span>Item Layanan</span><b>{selectedCategorySummary.items}</b></div>
+      </div>
+      <div className="table-wrap category-detail-table">
+        <table>
+          <thead><tr><th>Tanggal</th><th>Order</th><th>Pelanggan</th><th>Layanan</th><th>Qty</th><th>Nilai</th></tr></thead>
+          <tbody>
+            {categoryDetails.length===0
+              ? <tr><td colSpan={6} className="table-empty">Tidak ada detail pada periode ini.</td></tr>
+              : categoryDetails.map((row,index)=><tr key={`${row.orderNo}-${row.service}-${index}`}>
+                  <td>{businessDateLabel(row.date)}</td>
+                  <td><b>{row.orderNo}</b></td>
+                  <td><b>{row.customer}</b><small>{row.phone||'-'}</small></td>
+                  <td>{row.service}</td>
+                  <td>{row.quantity.toLocaleString('id-ID')} {row.unit}</td>
+                  <td><b>{formatIDR(row.amount)}</b></td>
+                </tr>)}
+          </tbody>
+        </table>
+      </div>
+      <div className="category-detail-actions"><button type="button" className="secondary-button" onClick={()=>setSelectedCategory(null)}>Tutup</button></div>
+    </Modal>}
   </>
 }

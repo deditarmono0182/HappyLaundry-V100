@@ -9882,3 +9882,18 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   .payroll-detail-summary span{font-size:10px!important}
   .payroll-detail-summary b{font-size:13px!important}
 }
+
+/* V113.0.77 — Category drill-down */
+.category-revenue-button{width:100%;border:0;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.category-revenue-button:hover{background:#f7fbff}
+.category-revenue-name small{display:block;margin:3px 0 7px;color:#7b9298;font-size:10px;font-weight:650}
+.category-detail-modal{width:min(980px,96vw)}
+.category-detail-body{padding:18px}
+.category-detail-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.category-detail-summary>div{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#f8fbfa;display:grid;gap:4px}
+.category-detail-summary span{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.category-detail-summary b{font-size:18px;color:var(--text)}
+.category-detail-table{max-height:58vh;border:1px solid var(--border);border-radius:12px}
+.category-detail-table table{min-width:760px}
+.category-detail-actions{display:flex;justify-content:flex-end;margin-top:14px}
+@media(max-width:700px){.category-detail-summary{grid-template-columns:1fr 1fr}.category-detail-summary>div:first-child{grid-column:1/-1}.category-detail-body{padding:12px}}
