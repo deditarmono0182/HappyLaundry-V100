@@ -9897,3 +9897,156 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .category-detail-table table{min-width:760px}
 .category-detail-actions{display:flex;justify-content:flex-end;margin-top:14px}
 @media(max-width:700px){.category-detail-summary{grid-template-columns:1fr 1fr}.category-detail-summary>div:first-child{grid-column:1/-1}.category-detail-body{padding:12px}}
+
+
+/* =========================================================
+   HappyLaundry V113.0.79 — Clean Category Ranking UI
+   ========================================================= */
+.dashboard-category-revenue .category-revenue-list{
+  display:grid!important;
+  gap:10px!important;
+  margin-top:8px!important;
+}
+.dashboard-category-revenue .category-revenue-row.category-revenue-button{
+  width:100%!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:38px minmax(0,1fr) auto 72px!important;
+  gap:14px!important;
+  align-items:center!important;
+  margin:0!important;
+  padding:13px 14px!important;
+  border:1px solid #dceae5!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  box-shadow:0 3px 12px rgba(20,66,57,.04)!important;
+  text-align:left!important;
+  color:inherit!important;
+  cursor:pointer!important;
+  overflow:hidden!important;
+}
+.dashboard-category-revenue .category-revenue-row.category-revenue-button:hover{
+  background:#f8fcfb!important;
+  border-color:#b8d9ce!important;
+  transform:translateY(-1px);
+}
+.dashboard-category-revenue .category-rank{
+  width:32px!important;
+  height:32px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:50%!important;
+  background:#e8f4ff!important;
+  color:#0872cf!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  flex:none!important;
+}
+.dashboard-category-revenue .category-revenue-name{
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-rows:auto auto!important;
+  column-gap:10px!important;
+  row-gap:8px!important;
+  align-items:center!important;
+}
+.dashboard-category-revenue .category-revenue-name b{
+  min-width:0!important;
+  color:#103f38!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.dashboard-category-revenue .category-revenue-name small{
+  grid-column:2!important;
+  grid-row:1!important;
+  margin:0!important;
+  padding:4px 8px!important;
+  border-radius:999px!important;
+  background:#f0f7ff!important;
+  color:#176bbb!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.dashboard-category-revenue .category-progress{
+  grid-column:1 / -1!important;
+  grid-row:2!important;
+  width:100%!important;
+  height:7px!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border-radius:999px!important;
+  background:#e5eef3!important;
+}
+.dashboard-category-revenue .category-progress i{
+  display:block!important;
+  height:100%!important;
+  border-radius:999px!important;
+  background:linear-gradient(90deg,#258ee8,#19a6c9)!important;
+}
+.dashboard-category-revenue .category-revenue-row strong{
+  min-width:112px!important;
+  color:#0b463d!important;
+  text-align:right!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+.dashboard-category-revenue .category-percent{
+  min-width:58px!important;
+  display:inline-flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  padding:6px 8px!important;
+  border-radius:999px!important;
+  background:#e9f3ff!important;
+  color:#0765bd!important;
+  font-size:11px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+@media(max-width:700px){
+  .dashboard-category-revenue .category-revenue-row.category-revenue-button{
+    grid-template-columns:34px minmax(0,1fr) auto!important;
+    gap:10px!important;
+    padding:11px 12px!important;
+  }
+  .dashboard-category-revenue .category-rank{
+    width:30px!important;
+    height:30px!important;
+  }
+  .dashboard-category-revenue .category-revenue-name{
+    grid-column:2!important;
+    grid-row:1 / span 2!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto auto auto!important;
+    row-gap:6px!important;
+  }
+  .dashboard-category-revenue .category-revenue-name small{
+    grid-column:1!important;
+    grid-row:2!important;
+    justify-self:start!important;
+  }
+  .dashboard-category-revenue .category-progress{
+    grid-column:1!important;
+    grid-row:3!important;
+  }
+  .dashboard-category-revenue .category-revenue-row strong{
+    grid-column:3!important;
+    grid-row:1!important;
+    min-width:0!important;
+    font-size:12px!important;
+  }
+  .dashboard-category-revenue .category-percent{
+    grid-column:3!important;
+    grid-row:2!important;
+    min-width:52px!important;
+    font-size:10px!important;
+  }
+}

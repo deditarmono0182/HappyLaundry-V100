@@ -425,3 +425,9 @@ test
 - Menambahkan dropdown Kategori Layanan di halaman Order.
 - Order multi-kategori tetap muncul jika salah satu item cocok dengan kategori yang dipilih.
 - Tidak perlu SQL baru.
+
+
+## V113.0.79 — Clean Category Ranking UI
+- Merapikan Omzet / Barang Masuk per Kategori menjadi ranking card yang lega dan tidak tumpang tindih.
+- Nama kategori, nominal, persentase, progress bar, dan tombol Lihat detail tetap terlihat jelas.
+- Tidak ada perubahan database / SQL baru.

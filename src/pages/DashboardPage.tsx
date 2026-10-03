@@ -537,7 +537,7 @@ export function DashboardPage() {
               <span className="category-rank">{index+1}</span>
               <div className="category-revenue-name">
                 <b>{item.category}</b>
-                <small>Klik untuk lihat detail layanan & order</small>
+                <small>Lihat detail</small>
                 <div className="category-progress"><i style={{width:`${Math.max(2,item.percentage)}%`}}/></div>
               </div>
               <strong>{formatIDR(item.amount)}</strong>
