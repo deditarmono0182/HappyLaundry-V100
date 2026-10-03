@@ -70,6 +70,8 @@ interface CashAdvance{
   remaining_amount:number
   note:string|null
   issued_at:string
+  cancelled_at?:string|null
+  cancel_reason?:string|null
 }
 
 interface CashAdvanceDeduction{
@@ -159,6 +161,8 @@ export function PayrollPage(){
   const[paymentEmployee,setPaymentEmployee]=useState<Employee|null>(null)
   const[cashAdvanceEmployee,setCashAdvanceEmployee]=useState<Employee|null>(null)
   const[cashAdvanceForm,setCashAdvanceForm]=useState({amount:'0',note:''})
+  const[cancelCashAdvance,setCancelCashAdvance]=useState<CashAdvance|null>(null)
+  const[cancelCashAdvanceReason,setCancelCashAdvanceReason]=useState('')
   const[paymentForm,setPaymentForm]=useState({amount:'0',payment_method:'Transfer',note:''})
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
@@ -181,7 +185,7 @@ export function PayrollPage(){
       supabase.from('v111_employee_revenue_shares').select('*'),
       supabase.from('v111_payroll_adjustments').select('*').eq('payroll_month',range.start),
       supabase.from('v113_payroll_payments').select('*').eq('payroll_month',range.start).order('paid_at',{ascending:false}),
-      supabase.from('v113072_employee_cash_advances').select('id,employee_id,amount,remaining_amount,note,issued_at').order('issued_at',{ascending:false}),
+      supabase.from('v113072_employee_cash_advances').select('id,employee_id,amount,remaining_amount,note,issued_at,cancelled_at,cancel_reason').order('issued_at',{ascending:false}),
       supabase.from('v113072_cash_advance_deductions').select('id,cash_advance_id,employee_id,payroll_month,amount,created_at').eq('payroll_month',range.start),
       supabase.from('v113_employee_commission_settings').select('*'),
       supabase.from('v113_commission_ledger').select('*').gte('earned_at',`${range.start}T00:00:00`).lte('earned_at',`${range.end}T23:59:59.999`),
@@ -337,9 +341,10 @@ export function PayrollPage(){
       .filter(item=>item.employee_id===employee.id)
       .reduce((sum,item)=>sum+Number(item.amount||0),0)
     const cashAdvanceOutstanding=cashAdvances
-      .filter(item=>item.employee_id===employee.id)
+      .filter(item=>item.employee_id===employee.id&&!item.cancelled_at)
       .reduce((sum,item)=>sum+Number(item.remaining_amount||0),0)
     const total=Math.max(0,grossTotal-cashAdvanceApplied)
+    const payrollBalance=total-cashAdvanceOutstanding
     const paymentHistory=payrollPayments.filter(item=>item.employee_id===employee.id)
     const paidAmount=paymentHistory.reduce((sum,item)=>sum+Number(item.amount||0),0)
     const outstanding=Math.max(0,total-paidAmount)
@@ -351,7 +356,7 @@ export function PayrollPage(){
       shareDetails,revenueShare,productionCommission,courierCommission,orderCommission,
       commissionOrderCount:new Set(employeeLedger.map(item=>item.order_id)).size,
       commissionDetails:[...employeeLedger].sort((a,b)=>new Date(b.earned_at).getTime()-new Date(a.earned_at).getTime()),
-      bonus,grossTotal,cashAdvanceApplied,cashAdvanceOutstanding,total,paymentHistory,paidAmount,outstanding,paymentStatus
+      bonus,grossTotal,cashAdvanceApplied,cashAdvanceOutstanding,total,payrollBalance,paymentHistory,paidAmount,outstanding,paymentStatus
     }
   }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap,payrollPayments,cashAdvances,cashAdvanceDeductions])
 
@@ -575,6 +580,23 @@ export function PayrollPage(){
     setCashAdvanceEmployee(null)
     setCashAdvanceForm({amount:'0',note:''})
     setSuccess(`Kas bon ${employeeName} sebesar ${formatRupiah(amount)} berhasil dicatat${deduction>0?` dan ${formatRupiah(deduction)} langsung dipotong dari gaji periode ini.`:'.'}`)
+    await load()
+    setBusy(false)
+  }
+
+  const confirmCancelCashAdvance=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!cancelCashAdvance)return
+    const reason=cancelCashAdvanceReason.trim()
+    if(!reason){setMessage('Alasan pembatalan kas bon wajib diisi.');return}
+    setBusy(true);setMessage('');setSuccess('')
+    const result=await supabase.rpc('v113074_cancel_cash_advance',{
+      p_cash_advance_id:cancelCashAdvance.id,
+      p_reason:reason
+    })
+    if(result.error){setMessage(result.error.message);setBusy(false);return}
+    setCancelCashAdvance(null);setCancelCashAdvanceReason('')
+    setSuccess('Kas bon berhasil dibatalkan. Potongan gaji yang belum dibayar sudah dikembalikan otomatis.')
     await load()
     setBusy(false)
   }
@@ -838,10 +860,10 @@ export function PayrollPage(){
                 </td>
                 <td><b>{formatRupiah(r.grossTotal)}</b></td>
                 <td><b className="payroll-deduction">− {formatRupiah(r.cashAdvanceApplied)}</b><small>Sisa {formatRupiah(r.cashAdvanceOutstanding)}</small></td>
-                <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
+                <td><b className={`payroll-total ${r.payrollBalance<0?'negative':''}`}>{formatRupiah(r.payrollBalance)}</b></td>
                 <td><b>{formatRupiah(r.paidAmount)}</b></td>
                 <td><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
-                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
+                <td><span className={`payroll-payment-status ${r.payrollBalance<0?'debt':r.paymentStatus}`}>{r.payrollBalance<0?'Saldo Minus':r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
                 <td>
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
@@ -870,7 +892,7 @@ export function PayrollPage(){
           <div><span>Gaji Kotor</span><b>{formatRupiah(row?.grossTotal||0)}</b></div>
           <div><span>Potongan Kas Bon</span><b>− {formatRupiah(row?.cashAdvanceApplied||0)}</b></div>
           <div><span>Sisa Kas Bon</span><b>{formatRupiah(row?.cashAdvanceOutstanding||0)}</b></div>
-          <div><span>Gaji Bersih</span><b>{formatRupiah(row?.total||0)}</b></div>
+          <div><span>Saldo Gaji Setelah Kas Bon</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
           <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
           <div><span>Sisa Gaji</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
         </div>
@@ -900,15 +922,17 @@ export function PayrollPage(){
         </div>
         <div className="table-wrap payroll-payment-history-wrap">
           <table className="payroll-commission-detail">
-            <thead><tr><th>Tanggal</th><th>Nominal</th><th>Sisa</th><th>Keterangan</th></tr></thead>
+            <thead><tr><th>Tanggal</th><th>Nominal</th><th>Sisa</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
             <tbody>
-              {cashHistory.map(item=><tr key={item.id}>
+              {cashHistory.map(item=><tr key={item.id} className={item.cancelled_at?'cash-advance-cancelled':''}>
                 <td>{new Date(item.issued_at).toLocaleString('id-ID')}</td>
                 <td><b>{formatRupiah(Number(item.amount||0))}</b></td>
-                <td>{formatRupiah(Number(item.remaining_amount||0))}</td>
-                <td>{item.note||'-'}</td>
+                <td>{item.cancelled_at?'-':formatRupiah(Number(item.remaining_amount||0))}</td>
+                <td><span className={`cash-advance-status ${item.cancelled_at?'cancelled':'active'}`}>{item.cancelled_at?'Dibatalkan':'Aktif'}</span></td>
+                <td>{item.cancelled_at?`Batal: ${item.cancel_reason||'-'}`:(item.note||'-')}</td>
+                <td>{!item.cancelled_at&&<button className="finance-row-action danger-soft" onClick={()=>{setCancelCashAdvance(item);setCancelCashAdvanceReason('')}}><Trash2 size={14}/>Batalkan</button>}</td>
               </tr>)}
-              {cashHistory.length===0&&<tr><td colSpan={4} className="table-empty">Belum ada kas bon.</td></tr>}
+              {cashHistory.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada kas bon.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -938,6 +962,19 @@ export function PayrollPage(){
         </div>
       </Modal>
     })()}
+
+    {cancelCashAdvance&&<Modal title="Batalkan Kas Bon" onClose={()=>!busy&&setCancelCashAdvance(null)}>
+      <form className="modal-form" onSubmit={confirmCancelCashAdvance}>
+        <div className="payroll-setting-note"><Trash2 size={18}/><div><b>Kas Bon {formatRupiah(Number(cancelCashAdvance.amount||0))}</b><span>Pembatalan tidak menghapus riwayat. Jika potongan gaji belum dibayar, potongan akan dikembalikan otomatis.</span></div></div>
+        <label>Alasan Pembatalan
+          <textarea rows={3} value={cancelCashAdvanceReason} onChange={e=>setCancelCashAdvanceReason(e.target.value)} placeholder="Contoh: salah input nominal / kas bon dibatalkan"/>
+        </label>
+        <div className="modal-actions">
+          <button type="button" className="secondary-button" onClick={()=>setCancelCashAdvance(null)} disabled={busy}>Batal</button>
+          <button className="danger-button" disabled={busy||!cancelCashAdvanceReason.trim()}><Trash2 size={16}/>{busy?'Memproses...':'Batalkan Kas Bon'}</button>
+        </div>
+      </form>
+    </Modal>}
 
     {cashAdvanceEmployee&&(()=>{
       const row=payrollRows.find(item=>item.employee.id===cashAdvanceEmployee.id)
@@ -969,7 +1006,7 @@ export function PayrollPage(){
       return <Modal title={`Pembayaran Gaji — ${paymentEmployee.full_name}`} onClose={()=>!busy&&setPaymentEmployee(null)}>
         <form className="modal-form" onSubmit={savePayrollPayment}>
           <div className="payroll-payment-card">
-            <div><span>Gaji Bersih</span><b>{formatRupiah(row?.total||0)}</b></div>
+            <div><span>Saldo Gaji Setelah Kas Bon</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
             <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
           </div>

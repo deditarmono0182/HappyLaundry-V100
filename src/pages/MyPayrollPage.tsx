@@ -11,7 +11,7 @@ type CommissionDetail={
   order_id:string;order_no:string;type:'production'|'courier';base_amount:number;percent:number;amount:number;earned_at:string
 }
 type PaymentHistory={id:string;amount:number;payment_method:string;note:string|null;paid_at:string}
-type CashAdvanceHistory={id:string;amount:number;remaining_amount:number;note:string|null;issued_at:string}
+type CashAdvanceHistory={id:string;amount:number;remaining_amount:number;note:string|null;issued_at:string;cancelled_at?:string|null;cancel_reason?:string|null}
 type MyPayroll={
   employee:{id:string;full_name:string;login_id:string}
   payroll_month:string
@@ -19,7 +19,7 @@ type MyPayroll={
   attendance_rate:number;attendance_pay:number;allowance:number;bonus:number;revenue_share:number
   production_commission:number;courier_commission:number;gross_total:number
   cash_advance_applied:number;cash_advance_outstanding:number;cash_advance_history:CashAdvanceHistory[]
-  net_total:number;paid_amount:number;remaining_pay:number
+  net_total:number;payroll_balance:number;paid_amount:number;remaining_pay:number
   commission_details:CommissionDetail[];payment_history:PaymentHistory[]
 }
 
@@ -55,14 +55,16 @@ export function MyPayrollPage(){
       const gross=attendancePay+Number(b.allowance||0)+Number(b.bonus||0)+share+production+courier
       const applied=Number(b.cash_advance_applied||0)
       const net=Math.max(0,gross-applied)
+      const outstandingCashAdvance=Number(b.cash_advance_outstanding||0)
+      const payrollBalance=net-outstandingCashAdvance
       const paid=Number(b.paid_amount||0)
       setData({
         ...b,
         present_days:present,permission_days:Number(b.permission_days||0),sick_days:Number(b.sick_days||0),absent_days:Number(b.absent_days||0),
         attendance_rate:attendanceRate,attendance_pay:attendancePay,allowance:Number(b.allowance||0),bonus:Number(b.bonus||0),
         revenue_share:share,production_commission:production,courier_commission:courier,gross_total:gross,
-        cash_advance_applied:applied,cash_advance_outstanding:Number(b.cash_advance_outstanding||0),
-        net_total:net,paid_amount:paid,remaining_pay:Math.max(0,net-paid),commission_details:details,
+        cash_advance_applied:applied,cash_advance_outstanding:outstandingCashAdvance,
+        net_total:net,payroll_balance:payrollBalance,paid_amount:paid,remaining_pay:Math.max(0,net-paid),commission_details:details,
         cash_advance_history:(b.cash_advance_history||[]) as CashAdvanceHistory[],payment_history:(b.payment_history||[]) as PaymentHistory[]
       } as MyPayroll)
     }
@@ -73,6 +75,7 @@ export function MyPayrollPage(){
 
   const status=useMemo(()=>{
     if(!data)return '-'
+    if(data.payroll_balance<0)return 'Saldo Minus'
     if(data.gross_total>0&&data.net_total<=0&&data.cash_advance_applied>0)return 'Terpotong Kas Bon'
     if(data.net_total<=0&&data.paid_amount<=0)return 'Nihil'
     if(data.remaining_pay<=0)return 'Lunas'
@@ -99,7 +102,7 @@ export function MyPayrollPage(){
       <section className="stats-grid my-payroll-stats">
         <StatCard icon={WalletCards} label="Gaji Kotor" value={formatRupiah(Number(data.gross_total||0))} caption={`${data.present_days||0} hari hadir`}/>
         <StatCard icon={HandCoins} label="Potongan Kas Bon" value={formatRupiah(Number(data.cash_advance_applied||0))} caption={`Sisa kas bon ${formatRupiah(Number(data.cash_advance_outstanding||0))}`}/>
-        <StatCard icon={CreditCard} label="Gaji Bersih" value={formatRupiah(Number(data.net_total||0))} caption={`Status: ${status}`}/>
+        <StatCard icon={CreditCard} label="Saldo Gaji" value={formatRupiah(Number(data.payroll_balance||0))} caption={`Status: ${status}`}/>
         <StatCard icon={CheckCircle2} label="Sudah Dibayar" value={formatRupiah(Number(data.paid_amount||0))} caption={`Sisa ${formatRupiah(Number(data.remaining_pay||0))}`}/>
       </section>
 
@@ -114,7 +117,7 @@ export function MyPayrollPage(){
           <div><span>Komisi Kurir</span><b>{formatRupiah(Number(data.courier_commission||0))}</b></div>
           <div className="emphasis"><span>Gaji Kotor</span><b>{formatRupiah(Number(data.gross_total||0))}</b></div>
           <div className="deduction"><span>Kas Bon Dipotong</span><b>− {formatRupiah(Number(data.cash_advance_applied||0))}</b></div>
-          <div className="emphasis"><span>Gaji Bersih</span><b>{formatRupiah(Number(data.net_total||0))}</b></div>
+          <div className={`emphasis ${data.payroll_balance<0?'negative':''}`}><span>Saldo Gaji Setelah Kas Bon</span><b>{formatRupiah(Number(data.payroll_balance||0))}</b><small>{data.payroll_balance<0?'Kas bon lebih besar dari hak gaji periode ini':''}</small></div>
         </div>
       </section>
 
@@ -138,7 +141,7 @@ export function MyPayrollPage(){
         <div className="table-wrap"><table className="payroll-commission-detail">
           <thead><tr><th>Tanggal</th><th>Nominal</th><th>Sisa</th><th>Keterangan</th></tr></thead>
           <tbody>
-            {(data.cash_advance_history||[]).map(r=><tr key={r.id}><td>{new Date(r.issued_at).toLocaleString('id-ID')}</td><td><b>{formatRupiah(Number(r.amount||0))}</b></td><td>{formatRupiah(Number(r.remaining_amount||0))}</td><td>{r.note||'-'}</td></tr>)}
+            {(data.cash_advance_history||[]).map(r=><tr key={r.id} className={r.cancelled_at?'cash-advance-cancelled':''}><td>{new Date(r.issued_at).toLocaleString('id-ID')}</td><td><b>{formatRupiah(Number(r.amount||0))}</b></td><td>{r.cancelled_at?'-':formatRupiah(Number(r.remaining_amount||0))}</td><td>{r.cancelled_at?`Dibatalkan: ${r.cancel_reason||'-'}`:(r.note||'-')}</td></tr>)}
             {(!data.cash_advance_history||data.cash_advance_history.length===0)&&<tr><td colSpan={4} className="table-empty">Belum ada kas bon.</td></tr>}
           </tbody>
         </table></div>

@@ -9858,3 +9858,27 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 .info-box{padding:11px 12px;border-radius:12px;background:#eff8ff;border:1px solid #cfe6f6;color:#315f7f;font-size:12px;line-height:1.45}
 @media(max-width:900px){.my-payroll-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.my-payroll-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.my-payroll-toolbar{display:grid;grid-template-columns:1fr}.my-payroll-toolbar label,.my-payroll-toolbar input,.my-payroll-toolbar button{width:100%}.my-payroll-grid{grid-template-columns:1fr}.my-payroll-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* =========================================================
+   HappyLaundry V113.0.74 — Compact Payroll + Safe Cash Advance Cancel
+   ========================================================= */
+.payroll-table{min-width:1040px!important;font-size:10.5px}
+.payroll-table th,.payroll-table td{padding:7px 8px!important}
+.payroll-table th{font-size:9.5px!important;white-space:nowrap}
+.payroll-table td small{font-size:8.7px!important;margin-top:2px}
+.payroll-table .payroll-bonus-input{width:88px;height:30px;padding:0 6px}
+.payroll-row-actions{gap:4px!important;min-width:132px!important}
+.payroll-row-actions .finance-row-action{padding:6px 7px!important;font-size:9px!important}
+.payroll-total.negative,.payroll-negative,.my-payroll-grid .negative b{color:#c62828!important}
+.payroll-payment-status.debt{background:#fff1f2;color:#b42318;border:1px solid #fecaca}
+.cash-advance-status{display:inline-flex;padding:4px 7px;border-radius:999px;font-size:9px;font-weight:900;white-space:nowrap}
+.cash-advance-status.active{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.cash-advance-status.cancelled{background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1}
+.cash-advance-cancelled{opacity:.68}
+.danger-soft{background:#fff5f5!important;border-color:#fecaca!important;color:#b42318!important}
+@media(max-width:760px){
+  .payroll-detail-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+  .payroll-detail-summary>div{padding:8px 9px!important}
+  .payroll-detail-summary span{font-size:10px!important}
+  .payroll-detail-summary b{font-size:13px!important}
+}

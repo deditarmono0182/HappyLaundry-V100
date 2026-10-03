@@ -388,3 +388,13 @@ Laporan Owner membedakan omzet terbayar dari order masuk, mengurangi komisi prod
 ## V113.0.73 — Build Fix
 - Memperbaiki PageHeader Gaji Saya yang belum mengirim prop eyebrow wajib.
 - Tidak ada perubahan database / SQL baru.
+test
+
+
+## V113.0.74 — Kas Bon Safe Cancel + Compact Payroll
+- Owner dapat membatalkan kas bon dengan alasan wajib dan audit tetap tersimpan.
+- Potongan kas bon yang belum masuk payroll berbayar dikembalikan otomatis.
+- Jika payroll terkait sudah dibayar, pembatalan otomatis diblokir demi konsistensi data.
+- Saldo gaji karyawan dapat tampil minus bila kas bon melebihi hak gaji.
+- Tabel payroll dibuat lebih padat.
+- Memerlukan SQL 060.
