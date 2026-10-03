@@ -212,23 +212,24 @@ export function ProfitTargetDashboardPage(){
   },[payrollShares])
 
   const payrollForMonth=useCallback((month:Date)=>{
-    const monthPayments=payments.filter(row=>inMonth(row.created_at,month))
+    const monthOrders=orders.filter(row=>row.status!=='cancelled'&&inMonth(row.created_at,month))
     const categoryRevenue:Record<string,number>={}
 
-    for(const payment of monthPayments){
-      const orderItems=itemsByOrder.get(payment.order_id)||[]
+    // V113.0.76: bagi hasil kategori menggunakan nilai barang/order masuk.
+    for(const order of monthOrders){
+      const orderItems=itemsByOrder.get(order.id)||[]
       const itemTotal=orderItems.reduce((sum,item)=>sum+Math.max(0,Number(item.subtotal||0)),0)
-      const paymentAmount=Math.max(0,Number(payment.amount||0))
-      if(paymentAmount<=0)continue
+      const orderTotal=Math.max(0,Number(order.total||0))
+      if(orderTotal<=0)continue
       if(orderItems.length===0||itemTotal<=0){
-        categoryRevenue.Kiloan=(categoryRevenue.Kiloan||0)+paymentAmount
+        categoryRevenue.Kiloan=(categoryRevenue.Kiloan||0)+orderTotal
         continue
       }
       for(const item of orderItems){
         const subtotal=Math.max(0,Number(item.subtotal||0))
         if(subtotal<=0)continue
         const category=item.service_id?serviceCategory.get(item.service_id)||'Kiloan':'Kiloan'
-        categoryRevenue[category]=(categoryRevenue[category]||0)+(paymentAmount*(subtotal/itemTotal))
+        categoryRevenue[category]=(categoryRevenue[category]||0)+(orderTotal*(subtotal/itemTotal))
       }
     }
 
@@ -255,7 +256,7 @@ export function ProfitTargetDashboardPage(){
       }
     })
     return{rows,total:rows.reduce((sum,row)=>sum+row.total,0)}
-  },[payments,itemsByOrder,serviceCategory,payrollAdjustments,employees,settingMap,attendance,sharesByEmployee])
+  },[orders,itemsByOrder,serviceCategory,payrollAdjustments,employees,settingMap,attendance,sharesByEmployee])
 
   const currentPayroll=useMemo(()=>payrollForMonth(currentMonth),[payrollForMonth])
   const previousPayroll=useMemo(()=>payrollForMonth(previousMonth),[payrollForMonth])

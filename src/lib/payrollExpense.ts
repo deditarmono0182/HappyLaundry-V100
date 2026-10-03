@@ -31,6 +31,7 @@ interface PayrollSetting{ employee_id:string; attendance_rate:number; monthly_al
 interface PayrollShare{ employee_id:string; category:string; share_percent:number }
 interface PayrollAdjustment{ employee_id:string; payroll_month:string; bonus:number }
 interface Payment{ order_id:string; amount:number; created_at:string }
+interface PayrollOrder{ id:string; subtotal:number; total:number; status:string; created_at:string }
 interface OrderItem{ order_id:string; service_id:string|null; subtotal:number }
 interface Service{ id:string; category:string }
 
@@ -70,13 +71,14 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
   const lastDay=new Date(last.getFullYear(),last.getMonth()+1,0)
   const lastDate=dateKey(lastDay)
 
-  const [emp,a,ps,shr,adj,p,oi,sv,cl]=await Promise.all([
+  const [emp,a,ps,shr,adj,p,o,oi,sv,cl]=await Promise.all([
     supabase.from('v109_users').select('id,full_name').eq('is_active',true).order('full_name'),
     supabase.from('v111_attendance').select('employee_id,attendance_date,status').gte('attendance_date',firstMonth).lte('attendance_date',lastDate),
     supabase.from('v111_employee_payroll_settings').select('employee_id,attendance_rate,monthly_allowance'),
     supabase.from('v111_employee_revenue_shares').select('employee_id,category,share_percent'),
     supabase.from('v111_payroll_adjustments').select('employee_id,payroll_month,bonus').gte('payroll_month',firstMonth).lte('payroll_month',monthStartKey(last)),
     supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${firstMonth}T00:00:00`).lte('created_at',`${lastDate}T23:59:59.999`),
+    supabase.from('v100_orders_view').select('id,subtotal,total,status,created_at').gte('created_at',`${firstMonth}T00:00:00`).lte('created_at',`${lastDate}T23:59:59.999`),
     supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
     supabase.from('v100_services').select('id,category'),
     supabase.from('v113_commission_ledger')
@@ -85,7 +87,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
       .lte('earned_at',`${lastDate}T23:59:59.999`)
   ])
 
-  const error=emp.error||a.error||ps.error||shr.error||adj.error||p.error||oi.error||sv.error||cl.error
+  const error=emp.error||a.error||ps.error||shr.error||adj.error||p.error||o.error||oi.error||sv.error||cl.error
   if(error)throw error
 
   const employees=(emp.data as Employee[])||[]
@@ -94,6 +96,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
   const shares=(shr.data as PayrollShare[])||[]
   const adjustments=(adj.data as PayrollAdjustment[])||[]
   const payments=(p.data as Payment[])||[]
+  const orders=(o.data as PayrollOrder[])||[]
   const orderItems=(oi.data as OrderItem[])||[]
   const services=(sv.data as Service[])||[]
   const commissionLedger=(cl.data as CommissionLedgerRow[])||[]
@@ -117,23 +120,25 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
 
   for(const month of months){
     const mStart=monthStartKey(month)
-    const monthPayments=payments.filter(row=>inMonth(row.created_at,month))
+    const monthOrders=orders.filter(row=>row.status!=='cancelled'&&inMonth(row.created_at,month))
     const categoryRevenue:Record<string,number>={}
 
-    for(const payment of monthPayments){
-      const list=itemsByOrder.get(payment.order_id)||[]
+    // V113.0.76: bagi hasil payroll mengikuti nilai barang/order masuk,
+    // bukan hanya pembayaran yang sudah diterima.
+    for(const order of monthOrders){
+      const list=itemsByOrder.get(order.id)||[]
       const itemTotal=list.reduce((sum,item)=>sum+Math.max(0,Number(item.subtotal||0)),0)
-      const paymentAmount=Math.max(0,Number(payment.amount||0))
-      if(paymentAmount<=0)continue
+      const orderTotal=Math.max(0,Number(order.total||0))
+      if(orderTotal<=0)continue
       if(list.length===0||itemTotal<=0){
-        categoryRevenue.Kiloan=(categoryRevenue.Kiloan||0)+paymentAmount
+        categoryRevenue.Kiloan=(categoryRevenue.Kiloan||0)+orderTotal
         continue
       }
       for(const item of list){
         const subtotal=Math.max(0,Number(item.subtotal||0))
         if(subtotal<=0)continue
         const category=item.service_id?serviceCategory.get(item.service_id)||'Kiloan':'Kiloan'
-        categoryRevenue[category]=(categoryRevenue[category]||0)+paymentAmount*(subtotal/itemTotal)
+        categoryRevenue[category]=(categoryRevenue[category]||0)+orderTotal*(subtotal/itemTotal)
       }
     }
 

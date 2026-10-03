@@ -405,3 +405,10 @@ test
 - Rincian payroll: uang hadir, tunjangan, bonus, bagi hasil, komisi produksi, komisi kurir.
 - Kas bon tidak dihitung sebagai biaya usaha tambahan agar tidak double-count.
 - Tidak ada SQL baru.
+
+
+## V113.0.76 — Revenue Share Category Sync
+- Rincian Bagi Hasil di Keuangan sekarang memakai nilai barang/order masuk sesuai periode, sama dengan Dashboard.
+- Kategori Satuan, Express, Kiloan, dan kategori lain ikut tampil sesuai order masuk walaupun belum dibayar.
+- Payroll Owner, laporan biaya payroll, dashboard target, dan Gaji Saya diselaraskan memakai dasar kategori yang sama.
+- SQL 061 memperbarui RPC Gaji Saya agar bagi hasil kategori berbasis order masuk.

@@ -106,6 +106,14 @@ interface Payment{
   created_at:string
 }
 
+interface PayrollOrder{
+  id:string
+  subtotal:number
+  total:number
+  status:string
+  created_at:string
+}
+
 interface OrderItem{
   order_id:string
   service_id:string|null
@@ -146,6 +154,7 @@ export function PayrollPage(){
   const[employeeCommissionSettings,setEmployeeCommissionSettings]=useState<EmployeeCommissionSetting[]>([])
   const[commissionLedger,setCommissionLedger]=useState<CommissionLedgerRow[]>([])
   const[payments,setPayments]=useState<Payment[]>([])
+  const[orders,setOrders]=useState<PayrollOrder[]>([])
   const[orderItems,setOrderItems]=useState<OrderItem[]>([])
   const[services,setServices]=useState<Service[]>([])
   const[tab,setTab]=useState<'attendance'|'payroll'>('attendance')
@@ -178,7 +187,7 @@ export function PayrollPage(){
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
     const range=monthRange(month)
-    const [e,a,s,shr,adj,payrollPay,ca,cd,ecs,ledger,p,oi,sv]=await Promise.all([
+    const [e,a,s,shr,adj,payrollPay,ca,cd,ecs,ledger,p,o,oi,sv]=await Promise.all([
       supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
       supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
       supabase.from('v111_employee_payroll_settings').select('*'),
@@ -190,10 +199,11 @@ export function PayrollPage(){
       supabase.from('v113_employee_commission_settings').select('*'),
       supabase.from('v113_commission_ledger').select('*').gte('earned_at',`${range.start}T00:00:00`).lte('earned_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
+      supabase.from('v100_orders_view').select('id,subtotal,total,status,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
-    const error=e.error||a.error||s.error||shr.error||adj.error||payrollPay.error||ca.error||cd.error||ecs.error||ledger.error||p.error||oi.error||sv.error
+    const error=e.error||a.error||s.error||shr.error||adj.error||payrollPay.error||ca.error||cd.error||ecs.error||ledger.error||p.error||o.error||oi.error||sv.error
     if(error)setMessage(error.message)
     else{
       setEmployees((e.data as Employee[])||[])
@@ -207,6 +217,7 @@ export function PayrollPage(){
       setEmployeeCommissionSettings((ecs.data as EmployeeCommissionSetting[])||[])
       setCommissionLedger((ledger.data as CommissionLedgerRow[])||[])
       setPayments((p.data as Payment[])||[])
+      setOrders((o.data as PayrollOrder[])||[])
       setOrderItems((oi.data as OrderItem[])||[])
       setServices((sv.data as Service[])||[])
       const drafts:Record<string,string>={}
@@ -272,14 +283,17 @@ export function PayrollPage(){
 
     const grouped:Record<string,number>={}
 
-    for(const payment of payments){
-      const items=itemsByOrder.get(payment.order_id)||[]
+    // V113.0.76: dasar bagi hasil = nilai order/barang masuk bulan tersebut,
+    // sama dengan dashboard dan rincian Keuangan.
+    for(const order of orders){
+      if(order.status==='cancelled')continue
+      const orderTotal=Math.max(0,Number(order.total||0))
+      if(orderTotal<=0)continue
+      const items=itemsByOrder.get(order.id)||[]
       const itemTotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.subtotal||0)),0)
-      const paymentAmount=Math.max(0,Number(payment.amount||0))
-      if(paymentAmount<=0)continue
 
       if(items.length===0||itemTotal<=0){
-        grouped['Kiloan']=(grouped['Kiloan']||0)+paymentAmount
+        grouped['Kiloan']=(grouped['Kiloan']||0)+orderTotal
         continue
       }
 
@@ -289,12 +303,12 @@ export function PayrollPage(){
         const category=item.service_id
           ? serviceCategory.get(item.service_id)||'Kiloan'
           : 'Kiloan'
-        grouped[category]=(grouped[category]||0)+(paymentAmount*(subtotal/itemTotal))
+        grouped[category]=(grouped[category]||0)+(orderTotal*(subtotal/itemTotal))
       }
     }
 
     return grouped
-  },[payments,orderItems,services])
+  },[orders,orderItems,services])
 
   const serviceCategories=useMemo(()=>Array.from(new Set([
     ...services.map(s=>(s.category||'Kiloan').trim()||'Kiloan'),
@@ -748,7 +762,7 @@ export function PayrollPage(){
       <section className="stats-grid payroll-stats">
         <StatCard icon={UsersRound} label="Karyawan Aktif" value={String(employees.length)} caption="Karyawan yang dapat diabsen"/>
         <StatCard icon={CalendarCheck2} label="Total Hadir Bulan Ini" value={String(totalPresent)} caption="Akumulasi hari hadir"/>
-        <StatCard icon={HandCoins} label="Omzet Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Bagi hasil dihitung per kategori layanan"/>
+        <StatCard icon={HandCoins} label="Omzet Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Bagi hasil dari nilai barang / order masuk"/>
       </section>
 
       <section className="panel data-panel">

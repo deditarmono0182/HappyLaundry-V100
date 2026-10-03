@@ -38,9 +38,11 @@ interface ExpenseRow{
 
 interface OrderSummary{
   id:string
+  subtotal:number
   total:number
   paid_amount:number
   status:string
+  created_at:string
 }
 
 interface PaymentRow{
@@ -112,7 +114,7 @@ export function FinancePage(){
       supabase.from('v106_expense_categories').select('*').eq('is_active',true).order('group_name').order('name'),
       supabase.from('v106_expenses_view').select('*').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false}),
       supabase.from('v100_payments').select('id,order_id,amount,created_at').gte('created_at',`${from}T00:00:00`).lte('created_at',`${to}T23:59:59.999`),
-      supabase.from('v100_orders_view').select('id,total,paid_amount,status'),
+      supabase.from('v100_orders_view').select('id,subtotal,total,paid_amount,status,created_at'),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category'),
       isOwner
@@ -184,28 +186,34 @@ export function FinancePage(){
     }
 
     const groupedRevenue:Record<string,number>={}
+    const startAt=new Date(`${from}T00:00:00`)
+    const endAt=new Date(`${to}T23:59:59.999`)
 
-    // Allocate each ACTUAL payment in the selected date range
-    // proportionally across the order's item subtotals.
-    for(const payment of payments){
-      const items=itemsByOrder.get(payment.order_id)||[]
+    // V113.0.76: Bagi hasil kategori mengikuti NILAI BARANG/ORDER MASUK
+    // pada periode yang dipilih, sama dengan Dashboard Owner.
+    for(const order of orders){
+      const createdAt=new Date(order.created_at)
+      if(order.status==='cancelled'||createdAt<startAt||createdAt>endAt)continue
+
+      const orderTotal=Math.max(0,Number(order.total||0))
+      if(orderTotal<=0)continue
+
+      const items=itemsByOrder.get(order.id)||[]
       const itemTotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.subtotal||0)),0)
-      const paymentAmount=Math.max(0,Number(payment.amount||0))
-
-      if(paymentAmount<=0)continue
 
       if(items.length===0||itemTotal<=0){
-        groupedRevenue['Reguler']=(groupedRevenue['Reguler']||0)+paymentAmount
+        groupedRevenue['Reguler']=(groupedRevenue['Reguler']||0)+orderTotal
         continue
       }
 
+      // Alokasikan diskon order secara proporsional ke tiap kategori.
       for(const item of items){
         const subtotal=Math.max(0,Number(item.subtotal||0))
         if(subtotal<=0)continue
         const category=item.service_id
           ? serviceCategory.get(item.service_id)||'Reguler'
           : 'Reguler'
-        const allocated=paymentAmount*(subtotal/itemTotal)
+        const allocated=orderTotal*(subtotal/itemTotal)
         groupedRevenue[category]=(groupedRevenue[category]||0)+allocated
       }
     }
@@ -236,13 +244,13 @@ export function FinancePage(){
     const effectivePercent=totalRevenue>0?(totalShare/totalRevenue)*100:0
 
     return{rows,totalRevenue,totalShare,remaining,effectivePercent}
-  },[payments,orderItems,services,shareSettings])
+  },[orders,orderItems,services,shareSettings,from,to])
 
   const revenueShareExportOptions=()=>({
     title:'Bagi Hasil per Kategori Layanan',
     filename:`bagi-hasil-${from}-${to}`,
     subtitle:`Periode ${from} s/d ${to}`,
-    headers:['Kategori Layanan','Omzet','Persentase (%)','Nilai Bagi Hasil','Sisa Omzet'],
+    headers:['Kategori Layanan','Barang / Order Masuk','Persentase (%)','Nilai Bagi Hasil','Sisa Nilai'],
     rows:revenueSharing.rows.map(row=>[
       row.category,
       Math.round(row.revenue),
@@ -251,7 +259,7 @@ export function FinancePage(){
       Math.round(row.revenue-row.shareAmount)
     ]),
     summary:[
-      ['Total Omzet',Math.round(revenueSharing.totalRevenue)],
+      ['Total Barang / Order Masuk',Math.round(revenueSharing.totalRevenue)],
       ['Total Bagi Hasil',Math.round(revenueSharing.totalShare)],
       ['Sisa Setelah Bagi Hasil',Math.round(revenueSharing.remaining)],
       ['Persentase Efektif',`${revenueSharing.effectivePercent.toFixed(2)}%`]
@@ -461,7 +469,7 @@ export function FinancePage(){
         <div>
           <span className="eyebrow">REVENUE SHARING</span>
           <h3>Bagi Hasil per Kategori Layanan</h3>
-          <p>Persentase diterapkan ke omzet pembayaran aktual pada periode yang dipilih.</p>
+          <p>Persentase diterapkan ke nilai barang / order masuk pada periode yang dipilih, sama seperti Dashboard Owner.</p>
         </div>
         <div className="revenue-share-actions">
           <button type="button" className="secondary-button" onClick={()=>downloadXls(revenueShareExportOptions())}>
@@ -484,9 +492,9 @@ export function FinancePage(){
 
       <div className="revenue-share-summary">
         <div>
-          <span>Omzet Kategori</span>
+          <span>Barang / Order Masuk</span>
           <strong>{formatRupiah(revenueSharing.totalRevenue)}</strong>
-          <small>Pembayaran aktual periode ini</small>
+          <small>Nilai order masuk periode ini</small>
         </div>
         <div className="share-total">
           <span>Total Bagi Hasil</span>
@@ -496,12 +504,12 @@ export function FinancePage(){
         <div>
           <span>Sisa Setelah Bagi Hasil</span>
           <strong>{formatRupiah(revenueSharing.remaining)}</strong>
-          <small>Omzet kategori - bagi hasil</small>
+          <small>Nilai order kategori - bagi hasil</small>
         </div>
         <div>
           <span>Persentase Efektif</span>
           <strong>{revenueSharing.effectivePercent.toFixed(2)}%</strong>
-          <small>Terhadap total omzet kategori</small>
+          <small>Terhadap total nilai order kategori</small>
         </div>
       </div>
 
@@ -510,10 +518,10 @@ export function FinancePage(){
           <thead>
             <tr>
               <th>Kategori Layanan</th>
-              <th>Omzet</th>
+              <th>Barang / Order Masuk</th>
               <th>Persentase</th>
               <th>Nilai Bagi Hasil</th>
-              <th>Sisa Omzet</th>
+              <th>Sisa Nilai</th>
             </tr>
           </thead>
           <tbody>
