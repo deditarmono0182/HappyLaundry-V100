@@ -1,0 +1,8 @@
+HappyLaundry V113.0.71 — Period Completed Status
+
+Perubahan:
+- Panel Status Order tetap menampilkan status order aktif saat ini.
+- Ditambahkan baris Selesai / Terkirim.
+- Jumlah Selesai / Terkirim mengikuti pilihan periode grafik: Hari Ini, 7 Hari, Bulan Ini, 3 Bulan, 6 Bulan, 12 Bulan.
+- Menggunakan riwayat progres SQL 057/058; tidak perlu SQL baru.
+- Ada fallback progress_last_at untuk order selesai lama.

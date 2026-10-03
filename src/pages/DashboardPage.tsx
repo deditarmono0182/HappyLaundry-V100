@@ -28,6 +28,12 @@ interface DashboardCommission{
   earned_at:string
 }
 
+interface DashboardProgressEvent{
+  order_id:string
+  new_status:string
+  created_at:string
+}
+
 export function DashboardPage() {
   const navigate=useNavigate()
   const {profile}=useAuth()
@@ -38,6 +44,7 @@ export function DashboardPage() {
   const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>([])
   const [services,setServices]=useState<DashboardService[]>([])
   const [commissions,setCommissions]=useState<DashboardCommission[]>([])
+  const [progressEvents,setProgressEvents]=useState<DashboardProgressEvent[]>([])
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
   const [revenuePeriod,setRevenuePeriod]=useState<'today'|'7d'|'month'|'3m'|'6m'|'12m'>('7d')
@@ -64,13 +71,22 @@ export function DashboardPage() {
       setServices((s.data as DashboardService[])||[])
       setCommissions((commissionRes.data as DashboardCommission[])||[])
       if(isOwner){
-        const {count}=await supabase
-          .from('v11306_delete_requests')
-          .select('id',{count:'exact',head:true})
-          .eq('status','pending')
+        const [{count},historyRes]=await Promise.all([
+          supabase
+            .from('v11306_delete_requests')
+            .select('id',{count:'exact',head:true})
+            .eq('status','pending'),
+          supabase
+            .from('v113063_order_progress_history')
+            .select('order_id,new_status,created_at')
+            .eq('new_status','completed')
+            .order('created_at',{ascending:false})
+        ])
         setPendingDeletes(count||0)
+        setProgressEvents((historyRes.data as DashboardProgressEvent[])||[])
       }else{
         setPendingDeletes(0)
+        setProgressEvents([])
       }
     }
   },[isOwner])
@@ -108,6 +124,27 @@ export function DashboardPage() {
   const ready=orders.filter(r=>r.status==='ready').length
   const completed=today.filter(r=>r.status==='completed').length
   const receivable=orders.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)
+  const selectedPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
+  const selectedPeriodCompleted=useMemo(()=>{
+    const completedIds=new Set(progressEvents
+      .filter(event=>new Date(event.created_at)>=selectedPeriodStart)
+      .map(event=>event.order_id))
+
+    // Fallback untuk order selesai lama yang dibuat sebelum riwayat progres tersedia.
+    for(const order of orders){
+      if(order.status!=='completed'||completedIds.has(order.id))continue
+      const completedAt=order.progress_last_at||order.created_at
+      if(new Date(completedAt)>=selectedPeriodStart)completedIds.add(order.id)
+    }
+    return completedIds.size
+  },[progressEvents,orders,selectedPeriodStart])
+
+  const selectedPeriodLabel=revenuePeriod==='today'?'Hari Ini'
+    :revenuePeriod==='7d'?'7 Hari'
+    :revenuePeriod==='month'?'Bulan Ini'
+    :revenuePeriod==='3m'?'3 Bulan'
+    :revenuePeriod==='6m'?'6 Bulan'
+    :'12 Bulan'
 
   const chart=useMemo(()=>{
     const now=new Date(businessClock)
@@ -440,8 +477,11 @@ export function DashboardPage() {
         </div>
       </article>
       <article className="panel">
-        <div className="panel-heading"><div><h3>Status Order</h3><p>Order aktif saat ini.</p></div></div>
-        <div className="status-summary">{(['received','washing','drying','ironing','packing','ready'] as const).map(s=><div key={s}><span className={`status-dot status-${s}`}/><span>{statusLabels[s]}</span><b>{orders.filter(r=>r.status===s).length}</b></div>)}</div>
+        <div className="panel-heading"><div><h3>Status Order</h3><p>Order aktif saat ini + selesai sesuai periode grafik.</p></div></div>
+        <div className="status-summary">
+          {(['received','washing','drying','ironing','packing','ready'] as const).map(s=><div key={s}><span className={`status-dot status-${s}`}/><span>{statusLabels[s]}</span><b>{orders.filter(r=>r.status===s).length}</b></div>)}
+          <div><span className="status-dot status-completed"/><span>Selesai / Terkirim <small>({selectedPeriodLabel})</small></span><b>{selectedPeriodCompleted}</b></div>
+        </div>
       </article>
     </section>
     <section className="panel dashboard-category-revenue">
