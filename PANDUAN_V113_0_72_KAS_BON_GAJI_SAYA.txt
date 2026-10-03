@@ -1,0 +1,24 @@
+HappyLaundry V113.0.72 — Kas Bon + Gaji Saya
+
+FITUR BARU
+1. Owner dapat mencatat Kas Bon dari menu Absensi & Gaji -> Daftar Gaji -> Kas Bon.
+2. Kas bon langsung memotong hak gaji pada periode aktif sampai batas gaji yang tersedia.
+3. Jika kas bon lebih besar dari gaji, sisa kas bon tetap tersimpan dan dapat dipotong pada periode berikutnya.
+4. Akun karyawan memiliki menu Gaji Saya.
+5. Gaji Saya hanya menampilkan data milik akun karyawan yang sedang login.
+6. Rincian: kehadiran, tunjangan, bonus, bagi hasil, komisi produksi, komisi kurir, kas bon, gaji bersih, pembayaran, dan sumber order komisi.
+
+URUTAN PASANG
+1. Jalankan SQL 059A di Supabase.
+2. Jalankan SQL 059B di Supabase.
+3. Jalankan SQL 059C1 di Supabase.
+4. Jalankan SQL 059C2 di Supabase.
+5. Jalankan SQL 059C3 di Supabase.
+6. Deploy source V113.0.72 ke GitHub/Netlify.
+7. Login Owner dan tes Kas Bon pada satu karyawan.
+8. Login dengan akun karyawan tersebut dan buka Gaji Saya.
+
+CATATAN
+- Tidak menghapus data lama.
+- Tabel kas bon baru terpisah dari Pengeluaran operasional agar tidak double dengan biaya gaji/komisi.
+- Akses Gaji Saya menggunakan RPC server-side yang hanya membaca employee_id dari sesi karyawan aktif.

@@ -63,6 +63,24 @@ interface PayrollPayment{
   created_by:string|null
 }
 
+interface CashAdvance{
+  id:string
+  employee_id:string
+  amount:number
+  remaining_amount:number
+  note:string|null
+  issued_at:string
+}
+
+interface CashAdvanceDeduction{
+  id:string
+  cash_advance_id:string
+  employee_id:string
+  payroll_month:string
+  amount:number
+  created_at:string
+}
+
 interface EmployeeCommissionSetting{
   employee_id:string
   production_percent:number
@@ -121,6 +139,8 @@ export function PayrollPage(){
   const[shares,setShares]=useState<PayrollShare[]>([])
   const[adjustments,setAdjustments]=useState<PayrollAdjustment[]>([])
   const[payrollPayments,setPayrollPayments]=useState<PayrollPayment[]>([])
+  const[cashAdvances,setCashAdvances]=useState<CashAdvance[]>([])
+  const[cashAdvanceDeductions,setCashAdvanceDeductions]=useState<CashAdvanceDeduction[]>([])
   const[employeeCommissionSettings,setEmployeeCommissionSettings]=useState<EmployeeCommissionSetting[]>([])
   const[commissionLedger,setCommissionLedger]=useState<CommissionLedgerRow[]>([])
   const[payments,setPayments]=useState<Payment[]>([])
@@ -137,6 +157,8 @@ export function PayrollPage(){
   const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
   const[detailEmployee,setDetailEmployee]=useState<Employee|null>(null)
   const[paymentEmployee,setPaymentEmployee]=useState<Employee|null>(null)
+  const[cashAdvanceEmployee,setCashAdvanceEmployee]=useState<Employee|null>(null)
+  const[cashAdvanceForm,setCashAdvanceForm]=useState({amount:'0',note:''})
   const[paymentForm,setPaymentForm]=useState({amount:'0',payment_method:'Transfer',note:''})
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
@@ -152,20 +174,22 @@ export function PayrollPage(){
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
     const range=monthRange(month)
-    const [e,a,s,shr,adj,payrollPay,ecs,ledger,p,oi,sv]=await Promise.all([
+    const [e,a,s,shr,adj,payrollPay,ca,cd,ecs,ledger,p,oi,sv]=await Promise.all([
       supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
       supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
       supabase.from('v111_employee_payroll_settings').select('*'),
       supabase.from('v111_employee_revenue_shares').select('*'),
       supabase.from('v111_payroll_adjustments').select('*').eq('payroll_month',range.start),
       supabase.from('v113_payroll_payments').select('*').eq('payroll_month',range.start).order('paid_at',{ascending:false}),
+      supabase.from('v113072_employee_cash_advances').select('id,employee_id,amount,remaining_amount,note,issued_at').order('issued_at',{ascending:false}),
+      supabase.from('v113072_cash_advance_deductions').select('id,cash_advance_id,employee_id,payroll_month,amount,created_at').eq('payroll_month',range.start),
       supabase.from('v113_employee_commission_settings').select('*'),
       supabase.from('v113_commission_ledger').select('*').gte('earned_at',`${range.start}T00:00:00`).lte('earned_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
-    const error=e.error||a.error||s.error||shr.error||adj.error||payrollPay.error||ecs.error||ledger.error||p.error||oi.error||sv.error
+    const error=e.error||a.error||s.error||shr.error||adj.error||payrollPay.error||ca.error||cd.error||ecs.error||ledger.error||p.error||oi.error||sv.error
     if(error)setMessage(error.message)
     else{
       setEmployees((e.data as Employee[])||[])
@@ -174,6 +198,8 @@ export function PayrollPage(){
       setShares((shr.data as PayrollShare[])||[])
       setAdjustments((adj.data as PayrollAdjustment[])||[])
       setPayrollPayments((payrollPay.data as PayrollPayment[])||[])
+      setCashAdvances((ca.data as CashAdvance[])||[])
+      setCashAdvanceDeductions((cd.data as CashAdvanceDeduction[])||[])
       setEmployeeCommissionSettings((ecs.data as EmployeeCommissionSetting[])||[])
       setCommissionLedger((ledger.data as CommissionLedgerRow[])||[])
       setPayments((p.data as Payment[])||[])
@@ -306,11 +332,18 @@ export function PayrollPage(){
     const orderCommission=productionCommission+courierCommission
 
     const bonus=Number(bonusDraft[employee.id]??adjustmentMap.get(employee.id)?.bonus??0)
-    const total=attendancePay+allowance+bonus+revenueShare+orderCommission
+    const grossTotal=attendancePay+allowance+bonus+revenueShare+orderCommission
+    const cashAdvanceApplied=cashAdvanceDeductions
+      .filter(item=>item.employee_id===employee.id)
+      .reduce((sum,item)=>sum+Number(item.amount||0),0)
+    const cashAdvanceOutstanding=cashAdvances
+      .filter(item=>item.employee_id===employee.id)
+      .reduce((sum,item)=>sum+Number(item.remaining_amount||0),0)
+    const total=Math.max(0,grossTotal-cashAdvanceApplied)
     const paymentHistory=payrollPayments.filter(item=>item.employee_id===employee.id)
     const paidAmount=paymentHistory.reduce((sum,item)=>sum+Number(item.amount||0),0)
     const outstanding=Math.max(0,total-paidAmount)
-    const paymentStatus=total<=0&&paidAmount<=0?'nil':paidAmount<=0?'unpaid':outstanding>0?'partial':'paid'
+    const paymentStatus=grossTotal>0&&total<=0&&cashAdvanceApplied>0?'cashbon':total<=0&&paidAmount<=0?'nil':paidAmount<=0?'unpaid':outstanding>0?'partial':'paid'
 
     return{
       employee,presentDays,permissionDays,sickDays,absentDays,
@@ -318,9 +351,9 @@ export function PayrollPage(){
       shareDetails,revenueShare,productionCommission,courierCommission,orderCommission,
       commissionOrderCount:new Set(employeeLedger.map(item=>item.order_id)).size,
       commissionDetails:[...employeeLedger].sort((a,b)=>new Date(b.earned_at).getTime()-new Date(a.earned_at).getTime()),
-      bonus,total,paymentHistory,paidAmount,outstanding,paymentStatus
+      bonus,grossTotal,cashAdvanceApplied,cashAdvanceOutstanding,total,paymentHistory,paidAmount,outstanding,paymentStatus
     }
-  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap,payrollPayments])
+  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap,payrollPayments,cashAdvances,cashAdvanceDeductions])
 
   const filteredEmployees=useMemo(()=>{
     const key=query.toLowerCase().trim()
@@ -507,6 +540,45 @@ export function PayrollPage(){
     setSuccess('')
   }
 
+  const openCashAdvance=(employee:Employee)=>{
+    setCashAdvanceEmployee(employee)
+    setCashAdvanceForm({amount:'0',note:''})
+    setMessage('');setSuccess('')
+  }
+
+  const saveCashAdvance=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!cashAdvanceEmployee)return
+    const amount=Math.max(0,Number(cashAdvanceForm.amount)||0)
+    if(amount<=0){setMessage('Nominal kas bon harus lebih dari Rp 0.');return}
+    setBusy(true);setMessage('');setSuccess('')
+    const add=await supabase.rpc('v113072_add_cash_advance',{
+      p_employee_id:cashAdvanceEmployee.id,
+      p_amount:amount,
+      p_note:cashAdvanceForm.note.trim()||null
+    })
+    if(add.error){setMessage(add.error.message);setBusy(false);return}
+
+    const row=payrollRows.find(item=>item.employee.id===cashAdvanceEmployee.id)
+    const available=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
+    const deduction=Math.min(amount,available)
+    if(deduction>0){
+      const apply=await supabase.rpc('v113072_apply_cash_advance_deduction',{
+        p_employee_id:cashAdvanceEmployee.id,
+        p_payroll_month:monthRange(month).start,
+        p_amount:deduction
+      })
+      if(apply.error){setMessage(`Kas bon tersimpan, tetapi potongan gaji gagal: ${apply.error.message}`);setBusy(false);await load();return}
+    }
+
+    const employeeName=cashAdvanceEmployee.full_name
+    setCashAdvanceEmployee(null)
+    setCashAdvanceForm({amount:'0',note:''})
+    setSuccess(`Kas bon ${employeeName} sebesar ${formatRupiah(amount)} berhasil dicatat${deduction>0?` dan ${formatRupiah(deduction)} langsung dipotong dari gaji periode ini.`:'.'}`)
+    await load()
+    setBusy(false)
+  }
+
   const savePayrollPayment=async(event:FormEvent)=>{
     event.preventDefault()
     if(!paymentEmployee)return
@@ -553,19 +625,21 @@ export function PayrollPage(){
     title:'Daftar Gaji Karyawan',
     filename:`gaji-karyawan-${month}`,
     subtitle:`Periode ${month} • Omzet aktual ${formatRupiah(monthlyRevenue)}`,
-    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Bagi Hasil Kategori','Komisi Produksi','Komisi Kurir','Total Gaji','Sudah Dibayar','Sisa','Status'],
+    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Bagi Hasil Kategori','Komisi Produksi','Komisi Kurir','Gaji Kotor','Potongan Kas Bon','Gaji Bersih','Sudah Dibayar','Sisa','Status'],
     rows:filteredPayroll.map(r=>[
       r.employee.full_name,r.presentDays,r.attendanceRate,
       Math.round(r.attendancePay),Math.round(r.allowance),Math.round(r.bonus),
       r.shareDetails.length
         ? r.shareDetails.map(item=>`${item.category} ${item.percent.toFixed(2)}% x ${Math.round(item.baseRevenue)} = ${Math.round(item.amount)}`).join(' | ')
         : '-',
-      Math.round(r.productionCommission),Math.round(r.courierCommission),Math.round(r.total),
-      Math.round(r.paidAmount),Math.round(r.outstanding),r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'
+      Math.round(r.productionCommission),Math.round(r.courierCommission),Math.round(r.grossTotal),Math.round(r.cashAdvanceApplied),Math.round(r.total),
+      Math.round(r.paidAmount),Math.round(r.outstanding),r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'
     ]),
     summary:[
       ['Omzet Bulan',Math.round(monthlyRevenue)],
-      ['Total Gaji',Math.round(filteredPayroll.reduce((s,r)=>s+r.total,0))]
+      ['Total Gaji Kotor',Math.round(filteredPayroll.reduce((s,r)=>s+r.grossTotal,0))],
+      ['Potongan Kas Bon',Math.round(filteredPayroll.reduce((s,r)=>s+r.cashAdvanceApplied,0))],
+      ['Total Gaji Bersih',Math.round(filteredPayroll.reduce((s,r)=>s+r.total,0))]
     ] as Array<[string,string|number]>
   })
 
@@ -593,10 +667,13 @@ export function PayrollPage(){
         ['Komisi Produksi',Math.round(row?.productionCommission||0)],
         ['Komisi Kurir',Math.round(row?.courierCommission||0)],
         ['Total Komisi Order',Math.round(row?.orderCommission||0)],
-        ['Total Gaji',Math.round(row?.total||0)],
+        ['Gaji Kotor',Math.round(row?.grossTotal||0)],
+        ['Potongan Kas Bon',Math.round(row?.cashAdvanceApplied||0)],
+        ['Sisa Kas Bon',Math.round(row?.cashAdvanceOutstanding||0)],
+        ['Gaji Bersih',Math.round(row?.total||0)],
         ['Sudah Dibayar',Math.round(row?.paidAmount||0)],
         ['Sisa Gaji',Math.round(row?.outstanding||0)],
-        ['Status Pembayaran',row?.paymentStatus==='nil'?'Nihil':row?.paymentStatus==='paid'?'Lunas':row?.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'],
+        ['Status Pembayaran',row?.paymentStatus==='cashbon'?'Terpotong Kas Bon':row?.paymentStatus==='nil'?'Nihil':row?.paymentStatus==='paid'?'Lunas':row?.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'],
         ...((row?.paymentHistory||[]).map((payment,index)=>[
           `Pembayaran ${index+1}`,
           `${new Date(payment.paid_at).toLocaleString('id-ID')} • ${payment.payment_method} • ${formatRupiah(Number(payment.amount||0))}${payment.note?` • ${payment.note}`:''}`
@@ -606,6 +683,8 @@ export function PayrollPage(){
   }
 
   const totalPayroll=payrollRows.reduce((sum,r)=>sum+r.total,0)
+  const totalCashAdvanceApplied=payrollRows.reduce((sum,r)=>sum+r.cashAdvanceApplied,0)
+  const totalCashAdvanceOutstanding=payrollRows.reduce((sum,r)=>sum+r.cashAdvanceOutstanding,0)
   const totalPresent=payrollRows.reduce((sum,r)=>sum+r.presentDays,0)
   const totalOrderCommission=payrollRows.reduce((sum,r)=>sum+r.orderCommission,0)
   const totalPaidPayroll=payrollRows.reduce((sum,r)=>sum+r.paidAmount,0)
@@ -709,14 +788,15 @@ export function PayrollPage(){
     </>:<>
       <section className="stats-grid payroll-stats">
         <StatCard icon={HandCoins} label="Omzet Bulan" value={formatRupiah(monthlyRevenue)} caption="Pembayaran aktual"/>
-        <StatCard icon={WalletCards} label="Total Gaji" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
+        <StatCard icon={WalletCards} label="Gaji Bersih" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
+        <StatCard icon={HandCoins} label="Kas Bon Dipotong" value={formatRupiah(totalCashAdvanceApplied)} caption={`Sisa kas bon ${formatRupiah(totalCashAdvanceOutstanding)}`}/>
         <StatCard icon={Gift} label="Komisi Order" value={formatRupiah(totalOrderCommission)} caption="Produksi + kurir yang sudah menjadi hak"/>
         <StatCard icon={CheckCircle2} label="Gaji Dibayar" value={formatRupiah(totalPaidPayroll)} caption={`Sisa ${formatRupiah(totalOutstandingPayroll)}`}/>
       </section>
 
       <section className="panel payroll-formula">
         <HandCoins size={21}/>
-        <div><b>Rumus Gaji</b><span>Total Gaji = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil Kategori + Komisi Order. Komisi produksi dan komisi kurir masuk setelah order Selesai & Lunas.</span></div>
+        <div><b>Rumus Gaji</b><span>Gaji Bersih = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil Kategori + Komisi Order − Kas Bon. Sisa kas bon otomatis tetap tersimpan untuk periode berikutnya.</span></div>
       </section>
 
       <section className="panel data-panel">
@@ -728,7 +808,7 @@ export function PayrollPage(){
           <table className="payroll-table">
             <thead><tr>
               <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>
-              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Total Gaji</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
+              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Gaji Kotor</th><th>Kas Bon</th><th>Gaji Bersih</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
             </tr></thead>
             <tbody>
               {filteredPayroll.map(r=><tr key={r.employee.id}>
@@ -756,19 +836,22 @@ export function PayrollPage(){
                     <small>{r.commissionOrderCount} order</small>
                   </div>
                 </td>
+                <td><b>{formatRupiah(r.grossTotal)}</b></td>
+                <td><b className="payroll-deduction">− {formatRupiah(r.cashAdvanceApplied)}</b><small>Sisa {formatRupiah(r.cashAdvanceOutstanding)}</small></td>
                 <td><b className="payroll-total">{formatRupiah(r.total)}</b></td>
                 <td><b>{formatRupiah(r.paidAmount)}</b></td>
                 <td><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
-                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
+                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
                 <td>
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
+                    <button className="finance-row-action cash-advance-button" onClick={()=>openCashAdvance(r.employee)}><HandCoins size={15}/>Kas Bon</button>
                     {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
                     <button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button>
                   </div>
                 </td>
               </tr>)}
-              {filteredPayroll.length===0&&<tr><td colSpan={13} className="table-empty">Belum ada karyawan aktif.</td></tr>}
+              {filteredPayroll.length===0&&<tr><td colSpan={15} className="table-empty">Belum ada karyawan aktif.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -778,12 +861,16 @@ export function PayrollPage(){
     {detailEmployee&&(()=>{
       const row=payrollRows.find(item=>item.employee.id===detailEmployee.id)
       const details=row?.commissionDetails||[]
+      const cashHistory=cashAdvances.filter(item=>item.employee_id===detailEmployee.id)
       return <Modal title={`Detail Gaji & Komisi — ${detailEmployee.full_name}`} onClose={()=>setDetailEmployee(null)}>
         <div className="payroll-detail-summary">
           <div><span>Total Komisi Order</span><b>{formatRupiah(row?.orderCommission||0)}</b></div>
           <div><span>Produksi</span><b>{formatRupiah(row?.productionCommission||0)}</b></div>
           <div><span>Kurir</span><b>{formatRupiah(row?.courierCommission||0)}</b></div>
-          <div><span>Total Gaji</span><b>{formatRupiah(row?.total||0)}</b></div>
+          <div><span>Gaji Kotor</span><b>{formatRupiah(row?.grossTotal||0)}</b></div>
+          <div><span>Potongan Kas Bon</span><b>− {formatRupiah(row?.cashAdvanceApplied||0)}</b></div>
+          <div><span>Sisa Kas Bon</span><b>{formatRupiah(row?.cashAdvanceOutstanding||0)}</b></div>
+          <div><span>Gaji Bersih</span><b>{formatRupiah(row?.total||0)}</b></div>
           <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
           <div><span>Sisa Gaji</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
         </div>
@@ -804,6 +891,24 @@ export function PayrollPage(){
                 <td>{new Date(item.earned_at).toLocaleString('id-ID')}</td>
               </tr>)}
               {details.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada komisi order pada periode ini.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+        <div className="payroll-detail-head payroll-payment-history-head">
+          <b>Riwayat Kas Bon</b>
+          <small>Kas bon yang belum habis dipotong akan tersimpan sebagai saldo untuk periode berikutnya.</small>
+        </div>
+        <div className="table-wrap payroll-payment-history-wrap">
+          <table className="payroll-commission-detail">
+            <thead><tr><th>Tanggal</th><th>Nominal</th><th>Sisa</th><th>Keterangan</th></tr></thead>
+            <tbody>
+              {cashHistory.map(item=><tr key={item.id}>
+                <td>{new Date(item.issued_at).toLocaleString('id-ID')}</td>
+                <td><b>{formatRupiah(Number(item.amount||0))}</b></td>
+                <td>{formatRupiah(Number(item.remaining_amount||0))}</td>
+                <td>{item.note||'-'}</td>
+              </tr>)}
+              {cashHistory.length===0&&<tr><td colSpan={4} className="table-empty">Belum ada kas bon.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -834,12 +939,37 @@ export function PayrollPage(){
       </Modal>
     })()}
 
+    {cashAdvanceEmployee&&(()=>{
+      const row=payrollRows.find(item=>item.employee.id===cashAdvanceEmployee.id)
+      return <Modal title={`Kas Bon — ${cashAdvanceEmployee.full_name}`} onClose={()=>!busy&&setCashAdvanceEmployee(null)}>
+        <form className="modal-form" onSubmit={saveCashAdvance}>
+          <div className="payroll-payment-card">
+            <div><span>Gaji Kotor Periode Ini</span><b>{formatRupiah(row?.grossTotal||0)}</b></div>
+            <div><span>Kas Bon Sudah Dipotong</span><b>{formatRupiah(row?.cashAdvanceApplied||0)}</b></div>
+            <div><span>Sisa Kas Bon Lama</span><b>{formatRupiah(row?.cashAdvanceOutstanding||0)}</b></div>
+          </div>
+          <label>Nominal Kas Bon
+            <input type="number" min="1" value={cashAdvanceForm.amount} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,amount:e.target.value})} placeholder="Contoh: 200000"/>
+          </label>
+          <label>Keterangan
+            <textarea rows={3} value={cashAdvanceForm.note} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,note:e.target.value})} placeholder="Contoh: Kas bon kebutuhan keluarga"/>
+          </label>
+          <div className="info-box">Kas bon akan langsung dipotong dari gaji periode ini sebesar hak gaji yang tersedia. Jika kas bon lebih besar dari gaji, sisanya otomatis dibawa ke periode berikutnya.</div>
+          {message&&<div className="error-box">{message}</div>}
+          <div className="form-actions">
+            <button type="button" className="secondary-button" onClick={()=>setCashAdvanceEmployee(null)} disabled={busy}>Batal</button>
+            <button className="primary-button" disabled={busy||Number(cashAdvanceForm.amount)<=0}><Save size={16}/>{busy?'Menyimpan...':'Simpan Kas Bon'}</button>
+          </div>
+        </form>
+      </Modal>
+    })()}
+
     {paymentEmployee&&(()=>{
       const row=payrollRows.find(item=>item.employee.id===paymentEmployee.id)
       return <Modal title={`Pembayaran Gaji — ${paymentEmployee.full_name}`} onClose={()=>!busy&&setPaymentEmployee(null)}>
         <form className="modal-form" onSubmit={savePayrollPayment}>
           <div className="payroll-payment-card">
-            <div><span>Total Gaji</span><b>{formatRupiah(row?.total||0)}</b></div>
+            <div><span>Gaji Bersih</span><b>{formatRupiah(row?.total||0)}</b></div>
             <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
           </div>

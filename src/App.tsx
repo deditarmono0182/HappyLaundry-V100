@@ -21,6 +21,7 @@ const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(m=>({default:m.S
 const PrintSettingsPage=lazy(()=>import('./pages/PrintSettingsPage').then(m=>({default:m.PrintSettingsPage})))
 const EmployeesPage=lazy(()=>import('./pages/EmployeesPage').then(m=>({default:m.EmployeesPage})))
 const PayrollPage=lazy(()=>import('./pages/PayrollPage').then(m=>({default:m.PayrollPage})))
+const MyPayrollPage=lazy(()=>import('./pages/MyPayrollPage').then(m=>({default:m.MyPayrollPage})))
 const UserAuditPage=lazy(()=>import('./pages/UserAuditPage').then(m=>({default:m.UserAuditPage})))
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
 const FinancePage=lazy(()=>import('./pages/FinancePage').then(m=>({default:m.FinancePage})))
@@ -75,6 +76,7 @@ export default function App(){
       <Route path="settings/print" element={<PermissionRoute permission="settings"><PrintSettingsPage/></PermissionRoute>}/>
       <Route path="settings/employees" element={<EmployeesPage/>}/>
       <Route path="payroll" element={<PayrollPage/>}/>
+      <Route path="my-payroll" element={<MyPayrollPage/>}/>
       <Route path="attendance" element={<AttendancePage/>}/>
       <Route path="settings/attendance" element={<AttendanceSettingsPage/>}/>
       <Route path="settings/online-payment" element={<OnlinePaymentSettingsPage/>}/>

@@ -31,6 +31,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/reports', label: 'Laporan Owner', icon: BarChart3, permission: 'reports' },
   { to: '/attendance', label: 'Absen', icon: ScanLine, roles: ['employee'] },
   { to: '/payroll', label: 'Absensi & Gaji', icon: CalendarCheck2, roles: ['owner'] },
+  { to: '/my-payroll', label: 'Gaji Saya', icon: WalletCards, roles: ['employee'] },
   { to: '/backup', label: 'Backup Data', icon: DatabaseBackup, permission: 'backup' },
   { to: '/settings', label: 'Pengaturan', icon: Settings, permission: 'settings' }
 ]

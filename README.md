@@ -377,3 +377,9 @@ Laporan Owner membedakan omzet terbayar dari order masuk, mengurangi komisi prod
 - Kategori Satuan akan muncul bila ada order Satuan pada periode terpilih, walaupun order belum dibayar.
 - Diskon dialokasikan proporsional ke item agar total kategori konsisten dengan nilai order bersih.
 - Tidak ada SQL baru.
+
+## V113.0.72 — Kas Bon + Gaji Saya
+- Kas Bon per karyawan di menu Gaji.
+- Potongan kas bon dan saldo sisa.
+- Menu Gaji Saya untuk akun karyawan, hanya data sendiri.
+- Rincian komisi order dan riwayat pembayaran.
