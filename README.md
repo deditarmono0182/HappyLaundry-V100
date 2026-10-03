@@ -358,3 +358,7 @@ V113.0.53
 - Total Gaji Rp0 + Dibayar Rp0 sekarang berstatus Nihil, bukan Belum Dibayar.
 - Status Belum Dibayar hanya untuk Total Gaji > Rp0 dan belum ada pembayaran.
 - Tidak mengubah perhitungan gaji, riwayat pembayaran, komisi, atau database.
+
+
+## V113.0.68 Owner Report Order + Commission
+Laporan Owner membedakan omzet terbayar dari order masuk, mengurangi komisi produksi/kurir pada laba bersih, dan menambahkan grafik jumlah order masuk harian. Tidak ada SQL baru.

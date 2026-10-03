@@ -1,0 +1,10 @@
+HappyLaundry Enterprise V113.0.68 — Owner Report Order + Commission
+
+Perubahan:
+- Omzet tetap dihitung dari pembayaran yang benar-benar masuk.
+- Laba Bersih = Omzet Terbayar - Pengeluaran - Komisi Produksi - Komisi Kurir.
+- Kartu Order diganti menjadi Order Masuk dan menampilkan jumlah order baru pada periode.
+- Nilai order masuk ditampilkan pada caption kartu Order Masuk.
+- Grafik baru: Jumlah Order Masuk Harian.
+- Grafik Omzet Harian tetap dipertahankan.
+- Tidak memerlukan SQL baru; memakai v113_commission_ledger yang sudah ada.

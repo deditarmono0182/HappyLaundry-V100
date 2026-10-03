@@ -52,6 +52,12 @@ interface CustomerRow{
   name:string
 }
 
+interface CommissionRow{
+  commission_type:string
+  amount:number
+  earned_at:string
+}
+
 const todayISO=()=>{
   const d=new Date()
   const y=d.getFullYear()
@@ -78,6 +84,7 @@ export function ReportsPage(){
   const [cash,setCash]=useState<CashRow[]>([])
   const [items,setItems]=useState<ItemRow[]>([])
   const [customers,setCustomers]=useState<CustomerRow[]>([])
+  const [commissions,setCommissions]=useState<CommissionRow[]>([])
   const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
 
@@ -86,7 +93,7 @@ export function ReportsPage(){
     const fromISO=startOfDay(appliedFrom)
     const toISO=endOfDay(appliedTo)
 
-    const [orderRes,paymentRes,cashRes,itemRes,customerRes]=await Promise.all([
+    const [orderRes,paymentRes,cashRes,itemRes,customerRes,commissionRes]=await Promise.all([
       supabase.from('v100_orders')
         .select('id,order_no,customer_id,total,paid_amount,payment_status,status,created_at')
         .gte('created_at',fromISO).lte('created_at',toISO)
@@ -100,19 +107,23 @@ export function ReportsPage(){
       supabase.from('v100_order_items')
         .select('*'),
       supabase.from('v100_customers')
-        .select('id,name')
+        .select('id,name'),
+      supabase.from('v113_commission_ledger')
+        .select('commission_type,amount,earned_at')
+        .gte('earned_at',fromISO).lte('earned_at',toISO)
     ])
 
-    const error=orderRes.error||paymentRes.error||cashRes.error||itemRes.error||customerRes.error
+    const error=orderRes.error||paymentRes.error||cashRes.error||itemRes.error||customerRes.error||commissionRes.error
     if(error){
       setMessage(error.message)
-      setOrders([]);setPayments([]);setCash([]);setItems([]);setCustomers([])
+      setOrders([]);setPayments([]);setCash([]);setItems([]);setCustomers([]);setCommissions([])
     }else{
       setOrders((orderRes.data as OrderRow[])||[])
       setPayments((paymentRes.data as PaymentRow[])||[])
       setCash((cashRes.data as CashRow[])||[])
       setItems((itemRes.data as ItemRow[])||[])
       setCustomers((customerRes.data as CustomerRow[])||[])
+      setCommissions((commissionRes.data as CommissionRow[])||[])
     }
     setLoading(false)
   },[appliedFrom,appliedTo])
@@ -124,9 +135,13 @@ export function ReportsPage(){
   const report=useMemo(()=>{
     const omzet=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
     const expense=cash.reduce((sum,c)=>sum+Number(c.amount||0),0)
+    const productionCommission=commissions.filter(c=>c.commission_type==='production').reduce((sum,c)=>sum+Number(c.amount||0),0)
+    const courierCommission=commissions.filter(c=>c.commission_type==='courier').reduce((sum,c)=>sum+Number(c.amount||0),0)
+    const commissionTotal=productionCommission+courierCommission
+    const orderValue=orders.reduce((sum,o)=>sum+Number(o.total||0),0)
     const receivable=orders.reduce((sum,o)=>sum+Math.max(0,Number(o.total||0)-Number(o.paid_amount||0)),0)
     const completed=orders.filter(o=>o.status==='completed'||o.status==='ready').length
-    const avg=orders.length?omzet/orders.length:0
+    const avg=orders.length?orderValue/orders.length:0
 
     const paymentMethods:Record<string,number>={}
     for(const p of payments){
@@ -164,15 +179,24 @@ export function ReportsPage(){
     }
 
     const dayMap:Record<string,number>={}
+    const orderDayMap:Record<string,number>={}
     for(const p of payments){
       const key=new Date(p.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})
       dayMap[key]=(dayMap[key]||0)+Number(p.amount||0)
+    }
+    for(const o of orders){
+      const key=new Date(o.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})
+      orderDayMap[key]=(orderDayMap[key]||0)+1
     }
 
     return{
       omzet,
       expense,
-      net:omzet-expense,
+      productionCommission,
+      courierCommission,
+      commissionTotal,
+      orderValue,
+      net:omzet-expense-commissionTotal,
       receivable,
       orders:orders.length,
       completed,
@@ -180,12 +204,14 @@ export function ReportsPage(){
       paymentMethods:Object.entries(paymentMethods).sort((a,b)=>b[1]-a[1]),
       services:Object.entries(serviceMap).map(([name,v])=>({name,...v})).sort((a,b)=>b.qty-a.qty).slice(0,8),
       customers:Object.values(customerMap).sort((a,b)=>b.total-a.total).slice(0,8),
-      daily:Object.entries(dayMap)
+      daily:Object.entries(dayMap),
+      dailyOrders:Object.entries(orderDayMap)
     }
-  },[orders,payments,cash,items,customers,orderIds])
+  },[orders,payments,cash,items,customers,commissions,orderIds])
 
   const maxDaily=Math.max(1,...report.daily.map(([,v])=>v))
   const maxMethod=Math.max(1,...report.paymentMethods.map(([,v])=>v))
+  const maxDailyOrders=Math.max(1,...report.dailyOrders.map(([,v])=>v))
 
   const setToday=()=>{
     const t=todayISO()
@@ -211,9 +237,11 @@ export function ReportsPage(){
     rows:[
       ['Ringkasan','Omzet',payments.length,report.omzet],
       ['Ringkasan','Pengeluaran',cash.length,report.expense],
+      ['Ringkasan','Komisi Produksi','-',report.productionCommission],
+      ['Ringkasan','Komisi Kurir','-',report.courierCommission],
       ['Ringkasan','Laba Bersih','-',report.net],
       ['Ringkasan','Piutang',orders.filter(o=>Number(o.total)>Number(o.paid_amount)).length,report.receivable],
-      ['Ringkasan','Order',report.orders,Math.round(report.avg)],
+      ['Ringkasan','Order Masuk',report.orders,report.orderValue],
       ...report.paymentMethods.map(([name,value])=>['Metode Pembayaran',name.toUpperCase(),'-',value]),
       ...report.services.map(s=>['Layanan',s.name,s.qty,s.revenue]),
       ...report.customers.map(c=>['Pelanggan',c.name,c.orders,c.total])
@@ -221,8 +249,12 @@ export function ReportsPage(){
     summary:[
       ['Omzet',report.omzet],
       ['Pengeluaran',report.expense],
+      ['Komisi Produksi',report.productionCommission],
+      ['Komisi Kurir',report.courierCommission],
       ['Laba Bersih',report.net],
-      ['Piutang',report.receivable]
+      ['Piutang',report.receivable],
+      ['Jumlah Order Masuk',report.orders],
+      ['Nilai Order Masuk',report.orderValue]
     ] as Array<[string,string|number]>
   })
 
@@ -236,8 +268,12 @@ export function ReportsPage(){
       ['Ringkasan','Nilai'],
       ['Omzet',report.omzet],
       ['Pengeluaran',report.expense],
+      ['Komisi Produksi',report.productionCommission],
+      ['Komisi Kurir',report.courierCommission],
       ['Laba Bersih',report.net],
       ['Piutang',report.receivable],
+      ['Jumlah Order Masuk',report.orders],
+      ['Nilai Order Masuk',report.orderValue],
       ['Order',report.orders],
       ['Rata-rata Order',Math.round(report.avg)],
       [],
@@ -284,11 +320,12 @@ export function ReportsPage(){
     {message&&<div className="error-box inline-message">{message}</div>}
 
     <section className="stats-grid report-stats">
-      <StatCard icon={TrendingUp} label="Omzet" value={formatRupiah(report.omzet)} caption={`${payments.length} pembayaran`}/>
+      <StatCard icon={TrendingUp} label="Omzet Terbayar" value={formatRupiah(report.omzet)} caption={`${payments.length} pembayaran masuk`}/>
       <StatCard icon={WalletCards} label="Pengeluaran" value={formatRupiah(report.expense)} caption="Kas keluar"/>
-      <StatCard icon={TrendingUp} label="Laba Bersih" value={formatRupiah(report.net)} caption="Omzet dikurangi pengeluaran"/>
+      <StatCard icon={CreditCard} label="Komisi Karyawan" value={formatRupiah(report.commissionTotal)} caption={`Produksi ${formatRupiah(report.productionCommission)} • Kurir ${formatRupiah(report.courierCommission)}`}/>
+      <StatCard icon={TrendingUp} label="Laba Bersih" value={formatRupiah(report.net)} caption="Omzet - pengeluaran - komisi"/>
       <StatCard icon={ReceiptText} label="Piutang" value={formatRupiah(report.receivable)} caption="Sisa tagihan"/>
-      <StatCard icon={BarChart3} label="Order" value={String(report.orders)} caption={`${report.completed} selesai/siap`}/>
+      <StatCard icon={BarChart3} label="Order Masuk" value={String(report.orders)} caption={`${report.completed} selesai/siap • ${formatRupiah(report.orderValue)}`}/>
       <StatCard icon={TrendingUp} label="Rata-rata Order" value={formatRupiah(report.avg)} caption="Nilai rata-rata transaksi"/>
     </section>
 
@@ -299,6 +336,16 @@ export function ReportsPage(){
         <div className="report-bars">
           {report.daily.map(([label,value])=><div className="report-bar-row" key={label}>
             <span>{label}</span><div><i style={{width:`${Math.max(4,(value/maxDaily)*100)}%`}}/></div><b>{formatRupiah(value)}</b>
+          </div>)}
+        </div>}
+      </article>
+
+      <article className="panel report-card">
+        <div className="panel-heading"><div><h3>Jumlah Order Masuk Harian</h3><p>Jumlah order baru yang dibuat pada periode terpilih.</p></div></div>
+        {loading?<div className="table-empty">Memuat laporan...</div>:report.dailyOrders.length===0?<div className="report-empty">Belum ada order masuk di periode ini.</div>:
+        <div className="report-bars">
+          {report.dailyOrders.map(([label,value])=><div className="report-bar-row" key={label}>
+            <span>{label}</span><div><i style={{width:`${Math.max(4,(value/maxDailyOrders)*100)}%`}}/></div><b>{value} order</b>
           </div>)}
         </div>}
       </article>
