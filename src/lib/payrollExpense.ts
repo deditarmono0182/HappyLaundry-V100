@@ -19,6 +19,10 @@ export interface PayrollExpenseRow{
   allowance:number
   bonus:number
   revenue_share:number
+  production_commission:number
+  courier_commission:number
+  order_commission:number
+  gross_payroll:number
 }
 
 interface Employee{ id:string; full_name:string }
@@ -29,6 +33,13 @@ interface PayrollAdjustment{ employee_id:string; payroll_month:string; bonus:num
 interface Payment{ order_id:string; amount:number; created_at:string }
 interface OrderItem{ order_id:string; service_id:string|null; subtotal:number }
 interface Service{ id:string; category:string }
+
+interface CommissionLedgerRow{
+  employee_id:string
+  commission_type:'production'|'courier'
+  amount:number
+  earned_at:string
+}
 
 const pad=(n:number)=>String(n).padStart(2,'0')
 const monthStartKey=(d:Date)=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-01`
@@ -59,7 +70,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
   const lastDay=new Date(last.getFullYear(),last.getMonth()+1,0)
   const lastDate=dateKey(lastDay)
 
-  const [emp,a,ps,shr,adj,p,oi,sv]=await Promise.all([
+  const [emp,a,ps,shr,adj,p,oi,sv,cl]=await Promise.all([
     supabase.from('v109_users').select('id,full_name').eq('is_active',true).order('full_name'),
     supabase.from('v111_attendance').select('employee_id,attendance_date,status').gte('attendance_date',firstMonth).lte('attendance_date',lastDate),
     supabase.from('v111_employee_payroll_settings').select('employee_id,attendance_rate,monthly_allowance'),
@@ -67,10 +78,14 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
     supabase.from('v111_payroll_adjustments').select('employee_id,payroll_month,bonus').gte('payroll_month',firstMonth).lte('payroll_month',monthStartKey(last)),
     supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${firstMonth}T00:00:00`).lte('created_at',`${lastDate}T23:59:59.999`),
     supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
-    supabase.from('v100_services').select('id,category')
+    supabase.from('v100_services').select('id,category'),
+    supabase.from('v113_commission_ledger')
+      .select('employee_id,commission_type,amount,earned_at')
+      .gte('earned_at',`${firstMonth}T00:00:00`)
+      .lte('earned_at',`${lastDate}T23:59:59.999`)
   ])
 
-  const error=emp.error||a.error||ps.error||shr.error||adj.error||p.error||oi.error||sv.error
+  const error=emp.error||a.error||ps.error||shr.error||adj.error||p.error||oi.error||sv.error||cl.error
   if(error)throw error
 
   const employees=(emp.data as Employee[])||[]
@@ -81,6 +96,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
   const payments=(p.data as Payment[])||[]
   const orderItems=(oi.data as OrderItem[])||[]
   const services=(sv.data as Service[])||[]
+  const commissionLedger=(cl.data as CommissionLedgerRow[])||[]
 
   const settingMap=new Map(settings.map(row=>[row.employee_id,row]))
   const serviceCategory=new Map(services.map(service=>[
@@ -136,7 +152,21 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
       const revenueShare=(sharesByEmployee.get(employee.id)||[]).reduce((sum,share)=>
         sum+Number(categoryRevenue[share.category]||0)*(Number(share.share_percent||0)/100),0
       )
-      const amount=attendancePay+allowance+bonus+revenueShare
+
+      const employeeCommission=commissionLedger.filter(row=>
+        row.employee_id===employee.id&&inMonth(row.earned_at,month)
+      )
+      const productionCommission=employeeCommission
+        .filter(row=>row.commission_type==='production')
+        .reduce((sum,row)=>sum+Number(row.amount||0),0)
+      const courierCommission=employeeCommission
+        .filter(row=>row.commission_type==='courier')
+        .reduce((sum,row)=>sum+Number(row.amount||0),0)
+      const orderCommission=productionCommission+courierCommission
+
+      // Kas bon tidak dihitung sebagai biaya usaha baru. Kas bon adalah uang muka/piutang
+      // karyawan dan hanya mengurangi jumlah yang dibayar ke karyawan, bukan hak gajinya.
+      const amount=attendancePay+allowance+bonus+revenueShare+orderCommission
       if(amount<=0)continue
 
       result.push({
@@ -147,7 +177,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
         group_name:'SDM / Payroll',
         amount,
         payment_method:'payroll',
-        description:`${employee.full_name} • Hadir ${presentDays} hari • Uang hadir ${attendancePay.toLocaleString('id-ID')} • Tunjangan ${allowance.toLocaleString('id-ID')} • Bonus ${bonus.toLocaleString('id-ID')} • Bagi hasil ${Math.round(revenueShare).toLocaleString('id-ID')}`,
+        description:`${employee.full_name} • Hadir ${presentDays} hari • Uang hadir ${attendancePay.toLocaleString('id-ID')} • Tunjangan ${allowance.toLocaleString('id-ID')} • Bonus ${bonus.toLocaleString('id-ID')} • Bagi hasil ${Math.round(revenueShare).toLocaleString('id-ID')} • Komisi produksi ${Math.round(productionCommission).toLocaleString('id-ID')} • Komisi kurir ${Math.round(courierCommission).toLocaleString('id-ID')}`,
         reference:`PAYROLL-${mStart.slice(0,7)}-${employee.id.slice(0,8)}`,
         created_at:`${mStart}T12:00:00`,
         payroll_month:mStart,
@@ -157,7 +187,11 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
         attendance_pay:attendancePay,
         allowance,
         bonus,
-        revenue_share:revenueShare
+        revenue_share:revenueShare,
+        production_commission:productionCommission,
+        courier_commission:courierCommission,
+        order_commission:orderCommission,
+        gross_payroll:amount
       })
     }
   }

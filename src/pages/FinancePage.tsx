@@ -446,7 +446,7 @@ export function FinancePage(){
         <StatCard icon={TrendingUp} label="Pemasukan" value={formatRupiah(stats.omzet)} caption={`${payments.length} pembayaran • Klik untuk lihat`}/>
       </button>
       <button type="button" className="finance-click-stat finance-expense-click" onClick={()=>navigate('/finance/expenses')} title="Buka daftar pengeluaran">
-        <StatCard icon={TrendingDown} label="Pengeluaran" value={formatRupiah(stats.expense)} caption={`${expenses.length} operasional + ${payrollExpenses.length} gaji • Klik untuk lihat`}/>
+        <StatCard icon={TrendingDown} label="Pengeluaran" value={formatRupiah(stats.expense)} caption={`${expenses.length} operasional + ${payrollExpenses.length} payroll lengkap • Klik untuk lihat`}/>
       </button>
       <StatCard icon={WalletCards} label="Laba Bersih" value={formatRupiah(stats.net)} caption="Pemasukan - pengeluaran"/>
       <button type="button" className="finance-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">

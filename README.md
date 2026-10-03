@@ -398,3 +398,10 @@ test
 - Saldo gaji karyawan dapat tampil minus bila kas bon melebihi hak gaji.
 - Tabel payroll dibuat lebih padat.
 - Memerlukan SQL 060.
+
+
+## V113.0.75 — Finance Payroll Complete
+- Laporan Keuangan sekarang memasukkan komisi produksi dan komisi kurir ke biaya payroll.
+- Rincian payroll: uang hadir, tunjangan, bonus, bagi hasil, komisi produksi, komisi kurir.
+- Kas bon tidak dihitung sebagai biaya usaha tambahan agar tidak double-count.
+- Tidak ada SQL baru.
