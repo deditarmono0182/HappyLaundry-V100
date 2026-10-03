@@ -383,3 +383,8 @@ Laporan Owner membedakan omzet terbayar dari order masuk, mengurangi komisi prod
 - Potongan kas bon dan saldo sisa.
 - Menu Gaji Saya untuk akun karyawan, hanya data sendiri.
 - Rincian komisi order dan riwayat pembayaran.
+
+
+## V113.0.73 — Build Fix
+- Memperbaiki PageHeader Gaji Saya yang belum mengirim prop eyebrow wajib.
+- Tidak ada perubahan database / SQL baru.

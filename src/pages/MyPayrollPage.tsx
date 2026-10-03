@@ -83,7 +83,7 @@ export function MyPayrollPage(){
   if(profile?.role!=='employee')return <section className="panel"><b>Gaji Saya khusus akun karyawan.</b></section>
 
   return <div className="page-stack">
-    <PageHeader title="Gaji Saya" description="Rincian gaji, komisi, kas bon, dan riwayat pembayaran milik akun Anda sendiri."/>
+    <PageHeader eyebrow="KARYAWAN" title="Gaji Saya" description="Rincian gaji, komisi, kas bon, dan riwayat pembayaran milik akun Anda sendiri."/>
 
     <section className="panel my-payroll-toolbar">
       <label><CalendarRange size={17}/> Periode
