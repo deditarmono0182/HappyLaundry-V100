@@ -95,6 +95,7 @@ export function OrdersPage() {
   const [query, setQuery] = useState('')
   const [paymentFilter,setPaymentFilter]=useState<'all'|'unpaid'|'partial'|'paid'>('all')
   const [statusFilter,setStatusFilter]=useState<'all'|OrderStatus>('all')
+  const [categoryFilter,setCategoryFilter]=useState('all')
   const [statusBusyId,setStatusBusyId]=useState<string|null>(null)
   const [loading, setLoading] = useState(true)
   const [orderLimit,setOrderLimit]=useState(ORDER_PAGE_SIZE)
@@ -214,6 +215,28 @@ export function OrdersPage() {
         : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
       return `${item.service_name} ${formattedQty} ${item.unit}`
     }).join(' • ')
+  }
+
+  const serviceCategoryByName=useMemo(()=>{
+    const map=new Map<string,string>()
+    for(const service of services){
+      map.set(service.name.trim().toLowerCase(),service.category?.trim()||'Tanpa Kategori')
+    }
+    return map
+  },[services])
+
+  const categories=useMemo(()=>{
+    const values=new Set<string>()
+    for(const service of services){
+      const category=service.category?.trim()
+      if(category)values.add(category)
+    }
+    return Array.from(values).sort((a,b)=>a.localeCompare(b,'id'))
+  },[services])
+
+  const orderCategories=(orderId:string)=>{
+    const list=serviceItemsByOrder.get(orderId)||[]
+    return Array.from(new Set(list.map(item=>serviceCategoryByName.get(item.service_name.trim().toLowerCase())).filter((value):value is string=>Boolean(value))))
   }
 
   const deliveryProofByOrder=useMemo(()=>{
@@ -362,6 +385,9 @@ export function OrdersPage() {
       if(paymentFilter!=='all'&&row.payment_status!==paymentFilter)return false
       if(statusFilter!=='all'&&row.status!==statusFilter)return false
 
+      const rowCategories=orderCategories(row.id)
+      if(categoryFilter!=='all'&&!rowCategories.some(category=>category.toLowerCase()===categoryFilter.toLowerCase()))return false
+
       if(!keyword)return true
 
       const haystack=[
@@ -372,12 +398,13 @@ export function OrdersPage() {
         row.status,
         paymentLabels[row.payment_status],
         row.payment_status,
-        serviceSummary(row.id)
+        serviceSummary(row.id),
+        ...rowCategories
       ].join(' ').toLowerCase()
 
       return haystack.includes(keyword)
     })
-  },[query,rows,serviceItemsByOrder,paymentFilter,statusFilter])
+  },[query,rows,serviceItemsByOrder,serviceCategoryByName,paymentFilter,statusFilter,categoryFilter])
 
   const overdueRows = useMemo(() => {
     const now = Date.now()
@@ -859,7 +886,7 @@ export function OrdersPage() {
             <input
               value={query}
               onChange={event=>setQuery(event.target.value)}
-              placeholder="Cari order, pelanggan, telepon, layanan, status, atau pembayaran"
+              placeholder="Cari order, pelanggan, layanan, kategori (Express/Kiloan/Satuan), status, atau pembayaran"
             />
           </label>
 
@@ -888,6 +915,14 @@ export function OrdersPage() {
             </select>
           </label>
 
+          <label className="order-filter-field">
+            <span>Kategori Layanan</span>
+            <select value={categoryFilter} onChange={e=>setCategoryFilter(e.target.value)}>
+              <option value="all">Semua Kategori</option>
+              {categories.map(category=><option key={category} value={category}>{category}</option>)}
+            </select>
+          </label>
+
           <button
             type="button"
             className="secondary-button order-reset-filter"
@@ -895,6 +930,7 @@ export function OrdersPage() {
               setQuery('')
               setPaymentFilter('all')
               setStatusFilter('all')
+              setCategoryFilter('all')
             }}
           >
             Semua

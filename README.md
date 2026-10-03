@@ -418,3 +418,10 @@ test
 - Klik kategori Express/Kiloan/Satuan di Dashboard untuk melihat detail order dan layanan pada periode grafik terpilih.
 - Menampilkan tanggal, nomor order, pelanggan, layanan, qty/berat, nilai kontribusi, total kategori dan jumlah order.
 - Tidak perlu SQL baru.
+
+
+## V113.0.78 — Order Category Search & Filter
+- Search Order sekarang bisa mencari kategori layanan seperti Express, Kiloan, dan Satuan.
+- Menambahkan dropdown Kategori Layanan di halaman Order.
+- Order multi-kategori tetap muncul jika salah satu item cocok dengan kategori yang dipilih.
+- Tidak perlu SQL baru.
