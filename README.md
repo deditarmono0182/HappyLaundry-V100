@@ -501,3 +501,13 @@ test
 - Klik kartu tetap membuka Order dengan filter Terlambat.
 - Perubahan nilai uang kecil/non-bold V113.0.87 tetap dipertahankan.
 - Tidak ada SQL baru.
+
+
+## V113.0.89 — Overdue Card Exact Grid Match
+- Kartu Terlambat tidak lagi dibungkus elemen button.
+- Kartu Terlambat sekarang menjadi elemen `stat-card` langsung di grid, sama seperti kartu KPI lain.
+- Lebar, tinggi, padding, dan responsif HP/laptop mengikuti kartu lain secara identik.
+- Klik dan keyboard Enter/Space tetap membuka Order dengan filter Terlambat.
+- Warna peringatan tetap dipertahankan.
+- Perubahan nilai uang kecil/non-bold tetap dipertahankan.
+- Tidak ada SQL baru.

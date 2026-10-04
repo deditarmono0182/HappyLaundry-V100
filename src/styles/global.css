@@ -10454,3 +10454,33 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   outline-offset:2px!important;
   border-radius:16px!important;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.89 — Overdue Card Exact Grid Match
+   Terlambat is now a direct .stat-card grid item (no button
+   wrapper), so it inherits the exact same width/height as all
+   other dashboard KPI cards on laptop and mobile.
+   ========================================================= */
+.dashboard-stats > .dashboard-overdue-stat-card{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  cursor:pointer!important;
+}
+.dashboard-stats > .dashboard-overdue-stat-card.has-overdue{
+  border-color:#f0bd72!important;
+  background:#fffaf2!important;
+}
+.dashboard-stats > .dashboard-overdue-stat-card.has-overdue .stat-icon{
+  background:#fff0d7!important;
+  color:#b85c00!important;
+}
+.dashboard-stats > .dashboard-overdue-stat-card.has-overdue strong{
+  color:#b85c00!important;
+}
+.dashboard-stats > .dashboard-overdue-stat-card:focus-visible{
+  outline:3px solid rgba(30,136,229,.22)!important;
+  outline-offset:2px!important;
+}

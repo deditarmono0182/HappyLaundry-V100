@@ -442,14 +442,17 @@ export function DashboardPage() {
       <StatCard label="Omzet / Barang Masuk Hari Ini" value={formatIDR(omzet)} caption={`Kas masuk ${formatIDR(cashIn)}`} icon={Banknote}/>
       <StatCard label="Order Hari Ini" value={String(today.length)} caption="Order masuk hari ini" icon={ShoppingBag}/>
       <StatCard label="Sedang Diproses" value={String(processing)} caption="Belum siap diambil" icon={WashingMachine}/>
-      <button
-        type="button"
-        className={`dashboard-click-stat dashboard-overdue-shortcut ${overdue>0?'has-overdue':''}`}
+      <article
+        className={`stat-card dashboard-overdue-stat-card ${overdue>0?'has-overdue':''}`}
+        role="button"
+        tabIndex={0}
         onClick={()=>navigate('/orders?status=overdue')}
+        onKeyDown={(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();navigate('/orders?status=overdue')}}}
         title="Lihat order terlambat"
       >
-        <StatCard label="Terlambat" value={String(overdue)} caption="Klik untuk lihat order" icon={AlertTriangle}/>
-      </button>
+        <div className="stat-icon"><AlertTriangle size={24}/></div>
+        <div><span>Terlambat</span><strong>{overdue}</strong><small>Klik untuk lihat order</small></div>
+      </article>
       <StatCard label="Siap Diambil" value={String(ready)} caption="Menunggu pelanggan" icon={PackageCheck}/>
       <StatCard label="Selesai Hari Ini" value={String(completed)} caption="Order selesai" icon={CheckCircle2}/>
       <button type="button" className="dashboard-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
