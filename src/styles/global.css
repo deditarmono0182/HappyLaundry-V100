@@ -10509,35 +10509,95 @@ html[data-density="ultra"] .main-content .expense-delete-request{
 
 
 /* =========================================================
-   HappyLaundry V113.0.92 — Bulk Assignment Correction
+   HappyLaundry V113.0.93 — Find Missing Worker / Courier
    ========================================================= */
-.order-bulk-assignment-bar{
-  margin:10px 0 12px;
-  padding:10px 12px;
-  border:1px solid #b8d8cf;
-  border-radius:14px;
-  background:#f1fbf8;
+.assignment-find-bar{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:12px;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:10px 0 14px;
+  padding:10px 12px;
+  border:1px solid #dfeee9;
+  border-radius:14px;
+  background:#f8fcfb;
 }
-.order-bulk-assignment-bar>div:first-child{display:grid;gap:2px}
-.order-bulk-assignment-bar small{color:#5c6f69}
-.order-bulk-assignment-actions{display:flex;gap:8px;flex-wrap:wrap}
-.order-select-column{width:42px!important;min-width:42px!important;text-align:center!important}
-.order-select-column input,.order-mobile-select input,.bulk-only-empty-option input{width:17px;height:17px;accent-color:#16856d}
-.order-row-selected td{background:#f4fbf9!important}
-.order-assignment-missing-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
-.order-assignment-missing-badges span{font-size:10px;line-height:1.1;padding:4px 6px;border-radius:999px;background:#fff0df;color:#9a5200;border:1px solid #f0c38c;font-weight:700}
-.order-mobile-select{display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;font-size:11px;font-weight:700;color:#31554d}
-.order-mobile-card.is-selected{outline:2px solid rgba(22,133,109,.28);background:#fbfffe}
-.bulk-assignment-modal .info-box{display:grid;gap:3px}
-.bulk-only-empty-option{display:flex!important;align-items:flex-start!important;gap:9px!important;padding:10px 12px;border:1px solid #dce8e4;border-radius:12px;background:#f8fbfa}
-.bulk-only-empty-option>span{display:grid;gap:2px}
-.bulk-only-empty-option small{font-weight:400;color:#667a74}
+.assignment-find-bar>span{
+  font-size:12px;
+  font-weight:700;
+  color:#516b78;
+  margin-right:2px;
+}
+.assignment-find-bar button{
+  border:1px solid #d7e6e2;
+  background:#fff;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:12px;
+  font-weight:650;
+  cursor:pointer;
+  color:#264b5a;
+}
+.assignment-find-bar button b{
+  display:inline-grid;
+  place-items:center;
+  min-width:20px;
+  height:20px;
+  margin-left:5px;
+  padding:0 5px;
+  border-radius:999px;
+  background:#edf5f2;
+  font-size:11px;
+}
+.assignment-find-bar button.is-active{
+  border-color:#e9a653;
+  background:#fff7eb;
+  color:#9b5600;
+}
+.assignment-find-bar .assignment-clear{
+  margin-left:auto;
+  color:#315d6d;
+}
+
+.order-assignment-mini-warning{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+  margin-top:5px;
+}
+.order-assignment-mini-warning span,
+.order-assignment-warning span{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  background:#fff4df;
+  border:1px solid #f1c77d;
+  color:#9a5a00;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.1;
+  padding:4px 7px;
+}
+.order-assignment-warning{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:9px;
+}
 @media(max-width:700px){
-  .order-bulk-assignment-bar{position:sticky;bottom:10px;z-index:25;align-items:stretch;flex-direction:column;box-shadow:0 10px 30px rgba(20,54,46,.16)}
-  .order-bulk-assignment-actions{display:grid;grid-template-columns:1fr 1fr}
-  .order-bulk-assignment-actions button{justify-content:center}
+  .assignment-find-bar{
+    gap:6px;
+    padding:9px;
+  }
+  .assignment-find-bar>span{
+    width:100%;
+  }
+  .assignment-find-bar button{
+    padding:7px 9px;
+    font-size:11px;
+  }
+  .assignment-find-bar .assignment-clear{
+    margin-left:0;
+  }
 }

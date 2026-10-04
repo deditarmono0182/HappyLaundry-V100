@@ -102,14 +102,7 @@ export function OrdersPage() {
   const [paymentFilter,setPaymentFilter]=useState<'all'|'unpaid'|'partial'|'paid'>('all')
   const [statusFilter,setStatusFilter]=useState<'all'|'overdue'|OrderStatus>('all')
   const [categoryFilter,setCategoryFilter]=useState('all')
-  const [assignmentFilter,setAssignmentFilter]=useState<'all'|'worker_missing'|'courier_missing'|'both_missing'>('all')
-  const [selectedOrderIds,setSelectedOrderIds]=useState<string[]>([])
-  const [bulkCorrectionOpen,setBulkCorrectionOpen]=useState(false)
-  const [bulkWorkerId,setBulkWorkerId]=useState('')
-  const [bulkCourierId,setBulkCourierId]=useState('')
-  const [bulkOnlyEmpty,setBulkOnlyEmpty]=useState(true)
-  const [bulkCorrectionReason,setBulkCorrectionReason]=useState('')
-  const [bulkCorrectionBusy,setBulkCorrectionBusy]=useState(false)
+  const [assignmentFilter,setAssignmentFilter]=useState<'all'|'missing_worker'|'missing_courier'|'missing_any'|'missing_both'>('all')
   const [statusBusyId,setStatusBusyId]=useState<string|null>(null)
   const [loading, setLoading] = useState(true)
   const [orderLimit,setOrderLimit]=useState(ORDER_PAGE_SIZE)
@@ -398,79 +391,29 @@ export function OrdersPage() {
   }
 
 
-  const assignmentForOrder=(orderId:string)=>commissionAssignments.find(item=>item.order_id===orderId)
-  const isWorkerMissing=(orderId:string)=>!assignmentForOrder(orderId)?.worker_id
-  const isCourierMissing=(orderId:string)=>!assignmentForOrder(orderId)?.courier_id
+  const orderAssignmentMap=useMemo(
+    ()=>new Map(commissionAssignments.map(item=>[item.order_id,item])),
+    [commissionAssignments]
+  )
 
-  const toggleOrderSelection=(orderId:string)=>{
-    setSelectedOrderIds(current=>current.includes(orderId)?current.filter(id=>id!==orderId):[...current,orderId])
-  }
+  const missingAssignmentCounts=useMemo(()=>{
+    let worker=0
+    let courier=0
+    let any=0
+    let both=0
 
-  const clearBulkSelection=()=>setSelectedOrderIds([])
-
-  const openBulkAssignmentCorrection=()=>{
-    if(!selectedOrderIds.length)return
-    setBulkWorkerId('')
-    setBulkCourierId('')
-    setBulkOnlyEmpty(true)
-    setBulkCorrectionReason('Kasir lupa mengisi penanggung jawab')
-    setMessage('')
-    setBulkCorrectionOpen(true)
-  }
-
-  const submitBulkAssignmentCorrection=async()=>{
-    const selectedRows=rows.filter(row=>selectedOrderIds.includes(row.id))
-    if(!selectedRows.length)return
-    if(!bulkWorkerId&&!bulkCourierId){
-      setMessage('Pilih minimal Yang Mengerjakan atau Kurir untuk koreksi massal.')
-      return
+    for(const row of rows){
+      const assignment=orderAssignmentMap.get(row.id)
+      const missingWorker=!assignment?.worker_id
+      const missingCourier=!assignment?.courier_id
+      if(missingWorker)worker+=1
+      if(missingCourier)courier+=1
+      if(missingWorker||missingCourier)any+=1
+      if(missingWorker&&missingCourier)both+=1
     }
-    if(bulkCorrectionReason.trim().length<5){
-      setMessage('Alasan koreksi minimal 5 karakter.')
-      return
-    }
-    if(!window.confirm(`Koreksi ${selectedRows.length} order sekaligus? Riwayat koreksi tetap disimpan per order.`))return
 
-    setBulkCorrectionBusy(true)
-    setMessage('')
-    let success=0
-    const failures:string[]=[]
-    try{
-      for(const row of selectedRows){
-        const current=assignmentForOrder(row.id)
-        const nextWorker=bulkWorkerId
-          ? (bulkOnlyEmpty&&current?.worker_id?current.worker_id:bulkWorkerId)
-          : (current?.worker_id||null)
-        const nextCourier=bulkCourierId
-          ? (bulkOnlyEmpty&&current?.courier_id?current.courier_id:bulkCourierId)
-          : (current?.courier_id||null)
-
-        const hasChange=(nextWorker||null)!==(current?.worker_id||null)||(nextCourier||null)!==(current?.courier_id||null)
-        if(!hasChange){success+=1;continue}
-
-        const {error}=await supabase.rpc('v113_correct_order_assignment',{
-          p_order_id:row.id,
-          p_worker_id:nextWorker,
-          p_courier_id:nextCourier,
-          p_reason:bulkCorrectionReason.trim()
-        })
-        if(error)failures.push(`${row.order_no}: ${error.message}`)
-        else success+=1
-      }
-      await load()
-      if(failures.length){
-        setMessage(`${success} order berhasil. ${failures.length} order gagal: ${failures.slice(0,3).join(' | ')}`)
-      }else{
-        window.alert(`${success} order selesai dikoreksi.`)
-        setBulkCorrectionOpen(false)
-        setSelectedOrderIds([])
-      }
-    }catch(error){
-      setMessage(error instanceof Error?error.message:'Koreksi massal gagal.')
-    }finally{
-      setBulkCorrectionBusy(false)
-    }
-  }
+    return {worker,courier,any,both}
+  },[rows,orderAssignmentMap])
 
 
   const filtered = useMemo(() => {
@@ -488,11 +431,14 @@ export function OrdersPage() {
       const rowCategories=orderCategories(row.id)
       if(categoryFilter!=='all'&&!rowCategories.some(category=>category.toLowerCase()===categoryFilter.toLowerCase()))return false
 
-      const workerMissing=isWorkerMissing(row.id)
-      const courierMissing=isCourierMissing(row.id)
-      if(assignmentFilter==='worker_missing'&&!workerMissing)return false
-      if(assignmentFilter==='courier_missing'&&!courierMissing)return false
-      if(assignmentFilter==='both_missing'&&!(workerMissing&&courierMissing))return false
+      const assignment=orderAssignmentMap.get(row.id)
+      const missingWorker=!assignment?.worker_id
+      const missingCourier=!assignment?.courier_id
+
+      if(assignmentFilter==='missing_worker'&&!missingWorker)return false
+      if(assignmentFilter==='missing_courier'&&!missingCourier)return false
+      if(assignmentFilter==='missing_any'&&!(missingWorker||missingCourier))return false
+      if(assignmentFilter==='missing_both'&&!(missingWorker&&missingCourier))return false
 
       if(!keyword)return true
 
@@ -510,7 +456,7 @@ export function OrdersPage() {
 
       return haystack.includes(keyword)
     })
-  },[query,rows,serviceItemsByOrder,serviceCategoryByName,paymentFilter,statusFilter,categoryFilter,assignmentFilter,commissionAssignments])
+  },[query,rows,serviceItemsByOrder,serviceCategoryByName,paymentFilter,statusFilter,categoryFilter,assignmentFilter,orderAssignmentMap])
 
   const overdueRows = useMemo(() => {
     const now = Date.now()
@@ -716,8 +662,14 @@ export function OrdersPage() {
   const filteredLabel=()=>{
     const payment=paymentFilter==='all'?'Semua Pembayaran':paymentLabels[paymentFilter]
     const status=statusFilter==='all'?'Semua Status Cucian':statusFilter==='overdue'?'Terlambat':statusLabels[statusFilter]
-    const assignment=assignmentFilter==='all'?'Semua Penugasan':assignmentFilter==='worker_missing'?'Yang Mengerjakan Kosong':assignmentFilter==='courier_missing'?'Kurir Kosong':'Keduanya Kosong'
-    return `Filter: ${status} • ${payment} • ${assignment}`
+    const assignmentLabel={
+      all:'Semua Penugasan',
+      missing_worker:'Yang Mengerjakan Kosong',
+      missing_courier:'Kurir Kosong',
+      missing_any:'Ada Penugasan Kosong',
+      missing_both:'Keduanya Kosong'
+    }[assignmentFilter]
+    return `Filter: ${status} • ${payment} • ${assignmentLabel}`
   }
 
   const openCustomerTracking=(row:OrderRow)=>{
@@ -1033,15 +985,16 @@ export function OrdersPage() {
             </select>
           </label>
 
-          {profile?.role==='owner'&&<label className="order-filter-field">
+          <label className="order-filter-field order-assignment-filter">
             <span>Penugasan</span>
             <select value={assignmentFilter} onChange={e=>setAssignmentFilter(e.target.value as typeof assignmentFilter)}>
               <option value="all">Semua Penugasan</option>
-              <option value="worker_missing">Yang Mengerjakan Kosong</option>
-              <option value="courier_missing">Kurir Kosong</option>
-              <option value="both_missing">Keduanya Kosong</option>
+              <option value="missing_worker">Yang Mengerjakan Kosong</option>
+              <option value="missing_courier">Kurir Kosong</option>
+              <option value="missing_any">Salah Satu Kosong</option>
+              <option value="missing_both">Keduanya Kosong</option>
             </select>
-          </label>}
+          </label>
 
           <button
             type="button"
@@ -1052,7 +1005,6 @@ export function OrdersPage() {
               setStatusFilter('all')
               setCategoryFilter('all')
               setAssignmentFilter('all')
-              setSelectedOrderIds([])
             }}
           >
             Semua
@@ -1067,13 +1019,19 @@ export function OrdersPage() {
           <span className="record-count">{filtered.length} order</span>
         </div>
 
-        {profile?.role==='owner'&&selectedOrderIds.length>0&&<div className="order-bulk-assignment-bar">
-          <div><b>{selectedOrderIds.length} order dipilih</b><small>Koreksi Yang Mengerjakan / Kurir sekaligus.</small></div>
-          <div className="order-bulk-assignment-actions">
-            <button type="button" className="secondary-button" onClick={clearBulkSelection}>Batal Pilih</button>
-            <button type="button" className="primary-button" onClick={openBulkAssignmentCorrection}><Pencil size={16}/>Koreksi Penugasan</button>
-          </div>
-        </div>}
+        <div className="assignment-find-bar" aria-label="Cari order dengan penugasan kosong">
+          <span>Cari yang belum diisi:</span>
+          <button type="button" className={assignmentFilter==='missing_worker'?'is-active':''} onClick={()=>setAssignmentFilter('missing_worker')}>
+            Yang Mengerjakan <b>{missingAssignmentCounts.worker}</b>
+          </button>
+          <button type="button" className={assignmentFilter==='missing_courier'?'is-active':''} onClick={()=>setAssignmentFilter('missing_courier')}>
+            Kurir <b>{missingAssignmentCounts.courier}</b>
+          </button>
+          <button type="button" className={assignmentFilter==='missing_both'?'is-active':''} onClick={()=>setAssignmentFilter('missing_both')}>
+            Keduanya <b>{missingAssignmentCounts.both}</b>
+          </button>
+          {assignmentFilter!=='all'&&<button type="button" className="assignment-clear" onClick={()=>setAssignmentFilter('all')}>Tampilkan Semua</button>}
+        </div>
 
         {message && <div className="error-box inline-message">{message}</div>}
 
@@ -1084,11 +1042,7 @@ export function OrdersPage() {
             const proof=deliveryProofByOrder.get(row.id)
             const canAdvance=statusFlow.indexOf(row.status)>=0&&statusFlow.indexOf(row.status)<statusFlow.length-1
             return (
-              <article className={`order-mobile-card ${isOrderOverdue(row)?'is-overdue':''} ${selectedOrderIds.includes(row.id)?'is-selected':''}`} key={`mobile-${row.id}`}>
-                {profile?.role==='owner'&&<label className="order-mobile-select" title="Pilih untuk koreksi massal">
-                  <input type="checkbox" checked={selectedOrderIds.includes(row.id)} onChange={()=>toggleOrderSelection(row.id)}/>
-                  <span>Pilih</span>
-                </label>}
+              <article className={`order-mobile-card ${isOrderOverdue(row)?'is-overdue':''}`} key={`mobile-${row.id}`}>
                 <header className="order-mobile-card-head">
                   <div>
                     <strong>{row.order_no}</strong>
@@ -1109,15 +1063,21 @@ export function OrdersPage() {
                     : <span className={`badge status-${row.status}`}>{statusLabels[row.status]}</span>}
                 </header>
 
-                {profile?.role==='owner'&&(isWorkerMissing(row.id)||isCourierMissing(row.id))&&<div className="order-assignment-missing-badges">
-                  {isWorkerMissing(row.id)&&<span>Yang Mengerjakan kosong</span>}
-                  {isCourierMissing(row.id)&&<span>Kurir kosong</span>}
-                </div>}
-
                 <div className="order-mobile-service">
                   <span>Layanan</span>
                   <b>{serviceSummary(row.id)}</b>
                 </div>
+
+                {(()=>{
+                  const assignment=orderAssignmentMap.get(row.id)
+                  const missingWorker=!assignment?.worker_id
+                  const missingCourier=!assignment?.courier_id
+                  if(!missingWorker&&!missingCourier)return null
+                  return <div className="order-assignment-warning">
+                    {missingWorker&&<span>Yang Mengerjakan belum diisi</span>}
+                    {missingCourier&&<span>Kurir belum diisi</span>}
+                  </div>
+                })()}
 
                 <div className="order-mobile-money">
                   <div><span>Total</span><strong>{formatRupiah(row.total)}</strong></div>
@@ -1161,7 +1121,6 @@ export function OrdersPage() {
           <table className="orders-table">
             <thead>
               <tr>
-                {profile?.role==='owner'&&<th className="order-select-column"><input type="checkbox" aria-label="Pilih semua order tampil" checked={filtered.length>0&&filtered.every(row=>selectedOrderIds.includes(row.id))} onChange={event=>setSelectedOrderIds(event.target.checked?Array.from(new Set([...selectedOrderIds,...filtered.map(row=>row.id)])):selectedOrderIds.filter(id=>!filtered.some(row=>row.id===id)))}/></th>}
                 <th>Order</th>
                 <th>Pelanggan</th>
                 <th>Layanan</th>
@@ -1176,14 +1135,25 @@ export function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={profile?.role==='owner'?12:11} className="table-empty">Memuat order...</td></tr>}
+              {loading && <tr><td colSpan={11} className="table-empty">Memuat order...</td></tr>}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={profile?.role==='owner'?12:11} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
+                <tr><td colSpan={11} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
               )}
               {filtered.map(row => (
-                <tr key={row.id} className={selectedOrderIds.includes(row.id)?'order-row-selected':''}>
-                  {profile?.role==='owner'&&<td className="order-select-column"><input type="checkbox" aria-label={`Pilih ${row.order_no}`} checked={selectedOrderIds.includes(row.id)} onChange={()=>toggleOrderSelection(row.id)}/></td>}
-                  <td><b>{row.order_no}</b>{profile?.role==='owner'&&(isWorkerMissing(row.id)||isCourierMissing(row.id))&&<div className="order-assignment-missing-badges desktop">{isWorkerMissing(row.id)&&<span>Pengerjaan kosong</span>}{isCourierMissing(row.id)&&<span>Kurir kosong</span>}</div>}</td>
+                <tr key={row.id}>
+                  <td>
+                    <b>{row.order_no}</b>
+                    {(()=>{
+                      const assignment=orderAssignmentMap.get(row.id)
+                      const missingWorker=!assignment?.worker_id
+                      const missingCourier=!assignment?.courier_id
+                      if(!missingWorker&&!missingCourier)return null
+                      return <div className="order-assignment-mini-warning">
+                        {missingWorker&&<span>Pengerjaan kosong</span>}
+                        {missingCourier&&<span>Kurir kosong</span>}
+                      </div>
+                    })()}
+                  </td>
                   <td><b>{row.customer_name}</b><small>{row.customer_phone}</small></td>
                   <td className="order-service-cell">
                     {(serviceItemsByOrder.get(row.id)||[]).length
@@ -1431,45 +1401,6 @@ export function OrdersPage() {
                 onClick={()=>void submitDelivery()}
               >
                 <Truck size={16}/>{deliveryBusy?'Mengirim...':'Konfirmasi Telah Dikirim'}
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {bulkCorrectionOpen&&profile?.role==='owner'&&(
-        <Modal title={`Koreksi Penugasan Massal — ${selectedOrderIds.length} Order`} onClose={()=>!bulkCorrectionBusy&&setBulkCorrectionOpen(false)}>
-          <div className="modal-form bulk-assignment-modal">
-            <div className="info-box">
-              <b>{selectedOrderIds.length} order dipilih</b>
-              <span>Pilih Yang Mengerjakan dan/atau Kurir. Riwayat koreksi tetap dibuat per order.</span>
-            </div>
-            <label>
-              Yang Mengerjakan
-              <select value={bulkWorkerId} onChange={e=>setBulkWorkerId(e.target.value)}>
-                <option value="">Tidak diubah</option>
-                {commissionEmployeeNames.map(employee=><option key={`bulk-worker-${employee.id}`} value={employee.id}>{employee.full_name} ({employee.login_id})</option>)}
-              </select>
-            </label>
-            <label>
-              Kurir
-              <select value={bulkCourierId} onChange={e=>setBulkCourierId(e.target.value)}>
-                <option value="">Tidak diubah</option>
-                {commissionEmployeeNames.map(employee=><option key={`bulk-courier-${employee.id}`} value={employee.id}>{employee.full_name} ({employee.login_id})</option>)}
-              </select>
-            </label>
-            <label className="bulk-only-empty-option">
-              <input type="checkbox" checked={bulkOnlyEmpty} onChange={e=>setBulkOnlyEmpty(e.target.checked)}/>
-              <span><b>Hanya isi data yang masih kosong</b><small>Data penugasan yang sudah benar tidak akan ditimpa.</small></span>
-            </label>
-            <label>
-              Alasan Koreksi
-              <textarea rows={3} value={bulkCorrectionReason} onChange={e=>setBulkCorrectionReason(e.target.value)} placeholder="Contoh: kasir lupa mengisi penanggung jawab"/>
-            </label>
-            <div className="modal-actions">
-              <button type="button" className="secondary-button" disabled={bulkCorrectionBusy} onClick={()=>setBulkCorrectionOpen(false)}>Batal</button>
-              <button type="button" className="primary-button" disabled={bulkCorrectionBusy} onClick={()=>void submitBulkAssignmentCorrection()}>
-                <Pencil size={16}/>{bulkCorrectionBusy?'Menyimpan...':`Simpan ${selectedOrderIds.length} Order`}
               </button>
             </div>
           </div>

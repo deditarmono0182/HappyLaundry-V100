@@ -522,10 +522,11 @@ test
 - Tidak ada SQL baru.
 
 
-## V113.0.92 — Bulk Assignment Correction
-- Owner dapat memfilter order berdasarkan penugasan kosong.
-- Checkbox per order di desktop dan HP.
-- Beberapa order dapat dikoreksi sekaligus untuk Yang Mengerjakan dan/atau Kurir.
-- Opsi aman Hanya isi data yang masih kosong aktif secara default.
-- Menggunakan RPC koreksi existing sehingga audit/riwayat tetap tercatat per order.
+## V113.0.93 — Find Missing Worker / Courier
+- Fokus utama: mencari transaksi yang belum diisi Yang Mengerjakan dan/atau Kurir.
+- Tambah filter Penugasan: Yang Mengerjakan Kosong, Kurir Kosong, Salah Satu Kosong, Keduanya Kosong.
+- Tambah tombol pencarian cepat beserta jumlah order yang masih kosong.
+- Order yang penugasannya kosong diberi badge peringatan di desktop dan HP.
+- Tidak menambahkan checkbox bulk correction.
+- Sticky header V113.0.91 tetap dipertahankan.
 - Tidak ada SQL baru.
