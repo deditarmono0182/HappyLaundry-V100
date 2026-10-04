@@ -10159,3 +10159,64 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     margin-left:auto;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.82 — Employee Action Column Fix
+   ========================================================= */
+.employee-management-table th:last-child,
+.employee-management-table td:last-child{
+  min-width:178px!important;
+  width:178px!important;
+}
+.employee-management-table .employee-row-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:7px!important;
+  flex-wrap:nowrap!important;
+  min-width:150px!important;
+}
+.employee-management-table .employee-row-actions > button{
+  flex:0 0 auto!important;
+  margin:0!important;
+}
+.employee-management-table .employee-row-actions > button:not(.employee-reset-password-button){
+  width:34px!important;
+  min-width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0!important;
+  display:inline-grid!important;
+  place-items:center!important;
+}
+.employee-management-table .employee-reset-password-button{
+  width:auto!important;
+  min-width:88px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0 10px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+}
+.employee-management-table .employee-reset-password-button span{
+  display:inline!important;
+  font-size:11px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+@media(max-width:900px){
+  .employee-management-table th:last-child,
+  .employee-management-table td:last-child{
+    min-width:170px!important;
+    width:170px!important;
+  }
+  .employee-management-table .employee-row-actions{
+    min-width:145px!important;
+  }
+}

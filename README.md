@@ -444,3 +444,10 @@ test
 - Tombol Reset Password di Kelola Karyawan dibuat berlabel jelas, bukan hanya ikon.
 - Owner dapat memilih karyawan, mengisi password baru + konfirmasi, atau generate password otomatis.
 - Menggunakan RPC reset password yang sudah tersedia; tidak perlu SQL baru.
+
+
+## V113.0.82 — Employee Action Layout Fix
+- Kolom Aksi Kelola Karyawan dibuat lebih lebar dan stabil.
+- Tombol Edit, Password, dan Nonaktifkan tidak lagi tumpang tindih.
+- Label Reset Password dipadatkan menjadi Password.
+- Tidak ada SQL baru.
