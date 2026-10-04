@@ -431,3 +431,10 @@ test
 - Merapikan Omzet / Barang Masuk per Kategori menjadi ranking card yang lega dan tidak tumpang tindih.
 - Nama kategori, nominal, persentase, progress bar, dan tombol Lihat detail tetap terlihat jelas.
 - Tidak ada perubahan database / SQL baru.
+
+
+## V113.0.80 — Category List Card UI
+- Tampilan kategori dibuat seperti daftar Pelanggan dengan Transaksi Terbanyak.
+- Menampilkan ranking, jumlah order, jumlah item layanan, nilai barang masuk, dan kontribusi.
+- Baris tetap dapat diklik untuk drilldown detail kategori.
+- Tidak ada SQL baru.

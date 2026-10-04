@@ -246,7 +246,7 @@ export function DashboardPage() {
     const relevantOrders=orders.filter(o=>new Date(o.created_at)>=periodStart&&o.status!=='cancelled')
     const orderMap=new Map(relevantOrders.map(o=>[o.id,o]))
     const serviceCategory=new Map(services.map(s=>[s.id,s.category||'Reguler']))
-    const grouped:Record<string,number>={}
+    const grouped:Record<string,{amount:number;orders:Set<string>;items:number}>={}
 
     for(const item of orderItems){
       const order=orderMap.get(item.order_id)
@@ -259,12 +259,21 @@ export function DashboardPage() {
       // Diskon order dialokasikan proporsional agar total kategori tetap sama dengan nilai order bersih.
       const discountRatio=orderSubtotal>0?Math.min(1,orderTotal/orderSubtotal):1
       const category=item.service_id?serviceCategory.get(item.service_id)||'Reguler':'Reguler'
-      grouped[category]=(grouped[category]||0)+(Number(item.subtotal||0)*discountRatio)
+      if(!grouped[category])grouped[category]={amount:0,orders:new Set<string>(),items:0}
+      grouped[category].amount+=Number(item.subtotal||0)*discountRatio
+      grouped[category].orders.add(order.id)
+      grouped[category].items+=1
     }
 
-    const total=Object.values(grouped).reduce((sum,v)=>sum+v,0)
+    const total=Object.values(grouped).reduce((sum,v)=>sum+v.amount,0)
     return Object.entries(grouped)
-      .map(([category,amount])=>({category,amount,percentage:total>0?(amount/total)*100:0}))
+      .map(([category,data])=>({
+        category,
+        amount:data.amount,
+        orderCount:data.orders.size,
+        itemCount:data.items,
+        percentage:total>0?(data.amount/total)*100:0
+      }))
       .sort((a,b)=>b.amount-a.amount)
   },[orders,orderItems,services,revenuePeriod,businessClock])
 
@@ -532,16 +541,35 @@ export function DashboardPage() {
       </div>
       {categoryRevenue.length===0
         ? <div className="table-empty">Belum ada omzet kategori pada periode ini.</div>
-        : <div className="category-revenue-list">
-            {categoryRevenue.map((item,index)=><button type="button" className="category-revenue-row category-revenue-button" key={item.category} onClick={()=>setSelectedCategory(item.category)} title={`Lihat detail ${item.category}`}>
-              <span className="category-rank">{index+1}</span>
-              <div className="category-revenue-name">
+        : <div className="category-card-list">
+            {categoryRevenue.map((item,index)=><button
+              type="button"
+              className="category-card-row"
+              key={item.category}
+              onClick={()=>setSelectedCategory(item.category)}
+              title={`Klik untuk lihat detail ${item.category}`}
+            >
+              <span className={`category-card-rank rank-${index+1}`}>{index+1}</span>
+              <div className="category-card-info">
                 <b>{item.category}</b>
-                <small>Lihat detail</small>
-                <div className="category-progress"><i style={{width:`${Math.max(2,item.percentage)}%`}}/></div>
+                <small>Klik untuk lihat detail layanan & order</small>
               </div>
-              <strong>{formatIDR(item.amount)}</strong>
-              <span className="category-percent">{item.percentage.toFixed(1)}%</span>
+              <div className="category-card-stat">
+                <span>Order</span>
+                <strong>{item.orderCount}</strong>
+              </div>
+              <div className="category-card-stat">
+                <span>Item Layanan</span>
+                <strong>{item.itemCount}</strong>
+              </div>
+              <div className="category-card-stat">
+                <span>Barang Masuk</span>
+                <strong>{formatIDR(item.amount)}</strong>
+              </div>
+              <div className="category-card-stat category-card-percent">
+                <span>Kontribusi</span>
+                <strong>{item.percentage.toFixed(1)}%</strong>
+              </div>
             </button>)}
           </div>}
     </section>
