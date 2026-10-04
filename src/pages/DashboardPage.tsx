@@ -451,6 +451,7 @@ export function DashboardPage() {
       <button type="button" className="dashboard-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
         <StatCard label="Total Piutang" value={formatIDR(receivable)} caption="Sisa tagihan • Klik untuk lihat" icon={AlertTriangle}/>
       </button>
+      <StatCard label="Kas Masuk Hari Ini" value={formatIDR(cashIn)} caption="Pembayaran diterima hari ini" icon={WalletCards}/>
     </section>
     {isOwner&&<section className="panel owner-business-report">
       <div className="panel-heading">

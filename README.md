@@ -474,3 +474,12 @@ test
 - Halaman Order membaca query status=overdue dan otomatis mengaktifkan filter Terlambat.
 - Pilihan Terlambat tetap ada di filter Status Cucian.
 - Tidak ada SQL baru dan tidak mengubah data.
+
+
+## V113.0.86 — Dashboard Compact 4x2
+- Ringkasan Dashboard desktop dibuat 4 kolom x 2 baris.
+- Kartu dipersempit dan diseragamkan tingginya.
+- Kartu Terlambat menyatu rapi dengan kartu lain.
+- Ditambah kartu Kas Masuk Hari Ini sebagai kartu ke-8.
+- Tablet dan HP memakai 2 kolom.
+- Tidak ada SQL baru.
