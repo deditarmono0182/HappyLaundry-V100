@@ -20,6 +20,7 @@ function fallbackPath(pathname:string){
   if(pathname==='/finance')return '/'
   if(pathname==='/receivables')return '/'
   if(pathname==='/reports')return '/'
+  if(pathname==='/profit-loss')return '/reports'
   if(pathname==='/backup')return '/'
   if(pathname==='/settings')return '/'
   return '/'

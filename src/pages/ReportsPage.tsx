@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { BarChart3, CalendarDays, CreditCard, FileSpreadsheet, FileText, Printer, ReceiptText, TrendingUp, Users, WalletCards } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
@@ -75,6 +76,7 @@ const endOfDay=(value:string)=>`${value}T23:59:59.999`
 const startOfDay=(value:string)=>`${value}T00:00:00.000`
 
 export function ReportsPage(){
+  const navigate=useNavigate()
   const [from,setFrom]=useState(monthStartISO())
   const [to,setTo]=useState(todayISO())
   const [appliedFrom,setAppliedFrom]=useState(monthStartISO())
@@ -306,6 +308,7 @@ export function ReportsPage(){
       title="Laporan Owner"
       description="Analisis omzet barang masuk, kas terbayar, laba bersih, piutang, pelanggan, dan layanan."
       action={<div className="report-actions">
+        <button className="primary-button" onClick={()=>navigate('/profit-loss')}><TrendingUp size={17}/>Laba Rugi</button>
         <button className="secondary-button" onClick={()=>downloadXls(ownerExportOptions())}><FileSpreadsheet size={17}/>XLS</button>
         <button className="secondary-button" onClick={()=>printPdf(ownerExportOptions())}><FileText size={17}/>PDF</button>
         <button className="secondary-button" onClick={exportCSV}><FileSpreadsheet size={17}/>CSV</button>

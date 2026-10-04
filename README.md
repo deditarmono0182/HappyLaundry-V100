@@ -530,3 +530,15 @@ test
 - Tidak menambahkan checkbox bulk correction.
 - Sticky header V113.0.91 tetap dipertahankan.
 - Tidak ada SQL baru.
+
+
+## V113.0.94 — Profit & Loss Report
+- Tambah menu Owner: Laba Rugi.
+- Periode cepat: Hari Ini, 7 Hari, Bulan Ini, Bulan Lalu, dan Custom.
+- Ringkasan Pendapatan, Biaya Operasional, Biaya Karyawan, Laba Bersih, Margin.
+- Detail klik untuk sumber order, kas masuk, piutang, biaya, uang hadir, tunjangan, bonus, bagi hasil, komisi produksi, dan komisi kurir.
+- Tunjangan dan bonus diprorata per hari untuk periode parsial.
+- Pengeluaran manual yang terdeteksi sebagai payroll/SDM dikeluarkan dari Biaya Operasional agar tidak dihitung ganda dengan payroll otomatis.
+- Export XLS/PDF.
+- Dibangun dari baseline V113.0.93.
+- Tidak ada SQL baru.

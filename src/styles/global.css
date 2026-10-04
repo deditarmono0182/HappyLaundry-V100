@@ -10601,3 +10601,264 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     margin-left:0;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.94 — Profit & Loss Report
+   ========================================================= */
+.pl-period-panel{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.pl-quick-periods{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.pl-quick-periods button{
+  border:1px solid #d7e6e2;
+  background:#fff;
+  color:#315d6d;
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+}
+.pl-quick-periods button.is-active{
+  background:#eaf6f2;
+  border-color:#8dcbbb;
+  color:#126b58;
+}
+.pl-custom-period{
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.pl-custom-period label{
+  display:grid;
+  gap:5px;
+  font-size:11px;
+  font-weight:750;
+  color:#607783;
+}
+.pl-custom-period input{
+  min-height:38px;
+}
+.pl-stats{
+  margin-bottom:16px;
+}
+.pl-stat-button{
+  display:block;
+  width:100%;
+  min-width:0;
+  height:100%;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+.pl-stat-button .stat-card{
+  width:100%;
+  height:100%;
+}
+.pl-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.pl-card{
+  padding:18px;
+}
+.pl-card .panel-heading{
+  margin-bottom:10px;
+}
+.pl-row{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:11px 0;
+  border:0;
+  border-bottom:1px solid #edf3f1;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+.pl-static-row{
+  cursor:default;
+}
+.pl-row span{
+  min-width:0;
+  font-size:13px;
+  color:#3e5b68;
+}
+.pl-row span small{
+  display:block;
+  margin-top:2px;
+  font-size:10px;
+  color:#8aa0aa;
+}
+.pl-row b{
+  flex:0 0 auto;
+  font-size:14px;
+  font-weight:650;
+  color:#173d4a;
+  white-space:nowrap;
+}
+.pl-info-row b{
+  color:#547581;
+}
+.pl-total-row{
+  margin-top:4px;
+  border-bottom:0;
+  border-top:1px solid #d9e9e4;
+  font-weight:800;
+}
+.pl-total-row span,
+.pl-total-row b{
+  font-weight:800;
+}
+.pl-summary-card{
+  background:linear-gradient(180deg,#fbfefd,#f5fbf8);
+}
+.pl-grand-total{
+  margin-top:6px;
+  padding:14px 12px;
+  border:1px solid #b9dfd4;
+  border-radius:12px;
+  background:#eaf7f3;
+}
+.pl-grand-total span,
+.pl-grand-total b{
+  font-size:16px;
+  font-weight:850;
+  color:#0f6654;
+}
+.pl-margin{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px dashed #cbded8;
+}
+.pl-margin span{
+  font-size:12px;
+  color:#607783;
+}
+.pl-margin strong{
+  font-size:20px;
+  color:#173d4a;
+}
+.pl-note{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  margin:14px 0 4px;
+  padding:11px 13px;
+  border:1px solid #dce9e5;
+  border-radius:12px;
+  background:#f8fcfb;
+  color:#607783;
+  font-size:11px;
+  line-height:1.45;
+}
+.pl-note svg{
+  flex:0 0 auto;
+  margin-top:1px;
+}
+.pl-detail-modal{
+  width:min(720px,calc(100vw - 28px));
+}
+.pl-detail-list{
+  display:grid;
+  gap:0;
+}
+.pl-detail-list>div{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:10px 0;
+  border-bottom:1px solid #edf3f1;
+}
+.pl-detail-list>div span{
+  min-width:0;
+  font-size:12px;
+  color:#45636f;
+}
+.pl-detail-list>div b{
+  flex:0 0 auto;
+  font-size:12px;
+  font-weight:700;
+  color:#173d4a;
+  white-space:nowrap;
+}
+.pl-calc-list .is-total{
+  margin-top:4px;
+  padding-top:13px;
+  border-top:2px solid #cde2dc;
+}
+.pl-calc-list .is-total span,
+.pl-calc-list .is-total b{
+  font-size:14px;
+  font-weight:850;
+}
+.pl-detail-note{
+  margin:12px 0 0;
+  padding:10px;
+  border-radius:10px;
+  background:#fff7e8;
+  color:#8b5b16;
+  font-size:11px;
+  line-height:1.45;
+}
+
+@media(max-width:900px){
+  .pl-grid{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:620px){
+  .pl-period-panel{
+    align-items:stretch;
+  }
+  .pl-quick-periods{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+  }
+  .pl-quick-periods button{
+    width:100%;
+  }
+  .pl-custom-period{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+  }
+  .pl-custom-period .primary-button{
+    grid-column:1/-1;
+    justify-content:center;
+  }
+  .pl-card{
+    padding:14px;
+  }
+  .pl-row{
+    gap:9px;
+  }
+  .pl-row b{
+    font-size:12px;
+  }
+}

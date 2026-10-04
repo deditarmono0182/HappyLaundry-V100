@@ -29,6 +29,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/delete-approvals', label: 'Persetujuan Hapus', icon: ShieldAlert, roles: ['owner'] },
   { to: '/receivables', label: 'Piutang', icon: AlertTriangle, permission: 'receivables' },
   { to: '/reports', label: 'Laporan Owner', icon: BarChart3, permission: 'reports' },
+  { to: '/profit-loss', label: 'Laba Rugi', icon: CircleDollarSign, roles: ['owner'] },
   { to: '/attendance', label: 'Absen', icon: ScanLine, roles: ['employee'] },
   { to: '/payroll', label: 'Absensi & Gaji', icon: CalendarCheck2, roles: ['owner'] },
   { to: '/my-payroll', label: 'Gaji Saya', icon: WalletCards, roles: ['employee'] },
