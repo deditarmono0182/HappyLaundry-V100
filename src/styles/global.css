@@ -10484,3 +10484,25 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   outline:3px solid rgba(30,136,229,.22)!important;
   outline-offset:2px!important;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.91 — Sticky Order Table Header
+   Judul kolom tetap terlihat saat scroll ke bawah.
+   ========================================================= */
+@media(min-width:701px){
+  .order-panel .table-wrap{
+    position:relative!important;
+    max-height:calc(100vh - 245px)!important;
+    overflow:auto!important;
+    scrollbar-gutter:stable!important;
+  }
+
+  .orders-table thead th{
+    position:sticky!important;
+    top:0!important;
+    z-index:12!important;
+    background:#eef7f4!important;
+    box-shadow:0 1px 0 rgba(17,58,78,.12)!important;
+  }
+}

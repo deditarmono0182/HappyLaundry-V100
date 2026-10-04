@@ -511,3 +511,12 @@ test
 - Warna peringatan tetap dipertahankan.
 - Perubahan nilai uang kecil/non-bold tetap dipertahankan.
 - Tidak ada SQL baru.
+
+
+## V113.0.91 — Sticky Order Table Header
+- Judul kolom tabel Order tetap terlihat saat scroll ke bawah.
+- Header Layanan, Status, Pembayaran, Total, Estimasi Selesai, Pengiriman, Kasir, Dibuat, dan Aksi menjadi sticky.
+- Kolom Aksi tidak dibuat sticky di kanan.
+- Scroll horizontal tetap normal seperti sebelumnya.
+- Tampilan mobile card tidak diubah.
+- Tidak ada SQL baru.
