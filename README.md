@@ -520,3 +520,12 @@ test
 - Scroll horizontal tetap normal seperti sebelumnya.
 - Tampilan mobile card tidak diubah.
 - Tidak ada SQL baru.
+
+
+## V113.0.92 — Bulk Assignment Correction
+- Owner dapat memfilter order berdasarkan penugasan kosong.
+- Checkbox per order di desktop dan HP.
+- Beberapa order dapat dikoreksi sekaligus untuk Yang Mengerjakan dan/atau Kurir.
+- Opsi aman Hanya isi data yang masih kosong aktif secara default.
+- Menggunakan RPC koreksi existing sehingga audit/riwayat tetap tercatat per order.
+- Tidak ada SQL baru.

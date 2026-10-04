@@ -10506,3 +10506,38 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     box-shadow:0 1px 0 rgba(17,58,78,.12)!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.92 — Bulk Assignment Correction
+   ========================================================= */
+.order-bulk-assignment-bar{
+  margin:10px 0 12px;
+  padding:10px 12px;
+  border:1px solid #b8d8cf;
+  border-radius:14px;
+  background:#f1fbf8;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.order-bulk-assignment-bar>div:first-child{display:grid;gap:2px}
+.order-bulk-assignment-bar small{color:#5c6f69}
+.order-bulk-assignment-actions{display:flex;gap:8px;flex-wrap:wrap}
+.order-select-column{width:42px!important;min-width:42px!important;text-align:center!important}
+.order-select-column input,.order-mobile-select input,.bulk-only-empty-option input{width:17px;height:17px;accent-color:#16856d}
+.order-row-selected td{background:#f4fbf9!important}
+.order-assignment-missing-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.order-assignment-missing-badges span{font-size:10px;line-height:1.1;padding:4px 6px;border-radius:999px;background:#fff0df;color:#9a5200;border:1px solid #f0c38c;font-weight:700}
+.order-mobile-select{display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;font-size:11px;font-weight:700;color:#31554d}
+.order-mobile-card.is-selected{outline:2px solid rgba(22,133,109,.28);background:#fbfffe}
+.bulk-assignment-modal .info-box{display:grid;gap:3px}
+.bulk-only-empty-option{display:flex!important;align-items:flex-start!important;gap:9px!important;padding:10px 12px;border:1px solid #dce8e4;border-radius:12px;background:#f8fbfa}
+.bulk-only-empty-option>span{display:grid;gap:2px}
+.bulk-only-empty-option small{font-weight:400;color:#667a74}
+@media(max-width:700px){
+  .order-bulk-assignment-bar{position:sticky;bottom:10px;z-index:25;align-items:stretch;flex-direction:column;box-shadow:0 10px 30px rgba(20,54,46,.16)}
+  .order-bulk-assignment-actions{display:grid;grid-template-columns:1fr 1fr}
+  .order-bulk-assignment-actions button{justify-content:center}
+}
