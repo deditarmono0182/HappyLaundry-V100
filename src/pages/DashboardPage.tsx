@@ -127,6 +127,11 @@ export function DashboardPage() {
   const todayCommission=todayCommissions.reduce((s,r)=>s+Number(r.amount||0),0)
   const processing=orders.filter(r=>['received','washing','drying','ironing','packing'].includes(r.status)).length
   const ready=orders.filter(r=>r.status==='ready').length
+  const overdue=orders.filter(r=>{
+    if(!r.due_at)return false
+    if(['ready','completed','cancelled'].includes(r.status))return false
+    return new Date(r.due_at).getTime()<businessClock
+  }).length
   const completed=today.filter(r=>r.status==='completed').length
   const receivable=orders.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)
   const selectedPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
@@ -437,6 +442,10 @@ export function DashboardPage() {
       <StatCard label="Omzet / Barang Masuk Hari Ini" value={formatIDR(omzet)} caption={`Kas masuk ${formatIDR(cashIn)}`} icon={Banknote}/>
       <StatCard label="Order Hari Ini" value={String(today.length)} caption="Order masuk hari ini" icon={ShoppingBag}/>
       <StatCard label="Sedang Diproses" value={String(processing)} caption="Belum siap diambil" icon={WashingMachine}/>
+      <button type="button" className={`dashboard-overdue-card ${overdue>0?'has-overdue':''}`} onClick={()=>navigate('/orders?status=overdue')} title="Lihat order terlambat">
+        <div className="stat-icon"><AlertTriangle size={24}/></div>
+        <div><span>Terlambat</span><strong>{overdue}</strong><small>Klik untuk lihat order</small></div>
+      </button>
       <StatCard label="Siap Diambil" value={String(ready)} caption="Menunggu pelanggan" icon={PackageCheck}/>
       <StatCard label="Selesai Hari Ini" value={String(completed)} caption="Order selesai" icon={CheckCircle2}/>
       <button type="button" className="dashboard-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">

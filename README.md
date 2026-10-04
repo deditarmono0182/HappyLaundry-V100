@@ -458,3 +458,19 @@ test
 - Kartu Terlambat di halaman Order sekarang bisa diklik untuk langsung memfilter order terlambat.
 - Filter lain tetap dapat dikombinasikan.
 - Tidak ada SQL baru.
+
+
+## V113.0.84 — Overdue Runtime Fix
+- Memperbaiki error runtime "Cannot access before initialization" pada halaman Order.
+- Helper isOverdue sekarang didefinisikan sebelum dipakai oleh filter Terlambat.
+- Fitur filter Terlambat tetap dipertahankan.
+- Tidak ada SQL baru dan tidak ada perubahan data.
+
+
+## V113.0.85 — Overdue Dashboard Fix
+- Helper keterlambatan dipindah ke level module agar tidak memicu error initialization saat halaman Order dirender.
+- Tambah kartu Terlambat pada Dashboard.
+- Klik kartu Terlambat membuka /orders?status=overdue.
+- Halaman Order membaca query status=overdue dan otomatis mengaktifkan filter Terlambat.
+- Pilihan Terlambat tetap ada di filter Status Cucian.
+- Tidak ada SQL baru dan tidak mengubah data.

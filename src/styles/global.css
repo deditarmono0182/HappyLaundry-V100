@@ -10236,3 +10236,45 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   outline:3px solid rgba(30,136,229,.22);
   outline-offset:2px;
 }
+
+/* HappyLaundry V113.0.85 — Overdue Dashboard + Runtime Fix */
+.dashboard-overdue-card{
+  appearance:none;
+  border:1px solid var(--border-color,#d9e7f3);
+  background:var(--card-bg,#fff);
+  border-radius:18px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  min-height:106px;
+  text-align:left;
+  color:inherit;
+  cursor:pointer;
+  box-shadow:var(--shadow-sm,0 6px 18px rgba(16,51,80,.06));
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+}
+.dashboard-overdue-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 24px rgba(16,51,80,.09);
+}
+.dashboard-overdue-card.has-overdue{
+  border-color:#f0bd72;
+  background:#fffaf2;
+}
+.dashboard-overdue-card .stat-icon{
+  flex:0 0 auto;
+}
+.dashboard-overdue-card span,
+.dashboard-overdue-card strong,
+.dashboard-overdue-card small{
+  display:block;
+}
+.dashboard-overdue-card span{font-weight:800;color:#466579}
+.dashboard-overdue-card strong{font-size:28px;line-height:1.05;margin:2px 0;color:#123e50}
+.dashboard-overdue-card small{color:#607d8b}
+.dashboard-overdue-card:focus-visible{
+  outline:3px solid rgba(30,136,229,.22);
+  outline-offset:2px;
+}

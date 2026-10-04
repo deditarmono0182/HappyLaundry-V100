@@ -40,6 +40,12 @@ const emptyOrder = {
 
 const ORDER_PAGE_SIZE=100
 
+function isOrderOverdue(row: OrderRow){
+  if(!row.due_at)return false
+  if(['ready','completed','cancelled'].includes(row.status))return false
+  return new Date(row.due_at).getTime()<Date.now()
+}
+
 const statusFlow: OrderStatus[] = ['received', 'washing', 'drying', 'ironing', 'packing', 'ready', 'completed']
 
 type OrderServiceItem={
@@ -180,6 +186,11 @@ export function OrdersPage() {
   useEffect(()=>{
     const orderParam=searchParams.get('order')?.trim()
     const customerParam=searchParams.get('customer')?.trim()
+    const statusParam=searchParams.get('status')?.trim().toLowerCase()
+
+    if(statusParam==='overdue'){
+      setStatusFilter('overdue')
+    }
 
     if(orderParam){
       setQuery(orderParam)
@@ -378,6 +389,7 @@ export function OrdersPage() {
     }
   }
 
+
   const filtered = useMemo(() => {
     const keyword=query.trim().toLowerCase()
 
@@ -385,7 +397,7 @@ export function OrdersPage() {
       if(paymentFilter!=='all'&&row.payment_status!==paymentFilter)return false
 
       if(statusFilter==='overdue'){
-        if(!isOverdue(row))return false
+        if(!isOrderOverdue(row))return false
       }else if(statusFilter!=='all'&&row.status!==statusFilter){
         return false
       }
@@ -419,12 +431,6 @@ export function OrdersPage() {
       return new Date(row.due_at).getTime() < now
     })
   }, [rows])
-
-  const isOverdue = (row: OrderRow) => {
-    if (!row.due_at) return false
-    if (['ready','completed','cancelled'].includes(row.status)) return false
-    return new Date(row.due_at).getTime() < Date.now()
-  }
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.subtotal, 0),
@@ -968,7 +974,7 @@ export function OrdersPage() {
             const proof=deliveryProofByOrder.get(row.id)
             const canAdvance=statusFlow.indexOf(row.status)>=0&&statusFlow.indexOf(row.status)<statusFlow.length-1
             return (
-              <article className={`order-mobile-card ${isOverdue(row)?'is-overdue':''}`} key={`mobile-${row.id}`}>
+              <article className={`order-mobile-card ${isOrderOverdue(row)?'is-overdue':''}`} key={`mobile-${row.id}`}>
                 <header className="order-mobile-card-head">
                   <div>
                     <strong>{row.order_no}</strong>
@@ -1006,7 +1012,7 @@ export function OrdersPage() {
                 <div className="order-mobile-meta">
                   <div><span>Kasir</span><b>{row.created_by_name||row.created_by_login_id||'Data lama'}</b></div>
                   <div><span>Dibuat</span><b>{new Date(row.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit'})}</b></div>
-                  <div><span>Estimasi</span><b className={isOverdue(row)?'overdue-text':''}>{row.due_at?new Date(row.due_at).toLocaleDateString('id-ID'):'Belum diatur'}</b></div>
+                  <div><span>Estimasi</span><b className={isOrderOverdue(row)?'overdue-text':''}>{row.due_at?new Date(row.due_at).toLocaleDateString('id-ID'):'Belum diatur'}</b></div>
                 </div>
 
                 <div className="order-mobile-primary-actions">
@@ -1090,9 +1096,9 @@ export function OrdersPage() {
                   </td>
                   <td><span className={`badge payment-${row.payment_status}`}>{paymentLabels[row.payment_status]}</span><small>{formatRupiah(row.paid_amount)} / {formatRupiah(row.total)}</small></td>
                   <td><b>{formatRupiah(row.total)}</b></td>
-                  <td className={isOverdue(row)?'order-due-cell overdue':''}>
+                  <td className={isOrderOverdue(row)?'order-due-cell overdue':''}>
                     {row.due_at
-                      ? <><b>{new Date(row.due_at).toLocaleDateString('id-ID')}</b><small>{new Date(row.due_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}{isOverdue(row)?' • TERLAMBAT':''}</small></>
+                      ? <><b>{new Date(row.due_at).toLocaleDateString('id-ID')}</b><small>{new Date(row.due_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}{isOrderOverdue(row)?' • TERLAMBAT':''}</small></>
                       : <span className="order-no-due">Belum diatur</span>}
                   </td>
                   <td>
@@ -1393,7 +1399,7 @@ export function OrdersPage() {
             <div><span>Kurir</span><b>{commissionAssignmentMap.get(detail.id)?.courier_id?commissionEmployeeNameMap.get(commissionAssignmentMap.get(detail.id)!.courier_id!)||'-':'-'}</b></div>
             <div><span>Status Cucian</span><b>{statusLabels[detail.status]}</b></div>
             <div><span>Status Pembayaran</span><b>{paymentLabels[detail.payment_status]}</b></div>
-            <div><span>Estimasi Selesai</span><b className={isOverdue(detail)?'order-detail-overdue':''}>{detail.due_at?new Date(detail.due_at).toLocaleString('id-ID'):'Belum diatur'}{isOverdue(detail)?' • TERLAMBAT':''}</b></div>
+            <div><span>Estimasi Selesai</span><b className={isOrderOverdue(detail)?'order-detail-overdue':''}>{detail.due_at?new Date(detail.due_at).toLocaleString('id-ID'):'Belum diatur'}{isOrderOverdue(detail)?' • TERLAMBAT':''}</b></div>
             <div><span>Total</span><b>{formatRupiah(detail.total)}</b></div>
             <div><span>Sudah Bayar</span><b>{formatRupiah(detail.paid_amount)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(detail.total-detail.paid_amount)}</b></div>
