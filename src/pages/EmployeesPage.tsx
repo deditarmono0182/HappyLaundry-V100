@@ -245,7 +245,7 @@ export function EmployeesPage(){
               <td><div className="permission-mini-list">{permissionOptions.filter(([key])=>row[key]).map(([key,label])=><span key={key}>{label}</span>)}</div></td>
               <td><div className="row-actions employee-row-actions">
                 <button title="Edit" onClick={()=>edit(row)}><Pencil size={16}/></button>
-                <button title="Reset Password" onClick={()=>openReset(row)}><RefreshCw size={16}/></button>
+                <button className="employee-reset-password-button" title="Reset Password" onClick={()=>openReset(row)}><RefreshCw size={16}/><span>Reset Password</span></button>
                 <button className="danger-icon" title="Nonaktifkan" onClick={()=>void deactivate(row)}><Trash2 size={16}/></button>
               </div></td>
             </tr>)}

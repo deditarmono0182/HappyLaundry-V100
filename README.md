@@ -438,3 +438,9 @@ test
 - Menampilkan ranking, jumlah order, jumlah item layanan, nilai barang masuk, dan kontribusi.
 - Baris tetap dapat diklik untuk drilldown detail kategori.
 - Tidak ada SQL baru.
+
+
+## V113.0.81 — Employee Password Reset UI
+- Tombol Reset Password di Kelola Karyawan dibuat berlabel jelas, bukan hanya ikon.
+- Owner dapat memilih karyawan, mengisi password baru + konfirmasi, atau generate password otomatis.
+- Menggunakan RPC reset password yang sudah tersedia; tidak perlu SQL baru.
