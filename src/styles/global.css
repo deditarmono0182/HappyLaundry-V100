@@ -10220,3 +10220,19 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     min-width:145px!important;
   }
 }
+
+/* HappyLaundry V113.0.83 — Overdue Order Filter & Shortcut */
+.order-overdue-shortcut{
+  border:0;
+  width:100%;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+.order-overdue-shortcut:hover{
+  transform:translateY(-1px);
+}
+.order-overdue-shortcut:focus-visible{
+  outline:3px solid rgba(30,136,229,.22);
+  outline-offset:2px;
+}

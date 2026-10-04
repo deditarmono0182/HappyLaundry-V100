@@ -451,3 +451,10 @@ test
 - Tombol Edit, Password, dan Nonaktifkan tidak lagi tumpang tindih.
 - Label Reset Password dipadatkan menjadi Password.
 - Tidak ada SQL baru.
+
+
+## V113.0.83 — Overdue Order Filter & Shortcut
+- Tambah pilihan Terlambat pada filter Status Cucian.
+- Kartu Terlambat di halaman Order sekarang bisa diklik untuk langsung memfilter order terlambat.
+- Filter lain tetap dapat dikombinasikan.
+- Tidak ada SQL baru.

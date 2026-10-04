@@ -94,7 +94,7 @@ export function OrdersPage() {
   const [orderServiceItems, setOrderServiceItems] = useState<OrderServiceItem[]>([])
   const [query, setQuery] = useState('')
   const [paymentFilter,setPaymentFilter]=useState<'all'|'unpaid'|'partial'|'paid'>('all')
-  const [statusFilter,setStatusFilter]=useState<'all'|OrderStatus>('all')
+  const [statusFilter,setStatusFilter]=useState<'all'|'overdue'|OrderStatus>('all')
   const [categoryFilter,setCategoryFilter]=useState('all')
   const [statusBusyId,setStatusBusyId]=useState<string|null>(null)
   const [loading, setLoading] = useState(true)
@@ -383,7 +383,12 @@ export function OrdersPage() {
 
     return rows.filter(row=>{
       if(paymentFilter!=='all'&&row.payment_status!==paymentFilter)return false
-      if(statusFilter!=='all'&&row.status!==statusFilter)return false
+
+      if(statusFilter==='overdue'){
+        if(!isOverdue(row))return false
+      }else if(statusFilter!=='all'&&row.status!==statusFilter){
+        return false
+      }
 
       const rowCategories=orderCategories(row.id)
       if(categoryFilter!=='all'&&!rowCategories.some(category=>category.toLowerCase()===categoryFilter.toLowerCase()))return false
@@ -615,7 +620,7 @@ export function OrdersPage() {
 
   const filteredLabel=()=>{
     const payment=paymentFilter==='all'?'Semua Pembayaran':paymentLabels[paymentFilter]
-    const status=statusFilter==='all'?'Semua Status Cucian':statusLabels[statusFilter]
+    const status=statusFilter==='all'?'Semua Status Cucian':statusFilter==='overdue'?'Terlambat':statusLabels[statusFilter]
     return `Filter: ${status} • ${payment}`
   }
 
@@ -875,7 +880,15 @@ export function OrdersPage() {
       <section className="stats-grid compact-stats order-stats-grid">
         <article className="stat-card"><div className="stat-icon"><ShoppingBag size={22}/></div><div><span>Total Order</span><strong>{rows.length}</strong><small>Seluruh order</small></div></article>
         <article className="stat-card"><div className="stat-icon"><PackageCheck size={22}/></div><div><span>Siap Diambil</span><strong>{rows.filter(r => r.status === 'ready').length}</strong><small>Menunggu pelanggan</small></div></article>
-        <article className={`stat-card order-overdue-card ${overdueRows.length>0?'has-overdue':''}`}><div className="stat-icon"><AlertTriangle size={22}/></div><div><span>Terlambat</span><strong>{overdueRows.length}</strong><small>Lewat estimasi selesai</small></div></article>
+        <button
+          type="button"
+          className={`stat-card order-overdue-card order-overdue-shortcut ${overdueRows.length>0?'has-overdue':''}`}
+          onClick={()=>setStatusFilter('overdue')}
+          title="Tampilkan hanya order yang terlambat"
+        >
+          <div className="stat-icon"><AlertTriangle size={22}/></div>
+          <div><span>Terlambat</span><strong>{overdueRows.length}</strong><small>Klik untuk lihat daftar</small></div>
+        </button>
         <article className="stat-card"><div className="stat-icon"><CircleDollarSign size={22}/></div><div><span>Piutang</span><strong>{formatRupiah(rows.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0))}</strong><small>Sisa pembayaran</small></div></article>
       </section>
 
@@ -904,6 +917,7 @@ export function OrdersPage() {
             <span>Status Cucian</span>
             <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value as typeof statusFilter)}>
               <option value="all">Semua Status</option>
+              <option value="overdue">Terlambat</option>
               <option value="received">{statusLabels.received}</option>
               <option value="washing">{statusLabels.washing}</option>
               <option value="drying">{statusLabels.drying}</option>
