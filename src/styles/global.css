@@ -10237,76 +10237,175 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   outline-offset:2px;
 }
 
+/* HappyLaundry V113.0.85 — Overdue Dashboard + Runtime Fix */
+.dashboard-overdue-card{
+  appearance:none;
+  border:1px solid var(--border-color,#d9e7f3);
+  background:var(--card-bg,#fff);
+  border-radius:18px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  min-height:106px;
+  text-align:left;
+  color:inherit;
+  cursor:pointer;
+  box-shadow:var(--shadow-sm,0 6px 18px rgba(16,51,80,.06));
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+}
+.dashboard-overdue-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 24px rgba(16,51,80,.09);
+}
+.dashboard-overdue-card.has-overdue{
+  border-color:#f0bd72;
+  background:#fffaf2;
+}
+.dashboard-overdue-card .stat-icon{
+  flex:0 0 auto;
+}
+.dashboard-overdue-card span,
+.dashboard-overdue-card strong,
+.dashboard-overdue-card small{
+  display:block;
+}
+.dashboard-overdue-card span{font-weight:800;color:#466579}
+.dashboard-overdue-card strong{font-size:28px;line-height:1.05;margin:2px 0;color:#123e50}
+.dashboard-overdue-card small{color:#607d8b}
+.dashboard-overdue-card:focus-visible{
+  outline:3px solid rgba(30,136,229,.22);
+  outline-offset:2px;
+}
 
 /* =========================================================
-   HappyLaundry V113.0.84 — Dashboard Money Typography Fix
-   Monetary values are smaller and regular weight so they do
-   not dominate or overflow stat cards on mobile/laptop.
+   HappyLaundry V113.0.86 — Dashboard Compact 4x2 Grid
    ========================================================= */
-.stat-card .stat-money-value,
+.dashboard-stats{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:12px!important;
+  align-items:stretch!important;
+}
+.dashboard-stats > *{
+  min-width:0!important;
+  width:100%!important;
+  height:100%!important;
+}
+.dashboard-stats .stat-card,
+.dashboard-stats .dashboard-overdue-card{
+  min-height:92px!important;
+  padding:13px 14px!important;
+  border-radius:16px!important;
+  gap:11px!important;
+}
+.dashboard-stats .stat-icon{
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  border-radius:13px!important;
+}
+.dashboard-stats .stat-card strong,
+.dashboard-stats .dashboard-overdue-card strong{
+  font-size:22px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+}
+.dashboard-stats .stat-card span,
+.dashboard-stats .dashboard-overdue-card span{
+  font-size:10.5px!important;
+  line-height:1.2!important;
+}
+.dashboard-stats .stat-card small,
+.dashboard-stats .dashboard-overdue-card small{
+  font-size:10px!important;
+  line-height:1.2!important;
+  margin-top:2px!important;
+}
+.dashboard-stats .dashboard-click-stat{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  padding:0!important;
+  margin:0!important;
+}
+.dashboard-stats .dashboard-click-stat .stat-card{
+  height:100%!important;
+  width:100%!important;
+}
+.dashboard-stats .dashboard-overdue-card{
+  margin:0!important;
+}
+@media(max-width:1180px){
+  .dashboard-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:620px){
+  .dashboard-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+  .dashboard-stats .stat-card,
+  .dashboard-stats .dashboard-overdue-card{
+    min-height:84px!important;
+    padding:10px!important;
+    gap:8px!important;
+  }
+  .dashboard-stats .stat-icon{
+    width:38px!important;
+    height:38px!important;
+    min-width:38px!important;
+  }
+  .dashboard-stats .stat-card strong,
+  .dashboard-stats .dashboard-overdue-card strong{
+    font-size:18px!important;
+  }
+  .dashboard-stats .stat-card span,
+  .dashboard-stats .dashboard-overdue-card span{
+    font-size:9.5px!important;
+  }
+  .dashboard-stats .stat-card small,
+  .dashboard-stats .dashboard-overdue-card small{
+    font-size:9px!important;
+  }
+}
+
+
+/* =========================================================
+   HappyLaundry V113.0.87 — V86 Baseline + Money Typography
+   Preserve V113.0.86 compact 4x2 dashboard and overdue card.
+   Only monetary values are smaller and not bold.
+   ========================================================= */
 .dashboard-money-value{
-  font-size:20px!important;
+  font-size:18px!important;
   font-weight:500!important;
   line-height:1.08!important;
   letter-spacing:0!important;
-  white-space:nowrap;
-  max-width:100%;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  max-width:100%!important;
 }
-
+.dashboard-stats .stat-card .dashboard-money-value{
+  font-size:18px!important;
+  font-weight:500!important;
+}
 .owner-business-kpis .dashboard-money-value{
-  font-size:20px!important;
+  font-size:18px!important;
   font-weight:500!important;
 }
-
 .owner-payment-breakdown .dashboard-money-value{
-  font-size:15px!important;
+  font-size:14px!important;
   font-weight:500!important;
 }
-
-@media(max-width:900px){
-  .dashboard-stats .stat-card{
-    min-width:0!important;
-    overflow:hidden!important;
-  }
-  .dashboard-stats .stat-card>div:last-child{
-    min-width:0!important;
-  }
-  .dashboard-stats .stat-money-value{
-    font-size:18px!important;
+@media(max-width:620px){
+  .dashboard-stats .stat-card .dashboard-money-value{
+    font-size:15px!important;
     font-weight:500!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  .dashboard-stats .stat-card span{
-    font-size:10px!important;
-    line-height:1.15!important;
-  }
-  .dashboard-stats .stat-card small{
-    font-size:9px!important;
-    line-height:1.2!important;
   }
   .owner-business-kpis .dashboard-money-value{
-    font-size:17px!important;
-    font-weight:500!important;
-  }
-}
-
-@media(max-width:560px){
-  .dashboard-stats{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;
-  }
-  .dashboard-stats .stat-card{
-    padding:11px!important;
-    gap:8px!important;
-    min-height:92px!important;
-  }
-  .dashboard-stats .stat-icon{
-    width:40px!important;
-    height:40px!important;
-    min-width:40px!important;
-  }
-  .dashboard-stats .stat-money-value{
     font-size:16px!important;
     font-weight:500!important;
   }
