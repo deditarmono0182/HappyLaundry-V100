@@ -492,3 +492,12 @@ test
 - Nilai jumlah order/status tetap menonjol.
 - Layout compact 4x2 V113.0.86 tetap dipertahankan.
 - Tidak ada SQL baru.
+
+
+## V113.0.88 — Overdue Card Same Size Fix
+- Kartu Terlambat memakai komponen StatCard yang sama dengan kartu KPI lain.
+- Ukuran, tinggi, padding, ikon, dan typography sama di desktop dan HP.
+- Warna peringatan tetap dipertahankan.
+- Klik kartu tetap membuka Order dengan filter Terlambat.
+- Perubahan nilai uang kecil/non-bold V113.0.87 tetap dipertahankan.
+- Tidak ada SQL baru.

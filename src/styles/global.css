@@ -10410,3 +10410,47 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     font-weight:500!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.88 — Overdue Card Same Size Fix
+   ========================================================= */
+.dashboard-stats .dashboard-overdue-shortcut{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:inherit!important;
+  text-align:left!important;
+  cursor:pointer!important;
+  font:inherit!important;
+}
+.dashboard-stats .dashboard-overdue-shortcut .stat-card{
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+}
+.dashboard-stats .dashboard-overdue-shortcut.has-overdue .stat-card{
+  border-color:#f0bd72!important;
+  background:#fffaf2!important;
+}
+.dashboard-stats .dashboard-overdue-shortcut.has-overdue .stat-icon{
+  background:#fff0d7!important;
+  color:#b85c00!important;
+}
+.dashboard-stats .dashboard-overdue-shortcut.has-overdue .stat-card strong{
+  color:#b85c00!important;
+}
+.dashboard-stats .dashboard-overdue-shortcut:hover .stat-card{
+  transform:translateY(-1px)!important;
+  box-shadow:0 10px 24px rgba(16,51,80,.09)!important;
+}
+.dashboard-stats .dashboard-overdue-shortcut:focus-visible{
+  outline:3px solid rgba(30,136,229,.22)!important;
+  outline-offset:2px!important;
+  border-radius:16px!important;
+}
