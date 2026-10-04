@@ -127,11 +127,6 @@ export function DashboardPage() {
   const todayCommission=todayCommissions.reduce((s,r)=>s+Number(r.amount||0),0)
   const processing=orders.filter(r=>['received','washing','drying','ironing','packing'].includes(r.status)).length
   const ready=orders.filter(r=>r.status==='ready').length
-  const overdue=orders.filter(r=>{
-    if(!r.due_at)return false
-    if(['ready','completed','cancelled'].includes(r.status))return false
-    return new Date(r.due_at).getTime()<businessClock
-  }).length
   const completed=today.filter(r=>r.status==='completed').length
   const receivable=orders.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)
   const selectedPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
@@ -442,35 +437,30 @@ export function DashboardPage() {
       <StatCard label="Omzet / Barang Masuk Hari Ini" value={formatIDR(omzet)} caption={`Kas masuk ${formatIDR(cashIn)}`} icon={Banknote}/>
       <StatCard label="Order Hari Ini" value={String(today.length)} caption="Order masuk hari ini" icon={ShoppingBag}/>
       <StatCard label="Sedang Diproses" value={String(processing)} caption="Belum siap diambil" icon={WashingMachine}/>
-      <button type="button" className={`dashboard-overdue-card ${overdue>0?'has-overdue':''}`} onClick={()=>navigate('/orders?status=overdue')} title="Lihat order terlambat">
-        <div className="stat-icon"><AlertTriangle size={24}/></div>
-        <div><span>Terlambat</span><strong>{overdue}</strong><small>Klik untuk lihat order</small></div>
-      </button>
       <StatCard label="Siap Diambil" value={String(ready)} caption="Menunggu pelanggan" icon={PackageCheck}/>
       <StatCard label="Selesai Hari Ini" value={String(completed)} caption="Order selesai" icon={CheckCircle2}/>
       <button type="button" className="dashboard-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
         <StatCard label="Total Piutang" value={formatIDR(receivable)} caption="Sisa tagihan • Klik untuk lihat" icon={AlertTriangle}/>
       </button>
-      <StatCard label="Kas Masuk Hari Ini" value={formatIDR(cashIn)} caption="Pembayaran diterima hari ini" icon={WalletCards}/>
     </section>
     {isOwner&&<section className="panel owner-business-report">
       <div className="panel-heading">
         <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Kas masuk menunjukkan pembayaran yang sudah diterima.</p></div>
       </div>
       <div className="owner-business-kpis owner-business-kpis-six">
-        <div><span>Omzet / Barang Masuk</span><strong>{formatIDR(ownerOrderValue)}</strong></div>
-        <div><span>Kas Masuk</span><strong>{formatIDR(ownerCashIn)}</strong></div>
-        <div><span>Pengeluaran</span><strong>{formatIDR(ownerExpense)}</strong></div>
-        <div><span>Komisi</span><strong>{formatIDR(ownerCommission)}</strong></div>
-        <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih</span><strong>{formatIDR(ownerProfit)}</strong></div>
-        <div><span>Piutang Aktif</span><strong>{formatIDR(receivable)}</strong></div>
+        <div><span>Omzet / Barang Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerOrderValue)}</strong></div>
+        <div><span>Kas Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerCashIn)}</strong></div>
+        <div><span>Pengeluaran</span><strong className="dashboard-money-value">{formatIDR(ownerExpense)}</strong></div>
+        <div><span>Komisi</span><strong className="dashboard-money-value">{formatIDR(ownerCommission)}</strong></div>
+        <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih</span><strong className="dashboard-money-value">{formatIDR(ownerProfit)}</strong></div>
+        <div><span>Piutang Aktif</span><strong className="dashboard-money-value">{formatIDR(receivable)}</strong></div>
       </div>
       <div className="owner-payment-breakdown">
-        <div><Banknote size={18}/><span>Tunai</span><b>{formatIDR(ownerCash)}</b></div>
-        <div><Smartphone size={18}/><span>QRIS</span><b>{formatIDR(ownerQris)}</b></div>
-        <div><Landmark size={18}/><span>Transfer</span><b>{formatIDR(ownerTransfer)}</b></div>
+        <div><Banknote size={18}/><span>Tunai</span><b className="dashboard-money-value">{formatIDR(ownerCash)}</b></div>
+        <div><Smartphone size={18}/><span>QRIS</span><b className="dashboard-money-value">{formatIDR(ownerQris)}</b></div>
+        <div><Landmark size={18}/><span>Transfer</span><b className="dashboard-money-value">{formatIDR(ownerTransfer)}</b></div>
         <div><ShoppingBag size={18}/><span>Jumlah Order Masuk</span><b>{ownerPeriodOrders.length}</b></div>
-        <div><WalletCards size={18}/><span>Rata-rata Order</span><b>{formatIDR(ownerAverage)}</b></div>
+        <div><WalletCards size={18}/><span>Rata-rata Order</span><b className="dashboard-money-value">{formatIDR(ownerAverage)}</b></div>
       </div>
     </section>}
 
