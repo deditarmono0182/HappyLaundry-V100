@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  CalendarDays, CreditCard, FileSpreadsheet, FileText, ReceiptText,
+  CalendarDays, FileSpreadsheet, FileText, PiggyBank, ReceiptText, Settings2,
   TrendingDown, TrendingUp, Users, WalletCards
 } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
@@ -75,8 +75,17 @@ interface EmployeeRow{
   id:string
   full_name:string
 }
+interface ReserveSetting{
+  reserve_type:'depreciation'|'thr'|'health'|'unexpected'
+  label:string
+  method:'fixed'|'percent_revenue'
+  monthly_amount:number
+  revenue_percent:number
+  is_active:boolean
+  note:string|null
+}
 type PeriodPreset='today'|'7d'|'month'|'last_month'|'custom'
-type DetailKey='revenue'|'cash'|'receivable'|'operating'|'attendance'|'allowance'|'bonus'|'share'|'production'|'courier'|'payroll'|'net'|null
+type DetailKey='revenue'|'cash'|'receivable'|'operating'|'attendance'|'allowance'|'bonus'|'share'|'production'|'courier'|'payroll'|'operating_net'|'reserves'|'net_after_reserve'|null
 
 const pad=(n:number)=>String(n).padStart(2,'0')
 const daysInMonth=(year:number,month:number)=>new Date(Date.UTC(year,month,0)).getUTCDate()
@@ -128,6 +137,10 @@ export function ProfitLossPage(){
   const [items,setItems]=useState<OrderItem[]>([])
   const [services,setServices]=useState<ServiceRow[]>([])
   const [employees,setEmployees]=useState<EmployeeRow[]>([])
+  const [reserveSettings,setReserveSettings]=useState<ReserveSetting[]>([])
+  const [reserveDraft,setReserveDraft]=useState<ReserveSetting[]>([])
+  const [reserveModal,setReserveModal]=useState(false)
+  const [savingReserve,setSavingReserve]=useState(false)
   const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
   const [detail,setDetail]=useState<DetailKey>(null)
@@ -141,7 +154,7 @@ export function ProfitLossPage(){
     const firstMonth=`${appliedFrom.slice(0,7)}-01`
     const lastMonth=`${appliedTo.slice(0,7)}-01`
 
-    const [o,p,e,a,ps,adj,shr,com,it,sv,emp]=await Promise.all([
+    const [o,p,e,a,ps,adj,shr,com,it,sv,emp,res]=await Promise.all([
       supabase.from('v100_orders_view')
         .select('id,order_no,total,paid_amount,status,created_at')
         .gte('created_at',fromISO).lte('created_at',toISO),
@@ -172,10 +185,13 @@ export function ProfitLossPage(){
       supabase.from('v109_users')
         .select('id,full_name')
         .eq('is_active',true)
-        .order('full_name')
+        .order('full_name'),
+      supabase.from('v113095_reserve_settings')
+        .select('reserve_type,label,method,monthly_amount,revenue_percent,is_active,note')
+        .order('reserve_type')
     ])
 
-    const error=o.error||p.error||e.error||a.error||ps.error||adj.error||shr.error||com.error||it.error||sv.error||emp.error
+    const error=o.error||p.error||e.error||a.error||ps.error||adj.error||shr.error||com.error||it.error||sv.error||emp.error||res.error
     if(error){
       setMessage(error.message)
     }else{
@@ -190,6 +206,7 @@ export function ProfitLossPage(){
       setItems((it.data as OrderItem[])||[])
       setServices((sv.data as ServiceRow[])||[])
       setEmployees((emp.data as EmployeeRow[])||[])
+      setReserveSettings((res.data as ReserveSetting[])||[])
     }
     setLoading(false)
   },[appliedFrom,appliedTo])
@@ -299,8 +316,25 @@ export function ProfitLossPage(){
 
     const payroll=attendancePay+allowance+bonus+revenueShare+productionCommission+courierCommission
     const totalCost=operating+payroll
-    const net=revenue-totalCost
-    const margin=revenue>0?(net/revenue)*100:0
+    const operatingNet=revenue-totalCost
+    const operatingMargin=revenue>0?(operatingNet/revenue)*100:0
+
+    const monthDaysForReserve=rangeDaysByMonth(appliedFrom,appliedTo)
+    const reserveDetail=reserveSettings.filter(row=>row.is_active).map(row=>{
+      let amount=0
+      if(row.method==='percent_revenue'){
+        amount=revenue*(Number(row.revenue_percent||0)/100)
+      }else{
+        for(const [monthKey,selectedDays] of monthDaysForReserve.entries()){
+          const [year,month]=monthKey.split('-').map(Number)
+          amount+=Number(row.monthly_amount||0)*(selectedDays/daysInMonth(year,month))
+        }
+      }
+      return{...row,amount}
+    })
+    const reserveTotal=reserveDetail.reduce((sum,row)=>sum+row.amount,0)
+    const netAfterReserve=operatingNet-reserveTotal
+    const marginAfterReserve=revenue>0?(netAfterReserve/revenue)*100:0
 
     const operatingByCategory=Object.entries(operatingRows.reduce<Record<string,number>>((map,row)=>{
       const key=row.category_name||'Lain-lain'
@@ -312,9 +346,11 @@ export function ProfitLossPage(){
       validOrders,revenue,cashIn,receivable,operatingRows,excludedPayrollLike,operating,
       attendanceDetail,attendancePay,allowanceDetail,allowance,bonusDetail,bonus,
       shareDetail,revenueShare,productionDetail,courierDetail,productionCommission,courierCommission,
-      payroll,totalCost,net,margin,operatingByCategory,employeeMap
+      payroll,totalCost,operatingNet,operatingMargin,
+      reserveDetail,reserveTotal,netAfterReserve,marginAfterReserve,
+      operatingByCategory,employeeMap
     }
-  },[orders,payments,expenses,attendance,settings,adjustments,shares,commissions,items,services,employees,appliedFrom,appliedTo])
+  },[orders,payments,expenses,attendance,settings,adjustments,shares,commissions,items,services,employees,reserveSettings,appliedFrom,appliedTo])
 
   const setQuick=(next:Exclude<PeriodPreset,'custom'>)=>{
     const current=businessDateKey()
@@ -331,6 +367,38 @@ export function ProfitLossPage(){
   const applyCustom=()=>{
     if(!from||!to||from>to){setMessage('Periode tidak valid.');return}
     setPreset('custom');setAppliedFrom(from);setAppliedTo(to)
+  }
+
+  const openReserveSettings=()=>{
+    setReserveDraft(reserveSettings.map(row=>({...row})))
+    setReserveModal(true)
+  }
+
+  const updateReserveDraft=(type:ReserveSetting['reserve_type'],patch:Partial<ReserveSetting>)=>{
+    setReserveDraft(rows=>rows.map(row=>row.reserve_type===type?{...row,...patch}:row))
+  }
+
+  const saveReserveSettings=async()=>{
+    setSavingReserve(true)
+    setMessage('')
+    const payload=reserveDraft.map(row=>({
+      reserve_type:row.reserve_type,
+      label:row.label,
+      method:row.method,
+      monthly_amount:Math.max(0,Number(row.monthly_amount||0)),
+      revenue_percent:Math.max(0,Number(row.revenue_percent||0)),
+      is_active:Boolean(row.is_active),
+      note:row.note||null,
+      updated_at:new Date().toISOString()
+    }))
+    const {error}=await supabase.from('v113095_reserve_settings').upsert(payload,{onConflict:'reserve_type'})
+    if(error){
+      setMessage(error.message)
+    }else{
+      setReserveSettings(payload as ReserveSetting[])
+      setReserveModal(false)
+    }
+    setSavingReserve(false)
   }
 
   const exportOptions=()=>({
@@ -356,15 +424,22 @@ export function ProfitLossPage(){
       ['Komisi Kurir',Math.round(report.courierCommission)],
       ['Total Biaya Karyawan',Math.round(report.payroll)],
       ['',''],
-      ['TOTAL BIAYA',Math.round(report.totalCost)],
-      ['LABA BERSIH',Math.round(report.net)],
-      ['MARGIN LABA',`${report.margin.toFixed(2)}%`]
+      ['TOTAL BIAYA OPERASIONAL + KARYAWAN',Math.round(report.totalCost)],
+      ['LABA BERSIH OPERASIONAL',Math.round(report.operatingNet)],
+      ['MARGIN OPERASIONAL',`${report.operatingMargin.toFixed(2)}%`],
+      ['',''],
+      ['CADANGAN & KEWAJIBAN',''],
+      ...report.reserveDetail.map(row=>[`  ${row.label}`,Math.round(row.amount)]),
+      ['Total Cadangan',Math.round(report.reserveTotal)],
+      ['',''],
+      ['LABA BERSIH SETELAH CADANGAN',Math.round(report.netAfterReserve)],
+      ['MARGIN SETELAH CADANGAN',`${report.marginAfterReserve.toFixed(2)}%`]
     ],
     summary:[
       ['Pendapatan',Math.round(report.revenue)],
-      ['Total Biaya',Math.round(report.totalCost)],
-      ['Laba Bersih',Math.round(report.net)],
-      ['Margin',`${report.margin.toFixed(2)}%`]
+      ['Laba Bersih Operasional',Math.round(report.operatingNet)],
+      ['Total Cadangan',Math.round(report.reserveTotal)],
+      ['Laba Setelah Cadangan',Math.round(report.netAfterReserve)]
     ] as Array<[string,string|number]>
   })
 
@@ -380,7 +455,9 @@ export function ProfitLossPage(){
     production:'Detail Komisi Produksi',
     courier:'Detail Komisi Kurir',
     payroll:'Detail Biaya Karyawan',
-    net:'Perhitungan Laba Bersih'
+    operating_net:'Perhitungan Laba Bersih Operasional',
+    reserves:'Detail Cadangan & Kewajiban',
+    net_after_reserve:'Perhitungan Laba Setelah Cadangan'
   }[detail||'revenue']
 
   const detailContent=()=>{
@@ -441,11 +518,26 @@ export function ProfitLossPage(){
       <div className="is-total"><span>Total Biaya Karyawan</span><b>{formatRupiah(report.payroll)}</b></div>
     </div>
 
-    if(detail==='net')return <div className="pl-detail-list pl-calc-list">
+    if(detail==='operating_net')return <div className="pl-detail-list pl-calc-list">
       <div><span>Pendapatan</span><b>{formatRupiah(report.revenue)}</b></div>
       <div><span>Biaya Operasional</span><b>- {formatRupiah(report.operating)}</b></div>
       <div><span>Biaya Karyawan</span><b>- {formatRupiah(report.payroll)}</b></div>
-      <div className="is-total"><span>Laba Bersih</span><b>{formatRupiah(report.net)}</b></div>
+      <div className="is-total"><span>Laba Bersih Operasional</span><b>{formatRupiah(report.operatingNet)}</b></div>
+    </div>
+
+    if(detail==='reserves')return <div className="pl-detail-list">
+      {report.reserveDetail.length===0?<p className="pl-detail-note">Belum ada cadangan aktif.</p>:
+        report.reserveDetail.map(row=><div key={row.reserve_type}>
+          <span>{row.label} • {row.method==='fixed'?`${formatRupiah(row.monthly_amount)}/bulan`:`${Number(row.revenue_percent||0)}% omzet`}</span>
+          <b>{formatRupiah(row.amount)}</b>
+        </div>)}
+      <div className="is-total"><span>Total Cadangan</span><b>{formatRupiah(report.reserveTotal)}</b></div>
+    </div>
+
+    if(detail==='net_after_reserve')return <div className="pl-detail-list pl-calc-list">
+      <div><span>Laba Bersih Operasional</span><b>{formatRupiah(report.operatingNet)}</b></div>
+      <div><span>Total Cadangan & Kewajiban</span><b>- {formatRupiah(report.reserveTotal)}</b></div>
+      <div className="is-total"><span>Laba Bersih Setelah Cadangan</span><b>{formatRupiah(report.netAfterReserve)}</b></div>
     </div>
 
     return null
@@ -455,8 +547,9 @@ export function ProfitLossPage(){
     <PageHeader
       eyebrow="OWNER FINANCIAL REPORT"
       title="Laporan Laba Rugi"
-      description="Pendapatan, biaya operasional, biaya karyawan, laba bersih, dan margin dalam satu laporan."
+      description="Pisahkan laba operasional dari laba setelah penyusutan, THR, kesehatan, dan cadangan tak terduga."
       action={<div className="report-actions">
+        <button className="secondary-button" onClick={openReserveSettings}><Settings2 size={17}/>Atur Cadangan</button>
         <button className="secondary-button" onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={17}/>XLS</button>
         <button className="secondary-button" onClick={()=>printPdf(exportOptions())}><FileText size={17}/>PDF</button>
       </div>}
@@ -482,7 +575,8 @@ export function ProfitLossPage(){
       <button className="pl-stat-button" onClick={()=>setDetail('revenue')}><StatCard icon={TrendingUp} label="Pendapatan" value={formatRupiah(report.revenue)} caption={`${report.validOrders.length} order masuk`}/></button>
       <button className="pl-stat-button" onClick={()=>setDetail('operating')}><StatCard icon={TrendingDown} label="Biaya Operasional" value={formatRupiah(report.operating)} caption={`${report.operatingRows.length} transaksi biaya`}/></button>
       <button className="pl-stat-button" onClick={()=>setDetail('payroll')}><StatCard icon={Users} label="Biaya Karyawan" value={formatRupiah(report.payroll)} caption="Gaji, tunjangan, bonus & komisi"/></button>
-      <button className="pl-stat-button" onClick={()=>setDetail('net')}><StatCard icon={WalletCards} label="Laba Bersih" value={formatRupiah(report.net)} caption={`Margin ${report.margin.toFixed(1)}%`}/></button>
+      <button className="pl-stat-button" onClick={()=>setDetail('operating_net')}><StatCard icon={WalletCards} label="Laba Bersih Operasional" value={formatRupiah(report.operatingNet)} caption={`Margin ${report.operatingMargin.toFixed(1)}%`}/></button>
+      <button className="pl-stat-button" onClick={()=>setDetail('net_after_reserve')}><StatCard icon={PiggyBank} label="Laba Setelah Cadangan" value={formatRupiah(report.netAfterReserve)} caption={`Cadangan ${formatRupiah(report.reserveTotal)}`}/></button>
     </section>
 
     <section className="pl-grid">
@@ -512,21 +606,50 @@ export function ProfitLossPage(){
       </article>
 
       <article className="panel pl-card pl-summary-card">
-        <div className="panel-heading"><div><h3>Ringkasan Laba Rugi</h3><p>Perhitungan akrual berdasarkan nilai order masuk.</p></div></div>
+        <div className="panel-heading"><div><h3>Ringkasan Laba Rugi</h3><p>Laba usaha dipisahkan dari alokasi cadangan/kewajiban.</p></div></div>
         <div className="pl-row pl-static-row"><span>Pendapatan</span><b>{formatRupiah(report.revenue)}</b></div>
         <div className="pl-row pl-static-row"><span>Biaya Operasional</span><b>- {formatRupiah(report.operating)}</b></div>
         <div className="pl-row pl-static-row"><span>Biaya Karyawan</span><b>- {formatRupiah(report.payroll)}</b></div>
-        <button className="pl-row pl-grand-total" onClick={()=>setDetail('net')}><span>Laba Bersih</span><b>{formatRupiah(report.net)}</b></button>
-        <div className="pl-margin"><span>Margin Laba</span><strong>{report.margin.toFixed(2)}%</strong></div>
+        <button className="pl-row pl-grand-total" onClick={()=>setDetail('operating_net')}><span>Laba Bersih Operasional</span><b>{formatRupiah(report.operatingNet)}</b></button>
+        <button className="pl-row pl-reserve-total" onClick={()=>setDetail('reserves')}><span>Cadangan & Kewajiban</span><b>- {formatRupiah(report.reserveTotal)}</b></button>
+        <button className="pl-row pl-final-total" onClick={()=>setDetail('net_after_reserve')}><span>Laba Bersih Setelah Cadangan</span><b>{formatRupiah(report.netAfterReserve)}</b></button>
+        <div className="pl-margin"><span>Margin Setelah Cadangan</span><strong>{report.marginAfterReserve.toFixed(2)}%</strong></div>
       </article>
     </section>
 
     <div className="pl-note">
       <ReceiptText size={17}/>
-      <span>Kas Masuk dan Piutang ditampilkan sebagai informasi, tetapi tidak dijumlahkan lagi ke Pendapatan. Tunjangan/bonus untuk periode parsial dihitung secara proporsional per hari agar laporan harian/7 hari tidak memasukkan satu bulan penuh.</span>
+      <span>Cadangan bukan berarti kas sudah keluar. Laporan memisahkan Laba Bersih Operasional dari Laba Bersih Setelah Cadangan. Cadangan nominal bulanan diprorata sesuai jumlah hari periode; cadangan persentase dihitung dari omzet periode.</span>
     </div>
 
     {loading&&<div className="route-loading"><span/>Memuat laporan laba rugi...</div>}
+
+    {reserveModal&&<Modal title="Atur Cadangan & Kewajiban" onClose={()=>setReserveModal(false)} className="pl-reserve-modal">
+      <div className="pl-reserve-form">
+        <p className="pl-reserve-intro">Aktifkan cadangan yang ingin dihitung. Metode nominal tetap akan diprorata per hari; metode % omzet mengikuti pendapatan periode.</p>
+        {reserveDraft.map(row=><section className="pl-reserve-setting" key={row.reserve_type}>
+          <label className="pl-reserve-toggle">
+            <input type="checkbox" checked={row.is_active} onChange={e=>updateReserveDraft(row.reserve_type,{is_active:e.target.checked})}/>
+            <span><b>{row.label}</b><small>{row.reserve_type==='depreciation'?'Penyusutan mesin/peralatan':row.reserve_type==='thr'?'Kewajiban THR karyawan':row.reserve_type==='health'?'Cadangan kesehatan karyawan':'Dana biaya tidak terduga'}</small></span>
+          </label>
+          <div className="pl-reserve-fields">
+            <label>Metode
+              <select value={row.method} onChange={e=>updateReserveDraft(row.reserve_type,{method:e.target.value as ReserveSetting['method']})}>
+                <option value="fixed">Nominal per bulan</option>
+                <option value="percent_revenue">% dari omzet</option>
+              </select>
+            </label>
+            {row.method==='fixed'
+              ?<label>Nominal / bulan<input type="number" min="0" step="1000" value={row.monthly_amount} onChange={e=>updateReserveDraft(row.reserve_type,{monthly_amount:Number(e.target.value)})}/></label>
+              :<label>Persentase omzet<input type="number" min="0" max="100" step="0.1" value={row.revenue_percent} onChange={e=>updateReserveDraft(row.reserve_type,{revenue_percent:Number(e.target.value)})}/></label>}
+          </div>
+        </section>)}
+        <div className="modal-actions">
+          <button className="secondary-button" onClick={()=>setReserveModal(false)} disabled={savingReserve}>Batal</button>
+          <button className="primary-button" onClick={saveReserveSettings} disabled={savingReserve}>{savingReserve?'Menyimpan...':'Simpan Cadangan'}</button>
+        </div>
+      </div>
+    </Modal>}
 
     {detail&&<Modal title={detailTitle||'Detail'} onClose={()=>setDetail(null)} className="pl-detail-modal">
       {detailContent()}

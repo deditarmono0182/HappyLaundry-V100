@@ -10862,3 +10862,102 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     font-size:12px;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.95 — Operational vs After Reserve
+   ========================================================= */
+.pl-stats{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+.pl-reserve-total{
+  margin-top:8px;
+  border-top:1px dashed #d8e5e1;
+  color:#7a5b1f;
+}
+.pl-reserve-total b{
+  color:#a16a0b;
+}
+.pl-final-total{
+  margin-top:6px;
+  padding:14px 12px;
+  border:1px solid #b7d9cf;
+  border-radius:12px;
+  background:#f0f8f5;
+}
+.pl-final-total span,
+.pl-final-total b{
+  font-size:15px;
+  font-weight:850;
+  color:#135d50;
+}
+.pl-reserve-modal{
+  width:min(760px,calc(100vw - 28px));
+}
+.pl-reserve-form{
+  display:grid;
+  gap:12px;
+}
+.pl-reserve-intro{
+  margin:0 0 2px;
+  color:#627984;
+  font-size:12px;
+  line-height:1.5;
+}
+.pl-reserve-setting{
+  padding:13px;
+  border:1px solid #deebe7;
+  border-radius:14px;
+  background:#fbfefd;
+}
+.pl-reserve-toggle{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  cursor:pointer;
+}
+.pl-reserve-toggle input{
+  margin-top:3px;
+}
+.pl-reserve-toggle span{
+  display:grid;
+  gap:2px;
+}
+.pl-reserve-toggle b{
+  font-size:13px;
+  color:#234e5c;
+}
+.pl-reserve-toggle small{
+  color:#7b929b;
+  font-size:10px;
+}
+.pl-reserve-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:11px;
+}
+.pl-reserve-fields label{
+  display:grid;
+  gap:5px;
+  font-size:11px;
+  font-weight:700;
+  color:#657c86;
+}
+.pl-reserve-fields select,
+.pl-reserve-fields input{
+  min-height:38px;
+}
+@media(max-width:1100px){
+  .pl-stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+@media(max-width:700px){
+  .pl-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .pl-reserve-fields{
+    grid-template-columns:1fr;
+  }
+}

@@ -542,3 +542,13 @@ test
 - Export XLS/PDF.
 - Dibangun dari baseline V113.0.93.
 - Tidak ada SQL baru.
+
+
+## V113.0.95 — Reserve & Employee Liability
+- Laporan Laba Rugi memisahkan Laba Bersih Operasional dan Laba Bersih Setelah Cadangan.
+- Tambah pengaturan Owner untuk Penyusutan Peralatan, Cadangan THR, Cadangan Kesehatan, dan Cadangan Tak Terduga.
+- Setiap cadangan bisa metode nominal per bulan atau persentase omzet.
+- Nominal bulanan diprorata sesuai hari periode; persentase dihitung dari omzet periode.
+- Cadangan tidak dianggap kas keluar otomatis.
+- Export XLS/PDF ikut menampilkan cadangan.
+- SQL baru: 062_v113_0_95_reserve_settings.sql.
