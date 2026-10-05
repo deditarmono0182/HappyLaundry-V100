@@ -552,3 +552,11 @@ test
 - Cadangan tidak dianggap kas keluar otomatis.
 - Export XLS/PDF ikut menampilkan cadangan.
 - SQL baru: 062_v113_0_95_reserve_settings.sql.
+
+
+## V113.0.96 — Visible Reserve Breakdown
+- Laporan Laba Rugi menampilkan kartu Cadangan & Kewajiban langsung di halaman utama.
+- Setiap cadangan aktif terlihat satu per satu: Penyusutan, THR, Kesehatan, Tak Terduga.
+- Setiap baris menampilkan metode dan nilai cadangan periode.
+- Total Cadangan & Kewajiban terlihat jelas tanpa perlu membuka modal.
+- Tidak ada SQL baru.

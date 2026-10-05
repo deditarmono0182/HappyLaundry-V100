@@ -10961,3 +10961,29 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.96 — Visible Reserve Breakdown
+   ========================================================= */
+.pl-reserve-breakdown-card{
+  background:linear-gradient(180deg,#fffdf8,#fffaf1);
+  border-color:#f0dfb8!important;
+}
+.pl-reserve-breakdown-card .panel-heading h3{
+  color:#6f5319;
+}
+.pl-reserve-breakdown-card .pl-row b{
+  color:#8d6111;
+}
+.pl-reserve-grand-total{
+  margin-top:6px!important;
+  padding-top:13px!important;
+  border-top:2px solid #ead49e!important;
+}
+.pl-reserve-grand-total span,
+.pl-reserve-grand-total b{
+  font-size:14px!important;
+  font-weight:850!important;
+  color:#6f5319!important;
+}

@@ -576,7 +576,7 @@ export function ProfitLossPage(){
       <button className="pl-stat-button" onClick={()=>setDetail('operating')}><StatCard icon={TrendingDown} label="Biaya Operasional" value={formatRupiah(report.operating)} caption={`${report.operatingRows.length} transaksi biaya`}/></button>
       <button className="pl-stat-button" onClick={()=>setDetail('payroll')}><StatCard icon={Users} label="Biaya Karyawan" value={formatRupiah(report.payroll)} caption="Gaji, tunjangan, bonus & komisi"/></button>
       <button className="pl-stat-button" onClick={()=>setDetail('operating_net')}><StatCard icon={WalletCards} label="Laba Bersih Operasional" value={formatRupiah(report.operatingNet)} caption={`Margin ${report.operatingMargin.toFixed(1)}%`}/></button>
-      <button className="pl-stat-button" onClick={()=>setDetail('net_after_reserve')}><StatCard icon={PiggyBank} label="Laba Setelah Cadangan" value={formatRupiah(report.netAfterReserve)} caption={`Cadangan ${formatRupiah(report.reserveTotal)}`}/></button>
+      <button className="pl-stat-button" onClick={()=>setDetail('net_after_reserve')}><StatCard icon={PiggyBank} label="Laba Setelah Cadangan" value={formatRupiah(report.netAfterReserve)} caption={`Total cadangan ${formatRupiah(report.reserveTotal)}`}/></button>
     </section>
 
     <section className="pl-grid">
@@ -603,6 +603,22 @@ export function ProfitLossPage(){
         <button className="pl-row" onClick={()=>setDetail('production')}><span>Komisi Produksi</span><b>{formatRupiah(report.productionCommission)}</b></button>
         <button className="pl-row" onClick={()=>setDetail('courier')}><span>Komisi Kurir</span><b>{formatRupiah(report.courierCommission)}</b></button>
         <button className="pl-row pl-total-row" onClick={()=>setDetail('payroll')}><span>Total Biaya Karyawan</span><b>{formatRupiah(report.payroll)}</b></button>
+      </article>
+
+      <article className="panel pl-card pl-reserve-breakdown-card">
+        <div className="panel-heading"><div><h3>Cadangan & Kewajiban</h3><p>Alokasi yang mengurangi laba setelah cadangan, tetapi bukan otomatis kas keluar.</p></div></div>
+        {report.reserveDetail.length===0
+          ?<div className="report-empty">Belum ada cadangan aktif. Klik <b>Atur Cadangan</b> untuk mengaktifkan.</div>
+          :report.reserveDetail.map(row=><button className="pl-row" key={row.reserve_type} onClick={()=>setDetail('reserves')}>
+            <span>{row.label}
+              <small>{row.method==='fixed'?`${formatRupiah(row.monthly_amount)}/bulan`:`${Number(row.revenue_percent||0)}% omzet`}</small>
+            </span>
+            <b>{formatRupiah(row.amount)}</b>
+          </button>)}
+        <button className="pl-row pl-total-row pl-reserve-grand-total" onClick={()=>setDetail('reserves')}>
+          <span>Total Cadangan & Kewajiban</span>
+          <b>{formatRupiah(report.reserveTotal)}</b>
+        </button>
       </article>
 
       <article className="panel pl-card pl-summary-card">
