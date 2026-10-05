@@ -72,6 +72,14 @@ type OrderCommissionAssignment={
   courier_id:string|null
 }
 
+type OrderCommissionTeamMember={
+  order_id:string
+  commission_type:'production'|'courier'
+  employee_id:string
+  is_primary:boolean
+  share_percent:number
+}
+
 type CommissionEmployeeName={
   id:string
   full_name:string
@@ -116,6 +124,7 @@ export function OrdersPage() {
   const [quantityDraft, setQuantityDraft] = useState<Record<string,string>>({})
   const [deliveryProofs,setDeliveryProofs]=useState<DeliveryProof[]>([])
   const [commissionAssignments,setCommissionAssignments]=useState<OrderCommissionAssignment[]>([])
+  const [commissionTeamMembers,setCommissionTeamMembers]=useState<OrderCommissionTeamMember[]>([])
   const [commissionEmployeeNames,setCommissionEmployeeNames]=useState<CommissionEmployeeName[]>([])
   const [assignmentCorrectionHistory,setAssignmentCorrectionHistory]=useState<AssignmentCorrectionHistory[]>([])
   const [deliveryOrder,setDeliveryOrder]=useState<OrderRow|null>(null)
@@ -136,7 +145,7 @@ export function OrdersPage() {
   const load = useCallback(async () => {
     setLoading(true)
     setMessage('')
-    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionEmployeesResult, correctionHistoryResult] = await Promise.all([
+    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionTeamResult, commissionEmployeesResult, correctionHistoryResult] = await Promise.all([
       supabase
         .from('v100_orders_view')
         .select('*')
@@ -162,11 +171,14 @@ export function OrdersPage() {
       supabase
         .from('v113_order_commissions')
         .select('order_id,worker_id,courier_id'),
+      supabase
+        .from('v113097_order_commission_members')
+        .select('order_id,commission_type,employee_id,is_primary,share_percent'),
       supabase.from('v109_users').select('id,full_name,login_id'),
       supabase.from('v113_order_assignment_corrections').select('id,order_id,old_worker_id,new_worker_id,old_courier_id,new_courier_id,reason,changed_by,changed_at').order('changed_at',{ascending:false})
     ])
 
-    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionEmployeesResult.error || correctionHistoryResult.error
+    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionTeamResult.error || commissionEmployeesResult.error || correctionHistoryResult.error
     if (error) setMessage(error.message)
     else {
       const fetched=((ordersResult.data as OrderRow[])||[])
@@ -177,6 +189,7 @@ export function OrdersPage() {
       setOrderServiceItems((orderItemsResult.data as OrderServiceItem[]) || [])
       setDeliveryProofs((deliveryResult.data as DeliveryProof[]) || [])
       setCommissionAssignments((commissionResult.data as OrderCommissionAssignment[]) || [])
+      setCommissionTeamMembers((commissionTeamResult.data as OrderCommissionTeamMember[]) || [])
       setCommissionEmployeeNames((commissionEmployeesResult.data as CommissionEmployeeName[]) || [])
       setAssignmentCorrectionHistory((correctionHistoryResult.data as AssignmentCorrectionHistory[]) || [])
     }
@@ -709,6 +722,15 @@ export function OrdersPage() {
   }
 
   const commissionAssignmentMap=useMemo(()=>new Map(commissionAssignments.map(item=>[item.order_id,item])),[commissionAssignments])
+  const commissionTeamByOrder=useMemo(()=>{
+    const map=new Map<string,OrderCommissionTeamMember[]>()
+    for(const item of commissionTeamMembers){
+      const list=map.get(item.order_id)||[]
+      list.push(item)
+      map.set(item.order_id,list)
+    }
+    return map
+  },[commissionTeamMembers])
   const commissionEmployeeNameMap=useMemo(()=>new Map(commissionEmployeeNames.map(item=>[item.id,item.full_name])),[commissionEmployeeNames])
   const correctionHistoryByOrder=useMemo(()=>{
     const map=new Map<string,AssignmentCorrectionHistory[]>()
@@ -738,8 +760,15 @@ export function OrdersPage() {
     const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
     const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(trackingUrl)}`
     const commissionAssignment=commissionAssignmentMap.get(row.id)
-    const workerName=commissionAssignment?.worker_id?commissionEmployeeNameMap.get(commissionAssignment.worker_id)||'-':'-'
-    const courierName=commissionAssignment?.courier_id?commissionEmployeeNameMap.get(commissionAssignment.courier_id)||'-':'-'
+    const teamMembers=commissionTeamByOrder.get(row.id)||[]
+    const productionMembers=teamMembers.filter(item=>item.commission_type==='production')
+    const courierMembers=teamMembers.filter(item=>item.commission_type==='courier')
+    const workerName=productionMembers.length
+      ?productionMembers.map(item=>commissionEmployeeNameMap.get(item.employee_id)||'-').join(' + ')
+      :(commissionAssignment?.worker_id?commissionEmployeeNameMap.get(commissionAssignment.worker_id)||'-':'-')
+    const courierName=courierMembers.length
+      ?courierMembers.map(item=>commissionEmployeeNameMap.get(item.employee_id)||'-').join(' + ')
+      :(commissionAssignment?.courier_id?commissionEmployeeNameMap.get(commissionAssignment.courier_id)||'-':'-')
 
     printWindow.document.write(`
       <!doctype html>

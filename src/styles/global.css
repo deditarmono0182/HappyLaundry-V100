@@ -10987,3 +10987,74 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   font-weight:850!important;
   color:#6f5319!important;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.97 — Team Commission Split
+   ========================================================= */
+.commission-team-toggle{
+  width:max-content;
+  max-width:100%;
+  min-height:34px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:7px;
+  padding:7px 10px;
+  border:1px solid #cfe2dc;
+  border-radius:999px;
+  background:#f7fbfa;
+  color:#266052;
+  font-size:11px;
+  font-weight:750;
+  cursor:pointer;
+}
+.commission-team-picker{
+  display:grid;
+  gap:7px;
+  margin-top:8px;
+  padding:10px;
+  border:1px solid #dce9e5;
+  border-radius:12px;
+  background:#fbfefd;
+}
+.commission-team-picker>b{
+  font-size:12px;
+  color:#274f5b;
+}
+.commission-team-picker>span{
+  font-size:10px;
+  line-height:1.4;
+  color:#748b95;
+}
+.commission-team-picker>label{
+  display:flex!important;
+  align-items:center;
+  gap:8px;
+  min-height:34px;
+  padding:6px 7px;
+  border-radius:9px;
+  background:#fff;
+  cursor:pointer;
+}
+.commission-team-picker>label:hover{
+  background:#f1f8f5;
+}
+.commission-team-picker input{
+  width:16px!important;
+  min-width:16px!important;
+  height:16px!important;
+  min-height:16px!important;
+  margin:0!important;
+}
+.commission-team-picker label>span{
+  display:grid;
+  gap:1px;
+  font-size:11px;
+  font-weight:700;
+  color:#315b68;
+}
+.commission-team-picker label small{
+  font-size:9px;
+  color:#8799a1;
+}

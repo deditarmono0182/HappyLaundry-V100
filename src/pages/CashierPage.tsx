@@ -81,6 +81,10 @@ export function CashierPage() {
   const [commissionSettings,setCommissionSettings]=useState<CommissionSetting[]>([])
   const [workerId,setWorkerId]=useState('')
   const [courierId,setCourierId]=useState('')
+  const [workerExtraIds,setWorkerExtraIds]=useState<string[]>([])
+  const [courierExtraIds,setCourierExtraIds]=useState<string[]>([])
+  const [workerTeamOpen,setWorkerTeamOpen]=useState(false)
+  const [courierTeamOpen,setCourierTeamOpen]=useState(false)
   const [customerId,setCustomerId]=useState('')
   const [newCustomer,setNewCustomer]=useState(false)
   const [customerName,setCustomerName]=useState('')
@@ -222,6 +226,18 @@ export function CashierPage() {
   const courierPercent=Number(commissionSettingMap.get(courierId)?.courier_percent||0)
   const workerCommission=total*(workerPercent/100)
   const courierCommission=total*(courierPercent/100)
+  const workerTeamIds=useMemo(()=>workerId?[workerId,...workerExtraIds.filter(id=>id!==workerId)]:[],[workerId,workerExtraIds])
+  const courierTeamIds=useMemo(()=>courierId?[courierId,...courierExtraIds.filter(id=>id!==courierId)]:[],[courierId,courierExtraIds])
+  const workerShare=workerTeamIds.length?workerCommission/workerTeamIds.length:0
+  const courierShare=courierTeamIds.length?courierCommission/courierTeamIds.length:0
+
+  const toggleExtra=(kind:'worker'|'courier',id:string,checked:boolean)=>{
+    if(kind==='worker'){
+      setWorkerExtraIds(current=>checked?Array.from(new Set([...current,id])):current.filter(value=>value!==id))
+    }else{
+      setCourierExtraIds(current=>checked?Array.from(new Set([...current,id])):current.filter(value=>value!==id))
+    }
+  }
 
   const addItem=(service?:Service)=>{
     if(!service){
@@ -291,7 +307,8 @@ export function CashierPage() {
   const reset=()=>{
     setCustomerId('');setNewCustomer(false);setCustomerName('');setCustomerPhone('');setCustomerAddress('')
     setItems([]);setQuantityDraft({});setDiscountValue(0);setDiscountMode('nominal');setPaymentAmount(0)
-    setMethod('cash');setDueAt('');setDueAtManual(false);setNotes('');setQuery('');setWorkerId('');setCourierId('');setMessage('')
+    setMethod('cash');setDueAt('');setDueAtManual(false);setNotes('');setQuery('');setWorkerId('');setCourierId('')
+    setWorkerExtraIds([]);setCourierExtraIds([]);setWorkerTeamOpen(false);setCourierTeamOpen(false);setMessage('')
   }
 
   const confirmReset=()=>{
@@ -517,15 +534,24 @@ export function CashierPage() {
           courier_id:courierId||null,
           courier_percent:courierId?courierPercent:0
         })
-        if(assignment.error)commissionWarning=`Order tersimpan, tetapi komisi belum tercatat: ${assignment.error.message}`
+        if(assignment.error){
+          commissionWarning=`Order tersimpan, tetapi komisi belum tercatat: ${assignment.error.message}`
+        }else{
+          const teamResult=await supabase.rpc('v113097_set_order_commission_team',{
+            p_order_id:result.order_id,
+            p_production_ids:workerTeamIds,
+            p_courier_ids:courierTeamIds
+          })
+          if(teamResult.error)commissionWarning=`Order tersimpan, tetapi pembagian komisi tim belum tercatat: ${teamResult.error.message}`
+        }
       }
       const saved:SuccessData={
         orderId:result.order_id,orderNo:result.order_no,total,subtotal,discount,paid,
         customer:selectedName,phone:selectedPhone,
         due:dueIso?businessDateTimeLabel(dueIso):'-',
         method,notes:notes.trim(),items:[...items],
-        workerName:commissionEmployees.find(employee=>employee.id===workerId)?.full_name||'-',
-        courierName:commissionEmployees.find(employee=>employee.id===courierId)?.full_name||'-',
+        workerName:workerTeamIds.map(id=>commissionEmployees.find(employee=>employee.id===id)?.full_name).filter(Boolean).join(' + ')||'-',
+        courierName:courierTeamIds.map(id=>commissionEmployees.find(employee=>employee.id===id)?.full_name).filter(Boolean).join(' + ')||'-',
         cashierName:profile?.full_name||profile?.login_id||'Kasir'
       }
       setSuccess(saved)
@@ -618,18 +644,48 @@ export function CashierPage() {
           </div>
           <div className="form-grid-two">
             <label>Dikerjakan oleh
-              <select value={workerId} onChange={e=>setWorkerId(e.target.value)}>
+              <select value={workerId} onChange={e=>{setWorkerId(e.target.value);setWorkerExtraIds(current=>current.filter(id=>id!==e.target.value));if(!e.target.value)setWorkerTeamOpen(false)}}>
                 <option value="">Tidak ditentukan</option>
                 {commissionEmployees.map(employee=><option key={employee.id} value={employee.id}>{employee.full_name} — {employee.login_id}</option>)}
               </select>
-              <small>{workerId?`Komisi produksi ${workerPercent.toFixed(2)}% = ${formatIDR(workerCommission)}`:'Opsional. Pilih karyawan yang mengerjakan order ini.'}</small>
+              <small>{workerId
+                ?workerTeamIds.length>1
+                  ?`Komisi tim ${workerPercent.toFixed(2)}% = ${formatIDR(workerCommission)} • ${workerTeamIds.length} orang • masing-masing ${formatIDR(workerShare)}`
+                  :`Komisi produksi ${workerPercent.toFixed(2)}% = ${formatIDR(workerCommission)}`
+                :'Opsional. Pilih karyawan yang mengerjakan order ini.'}</small>
+              {workerId&&<button type="button" className="commission-team-toggle" onClick={()=>setWorkerTeamOpen(value=>!value)}>
+                <Plus size={14}/>{workerTeamOpen?'Tutup Tim':workerTeamIds.length>1?`Tim Pengerjaan (${workerTeamIds.length})`:'Tambah Anggota / Kerja Tim'}
+              </button>}
+              {workerId&&workerTeamOpen&&<div className="commission-team-picker">
+                <b>Anggota tambahan</b>
+                <span>Pembagian komisi otomatis rata. Persentase total mengikuti penanggung jawab utama.</span>
+                {commissionEmployees.filter(employee=>employee.id!==workerId).map(employee=><label key={`worker-team-${employee.id}`}>
+                  <input type="checkbox" checked={workerExtraIds.includes(employee.id)} onChange={e=>toggleExtra('worker',employee.id,e.target.checked)}/>
+                  <span>{employee.full_name}<small>{employee.login_id}</small></span>
+                </label>)}
+              </div>}
             </label>
             <label>Kurir
-              <select value={courierId} onChange={e=>setCourierId(e.target.value)}>
+              <select value={courierId} onChange={e=>{setCourierId(e.target.value);setCourierExtraIds(current=>current.filter(id=>id!==e.target.value));if(!e.target.value)setCourierTeamOpen(false)}}>
                 <option value="">Tanpa kurir</option>
                 {commissionEmployees.map(employee=><option key={employee.id} value={employee.id}>{employee.full_name} — {employee.login_id}</option>)}
               </select>
-              <small>{courierId?`Komisi kurir ${courierPercent.toFixed(2)}% = ${formatIDR(courierCommission)}`:'Opsional. Komisi kurir menjadi hak setelah order Selesai & Lunas.'}</small>
+              <small>{courierId
+                ?courierTeamIds.length>1
+                  ?`Komisi tim kurir ${courierPercent.toFixed(2)}% = ${formatIDR(courierCommission)} • ${courierTeamIds.length} orang • masing-masing ${formatIDR(courierShare)}`
+                  :`Komisi kurir ${courierPercent.toFixed(2)}% = ${formatIDR(courierCommission)}`
+                :'Opsional. Komisi kurir menjadi hak setelah order Selesai & Lunas.'}</small>
+              {courierId&&<button type="button" className="commission-team-toggle" onClick={()=>setCourierTeamOpen(value=>!value)}>
+                <Plus size={14}/>{courierTeamOpen?'Tutup Tim':courierTeamIds.length>1?`Tim Kurir (${courierTeamIds.length})`:'Tambah Anggota / Tim Kurir'}
+              </button>}
+              {courierId&&courierTeamOpen&&<div className="commission-team-picker">
+                <b>Kurir tambahan</b>
+                <span>Pembagian komisi otomatis rata. Persentase total mengikuti kurir utama.</span>
+                {commissionEmployees.filter(employee=>employee.id!==courierId).map(employee=><label key={`courier-team-${employee.id}`}>
+                  <input type="checkbox" checked={courierExtraIds.includes(employee.id)} onChange={e=>toggleExtra('courier',employee.id,e.target.checked)}/>
+                  <span>{employee.full_name}<small>{employee.login_id}</small></span>
+                </label>)}
+              </div>}
             </label>
           </div>
         </section>

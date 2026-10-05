@@ -560,3 +560,14 @@ test
 - Setiap baris menampilkan metode dan nilai cadangan periode.
 - Total Cadangan & Kewajiban terlihat jelas tanpa perlu membuka modal.
 - Tidak ada SQL baru.
+
+
+## V113.0.97 — Team Commission Split
+- Tetap bisa memilih 1 Yang Mengerjakan dan 1 Kurir seperti sebelumnya.
+- Tambah opsi Kerja Tim untuk produksi dan Tim Kurir.
+- Penanggung jawab utama menentukan persentase total komisi order.
+- Jika ada beberapa anggota, total komisi dibagi rata otomatis ke semua anggota.
+- Payroll/Gaji Saya tetap membaca v113_commission_ledger, sekarang mendukung anggota tim.
+- Nota/detail order menampilkan beberapa nama dengan tanda +.
+- Order lama tetap kompatibel memakai data komisi lama.
+- SQL baru: 063_v113_0_97_team_commission_split.sql.
