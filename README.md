@@ -571,3 +571,11 @@ test
 - Nota/detail order menampilkan beberapa nama dengan tanda +.
 - Order lama tetap kompatibel memakai data komisi lama.
 - SQL baru: 063_v113_0_97_team_commission_split.sql.
+
+
+## V113.0.98 — Operational Attention Center
+- Tambah Pusat Peringatan Operasional di Dashboard Owner.
+- Ringkas order terlambat, piutang/belum lunas, siap diambil >24 jam, Yang Mengerjakan kosong, Kurir kosong, estimasi selesai kosong, dan permintaan hapus pending.
+- Klik tiap jenis peringatan langsung membuka daftar terkait.
+- Orders mendukung shortcut URL untuk assignment=missing_worker/missing_courier dan attention=ready_long/no_due.
+- Tidak ada SQL baru.

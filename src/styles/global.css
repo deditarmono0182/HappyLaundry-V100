@@ -11058,3 +11058,217 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   font-size:9px;
   color:#8799a1;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.98 — Operational Attention Center
+   ========================================================= */
+.dashboard-attention-center{
+  width:100%;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:12px;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border:1px solid #d9e9e4;
+  border-radius:16px;
+  background:#f8fcfb;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+.dashboard-attention-center.has-issues{
+  border-color:#efd49c;
+  background:#fffaf0;
+}
+.dashboard-attention-center.is-clear{
+  border-color:#cce5dc;
+  background:#f5fbf8;
+}
+.dashboard-attention-icon{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  background:#edf6f3;
+  color:#2c6b5d;
+}
+.dashboard-attention-center.has-issues .dashboard-attention-icon{
+  background:#fff0d4;
+  color:#b36b00;
+}
+.dashboard-attention-copy{
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+.dashboard-attention-copy b{
+  font-size:14px;
+  color:#234f5b;
+}
+.dashboard-attention-copy small{
+  font-size:11px;
+  color:#738892;
+}
+.dashboard-attention-summary{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.dashboard-attention-summary>span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:5px 7px;
+  border:1px solid #e4ece9;
+  border-radius:999px;
+  background:#fff;
+  color:#607782;
+  font-size:10px;
+  white-space:nowrap;
+}
+.dashboard-attention-summary b{
+  color:#284f5c;
+}
+.dashboard-attention-total{
+  min-width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  padding:0 7px;
+  border-radius:999px;
+  background:#2d7666;
+  color:#fff;
+  font-size:12px;
+  font-weight:850;
+}
+.dashboard-attention-center.has-issues .dashboard-attention-total{
+  background:#d58a19;
+}
+.dashboard-attention-modal{
+  width:min(760px,calc(100vw - 28px));
+}
+.attention-modal-summary{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:12px;
+}
+.attention-modal-summary>div{
+  padding:11px 12px;
+  border:1px solid #deebe7;
+  border-radius:12px;
+  background:#f8fcfb;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.attention-modal-summary span{
+  font-size:11px;
+  color:#687f89;
+}
+.attention-modal-summary b{
+  font-size:18px;
+  color:#234f5b;
+}
+.attention-issue-list{
+  display:grid;
+  gap:8px;
+}
+.attention-issue-list>button{
+  width:100%;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:10px 11px;
+  border:1px solid #e2ece9;
+  border-radius:12px;
+  background:#fff;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+.attention-issue-list>button.has-count{
+  border-color:#ecd39f;
+  background:#fffaf2;
+}
+.attention-issue-icon{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:#eef6f3;
+  color:#2b6759;
+}
+.attention-issue-list .has-count .attention-issue-icon{
+  background:#fff0d7;
+  color:#ad6700;
+}
+.attention-issue-list button>span:nth-child(2){
+  display:grid;
+  gap:2px;
+}
+.attention-issue-list button>span:nth-child(2)>b{
+  font-size:12px;
+  color:#2c5360;
+}
+.attention-issue-list button>span:nth-child(2)>small{
+  font-size:10px;
+  color:#81949c;
+}
+.attention-issue-list button>strong{
+  min-width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:#eef5f3;
+  color:#355c68;
+  font-size:11px;
+}
+.attention-issue-list .has-count>strong{
+  background:#f2b958;
+  color:#fff;
+}
+.attention-modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:14px;
+}
+@media(max-width:760px){
+  .dashboard-attention-center{
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:9px;
+    padding:10px;
+  }
+  .dashboard-attention-summary{
+    grid-column:1/-1;
+    justify-content:flex-start;
+    padding-left:51px;
+  }
+  .dashboard-attention-icon{
+    width:40px;
+    height:40px;
+  }
+}
+@media(max-width:520px){
+  .dashboard-attention-summary{
+    padding-left:0;
+  }
+  .dashboard-attention-summary>span{
+    flex:1 1 auto;
+    justify-content:center;
+  }
+  .attention-modal-summary{
+    grid-template-columns:1fr;
+  }
+}

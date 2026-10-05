@@ -111,6 +111,7 @@ export function OrdersPage() {
   const [statusFilter,setStatusFilter]=useState<'all'|'overdue'|OrderStatus>('all')
   const [categoryFilter,setCategoryFilter]=useState('all')
   const [assignmentFilter,setAssignmentFilter]=useState<'all'|'missing_worker'|'missing_courier'|'missing_any'|'missing_both'>('all')
+  const [attentionFilter,setAttentionFilter]=useState<'all'|'ready_long'|'no_due'>('all')
   const [statusBusyId,setStatusBusyId]=useState<string|null>(null)
   const [loading, setLoading] = useState(true)
   const [orderLimit,setOrderLimit]=useState(ORDER_PAGE_SIZE)
@@ -201,9 +202,21 @@ export function OrdersPage() {
     const orderParam=searchParams.get('order')?.trim()
     const customerParam=searchParams.get('customer')?.trim()
     const statusParam=searchParams.get('status')?.trim().toLowerCase()
+    const assignmentParam=searchParams.get('assignment')?.trim().toLowerCase()
+    const attentionParam=searchParams.get('attention')?.trim().toLowerCase()
 
     if(statusParam==='overdue'){
       setStatusFilter('overdue')
+    }else if(['received','washing','drying','ironing','packing','ready','completed','cancelled'].includes(statusParam||'')){
+      setStatusFilter(statusParam as OrderStatus)
+    }
+
+    if(['missing_worker','missing_courier','missing_any','missing_both'].includes(assignmentParam||'')){
+      setAssignmentFilter(assignmentParam as typeof assignmentFilter)
+    }
+
+    if(attentionParam==='ready_long'||attentionParam==='no_due'){
+      setAttentionFilter(attentionParam)
     }
 
     if(orderParam){
@@ -453,6 +466,14 @@ export function OrdersPage() {
       if(assignmentFilter==='missing_any'&&!(missingWorker||missingCourier))return false
       if(assignmentFilter==='missing_both'&&!(missingWorker&&missingCourier))return false
 
+      if(attentionFilter==='ready_long'){
+        const marker=row.progress_last_at||row.due_at||row.created_at
+        if(row.status!=='ready'||Date.now()-new Date(marker).getTime()<24*60*60*1000)return false
+      }
+      if(attentionFilter==='no_due'){
+        if(['ready','completed','cancelled'].includes(row.status)||row.due_at)return false
+      }
+
       if(!keyword)return true
 
       const haystack=[
@@ -469,7 +490,7 @@ export function OrdersPage() {
 
       return haystack.includes(keyword)
     })
-  },[query,rows,serviceItemsByOrder,serviceCategoryByName,paymentFilter,statusFilter,categoryFilter,assignmentFilter,orderAssignmentMap])
+  },[query,rows,serviceItemsByOrder,serviceCategoryByName,paymentFilter,statusFilter,categoryFilter,assignmentFilter,attentionFilter,orderAssignmentMap])
 
   const overdueRows = useMemo(() => {
     const now = Date.now()
@@ -682,7 +703,8 @@ export function OrdersPage() {
       missing_any:'Ada Penugasan Kosong',
       missing_both:'Keduanya Kosong'
     }[assignmentFilter]
-    return `Filter: ${status} • ${payment} • ${assignmentLabel}`
+    const attentionLabel=attentionFilter==='ready_long'?'Siap >24 Jam':attentionFilter==='no_due'?'Estimasi Kosong':''
+    return `Filter: ${status} • ${payment} • ${assignmentLabel}${attentionLabel?` • ${attentionLabel}`:''}`
   }
 
   const openCustomerTracking=(row:OrderRow)=>{
@@ -1034,6 +1056,7 @@ export function OrdersPage() {
               setStatusFilter('all')
               setCategoryFilter('all')
               setAssignmentFilter('all')
+              setAttentionFilter('all')
             }}
           >
             Semua

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, Banknote, CheckCircle2, Crown, FileSpreadsheet, Landmark, MonitorCog, PackageCheck, ShieldAlert, ShoppingBag, Smartphone, TrendingUp, Users, WalletCards, WashingMachine } from 'lucide-react'
+import { AlertTriangle, Banknote, BellRing, CheckCircle2, Clock3, Crown, FileSpreadsheet, Landmark, MonitorCog, PackageCheck, ShieldAlert, ShoppingBag, Smartphone, TrendingUp, UserRoundX, Users, WalletCards, WashingMachine } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { Modal } from '../components/Modal'
 import { StatCard } from '../components/StatCard'
@@ -37,6 +37,11 @@ interface DashboardProgressEvent{
   new_status:string
   created_at:string
 }
+interface DashboardAssignment{
+  order_id:string
+  worker_id:string|null
+  courier_id:string|null
+}
 
 export function DashboardPage() {
   const navigate=useNavigate()
@@ -49,6 +54,8 @@ export function DashboardPage() {
   const [services,setServices]=useState<DashboardService[]>([])
   const [commissions,setCommissions]=useState<DashboardCommission[]>([])
   const [progressEvents,setProgressEvents]=useState<DashboardProgressEvent[]>([])
+  const [assignments,setAssignments]=useState<DashboardAssignment[]>([])
+  const [attentionOpen,setAttentionOpen]=useState(false)
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
   const [revenuePeriod,setRevenuePeriod]=useState<'today'|'7d'|'month'|'3m'|'6m'|'12m'>('7d')
@@ -59,15 +66,16 @@ export function DashboardPage() {
   )
 
   const load=useCallback(async()=>{
-    const [o,c,pay,i,s,commissionRes]=await Promise.all([
+    const [o,c,pay,i,s,commissionRes,assignmentRes]=await Promise.all([
       supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
       supabase.from('v100_cash_entries').select('amount,direction,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_order_items').select('order_id,service_id,service_name,unit,quantity,subtotal'),
       supabase.from('v100_services').select('id,category'),
-      supabase.from('v113_commission_ledger').select('commission_type,amount,earned_at')
+      supabase.from('v113_commission_ledger').select('commission_type,amount,earned_at'),
+      supabase.from('v113_order_commissions').select('order_id,worker_id,courier_id')
     ])
-    if(o.error||c.error||pay.error||i.error||s.error||commissionRes.error)setMessage((o.error||c.error||pay.error||i.error||s.error||commissionRes.error)?.message||'Gagal memuat data')
+    if(o.error||c.error||pay.error||i.error||s.error||commissionRes.error||assignmentRes.error)setMessage((o.error||c.error||pay.error||i.error||s.error||commissionRes.error||assignmentRes.error)?.message||'Gagal memuat data')
     else {
       setOrders((o.data as OrderRow[])||[])
       setCash(c.data||[])
@@ -75,6 +83,7 @@ export function DashboardPage() {
       setOrderItems((i.data as DashboardOrderItem[])||[])
       setServices((s.data as DashboardService[])||[])
       setCommissions((commissionRes.data as DashboardCommission[])||[])
+      setAssignments((assignmentRes.data as DashboardAssignment[])||[])
       if(isOwner){
         const [{count},historyRes]=await Promise.all([
           supabase
@@ -134,6 +143,32 @@ export function DashboardPage() {
   }).length
   const completed=today.filter(r=>r.status==='completed').length
   const receivable=orders.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0)
+  const assignmentMap=useMemo(()=>new Map(assignments.map(row=>[row.order_id,row])),[assignments])
+  const attention=useMemo(()=>{
+    const active=orders.filter(row=>!['completed','cancelled'].includes(row.status))
+    const overdueRows=active.filter(row=>
+      row.status!=='ready'&&Boolean(row.due_at)&&new Date(row.due_at as string).getTime()<businessClock
+    )
+    const unpaidRows=orders.filter(row=>row.status!=='cancelled'&&Math.max(0,Number(row.total)-Number(row.paid_amount))>0)
+    const readyLongRows=active.filter(row=>{
+      if(row.status!=='ready')return false
+      const marker=row.progress_last_at||row.due_at||row.created_at
+      return businessClock-new Date(marker).getTime()>=24*60*60*1000
+    })
+    const missingWorkerRows=active.filter(row=>!assignmentMap.get(row.id)?.worker_id)
+    const missingCourierRows=active.filter(row=>!assignmentMap.get(row.id)?.courier_id)
+    const noDueRows=active.filter(row=>row.status!=='ready'&&!row.due_at)
+
+    const uniqueOrders=new Set<string>()
+    ;[overdueRows,unpaidRows,readyLongRows,missingWorkerRows,missingCourierRows,noDueRows]
+      .forEach(group=>group.forEach(row=>uniqueOrders.add(row.id)))
+
+    return{
+      overdueRows,unpaidRows,readyLongRows,missingWorkerRows,missingCourierRows,noDueRows,
+      uniqueCount:uniqueOrders.size,
+      issueCount:overdueRows.length+unpaidRows.length+readyLongRows.length+missingWorkerRows.length+missingCourierRows.length+noDueRows.length+(pendingDeletes||0)
+    }
+  },[orders,assignmentMap,businessClock,pendingDeletes])
   const selectedPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
   const selectedPeriodCompleted=useMemo(()=>{
     const completedIds=new Set(progressEvents
@@ -417,6 +452,22 @@ export function DashboardPage() {
         <span className="dashboard-delete-alert-action">Periksa →</span>
       </button>}
 
+    {isOwner&&<button type="button" className={`dashboard-attention-center ${attention.issueCount>0?'has-issues':'is-clear'}`} onClick={()=>setAttentionOpen(true)}>
+      <span className="dashboard-attention-icon"><BellRing size={22}/></span>
+      <span className="dashboard-attention-copy">
+        <b>Perlu Perhatian</b>
+        <small>{attention.issueCount>0
+          ?`${attention.uniqueCount} order memiliki hal yang perlu diperiksa`
+          :'Tidak ada masalah operasional yang terdeteksi saat ini'}</small>
+      </span>
+      <span className="dashboard-attention-summary">
+        <span><AlertTriangle size={13}/> Terlambat <b>{attention.overdueRows.length}</b></span>
+        <span><UserRoundX size={13}/> Penugasan <b>{attention.missingWorkerRows.length+attention.missingCourierRows.length}</b></span>
+        <span><Clock3 size={13}/> Siap lama <b>{attention.readyLongRows.length}</b></span>
+      </span>
+      <span className="dashboard-attention-total">{attention.issueCount>99?'99+':attention.issueCount}</span>
+    </button>}
+
     <section className="panel dashboard-display-customizer">
       <div className="dashboard-display-title">
         <div className="dashboard-display-icon"><MonitorCog size={20}/></div>
@@ -638,6 +689,54 @@ export function DashboardPage() {
       <tbody>{orders.slice(0,10).map(r=><tr key={r.id}><td><b>{r.order_no}</b></td><td><b>{r.customer_name}</b><small>{r.customer_phone}</small></td><td><span className={`badge status-${r.status}`}>{statusLabels[r.status]}</span></td><td>{formatIDR(r.total)}</td><td>{formatIDR(Math.max(0,Number(r.total)-Number(r.paid_amount)))}</td><td>{new Date(r.created_at).toLocaleString('id-ID')}</td></tr>)}
       {orders.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada order.</td></tr>}</tbody></table></div>
     </section>
+    {attentionOpen&&<Modal title="Pusat Peringatan Operasional" onClose={()=>setAttentionOpen(false)} className="dashboard-attention-modal">
+      <div className="attention-modal-summary">
+        <div><span>Order perlu diperiksa</span><b>{attention.uniqueCount}</b></div>
+        <div><span>Total peringatan</span><b>{attention.issueCount}</b></div>
+      </div>
+      <div className="attention-issue-list">
+        <button type="button" className={attention.overdueRows.length?'has-count':''} onClick={()=>navigate('/orders?status=overdue')}>
+          <span className="attention-issue-icon"><AlertTriangle size={18}/></span>
+          <span><b>Order Terlambat</b><small>Lewat estimasi selesai dan belum siap.</small></span>
+          <strong>{attention.overdueRows.length}</strong>
+        </button>
+        <button type="button" className={attention.unpaidRows.length?'has-count':''} onClick={()=>navigate('/receivables')}>
+          <span className="attention-issue-icon"><WalletCards size={18}/></span>
+          <span><b>Belum Lunas / Piutang</b><small>Masih ada sisa tagihan pelanggan.</small></span>
+          <strong>{attention.unpaidRows.length}</strong>
+        </button>
+        <button type="button" className={attention.readyLongRows.length?'has-count':''} onClick={()=>navigate('/orders?attention=ready_long')}>
+          <span className="attention-issue-icon"><PackageCheck size={18}/></span>
+          <span><b>Siap Diambil Lebih dari 24 Jam</b><small>Perlu follow-up pelanggan.</small></span>
+          <strong>{attention.readyLongRows.length}</strong>
+        </button>
+        <button type="button" className={attention.missingWorkerRows.length?'has-count':''} onClick={()=>navigate('/orders?assignment=missing_worker')}>
+          <span className="attention-issue-icon"><Users size={18}/></span>
+          <span><b>Yang Mengerjakan Belum Diisi</b><small>Penugasan produksi masih kosong.</small></span>
+          <strong>{attention.missingWorkerRows.length}</strong>
+        </button>
+        <button type="button" className={attention.missingCourierRows.length?'has-count':''} onClick={()=>navigate('/orders?assignment=missing_courier')}>
+          <span className="attention-issue-icon"><UserRoundX size={18}/></span>
+          <span><b>Kurir Belum Diisi</b><small>Penugasan kurir masih kosong.</small></span>
+          <strong>{attention.missingCourierRows.length}</strong>
+        </button>
+        <button type="button" className={attention.noDueRows.length?'has-count':''} onClick={()=>navigate('/orders?attention=no_due')}>
+          <span className="attention-issue-icon"><Clock3 size={18}/></span>
+          <span><b>Estimasi Selesai Belum Diisi</b><small>Order aktif tanpa tanggal estimasi.</small></span>
+          <strong>{attention.noDueRows.length}</strong>
+        </button>
+        {pendingDeletes>0&&<button type="button" className="has-count" onClick={()=>navigate('/delete-approvals')}>
+          <span className="attention-issue-icon"><ShieldAlert size={18}/></span>
+          <span><b>Permintaan Hapus Menunggu</b><small>Perlu persetujuan Owner.</small></span>
+          <strong>{pendingDeletes}</strong>
+        </button>}
+      </div>
+      <div className="attention-modal-actions">
+        <button type="button" className="secondary-button" onClick={()=>setAttentionOpen(false)}>Tutup</button>
+        <button type="button" className="primary-button" onClick={()=>{setAttentionOpen(false);void load()}}>Refresh Data</button>
+      </div>
+    </Modal>}
+
     {selectedCategory&&<Modal title={`Detail Kategori ${selectedCategory} — ${selectedPeriodLabel}`} onClose={()=>setSelectedCategory(null)} className="category-detail-modal" bodyClassName="category-detail-body">
       <div className="category-detail-summary">
         <div><span>Total Nilai</span><b>{formatIDR(selectedCategorySummary.total)}</b></div>
