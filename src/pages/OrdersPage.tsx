@@ -98,6 +98,15 @@ type AssignmentCorrectionHistory={
   changed_at:string
 }
 
+type OrderExtraCharge={
+  id:string
+  order_id:string
+  charge_name:string
+  amount:number
+  reason:string
+  created_at:string
+}
+
 export function OrdersPage() {
   const navigate=useNavigate()
   const [searchParams]=useSearchParams()
@@ -142,11 +151,17 @@ export function OrdersPage() {
   const [correctionCourierId,setCorrectionCourierId]=useState('')
   const [correctionReason,setCorrectionReason]=useState('')
   const [correctionBusy,setCorrectionBusy]=useState(false)
+  const [extraCharges,setExtraCharges]=useState<OrderExtraCharge[]>([])
+  const [extraChargeOrder,setExtraChargeOrder]=useState<OrderRow|null>(null)
+  const [extraChargeName,setExtraChargeName]=useState('Extra Deep Cleaning')
+  const [extraChargeAmount,setExtraChargeAmount]=useState('')
+  const [extraChargeReason,setExtraChargeReason]=useState('')
+  const [extraChargeBusy,setExtraChargeBusy]=useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     setMessage('')
-    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionTeamResult, commissionEmployeesResult, correctionHistoryResult] = await Promise.all([
+    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionTeamResult, commissionEmployeesResult, correctionHistoryResult, extraChargeResult] = await Promise.all([
       supabase
         .from('v100_orders_view')
         .select('*')
@@ -176,10 +191,11 @@ export function OrdersPage() {
         .from('v113097_order_commission_members')
         .select('order_id,commission_type,employee_id,is_primary,share_percent'),
       supabase.from('v109_users').select('id,full_name,login_id'),
-      supabase.from('v113_order_assignment_corrections').select('id,order_id,old_worker_id,new_worker_id,old_courier_id,new_courier_id,reason,changed_by,changed_at').order('changed_at',{ascending:false})
+      supabase.from('v113_order_assignment_corrections').select('id,order_id,old_worker_id,new_worker_id,old_courier_id,new_courier_id,reason,changed_by,changed_at').order('changed_at',{ascending:false}),
+      supabase.from('v113099_order_extra_charges').select('id,order_id,charge_name,amount,reason,created_at').order('created_at',{ascending:false})
     ])
 
-    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionTeamResult.error || commissionEmployeesResult.error || correctionHistoryResult.error
+    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionTeamResult.error || commissionEmployeesResult.error || correctionHistoryResult.error || extraChargeResult.error
     if (error) setMessage(error.message)
     else {
       const fetched=((ordersResult.data as OrderRow[])||[])
@@ -193,6 +209,7 @@ export function OrdersPage() {
       setCommissionTeamMembers((commissionTeamResult.data as OrderCommissionTeamMember[]) || [])
       setCommissionEmployeeNames((commissionEmployeesResult.data as CommissionEmployeeName[]) || [])
       setAssignmentCorrectionHistory((correctionHistoryResult.data as AssignmentCorrectionHistory[]) || [])
+      setExtraCharges((extraChargeResult.data as OrderExtraCharge[]) || [])
     }
     setLoading(false)
   }, [orderLimit])
@@ -347,6 +364,53 @@ export function OrdersPage() {
       setMessage(error instanceof Error?error.message:'Koreksi penanggung jawab gagal.')
     }finally{
       setCorrectionBusy(false)
+    }
+  }
+
+  const openExtraCharge=(row:OrderRow)=>{
+    setExtraChargeOrder(row)
+    setExtraChargeName('Extra Deep Cleaning')
+    setExtraChargeAmount('')
+    setExtraChargeReason('')
+    setMessage('')
+    setDetail(null)
+  }
+
+  const submitExtraCharge=async()=>{
+    if(!extraChargeOrder)return
+    const amount=Number(extraChargeAmount)
+    if(!extraChargeName.trim()){
+      setMessage('Nama biaya tambahan wajib diisi.')
+      return
+    }
+    if(!Number.isFinite(amount)||amount<=0){
+      setMessage('Nominal biaya tambahan harus lebih dari 0.')
+      return
+    }
+    if(extraChargeReason.trim().length<5){
+      setMessage('Alasan koreksi minimal 5 karakter.')
+      return
+    }
+
+    if(!window.confirm(`${extraChargeOrder.order_no}\nTambah ${extraChargeName.trim()} sebesar ${formatRupiah(amount)}?\nTotal dan sisa tagihan order akan berubah.`))return
+
+    setExtraChargeBusy(true)
+    setMessage('')
+    try{
+      const {error}=await supabase.rpc('v113099_add_order_extra_charge',{
+        p_order_id:extraChargeOrder.id,
+        p_charge_name:extraChargeName.trim(),
+        p_amount:amount,
+        p_reason:extraChargeReason.trim()
+      })
+      if(error)throw error
+      setExtraChargeOrder(null)
+      await load()
+      window.alert('Biaya tambahan berhasil dimasukkan ke nota. Total dan sisa tagihan sudah diperbarui.')
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Koreksi nota gagal.')
+    }finally{
+      setExtraChargeBusy(false)
     }
   }
 
@@ -764,6 +828,17 @@ export function OrdersPage() {
     return map
   },[assignmentCorrectionHistory])
 
+  const extraChargesByOrder=useMemo(()=>{
+    const map=new Map<string,OrderExtraCharge[]>()
+    for(const item of extraCharges){
+      const list=map.get(item.order_id)||[]
+      list.push(item)
+      map.set(item.order_id,list)
+    }
+    return map
+  },[extraCharges])
+
+
   const printReceipt=(row:OrderRow)=>{
     const printWindow=window.open('','_blank','width=520,height=850')
     if(!printWindow)return
@@ -776,6 +851,12 @@ export function OrdersPage() {
           : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
         return `<div class="service-row"><span>${item.service_name}</span><b>${formattedQty} ${item.unit}</b></div>`
       })
+      .join('')
+
+    const extraChargeRows=(extraChargesByOrder.get(row.id)||[])
+      .slice()
+      .reverse()
+      .map(item=>`<div class="service-row extra-charge-row"><span>+ ${item.charge_name}</span><b>${formatRupiah(item.amount)}</b></div>`)
       .join('')
 
     const closeFallback=`${window.location.origin}/orders?order=${encodeURIComponent(row.order_no)}`
@@ -923,6 +1004,7 @@ export function OrdersPage() {
         <div class="line"></div>
         <b>Layanan</b>
         ${serviceRows||'<p class="small">Rincian layanan tidak tersedia.</p>'}
+        ${extraChargeRows?`<div class="line"></div><b>Biaya Tambahan / Koreksi Nota</b>${extraChargeRows}`:''}
 
         <div class="line"></div>
         <div class="row"><span>Subtotal</span><span>${formatRupiah(row.subtotal)}</span></div>
@@ -1459,6 +1541,42 @@ export function OrdersPage() {
         </Modal>
       )}
 
+      {extraChargeOrder&&profile?.role==='owner'&&(
+        <Modal title={`Koreksi Nota / Biaya Tambahan — ${extraChargeOrder.order_no}`} onClose={()=>setExtraChargeOrder(null)}>
+          <div className="modal-form">
+            <div className="delete-request-warning">
+              <CircleDollarSign size={20}/>
+              <div>
+                <b>Koreksi nota khusus Owner</b>
+                <span>Gunakan untuk biaya tambahan setelah order dibuat, misalnya Extra Deep Cleaning. Total dan sisa tagihan akan diperbarui otomatis.</span>
+              </div>
+            </div>
+            <label>Nama Biaya Tambahan
+              <input value={extraChargeName} onChange={e=>setExtraChargeName(e.target.value)} placeholder="Contoh: Extra Deep Cleaning"/>
+            </label>
+            <label>Nominal
+              <input type="number" min="1" step="1000" value={extraChargeAmount} onChange={e=>setExtraChargeAmount(e.target.value)} placeholder="Contoh: 25000"/>
+            </label>
+            <label>Alasan Koreksi
+              <textarea rows={3} value={extraChargeReason} onChange={e=>setExtraChargeReason(e.target.value)} placeholder="Contoh: noda berat, pelanggan menyetujui deep cleaning tambahan"/>
+            </label>
+            <div className="order-total-box">
+              <div><span>Total Sekarang</span><b>{formatRupiah(extraChargeOrder.total)}</b></div>
+              <div><span>Tambahan</span><b>{formatRupiah(Number(extraChargeAmount)||0)}</b></div>
+              <div><span>Total Baru</span><b>{formatRupiah(extraChargeOrder.total+(Number(extraChargeAmount)||0))}</b></div>
+              <div><span>Sisa Baru</span><b>{formatRupiah(Math.max(0,extraChargeOrder.total+(Number(extraChargeAmount)||0)-extraChargeOrder.paid_amount))}</b></div>
+            </div>
+            {message&&<div className="error-box">{message}</div>}
+            <div className="form-actions">
+              <button type="button" className="secondary-button" onClick={()=>setExtraChargeOrder(null)}>Batal</button>
+              <button type="button" className="primary-button" disabled={extraChargeBusy} onClick={()=>void submitExtraCharge()}>
+                <Plus size={16}/>{extraChargeBusy?'Menyimpan...':'Tambahkan ke Nota'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {correctionOrder&&profile?.role==='owner'&&(
         <Modal title={`Koreksi Penanggung Jawab — ${correctionOrder.order_no}`} onClose={()=>setCorrectionOrder(null)}>
           <div className="modal-form">
@@ -1522,6 +1640,15 @@ export function OrdersPage() {
                   : <b>-</b>}
               </div>
             </div>
+            {(extraChargesByOrder.get(detail.id)||[]).length>0&&<div className="order-detail-extra-charges">
+              <span>Biaya Tambahan / Koreksi Nota</span>
+              <div>
+                {(extraChargesByOrder.get(detail.id)||[]).slice().reverse().map(item=><div className="order-extra-charge-line" key={item.id}>
+                  <span><b>{item.charge_name}</b><small>{item.reason} • {new Date(item.created_at).toLocaleString('id-ID')}</small></span>
+                  <b>{formatRupiah(item.amount)}</b>
+                </div>)}
+              </div>
+            </div>}
             <div className="order-detail-delivery">
               <span>Pengiriman Kurir</span>
               {deliveryProofByOrder.get(detail.id)
@@ -1579,6 +1706,13 @@ export function OrdersPage() {
                   </div>}
             </div>}
             <div className="form-actions order-detail-actions">
+              {profile?.role==='owner'&&detail.status!=='cancelled'&&<button
+                type="button"
+                className="secondary-button order-extra-charge-button"
+                onClick={()=>openExtraCharge(detail)}
+              >
+                <CircleDollarSign size={16}/>Koreksi Nota / Tambah Biaya
+              </button>}
               {profile?.role==='owner'&&detail.status!=='cancelled'&&<button
                 type="button"
                 className="secondary-button"

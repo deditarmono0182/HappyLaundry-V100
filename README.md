@@ -579,3 +579,13 @@ test
 - Klik tiap jenis peringatan langsung membuka daftar terkait.
 - Orders mendukung shortcut URL untuk assignment=missing_worker/missing_courier dan attention=ready_long/no_due.
 - Tidak ada SQL baru.
+
+
+## V113.0.99 — Order Extra Charge & Receipt Correction
+- Tambah tombol Owner di Detail Order: Koreksi Nota / Tambah Biaya.
+- Cocok untuk Extra Deep Cleaning atau biaya tambahan setelah order dibuat.
+- Biaya tambahan menambah subtotal, total, dan otomatis menghitung ulang status/sisa pembayaran.
+- Jika order sebelumnya Lunas lalu ada biaya tambahan, status dapat berubah menjadi DP sampai selisih dibayar.
+- Riwayat biaya tambahan tampil di Detail Order dan Cetak Ulang Nota.
+- Komisi berbasis total ikut tersinkron melalui trigger komisi yang sudah ada.
+- SQL baru: 064.

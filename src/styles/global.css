@@ -11272,3 +11272,49 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.99 — Order Extra Charge / Receipt Fix
+   ========================================================= */
+.order-detail-extra-charges{
+  align-items:flex-start!important;
+}
+.order-detail-extra-charges>div{
+  display:grid;
+  gap:7px;
+  width:min(100%,520px);
+}
+.order-extra-charge-line{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 10px;
+  border:1px solid #efd9aa;
+  border-radius:10px;
+  background:#fffaf0;
+}
+.order-extra-charge-line>span{
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+.order-extra-charge-line>span>b{
+  color:#7c570f;
+}
+.order-extra-charge-line small{
+  font-size:10px;
+  line-height:1.35;
+  color:#8e8062;
+}
+.order-extra-charge-line>b{
+  flex:0 0 auto;
+  color:#7c570f;
+  white-space:nowrap;
+}
+.order-extra-charge-button{
+  border-color:#e7c879!important;
+  background:#fffaf0!important;
+  color:#8c610e!important;
+}
