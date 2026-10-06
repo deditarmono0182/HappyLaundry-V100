@@ -835,12 +835,12 @@ export function PayrollPage(){
         <div><b>Rumus Gaji</b><span>Gaji Bersih = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil Kategori + Komisi Order − Kas Bon. Sisa kas bon otomatis tetap tersimpan untuk periode berikutnya.</span></div>
       </section>
 
-      <section className="panel data-panel">
-        <div className="payroll-table-head">
+      <section className="panel data-panel payroll-list-panel">
+        <div className="payroll-table-head payroll-list-fixed-head">
           <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Komisi per order otomatis terakumulasi sesuai karyawan produksi dan kurir yang dipilih saat transaksi.</small></div>
           <button className="primary-button" onClick={()=>void saveBonuses()} disabled={busy}><Save size={16}/>{busy?'Menyimpan...':'Simpan Bonus'}</button>
         </div>
-        <div className="table-wrap">
+        <div className="table-wrap payroll-list-scroll">
           <table className="payroll-table">
             <thead><tr>
               <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>

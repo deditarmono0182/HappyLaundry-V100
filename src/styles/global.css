@@ -11318,3 +11318,47 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   background:#fffaf0!important;
   color:#8c610e!important;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.101 — Sticky Payroll List
+   ========================================================= */
+.payroll-list-panel{
+  overflow:hidden;
+}
+.payroll-list-fixed-head{
+  position:relative;
+  z-index:4;
+  background:#fff;
+  margin-bottom:8px;
+}
+.payroll-list-scroll{
+  max-height:calc(100vh - 300px);
+  min-height:260px;
+  overflow:auto!important;
+  overscroll-behavior:contain;
+  border:1px solid #e1eaee;
+  border-radius:12px;
+}
+.payroll-list-scroll .payroll-table{
+  margin:0;
+}
+.payroll-list-scroll .payroll-table thead th{
+  position:sticky!important;
+  top:0;
+  z-index:5;
+  background:#f2f8f6!important;
+  box-shadow:0 1px 0 #dbe7e3;
+}
+@media(max-width:900px){
+  .payroll-list-scroll{
+    max-height:62vh;
+    min-height:320px;
+  }
+}
+@media(max-width:620px){
+  .payroll-list-scroll{
+    max-height:68vh;
+    min-height:360px;
+  }
+}

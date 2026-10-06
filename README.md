@@ -599,3 +599,11 @@ test
 - Proteksi payroll berbayar tetap dipertahankan, termasuk anggota team yang akan dihapus.
 - Riwayat koreksi team disimpan di tabel audit baru.
 - SQL baru: 065.
+
+
+## V113.0.101 — Sticky Payroll List
+- Bagian Daftar Gaji sekarang memakai area scroll sendiri.
+- Judul Daftar Gaji dan tombol Simpan Bonus tetap di atas saat daftar karyawan digulir.
+- Header kolom tabel gaji sticky agar nama kolom tetap terlihat saat scroll ke bawah.
+- Horizontal scroll tetap tersedia untuk tabel lebar.
+- Tidak ada SQL baru.
