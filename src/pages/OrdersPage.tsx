@@ -149,6 +149,10 @@ export function OrdersPage() {
   const [correctionOrder,setCorrectionOrder]=useState<OrderRow|null>(null)
   const [correctionWorkerId,setCorrectionWorkerId]=useState('')
   const [correctionCourierId,setCorrectionCourierId]=useState('')
+  const [correctionWorkerExtraIds,setCorrectionWorkerExtraIds]=useState<string[]>([])
+  const [correctionCourierExtraIds,setCorrectionCourierExtraIds]=useState<string[]>([])
+  const [correctionWorkerTeamOpen,setCorrectionWorkerTeamOpen]=useState(false)
+  const [correctionCourierTeamOpen,setCorrectionCourierTeamOpen]=useState(false)
   const [correctionReason,setCorrectionReason]=useState('')
   const [correctionBusy,setCorrectionBusy]=useState(false)
   const [extraCharges,setExtraCharges]=useState<OrderExtraCharge[]>([])
@@ -330,9 +334,26 @@ export function OrdersPage() {
 
   const openAssignmentCorrection=(row:OrderRow)=>{
     const current=commissionAssignments.find(item=>item.order_id===row.id)
+    const team=commissionTeamMembers.filter(item=>item.order_id===row.id)
+    const productionTeam=team.filter(item=>item.commission_type==='production')
+    const courierTeam=team.filter(item=>item.commission_type==='courier')
+
+    const workerPrimary=productionTeam.find(item=>item.is_primary)?.employee_id
+      ||current?.worker_id
+      ||productionTeam[0]?.employee_id
+      ||''
+    const courierPrimary=courierTeam.find(item=>item.is_primary)?.employee_id
+      ||current?.courier_id
+      ||courierTeam[0]?.employee_id
+      ||''
+
     setCorrectionOrder(row)
-    setCorrectionWorkerId(current?.worker_id||'')
-    setCorrectionCourierId(current?.courier_id||'')
+    setCorrectionWorkerId(workerPrimary)
+    setCorrectionCourierId(courierPrimary)
+    setCorrectionWorkerExtraIds(productionTeam.map(item=>item.employee_id).filter(id=>id!==workerPrimary))
+    setCorrectionCourierExtraIds(courierTeam.map(item=>item.employee_id).filter(id=>id!==courierPrimary))
+    setCorrectionWorkerTeamOpen(productionTeam.length>1)
+    setCorrectionCourierTeamOpen(courierTeam.length>1)
     setCorrectionReason('')
     setMessage('')
     setDetail(null)
@@ -344,26 +365,46 @@ export function OrdersPage() {
       setMessage('Alasan koreksi minimal 5 karakter.')
       return
     }
-    if(!window.confirm(`${correctionOrder.order_no}\nSimpan koreksi Dikerjakan oleh / Kurir? Komisi order akan dihitung ulang.`))return
+
+    const productionIds=correctionWorkerId
+      ?[correctionWorkerId,...correctionWorkerExtraIds.filter(id=>id!==correctionWorkerId)]
+      :[]
+    const courierIds=correctionCourierId
+      ?[correctionCourierId,...correctionCourierExtraIds.filter(id=>id!==correctionCourierId)]
+      :[]
+
+    if(!window.confirm(`${correctionOrder.order_no}\nSimpan koreksi Team Pengerjaan / Team Kurir? Komisi order akan dihitung ulang dan dibagi rata jika anggota lebih dari satu.`))return
 
     setCorrectionBusy(true)
     setMessage('')
     try{
-      const {error}=await supabase.rpc('v113_correct_order_assignment',{
+      const {error}=await supabase.rpc('v113100_owner_correct_order_team',{
         p_order_id:correctionOrder.id,
-        p_worker_id:correctionWorkerId||null,
-        p_courier_id:correctionCourierId||null,
+        p_production_ids:productionIds,
+        p_courier_ids:courierIds,
         p_reason:correctionReason.trim()
       })
       if(error)throw error
       setCorrectionOrder(null)
       setCorrectionReason('')
+      setCorrectionWorkerExtraIds([])
+      setCorrectionCourierExtraIds([])
+      setCorrectionWorkerTeamOpen(false)
+      setCorrectionCourierTeamOpen(false)
       await load()
-      window.alert(`${correctionOrder.order_no} berhasil dikoreksi. Komisi dan nota sekarang memakai penanggung jawab yang baru.`)
+      window.alert(`${correctionOrder.order_no} berhasil dikoreksi. Team, komisi, dan nota sekarang memakai penanggung jawab yang baru.`)
     }catch(error){
-      setMessage(error instanceof Error?error.message:'Koreksi penanggung jawab gagal.')
+      setMessage(error instanceof Error?error.message:'Koreksi team penanggung jawab gagal.')
     }finally{
       setCorrectionBusy(false)
+    }
+  }
+
+  const toggleCorrectionTeamMember=(kind:'worker'|'courier',employeeId:string,checked:boolean)=>{
+    if(kind==='worker'){
+      setCorrectionWorkerExtraIds(current=>checked?Array.from(new Set([...current,employeeId])):current.filter(id=>id!==employeeId))
+    }else{
+      setCorrectionCourierExtraIds(current=>checked?Array.from(new Set([...current,employeeId])):current.filter(id=>id!==employeeId))
     }
   }
 
@@ -1584,20 +1625,81 @@ export function OrdersPage() {
               <AlertTriangle size={20}/>
               <div>
                 <b>Koreksi khusus Owner</b>
-                <span>Nama pada nota dan sumber komisi akan dipindahkan ke karyawan/kurir yang benar. Riwayat koreksi disimpan.</span>
+                <span>Bisa koreksi perorangan atau menambah Team Pengerjaan / Team Kurir. Komisi dibagi rata untuk anggota team dan riwayat koreksi disimpan.</span>
               </div>
             </div>
             <label>Dikerjakan oleh
-              <select value={correctionWorkerId} onChange={e=>setCorrectionWorkerId(e.target.value)}>
+              <select value={correctionWorkerId} onChange={e=>{
+                setCorrectionWorkerId(e.target.value)
+                setCorrectionWorkerExtraIds(current=>current.filter(id=>id!==e.target.value))
+                if(!e.target.value){
+                  setCorrectionWorkerExtraIds([])
+                  setCorrectionWorkerTeamOpen(false)
+                }
+              }}>
                 <option value="">- Tidak ada -</option>
                 {commissionEmployeeNames.map(employee=><option key={`worker-${employee.id}`} value={employee.id}>{employee.full_name} ({employee.login_id})</option>)}
               </select>
+              {correctionWorkerId&&<button type="button" className="commission-team-toggle" onClick={()=>setCorrectionWorkerTeamOpen(value=>!value)}>
+                <Plus size={14}/>
+                {correctionWorkerTeamOpen
+                  ?'Tutup Team Pengerjaan'
+                  :correctionWorkerExtraIds.length
+                    ?`Team Pengerjaan (${correctionWorkerExtraIds.length+1})`
+                    :'Tambah Anggota / Kerja Team'}
+              </button>}
+              {correctionWorkerId&&correctionWorkerTeamOpen&&<div className="commission-team-picker">
+                <b>Anggota Pengerjaan Tambahan</b>
+                <span>Komisi produksi akan dibagi rata kepada semua anggota team.</span>
+                {commissionEmployeeNames.filter(employee=>employee.id!==correctionWorkerId).map(employee=><label key={`correction-worker-team-${employee.id}`}>
+                  <input
+                    type="checkbox"
+                    checked={correctionWorkerExtraIds.includes(employee.id)}
+                    onChange={e=>toggleCorrectionTeamMember('worker',employee.id,e.target.checked)}
+                  />
+                  <span>{employee.full_name}<small>{employee.login_id}</small></span>
+                </label>)}
+              </div>}
+              {correctionWorkerId&&correctionWorkerExtraIds.length>0&&<small>
+                Total anggota pengerjaan: {correctionWorkerExtraIds.length+1} orang • pembagian komisi rata
+              </small>}
             </label>
+
             <label>Kurir
-              <select value={correctionCourierId} onChange={e=>setCorrectionCourierId(e.target.value)}>
+              <select value={correctionCourierId} onChange={e=>{
+                setCorrectionCourierId(e.target.value)
+                setCorrectionCourierExtraIds(current=>current.filter(id=>id!==e.target.value))
+                if(!e.target.value){
+                  setCorrectionCourierExtraIds([])
+                  setCorrectionCourierTeamOpen(false)
+                }
+              }}>
                 <option value="">- Tidak ada -</option>
                 {commissionEmployeeNames.map(employee=><option key={`courier-${employee.id}`} value={employee.id}>{employee.full_name} ({employee.login_id})</option>)}
               </select>
+              {correctionCourierId&&<button type="button" className="commission-team-toggle" onClick={()=>setCorrectionCourierTeamOpen(value=>!value)}>
+                <Plus size={14}/>
+                {correctionCourierTeamOpen
+                  ?'Tutup Team Kurir'
+                  :correctionCourierExtraIds.length
+                    ?`Team Kurir (${correctionCourierExtraIds.length+1})`
+                    :'Tambah Anggota / Team Kurir'}
+              </button>}
+              {correctionCourierId&&correctionCourierTeamOpen&&<div className="commission-team-picker">
+                <b>Kurir Tambahan</b>
+                <span>Komisi kurir akan dibagi rata kepada semua anggota team kurir.</span>
+                {commissionEmployeeNames.filter(employee=>employee.id!==correctionCourierId).map(employee=><label key={`correction-courier-team-${employee.id}`}>
+                  <input
+                    type="checkbox"
+                    checked={correctionCourierExtraIds.includes(employee.id)}
+                    onChange={e=>toggleCorrectionTeamMember('courier',employee.id,e.target.checked)}
+                  />
+                  <span>{employee.full_name}<small>{employee.login_id}</small></span>
+                </label>)}
+              </div>}
+              {correctionCourierId&&correctionCourierExtraIds.length>0&&<small>
+                Total anggota kurir: {correctionCourierExtraIds.length+1} orang • pembagian komisi rata
+              </small>}
             </label>
             <label>Alasan Koreksi
               <textarea rows={3} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Contoh: salah pilih nama saat input order"/>

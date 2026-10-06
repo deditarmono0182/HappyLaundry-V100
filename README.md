@@ -589,3 +589,13 @@ test
 - Riwayat biaya tambahan tampil di Detail Order dan Cetak Ulang Nota.
 - Komisi berbasis total ikut tersinkron melalui trigger komisi yang sudah ada.
 - SQL baru: 064.
+
+
+## V113.0.100 — Team Assignment Correction
+- Koreksi Penanggung Jawab di halaman Order sekarang mendukung Team Pengerjaan dan Team Kurir.
+- Tetap bisa koreksi perorangan seperti sebelumnya.
+- Bisa menambah/menghapus anggota team saat koreksi order.
+- Komisi team dibagi rata otomatis.
+- Proteksi payroll berbayar tetap dipertahankan, termasuk anggota team yang akan dihapus.
+- Riwayat koreksi team disimpan di tabel audit baru.
+- SQL baru: 065.
