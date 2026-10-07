@@ -607,3 +607,12 @@ test
 - Header kolom tabel gaji sticky agar nama kolom tetap terlihat saat scroll ke bawah.
 - Horizontal scroll tetap tersedia untuk tabel lebar.
 - Tidak ada SQL baru.
+
+
+## V113.0.102 — Finance & Reports Hub
+- Sidebar Owner disederhanakan dengan satu menu: Keuangan & Laporan.
+- Menu Owner yang digabung: Keuangan, Laba Rugi, Target Bisnis, Piutang, Kas Harian, Closing Harian, dan Laporan Owner.
+- Semua route/halaman lama tetap dipertahankan agar fitur dan link lama tidak rusak.
+- Hub juga menyediakan akses cepat ke Detail Pemasukan, Detail Pengeluaran, dan Absensi & Gaji.
+- Menu non-Owner tetap mengikuti permission lama.
+- Tidak ada SQL baru.

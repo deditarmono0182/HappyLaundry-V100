@@ -22,6 +22,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
   { to: '/inventory', label: 'Stok Bahan', icon: Package, roles: ['owner', 'staff'] },
   { to: '/suppliers', label: 'Supplier', icon: Truck, roles: ['owner', 'staff'] },
   { to: '/payments', label: 'Pembayaran', icon: CreditCard, permission: 'payments' },
+  { to: '/finance-reports', label: 'Keuangan & Laporan', icon: BarChart3, roles: ['owner'] },
   { to: '/cash', label: 'Kas Harian', icon: WalletCards, roles: ['owner', 'cashier'] },
   { to: '/daily-closing', label: 'Closing Harian', icon: CalendarCheck2, permission: 'cash' },
   { to: '/finance', label: 'Keuangan', icon: CircleDollarSign, permission: 'finance' },
@@ -312,11 +313,13 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.70 Category Order Value Fix</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.102 Finance & Reports Hub</span></div>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
           {items.filter(item => {
+            const ownerFinanceRoutes=new Set(['/cash','/daily-closing','/finance','/profit-target','/receivables','/reports','/profit-loss'])
+            if(isOwner&&ownerFinanceRoutes.has(item.to))return false
             const allowed=item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)
             if(!allowed)return false
             if(role==='employee'&&attendanceGate?.attendance_required&&(!attendanceGate.attended_today||attendanceGate.checked_out))return item.to==='/attendance'

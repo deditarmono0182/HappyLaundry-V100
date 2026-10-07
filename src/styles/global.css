@@ -11362,3 +11362,102 @@ html[data-density="ultra"] .main-content .expense-delete-request{
     min-height:360px;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.102 — Finance & Reports Hub
+   ========================================================= */
+.finance-reports-hub{
+  display:grid;
+  gap:16px;
+}
+.finance-hub-intro{
+  padding:14px 16px;
+  border:1px solid #d8e8ef;
+  border-radius:16px;
+  background:#f7fbfd;
+}
+.finance-hub-intro>div{
+  display:grid;
+  gap:3px;
+}
+.finance-hub-intro b{
+  color:#174b5a;
+  font-size:14px;
+}
+.finance-hub-intro span{
+  color:#67808a;
+  font-size:12px;
+}
+.finance-hub-section{
+  display:grid;
+  gap:10px;
+}
+.finance-hub-section h2{
+  margin:0;
+  color:#174b5a;
+  font-size:15px;
+}
+.finance-hub-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.finance-hub-card{
+  width:100%;
+  min-height:108px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  padding:15px;
+  border:1px solid #d8e7ed;
+  border-radius:16px;
+  background:#fff;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+  box-shadow:0 8px 20px rgba(35,78,94,.04);
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.finance-hub-card:hover{
+  transform:translateY(-1px);
+  border-color:#9ccbea;
+  box-shadow:0 10px 24px rgba(35,78,94,.08);
+}
+.finance-hub-icon{
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  background:#eaf6ff;
+  color:#1976d2;
+}
+.finance-hub-copy{
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+.finance-hub-copy b{
+  color:#174b5a;
+  font-size:13px;
+}
+.finance-hub-copy small{
+  color:#718993;
+  font-size:11px;
+  line-height:1.45;
+}
+.finance-hub-arrow{
+  color:#2884c7;
+  font-size:19px;
+  font-weight:800;
+}
+@media(max-width:1050px){
+  .finance-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .finance-hub-grid{grid-template-columns:1fr}
+  .finance-hub-card{min-height:92px;padding:12px}
+}
