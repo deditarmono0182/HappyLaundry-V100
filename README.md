@@ -637,3 +637,12 @@ test
 - Menu laporan tetap berada di halaman yang sama dengan kartu warna berdasarkan fungsi.
 - Dashboard utama diberi aksen pastel pada kartu ringkasan tanpa mengubah fungsi.
 - Tidak ada SQL baru.
+
+
+## V113.0.105 — Global Color UI Consistency
+- Warna pastel profesional diterapkan ke seluruh aplikasi utama, bukan hanya Keuangan & Laporan.
+- Dashboard, Kasir, Order, Produksi, Pelanggan, Kas Harian, Pembayaran, Piutang, Payroll, Laba Rugi, Laporan, dan kartu pengaturan dibuat lebih konsisten.
+- Kartu diperkecil, jarak antar elemen dirapatkan, font judul/angka dibuat lebih proporsional dan tidak terlalu tebal.
+- Tabel dibuat lebih compact dengan header yang lebih ringan dan row hover lembut.
+- Warna status mengikuti fungsi: biru informasi, hijau selesai/lunas, amber proses/peringatan, merah masalah/piutang, ungu proses/komisi.
+- Tidak ada SQL baru dan tidak ada perubahan struktur database.
