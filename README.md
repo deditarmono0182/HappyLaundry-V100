@@ -628,3 +628,12 @@ test
 - Login Karyawan memverifikasi sesi dan profil sebelum membuka aplikasi untuk mengurangi kasus login berhasil tetapi layar/profile kosong.
 - Pesan error Owner tidak lagi selalu dianggap password salah ketika masalah sebenarnya koneksi/server.
 - Tidak ada SQL baru.
+
+
+## V113.0.104 — Colorful Professional Finance Dashboard
+- Tampilan mengikuti mockup colorful profesional: biru tetap menjadi identitas utama HappyLaundry, ditambah aksen hijau, amber, merah lembut, ungu, cyan.
+- Keuangan & Laporan sekarang menampilkan KPI berwarna, Grafik Keuangan & Order 7 Hari, Status Order, Status Pembayaran, dan Metode Pembayaran.
+- Semua angka berasal dari data Supabase yang sudah digunakan aplikasi, bukan data contoh.
+- Menu laporan tetap berada di halaman yang sama dengan kartu warna berdasarkan fungsi.
+- Dashboard utama diberi aksen pastel pada kartu ringkasan tanpa mengubah fungsi.
+- Tidak ada SQL baru.

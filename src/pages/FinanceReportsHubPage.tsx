@@ -1,70 +1,287 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  AlertTriangle, BarChart3, CalendarCheck2, CircleDollarSign, FileText,
-  Landmark, ReceiptText, Target, TrendingUp, WalletCards
+  AlertTriangle, BarChart3, Banknote, CalendarCheck2, CheckCircle2, CircleDollarSign,
+  Clock3, FileText, Landmark, PackageCheck, ReceiptText, Smartphone, Target,
+  TrendingUp, WalletCards, WashingMachine
 } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
+import { formatIDR } from '../lib/format'
+import { supabase } from '../lib/supabase'
+import { addBusinessDays, businessDateKey, businessDateLabel } from '../lib/businessTime'
+import type { OrderRow } from '../types/order'
+
+type PaymentRow={
+  amount:number
+  method:'cash'|'qris'|'transfer'|'other'
+  created_at:string
+}
+
+type CashRow={
+  amount:number
+  direction:'in'|'out'
+  created_at:string
+}
 
 const sections=[
   {
     title:'Ringkasan & Analisis',
     items:[
-      {to:'/finance',title:'Keuangan',description:'Pendapatan, pengeluaran, biaya operasional, dan ringkasan keuangan.',icon:CircleDollarSign},
-      {to:'/profit-loss',title:'Laba Rugi',description:'Lihat laba bersih operasional, cadangan, margin, dan detail sumber.',icon:TrendingUp},
-      {to:'/profit-target',title:'Target Bisnis',description:'Pantau target omzet, laba, jumlah order, dan progres bulan berjalan.',icon:Target},
-      {to:'/reports',title:'Laporan Owner',description:'Ringkasan laporan bisnis dan export data Owner.',icon:BarChart3}
+      {to:'/finance',title:'Keuangan',description:'Pendapatan, pengeluaran, biaya operasional, dan ringkasan keuangan.',icon:CircleDollarSign,tone:'blue'},
+      {to:'/profit-loss',title:'Laba Rugi',description:'Lihat laba bersih operasional, cadangan, margin, dan detail sumber.',icon:TrendingUp,tone:'green'},
+      {to:'/profit-target',title:'Target Bisnis',description:'Pantau target omzet, laba, jumlah order, dan progres bulan berjalan.',icon:Target,tone:'cyan'},
+      {to:'/reports',title:'Laporan Owner',description:'Ringkasan laporan bisnis dan export data Owner.',icon:BarChart3,tone:'slate'}
     ]
   },
   {
     title:'Kas & Tagihan',
     items:[
-      {to:'/receivables',title:'Piutang',description:'Daftar order belum lunas dan sisa tagihan pelanggan.',icon:AlertTriangle},
-      {to:'/cash',title:'Kas Harian',description:'Catat pemasukan dan pengeluaran kas operasional harian.',icon:WalletCards},
-      {to:'/daily-closing',title:'Closing Harian',description:'Cocokkan kas sistem dengan uang fisik dan simpan snapshot akhir hari.',icon:CalendarCheck2}
+      {to:'/receivables',title:'Piutang',description:'Daftar order belum lunas dan sisa tagihan pelanggan.',icon:AlertTriangle,tone:'amber'},
+      {to:'/cash',title:'Kas Harian',description:'Catat pemasukan dan pengeluaran kas operasional harian.',icon:WalletCards,tone:'teal'},
+      {to:'/daily-closing',title:'Closing Harian',description:'Cocokkan kas sistem dengan uang fisik dan simpan snapshot akhir hari.',icon:CalendarCheck2,tone:'purple'}
     ]
   },
   {
     title:'Akses Cepat',
     items:[
-      {to:'/finance/income',title:'Detail Pemasukan',description:'Buka rincian sumber pemasukan periode keuangan.',icon:Landmark},
-      {to:'/finance/expenses',title:'Detail Pengeluaran',description:'Buka rincian pengeluaran dan bukti transaksi.',icon:ReceiptText},
-      {to:'/payroll',title:'Absensi & Gaji',description:'Akses payroll, komisi, bonus, kas bon, dan pembayaran gaji.',icon:FileText}
+      {to:'/finance/income',title:'Detail Pemasukan',description:'Buka rincian sumber pemasukan periode keuangan.',icon:Landmark,tone:'pink'},
+      {to:'/finance/expenses',title:'Detail Pengeluaran',description:'Buka rincian pengeluaran dan bukti transaksi.',icon:ReceiptText,tone:'red'},
+      {to:'/payroll',title:'Payroll / Komisi',description:'Akses payroll, komisi, bonus, kas bon, dan pembayaran gaji.',icon:FileText,tone:'violet'}
     ]
   }
 ] as const
 
 export function FinanceReportsHubPage(){
   const navigate=useNavigate()
+  const [orders,setOrders]=useState<OrderRow[]>([])
+  const [payments,setPayments]=useState<PaymentRow[]>([])
+  const [cash,setCash]=useState<CashRow[]>([])
+  const [message,setMessage]=useState('')
 
-  return <div className="finance-reports-hub">
+  useEffect(()=>{
+    let alive=true
+    const load=async()=>{
+      const [orderRes,paymentRes,cashRes]=await Promise.all([
+        supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
+        supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
+        supabase.from('v100_cash_entries').select('amount,direction,created_at').order('created_at',{ascending:false})
+      ])
+      if(!alive)return
+      const error=orderRes.error||paymentRes.error||cashRes.error
+      if(error){
+        setMessage(error.message)
+        return
+      }
+      setOrders((orderRes.data as OrderRow[])||[])
+      setPayments((paymentRes.data as PaymentRow[])||[])
+      setCash((cashRes.data as CashRow[])||[])
+      setMessage('')
+    }
+    void load()
+    const onFocus=()=>void load()
+    window.addEventListener('focus',onFocus)
+    return()=>{alive=false;window.removeEventListener('focus',onFocus)}
+  },[])
+
+  const todayKey=businessDateKey(new Date())
+  const todayOrders=useMemo(()=>orders.filter(row=>row.status!=='cancelled'&&businessDateKey(row.created_at)===todayKey),[orders,todayKey])
+  const todayPayments=useMemo(()=>payments.filter(row=>businessDateKey(row.created_at)===todayKey),[payments,todayKey])
+  const todayCash=useMemo(()=>cash.filter(row=>businessDateKey(row.created_at)===todayKey),[cash,todayKey])
+
+  const omzetToday=todayOrders.reduce((sum,row)=>sum+Number(row.total||0),0)
+  const cashInToday=todayPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
+  const expenseToday=todayCash.filter(row=>row.direction==='out').reduce((sum,row)=>sum+Number(row.amount||0),0)
+  const receivable=orders.filter(row=>row.status!=='cancelled').reduce((sum,row)=>sum+Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),0)
+  const profitToday=omzetToday-expenseToday
+
+  const paymentMethodSummary=useMemo(()=>{
+    const total=todayPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
+    return [
+      {key:'cash',label:'Tunai',icon:Banknote,amount:todayPayments.filter(x=>x.method==='cash').reduce((s,x)=>s+Number(x.amount||0),0)},
+      {key:'qris',label:'QRIS',icon:Smartphone,amount:todayPayments.filter(x=>x.method==='qris').reduce((s,x)=>s+Number(x.amount||0),0)},
+      {key:'transfer',label:'Transfer',icon:Landmark,amount:todayPayments.filter(x=>x.method==='transfer').reduce((s,x)=>s+Number(x.amount||0),0)}
+    ].map(row=>({...row,percentage:total>0?Math.round(row.amount/total*100):0}))
+  },[todayPayments])
+
+  const statusRows=useMemo(()=>[
+    {key:'received',label:'Diterima',icon:PackageCheck,count:orders.filter(x=>x.status==='received').length},
+    {key:'washing',label:'Dicuci',icon:WashingMachine,count:orders.filter(x=>x.status==='washing').length},
+    {key:'drying',label:'Dikeringkan',icon:Clock3,count:orders.filter(x=>x.status==='drying').length},
+    {key:'ironing',label:'Disetrika',icon:TrendingUp,count:orders.filter(x=>x.status==='ironing').length},
+    {key:'packing',label:'Packing',icon:PackageCheck,count:orders.filter(x=>x.status==='packing').length},
+    {key:'ready',label:'Siap Diambil',icon:WalletCards,count:orders.filter(x=>x.status==='ready').length},
+    {key:'completed',label:'Selesai Hari Ini',icon:CheckCircle2,count:todayOrders.filter(x=>x.status==='completed').length}
+  ],[orders,todayOrders])
+
+  const statusTotal=Math.max(1,statusRows.reduce((sum,row)=>sum+row.count,0))
+
+  const paymentStatusRows=useMemo(()=>{
+    const active=orders.filter(row=>row.status!=='cancelled')
+    const unpaid=active.filter(row=>Number(row.paid_amount||0)<=0).length
+    const partial=active.filter(row=>Number(row.paid_amount||0)>0&&Number(row.paid_amount||0)<Number(row.total||0)).length
+    const paid=active.filter(row=>Number(row.total||0)>0&&Number(row.paid_amount||0)>=Number(row.total||0)).length
+    const total=Math.max(1,unpaid+partial+paid)
+    return [
+      {key:'unpaid',label:'Belum Bayar',count:unpaid,percentage:Math.round(unpaid/total*100)},
+      {key:'partial',label:'DP / Sebagian',count:partial,percentage:Math.round(partial/total*100)},
+      {key:'paid',label:'Lunas',count:paid,percentage:Math.round(paid/total*100)}
+    ]
+  },[orders])
+
+  const chart=useMemo(()=>{
+    return Array.from({length:7},(_,index)=>{
+      const key=addBusinessDays(todayKey,-(6-index))
+      const dayOrders=orders.filter(row=>row.status!=='cancelled'&&businessDateKey(row.created_at)===key)
+      const dayPayments=payments.filter(row=>businessDateKey(row.created_at)===key)
+      return{
+        key,
+        label:businessDateLabel(`${key}T12:00:00+07:00`,{weekday:'short'}),
+        omzet:dayOrders.reduce((sum,row)=>sum+Number(row.total||0),0),
+        cashIn:dayPayments.reduce((sum,row)=>sum+Number(row.amount||0),0),
+        orders:dayOrders.length
+      }
+    })
+  },[orders,payments,todayKey])
+
+  const maxChart=Math.max(1,...chart.flatMap(row=>[row.omzet,row.cashIn]))
+  const maxOrders=Math.max(1,...chart.map(row=>row.orders))
+  const chartWidth=760,chartHeight=255,padX=38,padY=28
+  const innerW=chartWidth-padX*2,innerH=chartHeight-padY*2
+  const groupW=innerW/7
+  const moneyY=(value:number)=>padY+innerH-(value/maxChart)*innerH
+  const orderPoints=chart.map((row,index)=>({
+    x:padX+groupW*(index+.5),
+    y:padY+innerH-(row.orders/maxOrders)*innerH
+  }))
+
+  return <div className="finance-reports-hub colorful-finance-hub">
     <PageHeader
       eyebrow="KONTROL OWNER"
       title="Keuangan & Laporan"
-      description="Semua kontrol keuangan dan laporan Owner dalam satu tempat."
+      description="Pantau kondisi keuangan, transaksi, status order, dan laporan bisnis dalam satu tempat."
     />
 
-    <section className="finance-hub-intro">
-      <div>
-        <b>Satu pusat untuk kontrol bisnis</b>
-        <span>Menu di sidebar disederhanakan. Semua halaman lama tetap ada dan datanya tidak berubah.</span>
+    {message&&<div className="error-box">{message}</div>}
+
+    <section className="finance-live-kpis">
+      <button type="button" className="finance-live-kpi tone-blue" onClick={()=>navigate('/finance')}>
+        <span className="finance-kpi-icon"><BarChart3 size={22}/></span>
+        <span><small>Omzet / Barang Masuk</small><b>{formatIDR(omzetToday)}</b><em>{todayOrders.length} order hari ini</em></span>
+      </button>
+      <button type="button" className="finance-live-kpi tone-green" onClick={()=>navigate('/finance/income')}>
+        <span className="finance-kpi-icon"><WalletCards size={22}/></span>
+        <span><small>Kas Masuk</small><b>{formatIDR(cashInToday)}</b><em>Pembayaran diterima hari ini</em></span>
+      </button>
+      <button type="button" className="finance-live-kpi tone-red" onClick={()=>navigate('/finance/expenses')}>
+        <span className="finance-kpi-icon"><ReceiptText size={22}/></span>
+        <span><small>Pengeluaran</small><b>{formatIDR(expenseToday)}</b><em>Kas keluar hari ini</em></span>
+      </button>
+      <button type="button" className="finance-live-kpi tone-purple" onClick={()=>navigate('/profit-loss')}>
+        <span className="finance-kpi-icon"><TrendingUp size={22}/></span>
+        <span><small>Ringkasan Laba</small><b>{formatIDR(profitToday)}</b><em>Sebelum perhitungan cadangan</em></span>
+      </button>
+      <button type="button" className="finance-live-kpi tone-amber" onClick={()=>navigate('/receivables')}>
+        <span className="finance-kpi-icon"><Clock3 size={22}/></span>
+        <span><small>Piutang Aktif</small><b>{formatIDR(receivable)}</b><em>Klik untuk lihat tagihan</em></span>
+      </button>
+    </section>
+
+    <section className="finance-analytics-grid">
+      <article className="panel finance-main-chart-card">
+        <div className="finance-analytics-heading">
+          <div><h3><BarChart3 size={19}/> Grafik Keuangan & Order</h3><p>Perbandingan omzet, kas masuk, dan jumlah order selama 7 hari terakhir.</p></div>
+          <button type="button" className="finance-period-pill">7 Hari</button>
+        </div>
+        <div className="finance-chart-wrap">
+          <div className="finance-chart-legend">
+            <span className="legend-omzet">Omzet / Barang Masuk</span>
+            <span className="legend-cash">Kas Masuk</span>
+            <span className="legend-orders">Jumlah Order</span>
+          </div>
+          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img" aria-label="Grafik keuangan dan order 7 hari">
+            {[0,1,2,3,4].map(level=>{
+              const y=padY+(innerH/4)*level
+              return <line key={level} x1={padX} x2={chartWidth-padX} y1={y} y2={y} className="finance-grid-line"/>
+            })}
+            {chart.map((row,index)=>{
+              const center=padX+groupW*(index+.5)
+              const y1=moneyY(row.omzet),y2=moneyY(row.cashIn)
+              return <g key={row.key}>
+                <rect x={center-19} y={y1} width="15" height={Math.max(2,padY+innerH-y1)} rx="4" className="finance-bar-omzet"/>
+                <rect x={center+4} y={y2} width="15" height={Math.max(2,padY+innerH-y2)} rx="4" className="finance-bar-cash"/>
+              </g>
+            })}
+            <polyline points={orderPoints.map(p=>`${p.x},${p.y}`).join(' ')} fill="none" className="finance-order-line"/>
+            {orderPoints.map((point,index)=><circle key={chart[index].key} cx={point.x} cy={point.y} r="4.5" className="finance-order-point"/>)}
+          </svg>
+          <div className="finance-chart-labels">
+            {chart.map(row=><span key={row.key}><b>{row.label}</b><small>{row.orders} order</small></span>)}
+          </div>
+        </div>
+      </article>
+
+      <article className="panel finance-status-card">
+        <div className="finance-analytics-heading"><div><h3>Status Order</h3><p>Kondisi order aktif saat ini.</p></div></div>
+        <div className="finance-status-list">
+          {statusRows.map(row=>{
+            const Icon=row.icon
+            const percentage=Math.round(row.count/statusTotal*100)
+            return <div className={`finance-status-row status-${row.key}`} key={row.key}>
+              <span className="finance-status-icon"><Icon size={15}/></span>
+              <span className="finance-status-copy"><b>{row.label}</b><span><i style={{width:`${percentage}%`}}/></span></span>
+              <strong>{row.count}</strong>
+              <small>{percentage}%</small>
+            </div>
+          })}
+        </div>
+      </article>
+
+      <div className="finance-side-stack">
+        <article className="panel finance-payment-status-card">
+          <div className="finance-analytics-heading"><div><h3>Status Pembayaran</h3></div><button type="button" onClick={()=>navigate('/receivables')}>Lihat Detail →</button></div>
+          <div className="finance-payment-status-list">
+            {paymentStatusRows.map(row=><div className={`finance-payment-status payment-${row.key}`} key={row.key}>
+              <div><b>{row.label}</b><strong>{row.count} order</strong></div>
+              <span><i style={{width:`${row.percentage}%`}}/></span>
+              <small>{row.percentage}%</small>
+            </div>)}
+          </div>
+        </article>
+
+        <article className="panel finance-payment-method-card">
+          <div className="finance-analytics-heading"><div><h3>Metode Pembayaran</h3></div><button type="button" onClick={()=>navigate('/finance/income')}>Lihat Detail →</button></div>
+          <div className="finance-payment-method-list">
+            {paymentMethodSummary.map(row=>{
+              const Icon=row.icon
+              return <div className={`finance-method-row method-${row.key}`} key={row.key}>
+                <span className="finance-method-icon"><Icon size={16}/></span>
+                <span><b>{row.label}</b><small>{formatIDR(row.amount)}</small></span>
+                <span className="finance-method-bar"><i style={{width:`${row.percentage}%`}}/></span>
+                <strong>{row.percentage}%</strong>
+              </div>
+            })}
+          </div>
+        </article>
       </div>
     </section>
 
-    {sections.map(section=><section className="finance-hub-section" key={section.title}>
-      <h2>{section.title}</h2>
-      <div className="finance-hub-grid">
-        {section.items.map(item=>{
-          const Icon=item.icon
-          return <button type="button" className="finance-hub-card" key={item.to} onClick={()=>navigate(item.to)}>
-            <span className="finance-hub-icon"><Icon size={23}/></span>
-            <span className="finance-hub-copy">
-              <b>{item.title}</b>
-              <small>{item.description}</small>
-            </span>
-            <span className="finance-hub-arrow">→</span>
-          </button>
-        })}
+    <section className="finance-hub-menu-panel">
+      <div className="finance-hub-menu-heading">
+        <div><h3>Keuangan & Laporan</h3><p>Semua laporan dan kontrol keuangan tetap tersedia di sini.</p></div>
       </div>
-    </section>)}
+      {sections.map(section=><div className="finance-hub-section" key={section.title}>
+        <h2>{section.title}</h2>
+        <div className="finance-hub-grid">
+          {section.items.map(item=>{
+            const Icon=item.icon
+            return <button type="button" className={`finance-hub-card hub-tone-${item.tone}`} key={item.to} onClick={()=>navigate(item.to)}>
+              <span className="finance-hub-icon"><Icon size={22}/></span>
+              <span className="finance-hub-copy"><b>{item.title}</b><small>{item.description}</small></span>
+              <span className="finance-hub-arrow">→</span>
+            </button>
+          })}
+        </div>
+      </div>)}
+    </section>
   </div>
 }
