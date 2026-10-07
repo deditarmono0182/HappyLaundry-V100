@@ -56,7 +56,8 @@ export function LoginPage(){
           />
         </label>
         {error&&<div className="error-box">{error}</div>}
-        <button disabled={busy||!isSupabaseConfigured}>{busy?'Memproses...':'Login'}</button>
+        {!navigator.onLine&&<div className="warning-box">Perangkat sedang offline. Sambungkan internet lalu coba login lagi.</div>}
+        <button disabled={busy||!isSupabaseConfigured}>{busy?'Memproses & memverifikasi sesi...':'Login'}</button>
       </form>
 
       <small className="login-owner-note">Owner lama tetap dapat login menggunakan email Owner pada kolom ID Akun.</small>

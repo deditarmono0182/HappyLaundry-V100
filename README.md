@@ -616,3 +616,15 @@ test
 - Hub juga menyediakan akses cepat ke Detail Pemasukan, Detail Pengeluaran, dan Absensi & Gaji.
 - Menu non-Owner tetap mengikuti permission lama.
 - Tidak ada SQL baru.
+
+
+## V113.0.103 — Live Master Data & Login Reliability
+- Kasir otomatis memperbarui Pelanggan, Layanan, daftar karyawan komisi, dan setting komisi setiap 30 detik.
+- Master data juga refresh saat browser kembali fokus, kembali online, atau tab Kasir aktif kembali.
+- Kolom pelanggan refresh saat difokuskan; picker layanan selalu mencoba mengambil data terbaru sebelum dibuka.
+- Tambah tombol Refresh Data manual serta indikator waktu sinkron terakhir.
+- Pelanggan baru langsung dimasukkan ke daftar lokal setelah berhasil tersimpan ke Supabase.
+- Login Owner/Karyawan diperkuat dengan retry + timeout pada pemuatan profil.
+- Login Karyawan memverifikasi sesi dan profil sebelum membuka aplikasi untuk mengurangi kasus login berhasil tetapi layar/profile kosong.
+- Pesan error Owner tidak lagi selalu dianggap password salah ketika masalah sebenarnya koneksi/server.
+- Tidak ada SQL baru.

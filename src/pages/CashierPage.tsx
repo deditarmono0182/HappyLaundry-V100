@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  CheckCircle2, FileText, MessageCircle, Plus, Printer, QrCode, Search,
+  CheckCircle2, FileText, MessageCircle, Plus, Printer, QrCode, RefreshCw, Search,
   ShoppingCart, Trash2, UserPlus, WalletCards
 } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
@@ -109,8 +109,36 @@ export function CashierPage() {
   const [success,setSuccess]=useState<SuccessData|null>(null)
   const [storeSettings,setStoreSettings]=useState<StoreSettings|null>(null)
   const [printSettings,setPrintSettings]=useState<ReceiptPrintSettings>(defaultReceiptPrintSettings)
+  const [masterRefreshing,setMasterRefreshing]=useState(false)
+  const [lastMasterSync,setLastMasterSync]=useState<Date|null>(null)
   const formRef=useRef<HTMLFormElement|null>(null)
   const customerSearchRef=useRef<HTMLInputElement|null>(null)
+
+  const refreshMasterData=useCallback(async(showMessage=false)=>{
+    setMasterRefreshing(true)
+    try{
+      const [customerResult,serviceResult,employeeResult,commissionResult]=await Promise.all([
+        supabase.from('v100_customers').select('*').order('name'),
+        supabase.from('v100_services').select('*').eq('is_active',true).order('name'),
+        supabase.rpc('v113_list_commission_employees'),
+        supabase.from('v113_employee_commission_settings').select('employee_id,production_percent,courier_percent')
+      ])
+      const error=customerResult.error||serviceResult.error||employeeResult.error||commissionResult.error
+      if(error){
+        if(showMessage)setMessage(error.message)
+        return false
+      }
+      setCustomers((customerResult.data as Customer[])||[])
+      setServices((serviceResult.data as Service[])||[])
+      setCommissionEmployees((employeeResult.data as CommissionEmployee[])||[])
+      setCommissionSettings((commissionResult.data as CommissionSetting[])||[])
+      setLastMasterSync(new Date())
+      if(showMessage)setMessage('')
+      return true
+    }finally{
+      setMasterRefreshing(false)
+    }
+  },[])
 
   const load=useCallback(async()=>{
     const start=businessDayStart()
@@ -133,12 +161,28 @@ export function CashierPage() {
       setTodayOrders((o.data as TodayOrder[])||[])
       setCommissionEmployees((employees.data as CommissionEmployee[])||[])
       setCommissionSettings((commission.data as CommissionSetting[])||[])
+      setLastMasterSync(new Date())
       setStoreSettings((settings.data as StoreSettings|null)||null)
       if(print.data)setPrintSettings({...defaultReceiptPrintSettings,...print.data} as ReceiptPrintSettings)
     }
   },[])
 
   useEffect(()=>{void load()},[load])
+
+  useEffect(()=>{
+    const refresh=()=>{void refreshMasterData(false)}
+    const onVisibility=()=>{if(document.visibilityState==='visible')refresh()}
+    window.addEventListener('focus',refresh)
+    window.addEventListener('online',refresh)
+    document.addEventListener('visibilitychange',onVisibility)
+    const timer=window.setInterval(refresh,30000)
+    return()=>{
+      window.removeEventListener('focus',refresh)
+      window.removeEventListener('online',refresh)
+      document.removeEventListener('visibilitychange',onVisibility)
+      window.clearInterval(timer)
+    }
+  },[refreshMasterData])
 
   // Keyboard shortcuts for faster cashier operation.
   useEffect(()=>{
@@ -239,9 +283,10 @@ export function CashierPage() {
     }
   }
 
-  const addItem=(service?:Service)=>{
+  const addItem=async(service?:Service)=>{
     if(!service){
-      if(services.length===0){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
+      const fresh=await refreshMasterData(false)
+      if(!fresh&&services.length===0){setMessage('Data layanan belum dapat dimuat. Periksa koneksi lalu coba lagi.');return}
       setServicePickerTarget(null)
       setServiceSearch('')
       setServicePickerOpen(true)
@@ -255,8 +300,9 @@ export function CashierPage() {
     setQuantityDraft(current=>({...current,[key]:'1'}))
   }
 
-  const openServicePicker=(targetKey:string|null=null)=>{
-    if(services.length===0){setMessage('Tambahkan layanan aktif terlebih dahulu.');return}
+  const openServicePicker=async(targetKey:string|null=null)=>{
+    const fresh=await refreshMasterData(false)
+    if(!fresh&&services.length===0){setMessage('Data layanan belum dapat dimuat. Periksa koneksi lalu coba lagi.');return}
     setServicePickerTarget(targetKey)
     setServiceSearch('')
     setServicePickerOpen(true)
@@ -504,6 +550,11 @@ export function CashierPage() {
           .select().single()
         if(error)throw error
         selectedCustomer=data.id; selectedName=data.name; selectedPhone=data.phone
+        setCustomers(current=>{
+          const next=current.filter(row=>row.id!==data.id)
+          return [...next,data as Customer].sort((a,b)=>a.name.localeCompare(b.name,'id'))
+        })
+        setLastMasterSync(new Date())
       }
       const paid=Math.min(Number(paymentAmount||0),total)
       const effectiveDueAt=dueAt||autoDueInput()
@@ -588,13 +639,25 @@ export function CashierPage() {
                 <label className="full-field">Alamat<input value={customerAddress} onChange={e=>setCustomerAddress(e.target.value)}/></label>
               </div>
             : <>
-                <label className="search-box cashier-search">
-                  <Search size={18}/><input ref={customerSearchRef} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari nama atau WhatsApp"/>
-                </label>
-                <select className="wide-select" value={customerId} onChange={e=>setCustomerId(e.target.value)}>
+                <div className="cashier-master-toolbar">
+                  <label className="search-box cashier-search">
+                    <Search size={18}/><input
+                      ref={customerSearchRef}
+                      value={query}
+                      onFocus={()=>void refreshMasterData(false)}
+                      onChange={e=>setQuery(e.target.value)}
+                      placeholder="Cari nama atau WhatsApp"
+                    />
+                  </label>
+                  <button type="button" className="secondary-button cashier-refresh-master" disabled={masterRefreshing} onClick={()=>void refreshMasterData(true)}>
+                    <RefreshCw size={15} className={masterRefreshing?'spin':''}/>{masterRefreshing?'Memuat...':'Refresh Data'}
+                  </button>
+                </div>
+                <select className="wide-select" value={customerId} onFocus={()=>void refreshMasterData(false)} onChange={e=>setCustomerId(e.target.value)}>
                   <option value="">Pilih pelanggan</option>
                   {filteredCustomers.map(c=><option key={c.id} value={c.id}>{c.name} — {c.phone}</option>)}
                 </select>
+                <small className="cashier-master-sync">Data pelanggan & layanan otomatis diperbarui{lastMasterSync?` • terakhir ${lastMasterSync.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`:''}.</small>
               </>
           }
         </section>
@@ -794,10 +857,15 @@ export function CashierPage() {
     >
       <div className="service-picker">
         <div className="service-picker-toolbar">
-          <label className="service-picker-search">
-            <Search size={19}/>
-            <input value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Cari layanan, mis. bantal, bedcover, boneka..." />
-          </label>
+          <div className="service-picker-refresh-row">
+            <label className="service-picker-search">
+              <Search size={19}/>
+              <input value={serviceSearch} onFocus={()=>void refreshMasterData(false)} onChange={e=>setServiceSearch(e.target.value)} placeholder="Cari layanan, mis. bantal, bedcover, boneka..." />
+            </label>
+            <button type="button" className="secondary-button" disabled={masterRefreshing} onClick={()=>void refreshMasterData(true)}>
+              <RefreshCw size={15} className={masterRefreshing?'spin':''}/>{masterRefreshing?'Memuat...':'Refresh'}
+            </button>
+          </div>
           <div className="cashier-category-tabs service-picker-tabs">
             {serviceCategories.map(category=><button type="button" key={category} className={serviceCategory===category?'active':''} onClick={()=>setServiceCategory(category)}>{category}</button>)}
           </div>

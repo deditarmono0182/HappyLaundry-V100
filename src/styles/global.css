@@ -11461,3 +11461,47 @@ html[data-density="ultra"] .main-content .expense-delete-request{
   .finance-hub-grid{grid-template-columns:1fr}
   .finance-hub-card{min-height:92px;padding:12px}
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.103 — Live Master Data & Login Reliability
+   ========================================================= */
+.cashier-master-toolbar,
+.service-picker-refresh-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.cashier-master-toolbar .cashier-search,
+.service-picker-refresh-row .service-picker-search{
+  flex:1 1 auto;
+  min-width:0;
+}
+.cashier-refresh-master{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+.cashier-master-sync{
+  display:block;
+  margin-top:5px;
+  color:#78909a;
+  font-size:10px;
+}
+.spin{
+  animation:hl-spin .8s linear infinite;
+}
+@keyframes hl-spin{
+  to{transform:rotate(360deg)}
+}
+@media(max-width:620px){
+  .cashier-master-toolbar,
+  .service-picker-refresh-row{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .cashier-refresh-master,
+  .service-picker-refresh-row .secondary-button{
+    width:100%;
+    justify-content:center;
+  }
+}
