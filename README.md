@@ -646,3 +646,13 @@ test
 - Tabel dibuat lebih compact dengan header yang lebih ringan dan row hover lembut.
 - Warna status mengikuti fungsi: biru informasi, hijau selesai/lunas, amber proses/peringatan, merah masalah/piutang, ungu proses/komisi.
 - Tidak ada SQL baru dan tidak ada perubahan struktur database.
+
+
+## V113.0.107 — Consistent Profit Formula
+- Menyamakan definisi Laba Bersih Operasional di Dashboard, Keuangan & Laporan, dan Laba Rugi.
+- Rumus resmi: Omzet / Barang Masuk - Biaya Operasional - Biaya Karyawan.
+- Biaya Karyawan mencakup uang hadir, tunjangan, bonus, bagi hasil, komisi produksi, dan komisi kurir.
+- Cadangan tetap terpisah sebagai Laba Setelah Cadangan.
+- Dashboard Kontrol Bisnis Owner sekarang mengambil Biaya Operasional dari sumber resmi pengeluaran dan menampilkan Biaya Karyawan.
+- Grafik Dashboard tidak lagi menampilkan seri 'Laba Bersih' dengan rumus lama; grafik difokuskan ke Omzet, Kas Masuk, dan Jumlah Order.
+- Tidak ada SQL baru.

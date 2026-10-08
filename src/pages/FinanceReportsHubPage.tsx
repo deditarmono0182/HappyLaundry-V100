@@ -8,6 +8,7 @@ import {
 import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
+import { fetchFinancialSummary, type FinancialSummary } from '../lib/financialSummary'
 import { addBusinessDays, businessDateKey, businessDateLabel } from '../lib/businessTime'
 import type { OrderRow } from '../types/order'
 
@@ -65,6 +66,7 @@ export function FinanceReportsHubPage(){
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [expenses,setExpenses]=useState<ExpenseRow[]>([])
   const [message,setMessage]=useState('')
+  const [financial,setFinancial]=useState<FinancialSummary|null>(null)
 
   useEffect(()=>{
     let alive=true
@@ -91,6 +93,20 @@ export function FinanceReportsHubPage(){
     return()=>{alive=false;window.removeEventListener('focus',onFocus)}
   },[])
 
+  useEffect(()=>{
+    let alive=true
+    const loadSummary=async()=>{
+      try{
+        const result=await fetchFinancialSummary(from,to)
+        if(alive)setFinancial(result)
+      }catch(error){
+        if(alive)setMessage(error instanceof Error?error.message:'Gagal memuat ringkasan laba.')
+      }
+    }
+    void loadSummary()
+    return()=>{alive=false}
+  },[from,to])
+
   const setQuickPeriod=(value:Exclude<PeriodPreset,'custom'>)=>{
     const today=businessDateKey(new Date())
     setPreset(value)
@@ -107,7 +123,9 @@ export function FinanceReportsHubPage(){
   const cashInToday=periodPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
   const expenseToday=periodExpenses.reduce((sum,row)=>sum+Number(row.amount||0),0)
   const receivable=orders.filter(row=>row.status!=='cancelled').reduce((sum,row)=>sum+Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),0)
-  const profitToday=omzetToday-expenseToday
+  const profitToday=financial?.operatingNet??(omzetToday-expenseToday)
+  const employeeCostPeriod=financial?.employeeCost??0
+  const operatingExpensePeriod=financial?.operating??expenseToday
 
   const paymentMethodSummary=useMemo(()=>{
     const total=periodPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
@@ -205,11 +223,15 @@ export function FinanceReportsHubPage(){
       </button>
       <button type="button" className="finance-live-kpi tone-red" onClick={()=>navigate('/finance/expenses')}>
         <span className="finance-kpi-icon"><ReceiptText size={22}/></span>
-        <span><small>Pengeluaran</small><b>{formatIDR(expenseToday)}</b><em>{periodExpenses.length} transaksi biaya • {periodLabel}</em></span>
+        <span><small>Pengeluaran</small><b>{formatIDR(operatingExpensePeriod)}</b><em>Biaya operasional • {periodLabel}</em></span>
+      </button>
+      <button type="button" className="finance-live-kpi tone-cyan" onClick={()=>navigate('/payroll')}>
+        <span className="finance-kpi-icon"><FileText size={22}/></span>
+        <span><small>Biaya Karyawan</small><b>{formatIDR(employeeCostPeriod)}</b><em>Gaji, tunjangan, bonus, bagi hasil & komisi</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-purple" onClick={()=>navigate('/profit-loss')}>
         <span className="finance-kpi-icon"><TrendingUp size={22}/></span>
-        <span><small>Ringkasan Laba</small><b>{formatIDR(profitToday)}</b><em>Omzet dikurangi pengeluaran operasional</em></span>
+        <span><small>Laba Bersih Operasional</small><b>{formatIDR(profitToday)}</b><em>Omzet - biaya operasional - biaya karyawan</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-amber" onClick={()=>navigate('/receivables')}>
         <span className="finance-kpi-icon"><Clock3 size={22}/></span>

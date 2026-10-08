@@ -7,6 +7,7 @@ import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import { fetchFinancialSummary, type FinancialSummary } from '../lib/financialSummary'
 import { useAuth } from '../lib/auth'
 import { downloadXls } from '../lib/exportData'
 import type { OrderRow } from '../types/order'
@@ -55,6 +56,7 @@ export function DashboardPage() {
   const [commissions,setCommissions]=useState<DashboardCommission[]>([])
   const [progressEvents,setProgressEvents]=useState<DashboardProgressEvent[]>([])
   const [assignments,setAssignments]=useState<DashboardAssignment[]>([])
+  const [ownerFinancial,setOwnerFinancial]=useState<FinancialSummary|null>(null)
   const [attentionOpen,setAttentionOpen]=useState(false)
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
@@ -246,7 +248,7 @@ export function DashboardPage() {
     })
   },[orders,payments,cash,commissions,revenuePeriod,businessClock])
 
-  const maxMoney=Math.max(1,...chart.flatMap(x=>[x.omzet,x.cashIn,Math.max(0,x.net)]))
+  const maxMoney=Math.max(1,...chart.flatMap(x=>[x.omzet,x.cashIn]))
   const maxOrders=Math.max(1,...chart.map(x=>x.orders))
 
   const combinedChart=useMemo(()=>{
@@ -354,9 +356,26 @@ export function DashboardPage() {
 
   const ownerPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
 
+  useEffect(()=>{
+    if(!isOwner)return
+    let alive=true
+    const fromKey=businessDateKey(ownerPeriodStart)
+    const toKey=businessDateKey(new Date(businessClock))
+    const run=async()=>{
+      try{
+        const result=await fetchFinancialSummary(fromKey,toKey)
+        if(alive)setOwnerFinancial(result)
+      }catch{
+        if(alive)setOwnerFinancial(null)
+      }
+    }
+    void run()
+    return()=>{alive=false}
+  },[isOwner,ownerPeriodStart,businessClock])
+
   const ownerPeriodOrders=useMemo(()=>orders.filter(r=>new Date(r.created_at)>=ownerPeriodStart&&r.status!=='cancelled'),[orders,ownerPeriodStart])
   const ownerPeriodCash=useMemo(()=>cash.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[cash,ownerPeriodStart])
-  const ownerExpense=ownerPeriodCash.filter(r=>r.direction==='out').reduce((s,r)=>s+Number(r.amount),0)
+  const ownerExpense=ownerFinancial?.operating??0
   const ownerPeriodPayments=useMemo(()=>payments.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[payments,ownerPeriodStart])
   const ownerCashIn=ownerPeriodPayments.reduce((s,r)=>s+Number(r.amount||0),0)
   const ownerOrderValue=ownerPeriodOrders.reduce((s,r)=>s+Number(r.total||0),0)
@@ -364,7 +383,9 @@ export function DashboardPage() {
   const ownerProductionCommission=ownerPeriodCommissions.filter(r=>r.commission_type==='production').reduce((s,r)=>s+Number(r.amount||0),0)
   const ownerCourierCommission=ownerPeriodCommissions.filter(r=>r.commission_type==='courier').reduce((s,r)=>s+Number(r.amount||0),0)
   const ownerCommission=ownerProductionCommission+ownerCourierCommission
-  const ownerProfit=ownerOrderValue-ownerExpense-ownerCommission
+  const ownerEmployeeCost=ownerFinancial?.employeeCost??ownerCommission
+  const ownerProfit=ownerFinancial?.operatingNet??(ownerOrderValue-ownerExpense-ownerEmployeeCost)
+  const ownerAfterReserve=ownerFinancial?.netAfterReserve??ownerProfit
   const ownerCash=ownerPeriodPayments.filter(r=>r.method==='cash').reduce((s,r)=>s+Number(r.amount),0)
   const ownerQris=ownerPeriodPayments.filter(r=>r.method==='qris').reduce((s,r)=>s+Number(r.amount),0)
   const ownerTransfer=ownerPeriodPayments.filter(r=>r.method==='transfer').reduce((s,r)=>s+Number(r.amount),0)
@@ -380,9 +401,11 @@ export function DashboardPage() {
         ['Omzet / Nilai Barang Masuk',ownerOrderValue],
         ['Kas Masuk (Terbayar)',ownerCashIn],
         ['Pengeluaran',ownerExpense],
+        ['Biaya Karyawan',ownerEmployeeCost],
         ['Komisi Produksi',ownerProductionCommission],
         ['Komisi Kurir',ownerCourierCommission],
-        ['Laba Bersih',ownerProfit],
+        ['Laba Bersih Operasional',ownerProfit],
+        ['Laba Setelah Cadangan',ownerAfterReserve],
         ['Piutang Aktif',receivable],
         ['Tunai',ownerCash],
         ['QRIS',ownerQris],
@@ -392,7 +415,7 @@ export function DashboardPage() {
         ['Sedang Diproses',processing],
         ['Siap Diambil',ready]
       ],
-      summary:[['Omzet Barang Masuk',ownerOrderValue],['Kas Masuk',ownerCashIn],['Pengeluaran',ownerExpense],['Komisi',ownerCommission],['Laba Bersih',ownerProfit]]
+      summary:[['Omzet Barang Masuk',ownerOrderValue],['Kas Masuk',ownerCashIn],['Biaya Operasional',ownerExpense],['Biaya Karyawan',ownerEmployeeCost],['Laba Bersih Operasional',ownerProfit],['Laba Setelah Cadangan',ownerAfterReserve]]
     })
   }
 
@@ -513,14 +536,14 @@ export function DashboardPage() {
     </section>
     {isOwner&&<section className="panel owner-business-report">
       <div className="panel-heading">
-        <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Kas masuk menunjukkan pembayaran yang sudah diterima.</p></div>
+        <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Laba Bersih Operasional mengikuti rumus yang sama dengan halaman Laba Rugi.</p></div>
       </div>
       <div className="owner-business-kpis owner-business-kpis-six">
         <div><span>Omzet / Barang Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerOrderValue)}</strong></div>
         <div><span>Kas Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerCashIn)}</strong></div>
-        <div><span>Pengeluaran</span><strong className="dashboard-money-value">{formatIDR(ownerExpense)}</strong></div>
-        <div><span>Komisi</span><strong className="dashboard-money-value">{formatIDR(ownerCommission)}</strong></div>
-        <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih</span><strong className="dashboard-money-value">{formatIDR(ownerProfit)}</strong></div>
+        <div><span>Biaya Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerExpense)}</strong></div>
+        <div><span>Biaya Karyawan</span><strong className="dashboard-money-value">{formatIDR(ownerEmployeeCost)}</strong></div>
+        <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerProfit)}</strong></div>
         <div><span>Piutang Aktif</span><strong className="dashboard-money-value">{formatIDR(receivable)}</strong></div>
       </div>
       <div className="owner-payment-breakdown">
@@ -537,7 +560,7 @@ export function DashboardPage() {
         <div className="panel-heading dashboard-revenue-heading">
           <div>
             <h3>{periodTitle}</h3>
-            <p>Omzet/barang masuk, kas masuk, laba bersih, dan jumlah order pada periode yang sama.</p>
+            <p>Omzet/barang masuk, kas masuk, dan jumlah order pada periode yang sama.</p>
           </div>
           <div className="revenue-period-tabs">
             <button className={revenuePeriod==='today'?'active':''} onClick={()=>setRevenuePeriod('today')}>Hari Ini</button>
@@ -552,7 +575,6 @@ export function DashboardPage() {
           <div className="owner-chart-legend">
             <span className="legend-order-value">Omzet / Barang Masuk</span>
             <span className="legend-cash-in">Kas Masuk</span>
-            <span className="legend-net">Laba Bersih</span>
             <span className="legend-order-count">Jumlah Order</span>
           </div>
           <svg viewBox={`0 0 ${combinedChart.width} ${combinedChart.height}`} role="img" aria-label={periodTitle}>
@@ -563,9 +585,8 @@ export function DashboardPage() {
             {chart.map((item,index)=>{
               const center=combinedChart.padX+combinedChart.groupW*(index+.5)
               const values=[
-                {value:item.omzet,x:center-combinedChart.barW*1.25,cls:'owner-bar-order-value'},
-                {value:item.cashIn,x:center,cls:'owner-bar-cash-in'},
-                {value:Math.max(0,item.net),x:center+combinedChart.barW*1.25,cls:'owner-bar-net'}
+                {value:item.omzet,x:center-combinedChart.barW*.65,cls:'owner-bar-order-value'},
+                {value:item.cashIn,x:center+combinedChart.barW*.65,cls:'owner-bar-cash-in'}
               ]
               return <g key={`${item.label}-${index}`}>
                 {values.map((bar,barIndex)=>{
@@ -586,7 +607,6 @@ export function DashboardPage() {
               <b>{item.label}</b>
               <span>Barang {formatIDR(item.omzet)}</span>
               <span>Kas {formatIDR(item.cashIn)}</span>
-              <span>Laba {formatIDR(item.net)}</span>
               <strong>{item.orders} order</strong>
             </div>)}
           </div>
