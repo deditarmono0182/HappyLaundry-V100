@@ -313,7 +313,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.110 True Sticky Header</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.111 Simple Sticky Topbar</span></div>
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
@@ -395,7 +395,10 @@ export function AppLayout() {
       <main className="main-content">
         <header className="topbar">
           <button className="icon-button drawer-menu-button" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={22} /></button>
-          <div><span className="eyebrow">HAPPYLAUNDRY BABAKAN</span><h1>Sistem Operasional Laundry</h1></div>
+          <div className="topbar-branding">
+            <h1>HappyLaundry</h1>
+            <span>Sistem Operasional Laundry</span>
+          </div>
           <div className="topbar-actions"><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
         </header>
         <div className="page-container">

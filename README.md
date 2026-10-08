@@ -682,3 +682,11 @@ test
 - Page header (judul halaman, tombol Tambah, tombol Kembali/action) tetap menempel tepat di bawah topbar.
 - Side menu click drawer tetap dipertahankan.
 - Tidak ada SQL baru.
+
+
+## V113.0.111 — Simple Sticky Topbar
+- Hanya bar aplikasi paling atas yang sticky saat scroll.
+- Judul halaman seperti Dashboard, Layanan & Harga, Order, dll kembali scroll normal.
+- Branding topbar diubah menjadi HappyLaundry lebih besar.
+- Teks Sistem Operasional Laundry dibuat lebih kecil dan ringan di bawah HappyLaundry.
+- Tidak ada perubahan layout halaman lain dan tidak ada SQL baru.

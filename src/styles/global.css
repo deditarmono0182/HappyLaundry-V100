@@ -12446,3 +12446,80 @@ body,
     top:58px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.111 — Simple Sticky Topbar
+   Only the very top application bar stays sticky.
+   ========================================================= */
+
+/* Undo the sticky page-title layer from V113.0.109 / V113.0.110 */
+.page-heading{
+  position:relative!important;
+  top:auto!important;
+  z-index:auto!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  padding:0!important;
+  background:transparent!important;
+  backdrop-filter:none!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+
+/* Keep only the top application bar sticky */
+.topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:70!important;
+  min-height:64px!important;
+  height:64px!important;
+  background:#fff!important;
+  box-shadow:0 1px 0 #dbe8f0,0 5px 14px rgba(29,79,105,.045)!important;
+}
+
+/* Branding hierarchy requested by owner */
+.topbar-branding{
+  display:grid;
+  gap:1px;
+  min-width:0;
+  line-height:1.05;
+}
+.topbar-branding h1{
+  margin:0!important;
+  font-size:24px!important;
+  line-height:1.08!important;
+  font-weight:760!important;
+  color:#17475b!important;
+  letter-spacing:-.35px;
+}
+.topbar-branding span{
+  font-size:10px!important;
+  line-height:1.2!important;
+  font-weight:500!important;
+  color:#6e8791!important;
+  letter-spacing:.05px;
+}
+
+/* Page heading returns to normal document flow */
+.page-heading h2{
+  font-size:22px!important;
+  margin:2px 0!important;
+}
+.page-heading p{
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+
+@media(max-width:700px){
+  .topbar{
+    min-height:60px!important;
+    height:60px!important;
+  }
+  .topbar-branding h1{
+    font-size:20px!important;
+  }
+  .topbar-branding span{
+    font-size:9px!important;
+  }
+}
