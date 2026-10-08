@@ -12468,3 +12468,84 @@ body.density-compact td{
 .topbar-branding span{display:block!important;margin:0!important;font-size:10px!important;line-height:1.15!important;font-weight:500!important;letter-spacing:.05px!important;color:#6f8791!important;}
 .page-heading{position:relative!important;top:auto!important;z-index:auto!important;}
 @media(max-width:700px){.topbar{height:60px!important;min-height:60px!important}.topbar-branding h1{font-size:21px!important}.topbar-branding span{font-size:9px!important}}
+
+
+/* =========================================================
+   HappyLaundry V113.0.115 — Fixed Brand Topbar
+   Guarantees the app topbar stays visible while page content scrolls.
+   Only the very top bar is fixed; PageHeader/actions stay in normal flow.
+   ========================================================= */
+.main-content{
+  padding-top:64px!important;
+}
+
+.topbar{
+  position:fixed!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  height:64px!important;
+  min-height:64px!important;
+  z-index:50!important;
+  margin:0!important;
+  background:#fff!important;
+  border-bottom:1px solid #dbe8e5!important;
+  box-shadow:0 2px 10px rgba(28,74,98,.06)!important;
+}
+
+/* Drawer must open above the fixed topbar. */
+.sidebar{
+  z-index:70!important;
+}
+.overlay{
+  z-index:65!important;
+}
+
+/* Page-level title/action area is NOT sticky/fixed. */
+.page-heading{
+  position:relative!important;
+  top:auto!important;
+  z-index:auto!important;
+  margin-top:0!important;
+}
+
+/* Requested branding hierarchy. */
+.topbar-branding{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  gap:1px!important;
+  min-width:0!important;
+}
+.topbar-branding h1{
+  margin:0!important;
+  font-size:25px!important;
+  line-height:1.04!important;
+  font-weight:800!important;
+  color:#17475b!important;
+  letter-spacing:-.35px!important;
+}
+.topbar-branding span{
+  margin-top:1px!important;
+  font-size:10px!important;
+  line-height:1.15!important;
+  font-weight:500!important;
+  color:#708791!important;
+}
+
+@media(max-width:700px){
+  .main-content{
+    padding-top:60px!important;
+  }
+  .topbar{
+    height:60px!important;
+    min-height:60px!important;
+  }
+  .topbar-branding h1{
+    font-size:21px!important;
+  }
+  .topbar-branding span{
+    font-size:9px!important;
+  }
+}

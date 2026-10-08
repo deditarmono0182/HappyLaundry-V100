@@ -705,3 +705,13 @@ test
 - Topbar tetap sticky saat scroll.
 - PageHeader, tombol Kembali, Print, Export, action header, dan kartu tidak diubah.
 - Tidak ada SQL baru.
+
+
+## V113.0.115 — Fixed Brand Topbar
+- Memperbaiki topbar V113.0.114 yang masih ikut scroll.
+- Topbar paling atas sekarang fixed, sehingga selalu terlihat saat halaman di-scroll.
+- Ruang 64px/60px disediakan pada main-content agar isi halaman tidak tertutup.
+- HappyLaundry tetap besar; Sistem Operasional Laundry tetap kecil.
+- PageHeader, tombol Kembali, Print, Export, dan kartu tetap normal/scroll biasa.
+- Drawer menu tetap muncul di atas topbar.
+- Tidak ada SQL baru.
