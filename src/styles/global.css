@@ -12370,3 +12370,79 @@ body.density-compact td{
     padding:9px 12px 10px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.110 — True Sticky Scroll Container
+   Fix: browser/app now scrolls inside .main-content so sticky
+   topbar + page-heading always work reliably.
+   ========================================================= */
+html,
+body,
+#root,
+.app-shell{
+  height:100%!important;
+  min-height:100%!important;
+}
+
+html,
+body,
+#root{
+  overflow:hidden!important;
+}
+
+.app-shell{
+  overflow:hidden!important;
+}
+
+.main-content{
+  height:100dvh!important;
+  max-height:100dvh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  position:relative!important;
+  scroll-behavior:smooth;
+}
+
+/* topbar remains visible while only content area scrolls */
+.topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:70!important;
+  min-height:58px!important;
+  background:#fff!important;
+  box-shadow:0 1px 0 #dbe8f0,0 6px 16px rgba(29,79,105,.05)!important;
+}
+
+/* page header sticks immediately below topbar */
+.page-heading{
+  position:sticky!important;
+  top:58px!important;
+  z-index:65!important;
+  background:#f5faff!important;
+  border-bottom:1px solid #d9e8f1!important;
+  box-shadow:0 7px 15px rgba(29,79,105,.05)!important;
+}
+
+/* Header buttons must stay clickable above page content */
+.page-heading-right,
+.page-heading-action,
+.page-back-button{
+  position:relative;
+  z-index:2;
+}
+
+@media(max-width:900px){
+  .main-content{
+    height:100dvh!important;
+    max-height:100dvh!important;
+  }
+  .topbar{
+    min-height:58px!important;
+  }
+  .page-heading{
+    top:58px!important;
+  }
+}

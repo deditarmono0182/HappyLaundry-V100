@@ -673,3 +673,12 @@ test
 - Judul halaman, tombol Tambah, tombol Kembali, dan action header tetap terlihat saat scroll ke bawah.
 - Side menu tetap model click drawer dari V113.0.108.
 - Tidak ada SQL baru.
+
+
+## V113.0.110 — True Sticky Header
+- Memperbaiki sticky header V113.0.109 yang belum bekerja konsisten.
+- Scroll aplikasi sekarang terjadi di area main-content, bukan seluruh body/browser.
+- Topbar tetap terlihat saat scroll.
+- Page header (judul halaman, tombol Tambah, tombol Kembali/action) tetap menempel tepat di bawah topbar.
+- Side menu click drawer tetap dipertahankan.
+- Tidak ada SQL baru.
