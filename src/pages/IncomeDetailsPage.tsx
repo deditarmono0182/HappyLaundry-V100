@@ -118,14 +118,14 @@ export function IncomeDetailsPage(){
       <StatCard icon={WalletCards} label="Rata-rata Pembayaran" value={formatRupiah(avg)} caption="Rata-rata pembayaran masuk"/>
     </section>
 
-    <section className="panel data-panel">
-      <div className="toolbar">
+    <section className="panel data-panel finance-income-list-panel">
+      <div className="toolbar finance-income-list-toolbar">
         <label className="search-box"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari order, pelanggan, atau metode"/></label>
         <span className="record-count">{filtered.length} pembayaran</span>
       </div>
       {message&&<div className="error-box inline-message">{message}</div>}
-      <div className="table-wrap">
-        <table>
+      <div className="table-wrap finance-income-list-scroll">
+        <table className="finance-income-list-table">
           <thead><tr><th>Tanggal</th><th>Order</th><th>Pelanggan</th><th>Metode</th><th>Nominal</th><th>Aksi</th></tr></thead>
           <tbody>
             {loading&&<tr><td colSpan={6} className="table-empty">Memuat pemasukan...</td></tr>}

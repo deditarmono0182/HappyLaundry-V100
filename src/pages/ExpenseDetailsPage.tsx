@@ -165,14 +165,14 @@ export function ExpenseDetailsPage(){
       <StatCard icon={TrendingDown} label="Rata-rata Pengeluaran" value={formatRupiah(avg)} caption="Rata-rata biaya termasuk gaji"/>
     </section>
 
-    <section className="panel data-panel">
-      <div className="toolbar">
+    <section className="panel data-panel finance-expense-list-panel">
+      <div className="toolbar finance-expense-list-toolbar">
         <label className="search-box"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari kategori, keterangan, referensi, atau metode"/></label>
         <span className="record-count">{filtered.length} pengeluaran</span>
       </div>
       {message&&<div className="error-box inline-message">{message}</div>}
-      <div className="table-wrap">
-        <table>
+      <div className="table-wrap finance-expense-list-scroll">
+        <table className="finance-expense-list-table">
           <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th><th>Aksi</th></tr></thead>
           <tbody>
             {loading&&<tr><td colSpan={8} className="table-empty">Memuat pengeluaran...</td></tr>}

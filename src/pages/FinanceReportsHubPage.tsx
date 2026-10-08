@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  AlertTriangle, BarChart3, Banknote, CalendarCheck2, CheckCircle2, CircleDollarSign,
+  AlertTriangle, BarChart3, Banknote, CalendarCheck2, CalendarDays, CheckCircle2, CircleDollarSign,
   Clock3, FileText, Landmark, PackageCheck, ReceiptText, Smartphone, Target,
   TrendingUp, WalletCards, WashingMachine
 } from 'lucide-react'
@@ -17,11 +17,15 @@ type PaymentRow={
   created_at:string
 }
 
-type CashRow={
+type ExpenseRow={
+  id:string
+  expense_date:string
   amount:number
-  direction:'in'|'out'
-  created_at:string
+  category_name:string
+  description:string|null
 }
+
+type PeriodPreset='today'|'7d'|'month'|'custom'
 
 const sections=[
   {
@@ -53,28 +57,32 @@ const sections=[
 
 export function FinanceReportsHubPage(){
   const navigate=useNavigate()
+  const todayKey=businessDateKey(new Date())
+  const [preset,setPreset]=useState<PeriodPreset>('7d')
+  const [from,setFrom]=useState(addBusinessDays(todayKey,-6))
+  const [to,setTo]=useState(todayKey)
   const [orders,setOrders]=useState<OrderRow[]>([])
   const [payments,setPayments]=useState<PaymentRow[]>([])
-  const [cash,setCash]=useState<CashRow[]>([])
+  const [expenses,setExpenses]=useState<ExpenseRow[]>([])
   const [message,setMessage]=useState('')
 
   useEffect(()=>{
     let alive=true
     const load=async()=>{
-      const [orderRes,paymentRes,cashRes]=await Promise.all([
+      const [orderRes,paymentRes,expenseRes]=await Promise.all([
         supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
         supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
-        supabase.from('v100_cash_entries').select('amount,direction,created_at').order('created_at',{ascending:false})
+        supabase.from('v106_expenses_view').select('id,expense_date,amount,category_name,description').order('expense_date',{ascending:false})
       ])
       if(!alive)return
-      const error=orderRes.error||paymentRes.error||cashRes.error
+      const error=orderRes.error||paymentRes.error||expenseRes.error
       if(error){
         setMessage(error.message)
         return
       }
       setOrders((orderRes.data as OrderRow[])||[])
       setPayments((paymentRes.data as PaymentRow[])||[])
-      setCash((cashRes.data as CashRow[])||[])
+      setExpenses((expenseRes.data as ExpenseRow[])||[])
       setMessage('')
     }
     void load()
@@ -83,25 +91,32 @@ export function FinanceReportsHubPage(){
     return()=>{alive=false;window.removeEventListener('focus',onFocus)}
   },[])
 
-  const todayKey=businessDateKey(new Date())
-  const todayOrders=useMemo(()=>orders.filter(row=>row.status!=='cancelled'&&businessDateKey(row.created_at)===todayKey),[orders,todayKey])
-  const todayPayments=useMemo(()=>payments.filter(row=>businessDateKey(row.created_at)===todayKey),[payments,todayKey])
-  const todayCash=useMemo(()=>cash.filter(row=>businessDateKey(row.created_at)===todayKey),[cash,todayKey])
+  const setQuickPeriod=(value:Exclude<PeriodPreset,'custom'>)=>{
+    const today=businessDateKey(new Date())
+    setPreset(value)
+    if(value==='today'){setFrom(today);setTo(today)}
+    if(value==='7d'){setFrom(addBusinessDays(today,-6));setTo(today)}
+    if(value==='month'){setFrom(`${today.slice(0,7)}-01`);setTo(today)}
+  }
+  const periodLabel=preset==='today'?'Hari Ini':preset==='7d'?'7 Hari':preset==='month'?'Bulan Ini':`${from} s/d ${to}`
+  const periodOrders=useMemo(()=>orders.filter(row=>{const key=businessDateKey(row.created_at);return row.status!=='cancelled'&&key>=from&&key<=to}),[orders,from,to])
+  const periodPayments=useMemo(()=>payments.filter(row=>{const key=businessDateKey(row.created_at);return key>=from&&key<=to}),[payments,from,to])
+  const periodExpenses=useMemo(()=>expenses.filter(row=>row.expense_date>=from&&row.expense_date<=to),[expenses,from,to])
 
-  const omzetToday=todayOrders.reduce((sum,row)=>sum+Number(row.total||0),0)
-  const cashInToday=todayPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
-  const expenseToday=todayCash.filter(row=>row.direction==='out').reduce((sum,row)=>sum+Number(row.amount||0),0)
+  const omzetToday=periodOrders.reduce((sum,row)=>sum+Number(row.total||0),0)
+  const cashInToday=periodPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
+  const expenseToday=periodExpenses.reduce((sum,row)=>sum+Number(row.amount||0),0)
   const receivable=orders.filter(row=>row.status!=='cancelled').reduce((sum,row)=>sum+Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),0)
   const profitToday=omzetToday-expenseToday
 
   const paymentMethodSummary=useMemo(()=>{
-    const total=todayPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
+    const total=periodPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
     return [
-      {key:'cash',label:'Tunai',icon:Banknote,amount:todayPayments.filter(x=>x.method==='cash').reduce((s,x)=>s+Number(x.amount||0),0)},
-      {key:'qris',label:'QRIS',icon:Smartphone,amount:todayPayments.filter(x=>x.method==='qris').reduce((s,x)=>s+Number(x.amount||0),0)},
-      {key:'transfer',label:'Transfer',icon:Landmark,amount:todayPayments.filter(x=>x.method==='transfer').reduce((s,x)=>s+Number(x.amount||0),0)}
+      {key:'cash',label:'Tunai',icon:Banknote,amount:periodPayments.filter(x=>x.method==='cash').reduce((s,x)=>s+Number(x.amount||0),0)},
+      {key:'qris',label:'QRIS',icon:Smartphone,amount:periodPayments.filter(x=>x.method==='qris').reduce((s,x)=>s+Number(x.amount||0),0)},
+      {key:'transfer',label:'Transfer',icon:Landmark,amount:periodPayments.filter(x=>x.method==='transfer').reduce((s,x)=>s+Number(x.amount||0),0)}
     ].map(row=>({...row,percentage:total>0?Math.round(row.amount/total*100):0}))
-  },[todayPayments])
+  },[periodPayments])
 
   const statusRows=useMemo(()=>[
     {key:'received',label:'Diterima',icon:PackageCheck,count:orders.filter(x=>x.status==='received').length},
@@ -110,13 +125,13 @@ export function FinanceReportsHubPage(){
     {key:'ironing',label:'Disetrika',icon:TrendingUp,count:orders.filter(x=>x.status==='ironing').length},
     {key:'packing',label:'Packing',icon:PackageCheck,count:orders.filter(x=>x.status==='packing').length},
     {key:'ready',label:'Siap Diambil',icon:WalletCards,count:orders.filter(x=>x.status==='ready').length},
-    {key:'completed',label:'Selesai Hari Ini',icon:CheckCircle2,count:todayOrders.filter(x=>x.status==='completed').length}
-  ],[orders,todayOrders])
+    {key:'completed',label:'Selesai Periode',icon:CheckCircle2,count:periodOrders.filter(x=>x.status==='completed').length}
+  ],[orders,periodOrders])
 
   const statusTotal=Math.max(1,statusRows.reduce((sum,row)=>sum+row.count,0))
 
   const paymentStatusRows=useMemo(()=>{
-    const active=orders.filter(row=>row.status!=='cancelled')
+    const active=periodOrders
     const unpaid=active.filter(row=>Number(row.paid_amount||0)<=0).length
     const partial=active.filter(row=>Number(row.paid_amount||0)>0&&Number(row.paid_amount||0)<Number(row.total||0)).length
     const paid=active.filter(row=>Number(row.total||0)>0&&Number(row.paid_amount||0)>=Number(row.total||0)).length
@@ -126,11 +141,11 @@ export function FinanceReportsHubPage(){
       {key:'partial',label:'DP / Sebagian',count:partial,percentage:Math.round(partial/total*100)},
       {key:'paid',label:'Lunas',count:paid,percentage:Math.round(paid/total*100)}
     ]
-  },[orders])
+  },[periodOrders])
 
   const chart=useMemo(()=>{
     return Array.from({length:7},(_,index)=>{
-      const key=addBusinessDays(todayKey,-(6-index))
+      const key=addBusinessDays(to,-(6-index))
       const dayOrders=orders.filter(row=>row.status!=='cancelled'&&businessDateKey(row.created_at)===key)
       const dayPayments=payments.filter(row=>businessDateKey(row.created_at)===key)
       return{
@@ -141,7 +156,7 @@ export function FinanceReportsHubPage(){
         orders:dayOrders.length
       }
     })
-  },[orders,payments,todayKey])
+  },[orders,payments,to])
 
   const maxChart=Math.max(1,...chart.flatMap(row=>[row.omzet,row.cashIn]))
   const maxOrders=Math.max(1,...chart.map(row=>row.orders))
@@ -161,24 +176,40 @@ export function FinanceReportsHubPage(){
       description="Pantau kondisi keuangan, transaksi, status order, dan laporan bisnis dalam satu tempat."
     />
 
+    <section className="panel finance-hub-period-panel">
+      <div className="finance-hub-period-left">
+        <b>Periode Laporan</b>
+        <div className="finance-hub-quick-periods">
+          <button type="button" className={preset==='today'?'is-active':''} onClick={()=>setQuickPeriod('today')}>Hari Ini</button>
+          <button type="button" className={preset==='7d'?'is-active':''} onClick={()=>setQuickPeriod('7d')}>7 Hari</button>
+          <button type="button" className={preset==='month'?'is-active':''} onClick={()=>setQuickPeriod('month')}>Bulan Ini</button>
+        </div>
+      </div>
+      <div className="finance-hub-custom-period">
+        <label>Dari<input type="date" value={from} onChange={e=>{setFrom(e.target.value);setPreset('custom')}}/></label>
+        <label>Sampai<input type="date" value={to} onChange={e=>{setTo(e.target.value);setPreset('custom')}}/></label>
+        <span className="finance-hub-current-period"><CalendarDays size={13}/>{periodLabel}</span>
+      </div>
+    </section>
+
     {message&&<div className="error-box">{message}</div>}
 
     <section className="finance-live-kpis">
       <button type="button" className="finance-live-kpi tone-blue" onClick={()=>navigate('/finance')}>
         <span className="finance-kpi-icon"><BarChart3 size={22}/></span>
-        <span><small>Omzet / Barang Masuk</small><b>{formatIDR(omzetToday)}</b><em>{todayOrders.length} order hari ini</em></span>
+        <span><small>Omzet / Barang Masuk</small><b>{formatIDR(omzetToday)}</b><em>{periodOrders.length} order • {periodLabel}</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-green" onClick={()=>navigate('/finance/income')}>
         <span className="finance-kpi-icon"><WalletCards size={22}/></span>
-        <span><small>Kas Masuk</small><b>{formatIDR(cashInToday)}</b><em>Pembayaran diterima hari ini</em></span>
+        <span><small>Kas Masuk</small><b>{formatIDR(cashInToday)}</b><em>Pembayaran diterima • {periodLabel}</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-red" onClick={()=>navigate('/finance/expenses')}>
         <span className="finance-kpi-icon"><ReceiptText size={22}/></span>
-        <span><small>Pengeluaran</small><b>{formatIDR(expenseToday)}</b><em>Kas keluar hari ini</em></span>
+        <span><small>Pengeluaran</small><b>{formatIDR(expenseToday)}</b><em>{periodExpenses.length} transaksi biaya • {periodLabel}</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-purple" onClick={()=>navigate('/profit-loss')}>
         <span className="finance-kpi-icon"><TrendingUp size={22}/></span>
-        <span><small>Ringkasan Laba</small><b>{formatIDR(profitToday)}</b><em>Sebelum perhitungan cadangan</em></span>
+        <span><small>Ringkasan Laba</small><b>{formatIDR(profitToday)}</b><em>Omzet dikurangi pengeluaran operasional</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-amber" onClick={()=>navigate('/receivables')}>
         <span className="finance-kpi-icon"><Clock3 size={22}/></span>
@@ -189,8 +220,8 @@ export function FinanceReportsHubPage(){
     <section className="finance-analytics-grid">
       <article className="panel finance-main-chart-card">
         <div className="finance-analytics-heading">
-          <div><h3><BarChart3 size={19}/> Grafik Keuangan & Order</h3><p>Perbandingan omzet, kas masuk, dan jumlah order selama 7 hari terakhir.</p></div>
-          <button type="button" className="finance-period-pill">7 Hari</button>
+          <div><h3><BarChart3 size={19}/> Grafik Keuangan & Order</h3><p>Omzet, kas masuk, dan jumlah order pada periode yang dipilih.</p></div>
+          <span className="finance-period-pill">{periodLabel}</span>
         </div>
         <div className="finance-chart-wrap">
           <div className="finance-chart-legend">
