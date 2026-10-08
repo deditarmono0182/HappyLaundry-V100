@@ -696,3 +696,12 @@ test
 - Generic PDF juga memakai brand HappyLaundry Babakan agar konsisten.
 - Export Laba Rugi profesional dari V113.0.112 tetap dipertahankan.
 - Tidak ada SQL baru.
+
+
+## V113.0.114 — Sticky Brand Header
+- Perubahan hanya pada topbar aplikasi paling atas.
+- HappyLaundry diperbesar sebagai nama utama.
+- Sistem Operasional Laundry diperkecil di bawah nama brand.
+- Topbar tetap sticky saat scroll.
+- PageHeader, tombol Kembali, Print, Export, action header, dan kartu tidak diubah.
+- Tidak ada SQL baru.
