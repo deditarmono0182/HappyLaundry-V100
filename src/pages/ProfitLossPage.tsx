@@ -6,7 +6,7 @@ import {
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { Modal } from '../components/Modal'
-import { downloadXls, printPdf } from '../lib/exportData'
+import { downloadFinancialStatementXls, printFinancialStatementPdf } from '../lib/exportData'
 import { formatRupiah } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import {
@@ -405,42 +405,58 @@ export function ProfitLossPage(){
     title:'Laporan Laba Rugi',
     filename:`laba-rugi-${appliedFrom}-${appliedTo}`,
     subtitle:`Periode ${appliedFrom} s/d ${appliedTo}`,
-    headers:['Komponen','Nilai'],
-    rows:[
-      ['PENDAPATAN',''],
-      ['Omzet / Nilai Order Masuk',Math.round(report.revenue)],
-      ['Kas Masuk (informasi)',Math.round(report.cashIn)],
-      ['Piutang (informasi)',Math.round(report.receivable)],
-      ['',''],
-      ['BIAYA OPERASIONAL',Math.round(report.operating)],
-      ...report.operatingByCategory.map(([name,value])=>[`  ${name}`,Math.round(value)]),
-      ['',''],
-      ['BIAYA KARYAWAN',''],
-      ['Uang Hadir',Math.round(report.attendancePay)],
-      ['Tunjangan (akrual proporsional)',Math.round(report.allowance)],
-      ['Bonus (akrual proporsional)',Math.round(report.bonus)],
-      ['Bagi Hasil',Math.round(report.revenueShare)],
-      ['Komisi Produksi',Math.round(report.productionCommission)],
-      ['Komisi Kurir',Math.round(report.courierCommission)],
-      ['Total Biaya Karyawan',Math.round(report.payroll)],
-      ['',''],
-      ['TOTAL BIAYA OPERASIONAL + KARYAWAN',Math.round(report.totalCost)],
-      ['LABA BERSIH OPERASIONAL',Math.round(report.operatingNet)],
-      ['MARGIN OPERASIONAL',`${report.operatingMargin.toFixed(2)}%`],
-      ['',''],
-      ['CADANGAN & KEWAJIBAN',''],
-      ...report.reserveDetail.map(row=>[`  ${row.label}`,Math.round(row.amount)]),
-      ['Total Cadangan',Math.round(report.reserveTotal)],
-      ['',''],
-      ['LABA BERSIH SETELAH CADANGAN',Math.round(report.netAfterReserve)],
-      ['MARGIN SETELAH CADANGAN',`${report.marginAfterReserve.toFixed(2)}%`]
-    ],
+    businessName:'HappyLaundry Babakan',
     summary:[
-      ['Pendapatan',Math.round(report.revenue)],
+      ['Pendapatan / Omzet',Math.round(report.revenue)],
+      ['Biaya Operasional',Math.round(report.operating)],
+      ['Biaya Karyawan',Math.round(report.payroll)],
       ['Laba Bersih Operasional',Math.round(report.operatingNet)],
       ['Total Cadangan',Math.round(report.reserveTotal)],
-      ['Laba Setelah Cadangan',Math.round(report.netAfterReserve)]
-    ] as Array<[string,string|number]>
+      ['Laba Bersih Setelah Cadangan',Math.round(report.netAfterReserve)]
+    ] as Array<[string,string|number]>,
+    sections:[
+      {
+        title:'A. Pendapatan',
+        rows:[
+          ['Omzet / Nilai Order Masuk',Math.round(report.revenue)],
+          ['Kas Masuk',Math.round(report.cashIn)],
+          ['Piutang Aktif',Math.round(report.receivable)]
+        ] as Array<[string,string|number]>
+      },
+      {
+        title:'B. Biaya Operasional',
+        rows:report.operatingByCategory.map(([name,value])=>[name,Math.round(value)] as [string,number]),
+        total:['Subtotal Biaya Operasional',Math.round(report.operating)] as [string,number]
+      },
+      {
+        title:'C. Biaya Karyawan',
+        rows:[
+          ['Uang Hadir',Math.round(report.attendancePay)],
+          ['Tunjangan',Math.round(report.allowance)],
+          ['Bonus',Math.round(report.bonus)],
+          ['Bagi Hasil',Math.round(report.revenueShare)],
+          ['Komisi Produksi',Math.round(report.productionCommission)],
+          ['Komisi Kurir',Math.round(report.courierCommission)]
+        ] as Array<[string,string|number]>,
+        total:['Subtotal Biaya Karyawan',Math.round(report.payroll)] as [string,number]
+      },
+      {
+        title:'D. Cadangan & Kewajiban',
+        rows:report.reserveDetail.map(row=>[row.label,Math.round(row.amount)] as [string,number]),
+        total:['Subtotal Cadangan',Math.round(report.reserveTotal)] as [string,number]
+      }
+    ],
+    resultRows:[
+      ['Total Biaya Operasional + Karyawan',Math.round(report.totalCost)],
+      ['Laba Bersih Operasional',Math.round(report.operatingNet)],
+      ['Margin Operasional',`${report.operatingMargin.toFixed(2)}%`],
+      ['Total Cadangan',Math.round(report.reserveTotal)],
+      ['Laba Bersih Setelah Cadangan',Math.round(report.netAfterReserve)]
+    ] as Array<[string,string|number]>,
+    notes:[
+      'Kas Masuk dan Piutang ditampilkan sebagai informasi arus kas; dasar pendapatan laba rugi adalah nilai order masuk pada periode terpilih.',
+      'Cadangan dipisahkan dari biaya operasional agar Laba Bersih Operasional dan Laba Setelah Cadangan mudah dibandingkan.'
+    ]
   })
 
   const detailTitle={
@@ -550,8 +566,8 @@ export function ProfitLossPage(){
       description="Pisahkan laba operasional dari laba setelah penyusutan, THR, kesehatan, dan cadangan tak terduga."
       action={<div className="report-actions">
         <button className="secondary-button" onClick={openReserveSettings}><Settings2 size={17}/>Atur Cadangan</button>
-        <button className="secondary-button" onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={17}/>XLS</button>
-        <button className="secondary-button" onClick={()=>printPdf(exportOptions())}><FileText size={17}/>PDF</button>
+        <button className="secondary-button" onClick={()=>downloadFinancialStatementXls(exportOptions())}><FileSpreadsheet size={17}/>XLS</button>
+        <button className="secondary-button" onClick={()=>printFinancialStatementPdf(exportOptions())}><FileText size={17}/>PDF</button>
       </div>}
     />
 

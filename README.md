@@ -673,3 +673,13 @@ test
 - Judul halaman, tombol Tambah, tombol Kembali, dan action header tetap terlihat saat scroll ke bawah.
 - Side menu tetap model click drawer dari V113.0.108.
 - Tidak ada SQL baru.
+
+
+## V113.0.112 — Professional Profit Loss Export
+- Dibangun kembali dari baseline stabil V113.0.109.
+- Export Laba Rugi XLS sekarang mempunyai 2 sheet: Ringkasan Laba Rugi dan Rincian.
+- Angka uang memakai format Rupiah, bukan angka mentah.
+- Ringkasan utama, subtotal, laba operasional, cadangan, dan laba setelah cadangan dibuat lebih jelas.
+- Rincian dibagi menjadi Pendapatan, Biaya Operasional, Biaya Karyawan, dan Cadangan & Kewajiban.
+- PDF Laba Rugi juga memakai layout ringkasan dan section yang lebih mudah dibaca.
+- Tidak ada SQL baru.
