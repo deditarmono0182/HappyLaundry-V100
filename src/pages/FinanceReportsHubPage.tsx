@@ -162,25 +162,46 @@ export function FinanceReportsHubPage(){
   },[periodOrders])
 
   const chart=useMemo(()=>{
-    return Array.from({length:7},(_,index)=>{
-      const key=addBusinessDays(to,-(6-index))
-      const dayOrders=orders.filter(row=>row.status!=='cancelled'&&businessDateKey(row.created_at)===key)
-      const dayPayments=payments.filter(row=>businessDateKey(row.created_at)===key)
+    const start=from<=to?from:to
+    const end=from<=to?to:from
+    const keys:string[]=[]
+    for(let key=start;key<=end;key=addBusinessDays(key,1))keys.push(key)
+
+    const bucketCount=Math.min(7,Math.max(1,keys.length))
+    const bucketSize=Math.ceil(keys.length/bucketCount)
+
+    return Array.from({length:bucketCount},(_,index)=>{
+      const bucketKeys=keys.slice(index*bucketSize,Math.min(keys.length,(index+1)*bucketSize))
+      const bucketStart=bucketKeys[0]||start
+      const bucketEnd=bucketKeys[bucketKeys.length-1]||bucketStart
+      const keySet=new Set(bucketKeys)
+      const bucketOrders=orders.filter(row=>row.status!=='cancelled'&&keySet.has(businessDateKey(row.created_at)))
+      const bucketPayments=payments.filter(row=>keySet.has(businessDateKey(row.created_at)))
+
+      let label=''
+      if(bucketKeys.length<=1){
+        label=businessDateLabel(`${bucketStart}T12:00:00+07:00`,{day:'2-digit',month:'short'})
+      }else{
+        const a=businessDateLabel(`${bucketStart}T12:00:00+07:00`,{day:'2-digit',month:'short'})
+        const b=businessDateLabel(`${bucketEnd}T12:00:00+07:00`,{day:'2-digit',month:'short'})
+        label=`${a}–${b}`
+      }
+
       return{
-        key,
-        label:businessDateLabel(`${key}T12:00:00+07:00`,{weekday:'short'}),
-        omzet:dayOrders.reduce((sum,row)=>sum+Number(row.total||0),0),
-        cashIn:dayPayments.reduce((sum,row)=>sum+Number(row.amount||0),0),
-        orders:dayOrders.length
+        key:`${bucketStart}-${bucketEnd}`,
+        label,
+        omzet:bucketOrders.reduce((sum,row)=>sum+Number(row.total||0),0),
+        cashIn:bucketPayments.reduce((sum,row)=>sum+Number(row.amount||0),0),
+        orders:bucketOrders.length
       }
     })
-  },[orders,payments,to])
+  },[orders,payments,from,to])
 
   const maxChart=Math.max(1,...chart.flatMap(row=>[row.omzet,row.cashIn]))
   const maxOrders=Math.max(1,...chart.map(row=>row.orders))
   const chartWidth=760,chartHeight=255,padX=38,padY=28
   const innerW=chartWidth-padX*2,innerH=chartHeight-padY*2
-  const groupW=innerW/7
+  const groupW=innerW/Math.max(1,chart.length)
   const moneyY=(value:number)=>padY+innerH-(value/maxChart)*innerH
   const orderPoints=chart.map((row,index)=>({
     x:padX+groupW*(index+.5),
@@ -195,19 +216,17 @@ export function FinanceReportsHubPage(){
     />
 
     <section className="panel finance-hub-period-panel">
-      <div className="finance-hub-period-left">
-        <b>Periode Laporan</b>
-        <div className="finance-hub-quick-periods">
-          <button type="button" className={preset==='today'?'is-active':''} onClick={()=>setQuickPeriod('today')}>Hari Ini</button>
-          <button type="button" className={preset==='7d'?'is-active':''} onClick={()=>setQuickPeriod('7d')}>7 Hari</button>
-          <button type="button" className={preset==='month'?'is-active':''} onClick={()=>setQuickPeriod('month')}>Bulan Ini</button>
-        </div>
+      <div className="finance-hub-period-title"><CalendarDays size={14}/><b>Periode</b></div>
+      <div className="finance-hub-quick-periods">
+        <button type="button" className={preset==='today'?'is-active':''} onClick={()=>setQuickPeriod('today')}>Hari Ini</button>
+        <button type="button" className={preset==='7d'?'is-active':''} onClick={()=>setQuickPeriod('7d')}>7 Hari</button>
+        <button type="button" className={preset==='month'?'is-active':''} onClick={()=>setQuickPeriod('month')}>Bulan Ini</button>
       </div>
       <div className="finance-hub-custom-period">
-        <label>Dari<input type="date" value={from} onChange={e=>{setFrom(e.target.value);setPreset('custom')}}/></label>
-        <label>Sampai<input type="date" value={to} onChange={e=>{setTo(e.target.value);setPreset('custom')}}/></label>
-        <span className="finance-hub-current-period"><CalendarDays size={13}/>{periodLabel}</span>
+        <label><span>Dari</span><input type="date" value={from} onChange={e=>{setFrom(e.target.value);setPreset('custom')}}/></label>
+        <label><span>Sampai</span><input type="date" value={to} onChange={e=>{setTo(e.target.value);setPreset('custom')}}/></label>
       </div>
+      <span className="finance-hub-current-period">{periodLabel}</span>
     </section>
 
     {message&&<div className="error-box">{message}</div>}
@@ -251,7 +270,7 @@ export function FinanceReportsHubPage(){
             <span className="legend-cash">Kas Masuk</span>
             <span className="legend-orders">Jumlah Order</span>
           </div>
-          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img" aria-label="Grafik keuangan dan order 7 hari">
+          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img" aria-label={`Grafik keuangan dan order ${periodLabel}`}>
             {[0,1,2,3,4].map(level=>{
               const y=padY+(innerH/4)*level
               return <line key={level} x1={padX} x2={chartWidth-padX} y1={y} y2={y} className="finance-grid-line"/>

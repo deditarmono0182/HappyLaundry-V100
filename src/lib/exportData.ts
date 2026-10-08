@@ -17,6 +17,14 @@ const escapeHtml=(value:ExportCell)=>
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
 
+const escapeXml=(value:ExportCell)=>
+  String(value??'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&apos;')
+
 const safeName=(value:string)=>
   value.toLowerCase()
     .replace(/[^a-z0-9_-]+/gi,'-')
@@ -24,37 +32,81 @@ const safeName=(value:string)=>
     || 'happylaundry-export'
 
 export function downloadXls(options:ExportTableOptions){
-  const summary=(options.summary||[])
-    .map(([label,value])=>`<tr><td colspan="${Math.max(1,options.headers.length-1)}"><b>${escapeHtml(label)}</b></td><td><b>${escapeHtml(value)}</b></td></tr>`)
-    .join('')
+  const currencyHint=(label:string)=>
+    /(nilai|harga|total|omzet|pendapatan|pengeluaran|biaya|kas|bayar|pembayaran|saldo|piutang|komisi|gaji|bonus|tunjangan|laba|profit|revenue|amount|subtotal|tagihan|sisa|cash)/i.test(label)
 
-  const html=`<!doctype html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <style>
-      table{border-collapse:collapse;font-family:Arial,sans-serif;font-size:11pt}
-      th,td{border:1px solid #999;padding:6px 8px}
-      th{background:#dceeff;font-weight:bold}
-      h1{font-family:Arial,sans-serif;font-size:18pt}
-      p{font-family:Arial,sans-serif}
-      .summary td{background:#f4f8fb}
-    </style>
-  </head>
-  <body>
-    <h1>${escapeHtml(options.title)}</h1>
-    ${options.subtitle?`<p>${escapeHtml(options.subtitle)}</p>`:''}
-    <table>
-      <thead><tr>${options.headers.map(h=>`<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>
-      <tbody>
-        ${options.rows.map(row=>`<tr>${row.map(cell=>`<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}
-      </tbody>
-      ${summary?`<tfoot class="summary">${summary}</tfoot>`:''}
-    </table>
-  </body>
-  </html>`
+  const xmlCell=(value:ExportCell,style:string='Text')=>{
+    if(typeof value==='number'&&Number.isFinite(value)){
+      return `<Cell ss:StyleID="${style}"><Data ss:Type="Number">${value}</Data></Cell>`
+    }
+    return `<Cell ss:StyleID="${style}"><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`
+  }
 
-  const blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'})
+  const headerCells=options.headers.map(h=>`<Cell ss:StyleID="Header"><Data ss:Type="String">${escapeXml(h)}</Data></Cell>`).join('')
+  const bodyRows=options.rows.map(row=>{
+    const cells=options.headers.map((header,index)=>{
+      const value=row[index]
+      if(typeof value==='number'&&Number.isFinite(value)){
+        return xmlCell(value,currencyHint(header)?'Currency':'Number')
+      }
+      return xmlCell(value,'Text')
+    }).join('')
+    return `<Row>${cells}</Row>`
+  }).join('')
+
+  const summaryRows=(options.summary||[]).map(([label,value])=>{
+    const valueStyle=typeof value==='number'&&currencyHint(label)?'SummaryCurrency':typeof value==='number'?'SummaryNumber':'SummaryValue'
+    return `<Row><Cell ss:StyleID="SummaryLabel" ss:MergeAcross="${Math.max(0,options.headers.length-2)}"><Data ss:Type="String">${escapeXml(label)}</Data></Cell>${xmlCell(value,valueStyle)}</Row>`
+  }).join('')
+
+  const columnDefs=options.headers.map((header,index)=>{
+    const wide=/(nama|pelanggan|layanan|keterangan|deskripsi|order|bagian|komponen)/i.test(header)
+    const width=index===0?(wide?165:115):wide?190:115
+    return `<Column ss:Width="${width}"/>`
+  }).join('')
+
+  const brand='HappyLaundry Babakan'
+  const subtitle=options.subtitle||'Laporan data operasional'
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="10"/><Alignment ss:Vertical="Center"/></Style>
+  <Style ss:ID="Brand"><Font ss:FontName="Arial" ss:Size="16" ss:Bold="1" ss:Color="#1779B8"/></Style>
+  <Style ss:ID="Title"><Font ss:FontName="Arial" ss:Size="13" ss:Bold="1" ss:Color="#173F52"/></Style>
+  <Style ss:ID="Subtitle"><Font ss:FontName="Arial" ss:Size="9" ss:Color="#68808C"/></Style>
+  <Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#173F52"/><Interior ss:Color="#DDEFFC" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#9CC6DF"/></Borders></Style>
+  <Style ss:ID="Text"><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E7EEF3"/></Borders></Style>
+  <Style ss:ID="Number"><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="#,##0"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E7EEF3"/></Borders></Style>
+  <Style ss:ID="Currency"><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="&quot;Rp&quot; #,##0"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E7EEF3"/></Borders></Style>
+  <Style ss:ID="SummaryLabel"><Font ss:Bold="1" ss:Color="#294A60"/><Interior ss:Color="#F1F7FB" ss:Pattern="Solid"/></Style>
+  <Style ss:ID="SummaryValue"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1"/><Interior ss:Color="#F1F7FB" ss:Pattern="Solid"/></Style>
+  <Style ss:ID="SummaryNumber"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1"/><Interior ss:Color="#F1F7FB" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0"/></Style>
+  <Style ss:ID="SummaryCurrency"><Alignment ss:Horizontal="Right"/><Font ss:Bold="1"/><Interior ss:Color="#E8F7EF" ss:Pattern="Solid"/><NumberFormat ss:Format="&quot;Rp&quot; #,##0"/></Style>
+ </Styles>
+ <Worksheet ss:Name="Laporan">
+  <Table ss:ExpandedColumnCount="${Math.max(1,options.headers.length)}">
+   ${columnDefs}
+   <Row ss:Height="25"><Cell ss:StyleID="Brand" ss:MergeAcross="${Math.max(0,options.headers.length-1)}"><Data ss:Type="String">${brand}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Title" ss:MergeAcross="${Math.max(0,options.headers.length-1)}"><Data ss:Type="String">${escapeXml(options.title)}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Subtitle" ss:MergeAcross="${Math.max(0,options.headers.length-1)}"><Data ss:Type="String">${escapeXml(subtitle)}</Data></Cell></Row>
+   <Row ss:Height="8"/>
+   <Row>${headerCells}</Row>
+   ${bodyRows}
+   ${summaryRows?`<Row ss:Height="8"/>${summaryRows}`:''}
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <FreezePanes/><FrozenNoSplit/><SplitHorizontal>5</SplitHorizontal><TopRowBottomPane>5</TopRowBottomPane>
+   <ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>`
+
+  const blob=new Blob(['\ufeff',xml],{type:'application/vnd.ms-excel;charset=utf-8'})
   const url=URL.createObjectURL(blob)
   const a=document.createElement('a')
   a.href=url
@@ -106,14 +158,14 @@ export function printPdf(options:ExportTableOptions){
         <h1>${escapeHtml(options.title)}</h1>
         ${options.subtitle?`<p>${escapeHtml(options.subtitle)}</p>`:''}
       </div>
-      <div class="brand"><b>HappyLaundry Enterprise</b><br>${new Date().toLocaleString('id-ID')}</div>
+      <div class="brand"><b>HappyLaundry Babakan</b><br>${new Date().toLocaleString('id-ID')}</div>
     </header>
     ${summary?`<section class="summary">${summary}</section>`:''}
     <table>
       <thead><tr>${options.headers.map(h=>`<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>
       <tbody>${options.rows.map(row=>`<tr>${row.map(cell=>`<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
     </table>
-    <footer>HappyLaundry Enterprise V110.9 • ${options.rows.length} baris data</footer>
+    <footer>HappyLaundry Babakan • ${options.rows.length} baris data</footer>
     <div class="no-print"><button onclick="window.print()">Simpan / Cetak PDF</button></div>
   </body>
   </html>`
@@ -141,14 +193,6 @@ export interface FinancialStatementExportOptions{
   resultRows:Array<[string,number|string]>
   notes?:string[]
 }
-
-const escapeXml=(value:ExportCell)=>
-  String(value??'')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&apos;')
 
 const xmlCell=(value:number|string,style='Text')=>{
   const isNumber=typeof value==='number'&&Number.isFinite(value)

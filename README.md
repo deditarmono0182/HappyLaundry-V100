@@ -683,3 +683,16 @@ test
 - Rincian dibagi menjadi Pendapatan, Biaya Operasional, Biaya Karyawan, dan Cadangan & Kewajiban.
 - PDF Laba Rugi juga memakai layout ringkasan dan section yang lebih mudah dibaca.
 - Tidak ada SQL baru.
+
+
+## V113.0.113 — Finance Chart & Export Polish
+- Periode Keuangan & Laporan dibuat satu baris ringkas agar tidak memakan ruang.
+- Grafik Keuangan & Order sekarang mengikuti periode yang dipilih:
+  Hari Ini = hari terpilih, 7 Hari = 7 hari, Bulan Ini/custom = seluruh rentang dibagi maksimal 7 kelompok.
+- Generic Export XLS di seluruh aplikasi diperbarui dengan header HappyLaundry Babakan.
+- Nilai uang otomatis diberi format Rp #,##0 berdasarkan nama kolom/komponen.
+- Angka jumlah/qty memakai pemisah ribuan tanpa simbol Rp.
+- Header tabel, ringkasan, lebar kolom, dan freeze pane dibuat lebih rapi.
+- Generic PDF juga memakai brand HappyLaundry Babakan agar konsisten.
+- Export Laba Rugi profesional dari V113.0.112 tetap dipertahankan.
+- Tidak ada SQL baru.

@@ -12370,3 +12370,78 @@ body.density-compact td{
     padding:9px 12px 10px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.113 — Compact Period + Live Chart
+   ========================================================= */
+.finance-hub-period-panel{
+  width:max-content!important;
+  max-width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  padding:7px 9px!important;
+  margin:0!important;
+  border-radius:12px!important;
+  background:#fff!important;
+}
+.finance-hub-period-title{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  color:#315d70;
+  white-space:nowrap;
+}
+.finance-hub-period-title b{
+  font-size:9px!important;
+}
+.finance-hub-quick-periods{
+  display:flex!important;
+  gap:5px!important;
+  flex-wrap:nowrap!important;
+}
+.finance-hub-quick-periods button{
+  min-height:28px!important;
+  height:28px!important;
+  padding:0 9px!important;
+  font-size:8.5px!important;
+  border-radius:7px!important;
+  white-space:nowrap;
+}
+.finance-hub-custom-period{
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  flex-wrap:nowrap!important;
+}
+.finance-hub-custom-period label{
+  display:flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  font-size:8px!important;
+  white-space:nowrap;
+}
+.finance-hub-custom-period input{
+  width:128px!important;
+  height:28px!important;
+  padding:0 6px!important;
+  font-size:8.5px!important;
+  border-radius:7px!important;
+}
+.finance-hub-current-period{
+  min-height:28px!important;
+  height:28px!important;
+  padding:0 8px!important;
+  font-size:8px!important;
+  white-space:nowrap;
+}
+@media(max-width:900px){
+  .finance-hub-period-panel{
+    width:100%!important;
+    overflow-x:auto!important;
+    flex-direction:row!important;
+    align-items:center!important;
+  }
+}
