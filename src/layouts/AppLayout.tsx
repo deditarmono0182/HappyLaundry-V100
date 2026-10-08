@@ -313,8 +313,8 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.107 Consistent Profit Formula</span></div>
-          <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.108 Click Drawer Menu</span></div>
+          <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
           {items.filter(item => {
@@ -394,7 +394,7 @@ export function AppLayout() {
 
       <main className="main-content">
         <header className="topbar">
-          <button className="icon-button mobile-only" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={22} /></button>
+          <button className="icon-button drawer-menu-button" onClick={() => setOpen(true)} aria-label="Buka menu"><Menu size={22} /></button>
           <div><span className="eyebrow">HAPPYLAUNDRY BABAKAN</span><h1>Sistem Operasional Laundry</h1></div>
           <div className="topbar-actions"><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
         </header>

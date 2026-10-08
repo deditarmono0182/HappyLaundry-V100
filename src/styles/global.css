@@ -12234,3 +12234,75 @@ body.density-compact td{
     grid-template-columns:repeat(6,minmax(0,1fr));
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.108 — Simple Click Drawer Menu
+   Sidebar hidden by default on desktop/tablet/mobile.
+   ========================================================= */
+.sidebar{
+  transform:translateX(-105%)!important;
+  transition:transform .22s ease!important;
+  width:min(88vw,272px)!important;
+  max-width:272px!important;
+  z-index:60!important;
+}
+.sidebar.sidebar-open{
+  transform:translateX(0)!important;
+}
+.main-content{
+  margin-left:0!important;
+  width:100%!important;
+  min-width:0!important;
+}
+.drawer-menu-button{
+  display:inline-grid!important;
+  place-items:center;
+  width:38px!important;
+  height:38px!important;
+  flex:0 0 auto;
+  border:1px solid #d7e6f1!important;
+  border-radius:10px!important;
+  background:#f2f8fd!important;
+  color:#176fc0!important;
+  cursor:pointer;
+}
+.drawer-menu-button:hover{
+  background:#e8f3fb!important;
+}
+.drawer-close-button{
+  display:inline-grid!important;
+  place-items:center;
+  width:34px!important;
+  height:34px!important;
+  margin-left:auto!important;
+  border:1px solid rgba(255,255,255,.2)!important;
+  border-radius:9px!important;
+  background:rgba(255,255,255,.10)!important;
+  color:#fff!important;
+  cursor:pointer;
+}
+.drawer-close-button:hover{
+  background:rgba(255,255,255,.18)!important;
+}
+.overlay{
+  display:block!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:55!important;
+  background:rgba(8,37,65,.34)!important;
+  backdrop-filter:blur(1px);
+  cursor:pointer;
+}
+.topbar{
+  padding-left:clamp(12px,1.7vw,24px)!important;
+}
+@media(max-width:900px){
+  .sidebar{
+    width:min(86vw,272px)!important;
+  }
+  .main-content{
+    margin-left:0!important;
+    width:100%!important;
+  }
+}

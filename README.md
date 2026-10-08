@@ -656,3 +656,12 @@ test
 - Dashboard Kontrol Bisnis Owner sekarang mengambil Biaya Operasional dari sumber resmi pengeluaran dan menampilkan Biaya Karyawan.
 - Grafik Dashboard tidak lagi menampilkan seri 'Laba Bersih' dengan rumus lama; grafik difokuskan ke Omzet, Kas Masuk, dan Jumlah Order.
 - Tidak ada SQL baru.
+
+
+## V113.0.108 — Simple Click Drawer Menu
+- Side menu tidak lagi sticky di desktop.
+- Default menu tertutup pada desktop, tablet, dan HP.
+- Klik tombol menu di topbar untuk membuka drawer dari kiri.
+- Klik X, area gelap di luar menu, atau pilih halaman untuk menutup kembali.
+- Area konten sekarang memakai lebar penuh saat menu tertutup.
+- Tidak ada SQL baru.
