@@ -12306,3 +12306,67 @@ body.density-compact td{
     width:100%!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.109 — Sticky Topbar + Page Header
+   Keeps menu button, page title, action button, and back button visible.
+   ========================================================= */
+.topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:45!important;
+  background:rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(10px);
+  box-shadow:0 1px 0 #dbe8f0;
+}
+
+.page-heading{
+  position:sticky!important;
+  top:64px!important;
+  z-index:38!important;
+  margin-left:-20px!important;
+  margin-right:-20px!important;
+  padding:10px 20px 12px!important;
+  background:rgba(244,250,255,.97)!important;
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid #d9e8f1;
+  box-shadow:0 8px 18px rgba(29,79,105,.05);
+}
+
+.page-heading h2{
+  font-size:22px!important;
+  margin:2px 0!important;
+}
+
+.page-heading p{
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+
+.page-heading .eyebrow{
+  font-size:9px!important;
+}
+
+.page-heading-right{
+  align-items:center!important;
+}
+
+.page-heading-action{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+
+.page-back-button{
+  flex:0 0 auto!important;
+}
+
+@media(max-width:900px){
+  .page-heading{
+    top:58px!important;
+    margin-left:-12px!important;
+    margin-right:-12px!important;
+    padding:9px 12px 10px!important;
+  }
+}

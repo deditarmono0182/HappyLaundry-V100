@@ -665,3 +665,11 @@ test
 - Klik X, area gelap di luar menu, atau pilih halaman untuk menutup kembali.
 - Area konten sekarang memakai lebar penuh saat menu tertutup.
 - Tidak ada SQL baru.
+
+
+## V113.0.109 — Sticky Topbar + Page Header
+- Topbar aplikasi sekarang sticky saat halaman di-scroll.
+- Page header halaman utama juga sticky di bawah topbar.
+- Judul halaman, tombol Tambah, tombol Kembali, dan action header tetap terlihat saat scroll ke bawah.
+- Side menu tetap model click drawer dari V113.0.108.
+- Tidak ada SQL baru.
