@@ -722,3 +722,12 @@ test
 - Menambahkan struktur akuntansi V113.0.116.
 - Memperbaiki build error V113.0.116: ikon Banknote pada ProfitLossPage sudah di-import.
 - Tidak ada SQL baru.
+
+
+## V113.0.120 — Global Uniform Typography
+- Dibangun dari V113.0.117.
+- Menyeragamkan ukuran teks operasional di seluruh aplikasi ke 12px.
+- Berlaku untuk Dashboard, Kasir, Order, Produksi, Pelanggan, Layanan, Stok, Supplier, Pembayaran, Keuangan & Laporan, Laba Rugi, Payroll, Backup, Pengaturan, tabel, tombol, input, modal, dan sidebar.
+- Nilai Rupiah, judul kartu, label, tabel, catatan, badge, dan tombol tidak lagi meloncat-loncat ukurannya.
+- Branding topbar tetap dikecualikan: HappyLaundry tetap besar dan Sistem Operasional Laundry tetap kecil sesuai permintaan sebelumnya.
+- Tidak ada perubahan rumus, data, atau SQL.

@@ -12560,3 +12560,167 @@ body.density-compact td{
 .pl-cash-surplus-row b{color:#08764e!important}
 .pl-summary-divider{height:1px;background:#dfeaf0;margin:7px 0}
 @media(max-width:700px){.finance-live-kpis{grid-template-columns:1fr!important}}
+
+
+/* =========================================================
+   HappyLaundry V113.0.120 — Global Uniform Typography
+   Seragamkan ukuran teks operasional di seluruh aplikasi.
+   Branding topbar dikecualikan agar tetap mengikuti desain brand.
+   ========================================================= */
+
+/* Base text */
+body,
+button,
+input,
+select,
+textarea,
+table,
+th,
+td,
+label,
+small,
+span,
+p,
+b,
+strong,
+em,
+a{
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+
+/* Page content headings */
+.page-container h1,
+.page-container h2,
+.page-container h3,
+.page-container h4,
+.page-container h5,
+.page-container h6,
+.panel h1,
+.panel h2,
+.panel h3,
+.panel h4,
+.panel h5,
+.panel h6,
+.page-heading h2,
+.panel-heading h3,
+.finance-analytics-heading h3,
+.finance-hub-menu-heading h3,
+.finance-hub-section h2,
+.dashboard-display-title b{
+  font-size:12px!important;
+  line-height:1.4!important;
+  font-weight:800!important;
+}
+
+/* Financial/card values should not jump in size */
+.stat-card strong,
+.finance-live-kpi b,
+.dashboard-money-value,
+.pl-row b,
+.pl-static-row b,
+.pl-final-total b,
+.pl-cash-surplus-row b,
+.record-count,
+.status-chip,
+.badge,
+.owner-kpi strong,
+.owner-business-control strong{
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+
+/* Table text */
+table th,
+table td,
+table td b,
+table td small{
+  font-size:12px!important;
+  line-height:1.4!important;
+}
+
+/* Buttons / chips */
+.primary-button,
+.secondary-button,
+.icon-button,
+.drawer-menu-button,
+.drawer-close-button,
+.finance-hub-quick-periods button,
+.finance-hub-current-period,
+.status-chip,
+.badge,
+.record-count{
+  font-size:12px!important;
+}
+
+/* Inputs */
+input,
+select,
+textarea,
+.search-box input{
+  font-size:12px!important;
+}
+
+/* Sidebar menu uniform */
+.sidebar,
+.sidebar nav a,
+.sidebar-footer,
+.sidebar-footer *,
+.brand span,
+.account,
+.account *{
+  font-size:12px!important;
+}
+
+/* Keep only the requested brand hierarchy */
+.topbar-branding h1{
+  font-size:25px!important;
+  line-height:1.04!important;
+}
+.topbar-branding span{
+  font-size:10px!important;
+  line-height:1.15!important;
+}
+
+/* Existing old topbar fallback if branding class is absent */
+.topbar .eyebrow{
+  font-size:10px!important;
+}
+.topbar h1:not(.topbar-branding h1){
+  font-size:12px!important;
+}
+
+/* Responsive: remain uniform instead of shrinking */
+@media(max-width:900px){
+  body,
+  button,
+  input,
+  select,
+  textarea,
+  table,
+  th,
+  td,
+  label,
+  small,
+  span,
+  p,
+  b,
+  strong,
+  em,
+  a,
+  .page-container h1,
+  .page-container h2,
+  .page-container h3,
+  .page-container h4,
+  .page-container h5,
+  .page-container h6{
+    font-size:12px!important;
+  }
+
+  .topbar-branding h1{
+    font-size:21px!important;
+  }
+  .topbar-branding span{
+    font-size:9px!important;
+  }
+}
