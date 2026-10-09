@@ -12765,3 +12765,15 @@ html[data-density="ultra"] .main-content *{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.123 — Owner Cash Advance Correction
+   ========================================================= */
+.cash-advance-history-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  flex-wrap:wrap;
+}

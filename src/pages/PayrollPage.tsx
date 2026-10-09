@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CalendarCheck2, CheckCircle2, FileSpreadsheet, FileText, Gift,
-  HandCoins, Plus, ReceiptText, Save, Search, Settings2, Trash2, UsersRound, WalletCards
+  HandCoins, Pencil, Plus, ReceiptText, Save, Search, Settings2, Trash2, UsersRound, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
@@ -172,6 +172,8 @@ export function PayrollPage(){
   const[cashAdvanceForm,setCashAdvanceForm]=useState({amount:'0',note:''})
   const[cancelCashAdvance,setCancelCashAdvance]=useState<CashAdvance|null>(null)
   const[cancelCashAdvanceReason,setCancelCashAdvanceReason]=useState('')
+  const[correctCashAdvance,setCorrectCashAdvance]=useState<CashAdvance|null>(null)
+  const[correctCashAdvanceForm,setCorrectCashAdvanceForm]=useState({amount:'0',note:'',reason:''})
   const[deductCashAdvanceEmployee,setDeductCashAdvanceEmployee]=useState<Employee|null>(null)
   const[cashAdvanceDeductionAmount,setCashAdvanceDeductionAmount]=useState('')
   const[paymentForm,setPaymentForm]=useState({amount:'0',payment_method:'Transfer',note:''})
@@ -639,6 +641,55 @@ export function PayrollPage(){
     setBusy(false)
   }
 
+  const openCorrectCashAdvance=(item:CashAdvance)=>{
+    setCorrectCashAdvance(item)
+    setCorrectCashAdvanceForm({
+      amount:String(Number(item.amount||0)),
+      note:item.note||'',
+      reason:''
+    })
+    setMessage('')
+    setSuccess('')
+  }
+
+  const saveCorrectCashAdvance=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!correctCashAdvance)return
+
+    const amount=Math.max(0,Number(correctCashAdvanceForm.amount)||0)
+    const deducted=Math.max(0,Number(correctCashAdvance.amount||0)-Number(correctCashAdvance.remaining_amount||0))
+    const reason=correctCashAdvanceForm.reason.trim()
+
+    if(amount<=0){setMessage('Nominal kas bon harus lebih dari Rp 0.');return}
+    if(amount+0.01<deducted){
+      setMessage(`Nominal tidak boleh lebih kecil dari kas bon yang sudah dipotong (${formatRupiah(deducted)}).`)
+      return
+    }
+    if(reason.length<5){
+      setMessage('Alasan koreksi minimal 5 karakter.')
+      return
+    }
+
+    setBusy(true);setMessage('');setSuccess('')
+    const result=await supabase.rpc('v113123_owner_correct_cash_advance',{
+      p_cash_advance_id:correctCashAdvance.id,
+      p_new_amount:amount,
+      p_new_note:correctCashAdvanceForm.note.trim()||null,
+      p_reason:reason
+    })
+    if(result.error){
+      setMessage(result.error.message)
+      setBusy(false)
+      return
+    }
+
+    setCorrectCashAdvance(null)
+    setCorrectCashAdvanceForm({amount:'0',note:'',reason:''})
+    setSuccess('Koreksi kas bon berhasil disimpan. Sisa kas bon dan audit koreksi sudah diperbarui.')
+    await load()
+    setBusy(false)
+  }
+
   const confirmCancelCashAdvance=async(event:FormEvent)=>{
     event.preventDefault()
     if(!cancelCashAdvance)return
@@ -986,7 +1037,10 @@ export function PayrollPage(){
                 <td>{item.cancelled_at?'-':formatRupiah(Number(item.remaining_amount||0))}</td>
                 <td><span className={`cash-advance-status ${item.cancelled_at?'cancelled':'active'}`}>{item.cancelled_at?'Dibatalkan':'Aktif'}</span></td>
                 <td>{item.cancelled_at?`Batal: ${item.cancel_reason||'-'}`:(item.note||'-')}</td>
-                <td>{!item.cancelled_at&&<button className="finance-row-action danger-soft" onClick={()=>{setCancelCashAdvance(item);setCancelCashAdvanceReason('')}}><Trash2 size={14}/>Batalkan</button>}</td>
+                <td>{!item.cancelled_at&&<div className="cash-advance-history-actions">
+                  <button className="finance-row-action" onClick={()=>openCorrectCashAdvance(item)}><Pencil size={14}/>Koreksi</button>
+                  <button className="finance-row-action danger-soft" onClick={()=>{setCancelCashAdvance(item);setCancelCashAdvanceReason('')}}><Trash2 size={14}/>Batalkan</button>
+                </div>}</td>
               </tr>)}
               {cashHistory.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada kas bon.</td></tr>}
             </tbody>
@@ -1039,6 +1093,57 @@ export function PayrollPage(){
           <div className="form-actions">
             <button type="button" className="secondary-button" onClick={()=>setDeductCashAdvanceEmployee(null)} disabled={busy}>Batal</button>
             <button className="primary-button" disabled={busy||Number(cashAdvanceDeductionAmount)<=0||maxAmount<=0}><HandCoins size={16}/>{busy?'Memproses...':'Potong dari Gaji'}</button>
+          </div>
+        </form>
+      </Modal>
+    })()}
+
+    {correctCashAdvance&&(()=>{
+      const alreadyDeducted=Math.max(0,Number(correctCashAdvance.amount||0)-Number(correctCashAdvance.remaining_amount||0))
+      const newAmount=Math.max(0,Number(correctCashAdvanceForm.amount)||0)
+      const newRemaining=Math.max(0,newAmount-alreadyDeducted)
+      return <Modal title="Koreksi Kas Bon — Owner" onClose={()=>!busy&&setCorrectCashAdvance(null)}>
+        <form className="modal-form" onSubmit={saveCorrectCashAdvance}>
+          <div className="payroll-payment-card">
+            <div><span>Nominal Sebelumnya</span><b>{formatRupiah(Number(correctCashAdvance.amount||0))}</b></div>
+            <div><span>Sudah Dipotong dari Gaji</span><b>{formatRupiah(alreadyDeducted)}</b></div>
+            <div><span>Sisa Setelah Koreksi</span><b>{formatRupiah(newRemaining)}</b></div>
+          </div>
+          <label>Nominal Kas Bon yang Benar
+            <input
+              type="number"
+              min={Math.max(1,Math.ceil(alreadyDeducted))}
+              value={correctCashAdvanceForm.amount}
+              onChange={e=>setCorrectCashAdvanceForm({...correctCashAdvanceForm,amount:e.target.value})}
+              required
+            />
+          </label>
+          <label>Keterangan
+            <textarea
+              rows={3}
+              value={correctCashAdvanceForm.note}
+              onChange={e=>setCorrectCashAdvanceForm({...correctCashAdvanceForm,note:e.target.value})}
+              placeholder="Keterangan kas bon"
+            />
+          </label>
+          <label>Alasan Koreksi
+            <textarea
+              rows={3}
+              value={correctCashAdvanceForm.reason}
+              onChange={e=>setCorrectCashAdvanceForm({...correctCashAdvanceForm,reason:e.target.value})}
+              placeholder="Contoh: salah input nominal kas bon"
+              required
+            />
+          </label>
+          <div className="info-box">
+            Nominal tidak boleh lebih kecil dari kas bon yang sudah pernah dipotong dari gaji. Perubahan nominal akan tercatat di audit dan penyesuaian kas.
+          </div>
+          {message&&<div className="error-box">{message}</div>}
+          <div className="form-actions">
+            <button type="button" className="secondary-button" onClick={()=>setCorrectCashAdvance(null)} disabled={busy}>Batal</button>
+            <button className="primary-button" disabled={busy||newAmount<=0||correctCashAdvanceForm.reason.trim().length<5}>
+              <Pencil size={16}/>{busy?'Menyimpan...':'Simpan Koreksi'}
+            </button>
           </div>
         </form>
       </Modal>

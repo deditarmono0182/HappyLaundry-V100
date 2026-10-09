@@ -743,3 +743,15 @@ Requires SQL 066.
 - Karyawan keuangan dapat melihat daftar kas bon dan sisa piutang, tetapi tidak mendapat hak membatalkan/edit payroll.
 - Owner mendapat tombol Potong Kas Bon di Absensi & Gaji untuk memotong kas bon lama dari gaji.
 - Potongan gaji mengurangi saldo kas bon tanpa mencatat Kas Masuk baru.
+
+
+## V113.0.123 — Owner Cash Advance Correction
+Requires SQL 067.
+- Owner dapat mengoreksi kas bon dari Detail Gaji & Komisi > Riwayat Kas Bon.
+- Tombol Koreksi tersedia di samping Batalkan.
+- Koreksi mendukung nominal, keterangan, dan alasan wajib.
+- Nominal tidak boleh lebih kecil dari kas bon yang sudah dipotong dari gaji.
+- Sisa kas bon dihitung ulang otomatis.
+- Semua koreksi disimpan dalam audit table.
+- Selisih nominal otomatis membuat penyesuaian Kas Harian.
+- Potong Kas Bon dari Gaji tetap terpisah dari Koreksi Kas Bon.
