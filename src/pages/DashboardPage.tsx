@@ -386,6 +386,7 @@ export function DashboardPage() {
   const ownerEmployeeCost=ownerFinancial?.employeeCost??ownerCommission
   const ownerProfit=ownerFinancial?.operatingNet??(ownerOrderValue-ownerExpense-ownerEmployeeCost)
   const ownerAfterReserve=ownerFinancial?.netAfterReserve??ownerProfit
+  const ownerCashOperatingSurplus=ownerFinancial?.cashOperatingSurplus??(ownerCashIn-ownerExpense-ownerEmployeeCost)
   const ownerCash=ownerPeriodPayments.filter(r=>r.method==='cash').reduce((s,r)=>s+Number(r.amount),0)
   const ownerQris=ownerPeriodPayments.filter(r=>r.method==='qris').reduce((s,r)=>s+Number(r.amount),0)
   const ownerTransfer=ownerPeriodPayments.filter(r=>r.method==='transfer').reduce((s,r)=>s+Number(r.amount),0)
@@ -406,6 +407,7 @@ export function DashboardPage() {
         ['Komisi Kurir',ownerCourierCommission],
         ['Laba Bersih Operasional',ownerProfit],
         ['Laba Setelah Cadangan',ownerAfterReserve],
+        ['Surplus Kas Operasional',ownerCashOperatingSurplus],
         ['Piutang Aktif',receivable],
         ['Tunai',ownerCash],
         ['QRIS',ownerQris],
@@ -415,7 +417,7 @@ export function DashboardPage() {
         ['Sedang Diproses',processing],
         ['Siap Diambil',ready]
       ],
-      summary:[['Omzet Barang Masuk',ownerOrderValue],['Kas Masuk',ownerCashIn],['Biaya Operasional',ownerExpense],['Biaya Karyawan',ownerEmployeeCost],['Laba Bersih Operasional',ownerProfit],['Laba Setelah Cadangan',ownerAfterReserve]]
+      summary:[['Omzet Barang Masuk',ownerOrderValue],['Kas Masuk',ownerCashIn],['Biaya Operasional',ownerExpense],['Biaya Karyawan',ownerEmployeeCost],['Laba Bersih Operasional',ownerProfit],['Laba Setelah Cadangan',ownerAfterReserve],['Surplus Kas Operasional',ownerCashOperatingSurplus]]
     })
   }
 
@@ -536,7 +538,7 @@ export function DashboardPage() {
     </section>
     {isOwner&&<section className="panel owner-business-report">
       <div className="panel-heading">
-        <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Laba Bersih Operasional mengikuti rumus yang sama dengan halaman Laba Rugi.</p></div>
+        <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Piutang tidak mengurangi laba; Surplus Kas Operasional menunjukkan kas masuk setelah biaya periode.</p></div>
       </div>
       <div className="owner-business-kpis owner-business-kpis-six">
         <div><span>Omzet / Barang Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerOrderValue)}</strong></div>
@@ -544,6 +546,7 @@ export function DashboardPage() {
         <div><span>Biaya Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerExpense)}</strong></div>
         <div><span>Biaya Karyawan</span><strong className="dashboard-money-value">{formatIDR(ownerEmployeeCost)}</strong></div>
         <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerProfit)}</strong></div>
+        <div className={ownerCashOperatingSurplus>=0?'profit-positive':'profit-negative'}><span>Surplus Kas Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerCashOperatingSurplus)}</strong></div>
         <div><span>Piutang Aktif</span><strong className="dashboard-money-value">{formatIDR(receivable)}</strong></div>
       </div>
       <div className="owner-payment-breakdown">

@@ -715,3 +715,15 @@ test
 - PageHeader, tombol Kembali, Print, Export, dan kartu tetap normal/scroll biasa.
 - Drawer menu tetap muncul di atas topbar.
 - Tidak ada SQL baru.
+
+
+## V113.0.116 — Accounting Structure & Cash Surplus
+- Struktur laporan memisahkan laba akuntansi dari posisi kas.
+- Piutang tetap termasuk dalam omzet/pendapatan dan tidak dikurangkan lagi dari laba.
+- Menambahkan Surplus Kas Operasional = Kas Masuk - Biaya Operasional - Biaya Karyawan.
+- Laba Rugi kini memiliki bagian khusus Posisi Kas & Piutang.
+- Ringkasan Laba Rugi menampilkan Kas Masuk, Piutang Belum Tertagih, dan Surplus Kas Operasional terpisah.
+- Export XLS/PDF Laba Rugi ikut menampilkan struktur baru.
+- Keuangan & Laporan menampilkan kartu Surplus Kas Operasional.
+- Dashboard Owner dan Export Laporan Owner ikut menampilkan Surplus Kas Operasional.
+- Tidak ada SQL baru.

@@ -39,6 +39,7 @@ export type FinancialSummary={
   operatingNet:number
   reserveTotal:number
   netAfterReserve:number
+  cashOperatingSurplus:number
 }
 
 const pad=(n:number)=>String(n).padStart(2,'0')
@@ -196,9 +197,12 @@ export async function fetchFinancialSummary(from:string,to:string):Promise<Finan
     }
   }
 
+  const cashOperatingSurplus=cashIn-operating-employeeCost
+
   return{
     revenue,cashIn,receivable,operating,
     attendancePay,allowance,bonus,revenueShare,productionCommission,courierCommission,
-    employeeCost,operatingNet,reserveTotal,netAfterReserve:operatingNet-reserveTotal
+    employeeCost,operatingNet,reserveTotal,netAfterReserve:operatingNet-reserveTotal,
+    cashOperatingSurplus
   }
 }

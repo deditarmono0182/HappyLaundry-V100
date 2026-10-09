@@ -85,7 +85,7 @@ interface ReserveSetting{
   note:string|null
 }
 type PeriodPreset='today'|'7d'|'month'|'last_month'|'custom'
-type DetailKey='revenue'|'cash'|'receivable'|'operating'|'attendance'|'allowance'|'bonus'|'share'|'production'|'courier'|'payroll'|'operating_net'|'reserves'|'net_after_reserve'|null
+type DetailKey='revenue'|'cash'|'receivable'|'cash_surplus'|'operating'|'attendance'|'allowance'|'bonus'|'share'|'production'|'courier'|'payroll'|'operating_net'|'reserves'|'net_after_reserve'|null
 
 const pad=(n:number)=>String(n).padStart(2,'0')
 const daysInMonth=(year:number,month:number)=>new Date(Date.UTC(year,month,0)).getUTCDate()
@@ -318,6 +318,7 @@ export function ProfitLossPage(){
     const totalCost=operating+payroll
     const operatingNet=revenue-totalCost
     const operatingMargin=revenue>0?(operatingNet/revenue)*100:0
+    const cashOperatingSurplus=cashIn-totalCost
 
     const monthDaysForReserve=rangeDaysByMonth(appliedFrom,appliedTo)
     const reserveDetail=reserveSettings.filter(row=>row.is_active).map(row=>{
@@ -346,7 +347,7 @@ export function ProfitLossPage(){
       validOrders,revenue,cashIn,receivable,operatingRows,excludedPayrollLike,operating,
       attendanceDetail,attendancePay,allowanceDetail,allowance,bonusDetail,bonus,
       shareDetail,revenueShare,productionDetail,courierDetail,productionCommission,courierCommission,
-      payroll,totalCost,operatingNet,operatingMargin,
+      payroll,totalCost,operatingNet,operatingMargin,cashOperatingSurplus,
       reserveDetail,reserveTotal,netAfterReserve,marginAfterReserve,
       operatingByCategory,employeeMap
     }
@@ -412,15 +413,14 @@ export function ProfitLossPage(){
       ['Biaya Karyawan',Math.round(report.payroll)],
       ['Laba Bersih Operasional',Math.round(report.operatingNet)],
       ['Total Cadangan',Math.round(report.reserveTotal)],
-      ['Laba Bersih Setelah Cadangan',Math.round(report.netAfterReserve)]
+      ['Laba Bersih Setelah Cadangan',Math.round(report.netAfterReserve)],
+      ['Surplus Kas Operasional',Math.round(report.cashOperatingSurplus)]
     ] as Array<[string,string|number]>,
     sections:[
       {
         title:'A. Pendapatan',
         rows:[
-          ['Omzet / Nilai Order Masuk',Math.round(report.revenue)],
-          ['Kas Masuk',Math.round(report.cashIn)],
-          ['Piutang Aktif',Math.round(report.receivable)]
+          ['Omzet / Nilai Order Masuk',Math.round(report.revenue)]
         ] as Array<[string,string|number]>
       },
       {
@@ -445,16 +445,27 @@ export function ProfitLossPage(){
         rows:report.reserveDetail.map(row=>[row.label,Math.round(row.amount)] as [string,number]),
         total:['Subtotal Cadangan',Math.round(report.reserveTotal)] as [string,number]
       }
+,
+      {
+        title:'E. Posisi Kas & Piutang',
+        rows:[
+          ['Kas Masuk',Math.round(report.cashIn)],
+          ['Piutang Belum Tertagih',Math.round(report.receivable)],
+          ['Surplus Kas Operasional',Math.round(report.cashOperatingSurplus)]
+        ] as Array<[string,string|number]>
+      }
     ],
     resultRows:[
       ['Total Biaya Operasional + Karyawan',Math.round(report.totalCost)],
       ['Laba Bersih Operasional',Math.round(report.operatingNet)],
       ['Margin Operasional',`${report.operatingMargin.toFixed(2)}%`],
       ['Total Cadangan',Math.round(report.reserveTotal)],
-      ['Laba Bersih Setelah Cadangan',Math.round(report.netAfterReserve)]
+      ['Laba Bersih Setelah Cadangan',Math.round(report.netAfterReserve)],
+      ['Surplus Kas Operasional',Math.round(report.cashOperatingSurplus)]
     ] as Array<[string,string|number]>,
     notes:[
-      'Kas Masuk dan Piutang ditampilkan sebagai informasi arus kas; dasar pendapatan laba rugi adalah nilai order masuk pada periode terpilih.',
+      'Piutang tidak mengurangi laba. Dasar pendapatan laba rugi adalah nilai order masuk pada periode terpilih.',
+      'Surplus Kas Operasional = Kas Masuk - Biaya Operasional - Biaya Karyawan. Angka ini menunjukkan posisi kas operasional periode, bukan laba akuntansi.',
       'Cadangan dipisahkan dari biaya operasional agar Laba Bersih Operasional dan Laba Setelah Cadangan mudah dibandingkan.'
     ]
   })
@@ -463,6 +474,7 @@ export function ProfitLossPage(){
     revenue:'Detail Pendapatan / Order Masuk',
     cash:'Detail Kas Masuk',
     receivable:'Detail Piutang',
+    cash_surplus:'Perhitungan Surplus Kas Operasional',
     operating:'Detail Pengeluaran Operasional',
     attendance:'Detail Uang Hadir',
     allowance:'Detail Tunjangan',
@@ -489,6 +501,14 @@ export function ProfitLossPage(){
       {report.validOrders.filter(row=>Number(row.total)-Number(row.paid_amount)>0).map(row=><div key={row.id}>
         <span>{row.order_no}</span><b>{formatRupiah(Math.max(0,Number(row.total)-Number(row.paid_amount)))}</b>
       </div>)}
+    </div>
+
+    if(detail==='cash_surplus')return <div className="pl-detail-list pl-calc-list">
+      <div><span>Kas Masuk</span><b>{formatRupiah(report.cashIn)}</b></div>
+      <div><span>Biaya Operasional</span><b>- {formatRupiah(report.operating)}</b></div>
+      <div><span>Biaya Karyawan</span><b>- {formatRupiah(report.payroll)}</b></div>
+      <div className="is-total"><span>Surplus Kas Operasional</span><b>{formatRupiah(report.cashOperatingSurplus)}</b></div>
+      <p className="pl-detail-note">Surplus kas menunjukkan uang yang benar-benar masuk pada periode setelah dikurangi biaya periode. Piutang tidak dikurangkan lagi dari laba.</p>
     </div>
 
     if(detail==='operating')return <div className="pl-detail-list">
@@ -593,14 +613,14 @@ export function ProfitLossPage(){
       <button className="pl-stat-button" onClick={()=>setDetail('payroll')}><StatCard icon={Users} label="Biaya Karyawan" value={formatRupiah(report.payroll)} caption="Gaji, tunjangan, bonus & komisi"/></button>
       <button className="pl-stat-button" onClick={()=>setDetail('operating_net')}><StatCard icon={WalletCards} label="Laba Bersih Operasional" value={formatRupiah(report.operatingNet)} caption={`Margin ${report.operatingMargin.toFixed(1)}%`}/></button>
       <button className="pl-stat-button" onClick={()=>setDetail('net_after_reserve')}><StatCard icon={PiggyBank} label="Laba Setelah Cadangan" value={formatRupiah(report.netAfterReserve)} caption={`Total cadangan ${formatRupiah(report.reserveTotal)}`}/></button>
+      <button className="pl-stat-button" onClick={()=>setDetail('cash_surplus')}><StatCard icon={Banknote} label="Surplus Kas Operasional" value={formatRupiah(report.cashOperatingSurplus)} caption="Kas masuk - biaya operasional - biaya karyawan"/></button>
     </section>
 
     <section className="pl-grid">
       <article className="panel pl-card">
         <div className="panel-heading"><div><h3>Pendapatan</h3><p>Nilai order masuk pada periode terpilih.</p></div></div>
         <button className="pl-row" onClick={()=>setDetail('revenue')}><span>Omzet / Nilai Order Masuk</span><b>{formatRupiah(report.revenue)}</b></button>
-        <button className="pl-row pl-info-row" onClick={()=>setDetail('cash')}><span>Kas Masuk <small>informasi arus kas</small></span><b>{formatRupiah(report.cashIn)}</b></button>
-        <button className="pl-row pl-info-row" onClick={()=>setDetail('receivable')}><span>Piutang <small>belum diterima</small></span><b>{formatRupiah(report.receivable)}</b></button>
+        <div className="pl-accounting-note">Pendapatan mengikuti nilai order masuk. Pembayaran dan piutang ditampilkan terpisah agar laba tidak tercampur dengan arus kas.</div>
       </article>
 
       <article className="panel pl-card">
@@ -619,6 +639,13 @@ export function ProfitLossPage(){
         <button className="pl-row" onClick={()=>setDetail('production')}><span>Komisi Produksi</span><b>{formatRupiah(report.productionCommission)}</b></button>
         <button className="pl-row" onClick={()=>setDetail('courier')}><span>Komisi Kurir</span><b>{formatRupiah(report.courierCommission)}</b></button>
         <button className="pl-row pl-total-row" onClick={()=>setDetail('payroll')}><span>Total Biaya Karyawan</span><b>{formatRupiah(report.payroll)}</b></button>
+      </article>
+
+      <article className="panel pl-card pl-cash-position-card">
+        <div className="panel-heading"><div><h3>Posisi Kas & Piutang</h3><p>Pisahkan uang yang sudah diterima dari pendapatan yang masih harus ditagih.</p></div></div>
+        <button className="pl-row pl-info-row" onClick={()=>setDetail('cash')}><span>Kas Masuk <small>uang benar-benar diterima</small></span><b>{formatRupiah(report.cashIn)}</b></button>
+        <button className="pl-row pl-info-row" onClick={()=>setDetail('receivable')}><span>Piutang Belum Tertagih <small>bukan pengurang laba</small></span><b>{formatRupiah(report.receivable)}</b></button>
+        <button className="pl-row pl-cash-surplus-row" onClick={()=>setDetail('cash_surplus')}><span>Surplus Kas Operasional <small>kas masuk - biaya operasional - biaya karyawan</small></span><b>{formatRupiah(report.cashOperatingSurplus)}</b></button>
       </article>
 
       <article className="panel pl-card pl-reserve-breakdown-card">
@@ -646,12 +673,16 @@ export function ProfitLossPage(){
         <button className="pl-row pl-reserve-total" onClick={()=>setDetail('reserves')}><span>Cadangan & Kewajiban</span><b>- {formatRupiah(report.reserveTotal)}</b></button>
         <button className="pl-row pl-final-total" onClick={()=>setDetail('net_after_reserve')}><span>Laba Bersih Setelah Cadangan</span><b>{formatRupiah(report.netAfterReserve)}</b></button>
         <div className="pl-margin"><span>Margin Setelah Cadangan</span><strong>{report.marginAfterReserve.toFixed(2)}%</strong></div>
+        <div className="pl-summary-divider"/>
+        <div className="pl-row pl-static-row"><span>Kas Masuk</span><b>{formatRupiah(report.cashIn)}</b></div>
+        <div className="pl-row pl-static-row"><span>Piutang Belum Tertagih</span><b>{formatRupiah(report.receivable)}</b></div>
+        <button className="pl-row pl-cash-surplus-row" onClick={()=>setDetail('cash_surplus')}><span>Surplus Kas Operasional</span><b>{formatRupiah(report.cashOperatingSurplus)}</b></button>
       </article>
     </section>
 
     <div className="pl-note">
       <ReceiptText size={17}/>
-      <span>Cadangan bukan berarti kas sudah keluar. Laporan memisahkan Laba Bersih Operasional dari Laba Bersih Setelah Cadangan. Cadangan nominal bulanan diprorata sesuai jumlah hari periode; cadangan persentase dihitung dari omzet periode.</span>
+      <span>Piutang tidak mengurangi laba karena sudah termasuk dalam omzet. Surplus Kas Operasional dipakai untuk melihat uang yang benar-benar masuk setelah Biaya Operasional dan Biaya Karyawan. Cadangan tetap dipisahkan karena bukan otomatis kas keluar.</span>
     </div>
 
     {loading&&<div className="route-loading"><span/>Memuat laporan laba rugi...</div>}

@@ -126,6 +126,7 @@ export function FinanceReportsHubPage(){
   const profitToday=financial?.operatingNet??(omzetToday-expenseToday)
   const employeeCostPeriod=financial?.employeeCost??0
   const operatingExpensePeriod=financial?.operating??expenseToday
+  const cashOperatingSurplus=financial?.cashOperatingSurplus??(cashInToday-operatingExpensePeriod-employeeCostPeriod)
 
   const paymentMethodSummary=useMemo(()=>{
     const total=periodPayments.reduce((sum,row)=>sum+Number(row.amount||0),0)
@@ -255,6 +256,10 @@ export function FinanceReportsHubPage(){
       <button type="button" className="finance-live-kpi tone-amber" onClick={()=>navigate('/receivables')}>
         <span className="finance-kpi-icon"><Clock3 size={22}/></span>
         <span><small>Piutang Aktif</small><b>{formatIDR(receivable)}</b><em>Klik untuk lihat tagihan</em></span>
+      </button>
+      <button type="button" className="finance-live-kpi tone-green" onClick={()=>navigate('/profit-loss')}>
+        <span className="finance-kpi-icon"><Banknote size={22}/></span>
+        <span><small>Surplus Kas Operasional</small><b>{formatIDR(cashOperatingSurplus)}</b><em>Kas masuk - biaya operasional - biaya karyawan</em></span>
       </button>
     </section>
 
