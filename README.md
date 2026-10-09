@@ -724,10 +724,11 @@ test
 - Tidak ada SQL baru.
 
 
-## V113.0.120 — Global Uniform Typography
-- Dibangun dari V113.0.117.
-- Menyeragamkan ukuran teks operasional di seluruh aplikasi ke 12px.
-- Berlaku untuk Dashboard, Kasir, Order, Produksi, Pelanggan, Layanan, Stok, Supplier, Pembayaran, Keuangan & Laporan, Laba Rugi, Payroll, Backup, Pengaturan, tabel, tombol, input, modal, dan sidebar.
-- Nilai Rupiah, judul kartu, label, tabel, catatan, badge, dan tombol tidak lagi meloncat-loncat ukurannya.
-- Branding topbar tetap dikecualikan: HappyLaundry tetap besar dan Sistem Operasional Laundry tetap kecil sesuai permintaan sebelumnya.
+## V113.0.121 — True Global Uniform Typography
+- Dibangun ulang dari V113.0.117.
+- Semua teks operasional di seluruh aplikasi dipaksa seragam 14px.
+- Berlaku juga untuk mode Comfort, Compact, dan Ultra Compact sehingga ukuran font tidak berubah lagi.
+- Angka Rupiah, judul kartu, label, tabel, catatan, tombol, sidebar, modal, input, dan badge semuanya 14px.
+- Perbedaan penting hanya memakai bold/warna, bukan ukuran font.
+- Pengecualian hanya branding topbar: HappyLaundry 26px dan Sistem Operasional Laundry 11px.
 - Tidak ada perubahan rumus, data, atau SQL.

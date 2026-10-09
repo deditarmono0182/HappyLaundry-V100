@@ -12563,57 +12563,74 @@ body.density-compact td{
 
 
 /* =========================================================
-   HappyLaundry V113.0.120 — Global Uniform Typography
-   Seragamkan ukuran teks operasional di seluruh aplikasi.
-   Branding topbar dikecualikan agar tetap mengikuti desain brand.
+   HappyLaundry V113.0.121 — True Global Uniform Typography
+   Semua teks operasional dibuat 14px secara universal.
+   Pengecualian hanya branding topbar.
    ========================================================= */
 
-/* Base text */
-body,
-button,
-input,
-select,
-textarea,
-table,
-th,
-td,
-label,
-small,
-span,
-p,
-b,
-strong,
-em,
-a{
-  font-size:12px!important;
+/* Override SEMUA aturan font-size lama, termasuk density mode */
+body .main-content *,
+body .sidebar *,
+body .modal-backdrop *,
+body .login-page *{
+  font-size:14px!important;
   line-height:1.4!important;
 }
 
-/* Page content headings */
-.page-container h1,
-.page-container h2,
-.page-container h3,
-.page-container h4,
-.page-container h5,
-.page-container h6,
-.panel h1,
-.panel h2,
-.panel h3,
-.panel h4,
-.panel h5,
-.panel h6,
-.page-heading h2,
-.panel-heading h3,
-.finance-analytics-heading h3,
-.finance-hub-menu-heading h3,
-.finance-hub-section h2,
-.dashboard-display-title b{
-  font-size:12px!important;
+/* Semua teks penting tetap sama ukuran; hanya weight/warna yang membedakan */
+body .main-content h1,
+body .main-content h2,
+body .main-content h3,
+body .main-content h4,
+body .main-content h5,
+body .main-content h6,
+body .main-content strong,
+body .main-content b,
+body .main-content small,
+body .main-content span,
+body .main-content p,
+body .main-content label,
+body .main-content button,
+body .main-content input,
+body .main-content select,
+body .main-content textarea,
+body .main-content table,
+body .main-content th,
+body .main-content td,
+body .main-content em,
+body .main-content a{
+  font-size:14px!important;
   line-height:1.4!important;
-  font-weight:800!important;
 }
 
-/* Financial/card values should not jump in size */
+/* Sidebar juga seragam */
+body .sidebar,
+body .sidebar a,
+body .sidebar span,
+body .sidebar b,
+body .sidebar strong,
+body .sidebar small,
+body .sidebar button{
+  font-size:14px!important;
+  line-height:1.4!important;
+}
+
+/* Modal / login juga seragam */
+body .modal-backdrop *,
+body .login-page *{
+  font-size:14px!important;
+  line-height:1.4!important;
+}
+
+/* Semua mode tampilan tidak boleh mengecilkan/membesarkan huruf lagi */
+html[data-density="comfort"] .main-content *,
+html[data-density="compact"] .main-content *,
+html[data-density="ultra"] .main-content *{
+  font-size:14px!important;
+  line-height:1.4!important;
+}
+
+/* Angka/card value sama ukuran dengan label */
 .stat-card strong,
 .finance-live-kpi b,
 .dashboard-money-value,
@@ -12621,106 +12638,61 @@ a{
 .pl-static-row b,
 .pl-final-total b,
 .pl-cash-surplus-row b,
-.record-count,
-.status-chip,
-.badge,
-.owner-kpi strong,
-.owner-business-control strong{
-  font-size:12px!important;
+.owner-business-control strong,
+.finance-status-row strong,
+.finance-payment-status strong,
+.finance-method-row strong{
+  font-size:14px!important;
   line-height:1.4!important;
 }
 
-/* Table text */
-table th,
-table td,
-table td b,
-table td small{
-  font-size:12px!important;
+/* Judul panel/card juga sama ukuran */
+.panel-heading h3,
+.finance-analytics-heading h3,
+.finance-hub-menu-heading h3,
+.finance-hub-section h2,
+.page-heading h2,
+.pl-card h3{
+  font-size:14px!important;
   line-height:1.4!important;
 }
 
-/* Buttons / chips */
-.primary-button,
-.secondary-button,
-.icon-button,
-.drawer-menu-button,
-.drawer-close-button,
-.finance-hub-quick-periods button,
-.finance-hub-current-period,
-.status-chip,
-.badge,
-.record-count{
-  font-size:12px!important;
+/* Branding topbar tetap menjadi satu-satunya hirarki ukuran */
+.topbar .topbar-branding h1{
+  font-size:26px!important;
+  line-height:1.05!important;
+  font-weight:800!important;
 }
-
-/* Inputs */
-input,
-select,
-textarea,
-.search-box input{
-  font-size:12px!important;
-}
-
-/* Sidebar menu uniform */
-.sidebar,
-.sidebar nav a,
-.sidebar-footer,
-.sidebar-footer *,
-.brand span,
-.account,
-.account *{
-  font-size:12px!important;
-}
-
-/* Keep only the requested brand hierarchy */
-.topbar-branding h1{
-  font-size:25px!important;
-  line-height:1.04!important;
-}
-.topbar-branding span{
-  font-size:10px!important;
+.topbar .topbar-branding span{
+  font-size:11px!important;
   line-height:1.15!important;
+  font-weight:500!important;
 }
 
-/* Existing old topbar fallback if branding class is absent */
-.topbar .eyebrow{
-  font-size:10px!important;
+/* Kalau masih memakai fallback struktur topbar lama */
+.topbar > div > .eyebrow{
+  font-size:11px!important;
 }
-.topbar h1:not(.topbar-branding h1){
-  font-size:12px!important;
+.topbar > div > h1{
+  font-size:14px!important;
 }
 
-/* Responsive: remain uniform instead of shrinking */
+/* Mobile tetap sama 14px, tidak diperkecil */
 @media(max-width:900px){
-  body,
-  button,
-  input,
-  select,
-  textarea,
-  table,
-  th,
-  td,
-  label,
-  small,
-  span,
-  p,
-  b,
-  strong,
-  em,
-  a,
-  .page-container h1,
-  .page-container h2,
-  .page-container h3,
-  .page-container h4,
-  .page-container h5,
-  .page-container h6{
-    font-size:12px!important;
+  body .main-content *,
+  body .sidebar *,
+  body .modal-backdrop *,
+  body .login-page *,
+  html[data-density="comfort"] .main-content *,
+  html[data-density="compact"] .main-content *,
+  html[data-density="ultra"] .main-content *{
+    font-size:14px!important;
   }
 
-  .topbar-branding h1{
-    font-size:21px!important;
+  .topbar .topbar-branding h1{
+    font-size:23px!important;
   }
-  .topbar-branding span{
-    font-size:9px!important;
+  .topbar .topbar-branding span{
+    font-size:10px!important;
   }
 }
