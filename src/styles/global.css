@@ -12551,46 +12551,12 @@ body.density-compact td{
 }
 
 
-/* =========================================================
-   HappyLaundry V113.0.116 — Accounting Structure + Cash Surplus
-   ========================================================= */
-.finance-live-kpis{
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr))!important;
-}
-
-.pl-accounting-note{
-  margin:10px 0 2px;
-  padding:10px 12px;
-  border-radius:10px;
-  background:#f2f8fc;
-  color:#607985;
-  font-size:10px;
-  line-height:1.45;
-}
-
-.pl-cash-position-card{
-  border-color:#cfe7dc!important;
-}
-
-.pl-cash-surplus-row{
-  background:#eef9f3!important;
-  border-top:1px solid #d3eadf!important;
-}
-.pl-cash-surplus-row span{
-  color:#315d4c!important;
-}
-.pl-cash-surplus-row b{
-  color:#08764e!important;
-}
-
-.pl-summary-divider{
-  height:1px;
-  background:#dfeaf0;
-  margin:7px 0;
-}
-
-@media(max-width:700px){
-  .finance-live-kpis{
-    grid-template-columns:1fr!important;
-  }
-}
+/* HappyLaundry V113.0.117 — Accounting Structure + Cash Surplus */
+.finance-live-kpis{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))!important}
+.pl-accounting-note{margin:10px 0 2px;padding:10px 12px;border-radius:10px;background:#f2f8fc;color:#607985;font-size:10px;line-height:1.45}
+.pl-cash-position-card{border-color:#cfe7dc!important}
+.pl-cash-surplus-row{background:#eef9f3!important;border-top:1px solid #d3eadf!important}
+.pl-cash-surplus-row span{color:#315d4c!important}
+.pl-cash-surplus-row b{color:#08764e!important}
+.pl-summary-divider{height:1px;background:#dfeaf0;margin:7px 0}
+@media(max-width:700px){.finance-live-kpis{grid-template-columns:1fr!important}}

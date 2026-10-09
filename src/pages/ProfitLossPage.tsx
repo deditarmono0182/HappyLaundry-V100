@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  CalendarDays, FileSpreadsheet, FileText, PiggyBank, ReceiptText, Settings2,
+  Banknote, CalendarDays, FileSpreadsheet, FileText, PiggyBank, ReceiptText, Settings2,
   TrendingDown, TrendingUp, Users, WalletCards
 } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
