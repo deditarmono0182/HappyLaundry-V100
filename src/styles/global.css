@@ -12560,3 +12560,104 @@ body.density-compact td{
 .pl-cash-surplus-row b{color:#08764e!important}
 .pl-summary-divider{height:1px;background:#dfeaf0;margin:7px 0}
 @media(max-width:700px){.finance-live-kpis{grid-template-columns:1fr!important}}
+
+
+/* =========================================================
+   HappyLaundry V113.0.118 — Profit & Loss Readability
+   Enlarge text only inside the Laba Rugi report cards.
+   ========================================================= */
+.pl-card h3,
+.pl-reserve-breakdown-card h3,
+.pl-cash-position-card h3{
+  font-size:17px!important;
+  line-height:1.25!important;
+}
+
+.pl-card .panel-heading p,
+.pl-reserve-breakdown-card .panel-heading p,
+.pl-cash-position-card .panel-heading p{
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+
+.pl-row,
+.pl-static-row{
+  font-size:11.5px!important;
+  line-height:1.35!important;
+}
+
+.pl-row span,
+.pl-static-row span{
+  font-size:11.5px!important;
+}
+
+.pl-row small,
+.pl-static-row small{
+  font-size:9.5px!important;
+  line-height:1.35!important;
+}
+
+.pl-row b,
+.pl-static-row b{
+  font-size:14px!important;
+  line-height:1.2!important;
+}
+
+.pl-final-total span,
+.pl-cash-surplus-row span{
+  font-size:12px!important;
+  font-weight:800!important;
+}
+
+.pl-final-total b,
+.pl-cash-surplus-row b{
+  font-size:16px!important;
+  font-weight:800!important;
+}
+
+.pl-margin{
+  font-size:11px!important;
+}
+
+.pl-margin strong{
+  font-size:14px!important;
+}
+
+.pl-reserve-breakdown-card .pl-reserve-row span,
+.pl-reserve-breakdown-card .pl-reserve-row b{
+  font-size:11.5px!important;
+}
+
+.pl-reserve-breakdown-card .pl-reserve-row small{
+  font-size:9.5px!important;
+}
+
+.pl-accounting-note,
+.pl-detail-note{
+  font-size:10.5px!important;
+  line-height:1.5!important;
+}
+
+.pl-note,
+.pl-note span{
+  font-size:10.5px!important;
+  line-height:1.5!important;
+}
+
+@media(max-width:700px){
+  .pl-card h3,
+  .pl-reserve-breakdown-card h3,
+  .pl-cash-position-card h3{
+    font-size:16px!important;
+  }
+  .pl-row,
+  .pl-row span,
+  .pl-static-row,
+  .pl-static-row span{
+    font-size:11px!important;
+  }
+  .pl-row b,
+  .pl-static-row b{
+    font-size:13px!important;
+  }
+}
