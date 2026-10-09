@@ -732,3 +732,14 @@ test
 - Perbedaan penting hanya memakai bold/warna, bukan ukuran font.
 - Pengecualian hanya branding topbar: HappyLaundry 26px dan Sistem Operasional Laundry 11px.
 - Tidak ada perubahan rumus, data, atau SQL.
+
+
+## V113.0.122 — Employee Finance Cash Advance
+Requires SQL 066.
+- Karyawan dengan akses Keuangan dapat input kas bon karyawan dari halaman Keuangan.
+- Hak akses Keuangan di Pengaturan Karyawan sekarang dijelaskan sebagai Pengeluaran & Kas Bon.
+- Kas bon otomatis tercatat sebagai Kas Keluar di Kas Harian dan sebagai piutang karyawan.
+- Kas bon tidak masuk biaya operasional / laba rugi.
+- Karyawan keuangan dapat melihat daftar kas bon dan sisa piutang, tetapi tidak mendapat hak membatalkan/edit payroll.
+- Owner mendapat tombol Potong Kas Bon di Absensi & Gaji untuk memotong kas bon lama dari gaji.
+- Potongan gaji mengurangi saldo kas bon tanpa mencatat Kas Masuk baru.

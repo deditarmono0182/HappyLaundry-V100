@@ -172,6 +172,8 @@ export function PayrollPage(){
   const[cashAdvanceForm,setCashAdvanceForm]=useState({amount:'0',note:''})
   const[cancelCashAdvance,setCancelCashAdvance]=useState<CashAdvance|null>(null)
   const[cancelCashAdvanceReason,setCancelCashAdvanceReason]=useState('')
+  const[deductCashAdvanceEmployee,setDeductCashAdvanceEmployee]=useState<Employee|null>(null)
+  const[cashAdvanceDeductionAmount,setCashAdvanceDeductionAmount]=useState('')
   const[paymentForm,setPaymentForm]=useState({amount:'0',payment_method:'Transfer',note:''})
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
@@ -598,6 +600,45 @@ export function PayrollPage(){
     setBusy(false)
   }
 
+  const openCashAdvanceDeduction=(employee:Employee)=>{
+    const row=payrollRows.find(item=>item.employee.id===employee.id)
+    const availableSalary=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
+    const outstandingCashAdvance=Math.max(0,Number(row?.cashAdvanceOutstanding||0))
+    setDeductCashAdvanceEmployee(employee)
+    setCashAdvanceDeductionAmount(String(Math.floor(Math.min(availableSalary,outstandingCashAdvance))))
+    setMessage('');setSuccess('')
+  }
+
+  const saveCashAdvanceDeduction=async(event:FormEvent)=>{
+    event.preventDefault()
+    if(!deductCashAdvanceEmployee)return
+    const row=payrollRows.find(item=>item.employee.id===deductCashAdvanceEmployee.id)
+    const availableSalary=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
+    const outstandingCashAdvance=Math.max(0,Number(row?.cashAdvanceOutstanding||0))
+    const amount=Math.max(0,Number(cashAdvanceDeductionAmount)||0)
+    const maxAmount=Math.min(availableSalary,outstandingCashAdvance)
+    if(amount<=0){setMessage('Nominal potongan harus lebih dari Rp 0.');return}
+    if(amount>maxAmount+0.01){setMessage(`Potongan maksimal ${formatRupiah(maxAmount)}.`);return}
+
+    setBusy(true);setMessage('');setSuccess('')
+    const result=await supabase.rpc('v113072_apply_cash_advance_deduction',{
+      p_employee_id:deductCashAdvanceEmployee.id,
+      p_payroll_month:monthRange(month).start,
+      p_amount:amount
+    })
+    if(result.error){
+      setMessage(result.error.message)
+      setBusy(false)
+      return
+    }
+    const employeeName=deductCashAdvanceEmployee.full_name
+    setDeductCashAdvanceEmployee(null)
+    setCashAdvanceDeductionAmount('')
+    setSuccess(`Kas bon ${employeeName} berhasil dipotong dari gaji sebesar ${formatRupiah(Number(result.data||amount))}.`)
+    await load()
+    setBusy(false)
+  }
+
   const confirmCancelCashAdvance=async(event:FormEvent)=>{
     event.preventDefault()
     if(!cancelCashAdvance)return
@@ -882,6 +923,7 @@ export function PayrollPage(){
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
                     <button className="finance-row-action cash-advance-button" onClick={()=>openCashAdvance(r.employee)}><HandCoins size={15}/>Kas Bon</button>
+                    {r.cashAdvanceOutstanding>0&&<button className="finance-row-action cash-advance-deduct-button" onClick={()=>openCashAdvanceDeduction(r.employee)}><HandCoins size={15}/>Potong Kas Bon</button>}
                     {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
                     <button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button>
                   </div>
@@ -974,6 +1016,31 @@ export function PayrollPage(){
           <button className="secondary-button" onClick={()=>printPdf(commissionDetailExport(detailEmployee))}><FileText size={16}/>Cetak / PDF</button>
           <button className="secondary-button" onClick={()=>setDetailEmployee(null)}>Tutup</button>
         </div>
+      </Modal>
+    })()}
+
+    {deductCashAdvanceEmployee&&(()=>{
+      const row=payrollRows.find(item=>item.employee.id===deductCashAdvanceEmployee.id)
+      const availableSalary=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
+      const outstandingCashAdvance=Math.max(0,Number(row?.cashAdvanceOutstanding||0))
+      const maxAmount=Math.min(availableSalary,outstandingCashAdvance)
+      return <Modal title={`Potong Kas Bon dari Gaji — ${deductCashAdvanceEmployee.full_name}`} onClose={()=>!busy&&setDeductCashAdvanceEmployee(null)}>
+        <form className="modal-form" onSubmit={saveCashAdvanceDeduction}>
+          <div className="payroll-payment-card">
+            <div><span>Sisa Kas Bon</span><b>{formatRupiah(outstandingCashAdvance)}</b></div>
+            <div><span>Gaji Tersedia untuk Potongan</span><b>{formatRupiah(availableSalary)}</b></div>
+            <div><span>Maksimal Potongan</span><b>{formatRupiah(maxAmount)}</b></div>
+          </div>
+          <label>Nominal Potongan
+            <input type="number" min="1" max={Math.max(0,Math.floor(maxAmount))} value={cashAdvanceDeductionAmount} onChange={e=>setCashAdvanceDeductionAmount(e.target.value)} required/>
+          </label>
+          <div className="info-box">Potongan gaji mengurangi saldo kas bon. Tidak dibuat transaksi Kas Masuk karena tidak ada uang baru yang diterima perusahaan.</div>
+          {message&&<div className="error-box">{message}</div>}
+          <div className="form-actions">
+            <button type="button" className="secondary-button" onClick={()=>setDeductCashAdvanceEmployee(null)} disabled={busy}>Batal</button>
+            <button className="primary-button" disabled={busy||Number(cashAdvanceDeductionAmount)<=0||maxAmount<=0}><HandCoins size={16}/>{busy?'Memproses...':'Potong dari Gaji'}</button>
+          </div>
+        </form>
       </Modal>
     })()}
 

@@ -12696,3 +12696,72 @@ html[data-density="ultra"] .main-content *{
     font-size:10px!important;
   }
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.122 — Employee Finance Cash Advance
+   ========================================================= */
+.finance-cash-advance-panel{
+  margin-bottom:14px;
+  padding:14px!important;
+}
+.finance-cash-advance-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:10px;
+}
+.finance-cash-advance-heading h3{
+  margin:2px 0;
+}
+.finance-cash-advance-heading p{
+  margin:0;
+  color:var(--muted);
+}
+.finance-cash-advance-summary{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:10px;
+}
+.finance-cash-advance-summary>div{
+  border:1px solid #dbe8e5;
+  border-radius:10px;
+  background:#f8fcfb;
+  padding:9px 11px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.finance-cash-advance-table{
+  max-height:270px;
+  border:1px solid #e1ece9;
+  border-radius:10px;
+}
+.finance-cash-advance-table thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+}
+.finance-cash-advance-footnote{
+  margin-top:9px;
+  padding:8px 10px;
+  border-radius:9px;
+  background:#f1f7fb;
+  color:#607985;
+}
+.cash-advance-input-button,
+.cash-advance-deduct-button{
+  white-space:nowrap;
+}
+@media(max-width:700px){
+  .finance-cash-advance-heading{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .finance-cash-advance-summary{
+    grid-template-columns:1fr;
+  }
+}

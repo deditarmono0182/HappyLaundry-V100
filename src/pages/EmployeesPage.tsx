@@ -44,7 +44,7 @@ const permissionOptions=[
   ['services','Layanan'],
   ['payments','Pembayaran'],
   ['receivables','Piutang'],
-  ['finance','Keuangan / Input Pengeluaran'],
+  ['finance','Keuangan / Pengeluaran & Kas Bon'],
   ['cash','Kas Harian'],
   ['reports','Laporan'],
   ['backup','Backup'],

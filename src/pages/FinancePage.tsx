@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  AlertTriangle, CalendarDays, Eye, FileSpreadsheet, FileText, ImageUp, Percent, Plus,
+  AlertTriangle, CalendarDays, Eye, FileSpreadsheet, FileText, HandCoins, ImageUp, Percent, Plus,
   ReceiptText, Search, Settings2, Trash2, TrendingDown, TrendingUp, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
@@ -69,6 +69,22 @@ interface RevenueShareSetting{
   share_percent:number
 }
 
+interface FinanceCashAdvanceEmployee{
+  id:string
+  full_name:string
+  login_id:string
+}
+
+interface FinanceCashAdvanceRow{
+  id:string
+  employee_id:string
+  employee_name:string
+  amount:number
+  remaining_amount:number
+  note:string|null
+  issued_at:string
+}
+
 const today=()=>businessDateKey()
 const monthStart=()=>businessMonthStartKey()
 
@@ -102,6 +118,13 @@ export function FinancePage(){
   const [deleteReason,setDeleteReason]=useState('')
   const [deletePhrase,setDeletePhrase]=useState('')
   const [deleteBusy,setDeleteBusy]=useState(false)
+  const [cashAdvanceEmployees,setCashAdvanceEmployees]=useState<FinanceCashAdvanceEmployee[]>([])
+  const [financeCashAdvances,setFinanceCashAdvances]=useState<FinanceCashAdvanceRow[]>([])
+  const [cashAdvanceOpen,setCashAdvanceOpen]=useState(false)
+  const [cashAdvanceBusy,setCashAdvanceBusy]=useState(false)
+  const [cashAdvanceForm,setCashAdvanceForm]=useState({
+    employee_id:'',amount:'',payment_method:'cash',note:''
+  })
 
   const [form,setForm]=useState({
     expense_date:today(),category_id:'',amount:'',payment_method:'cash',
@@ -142,6 +165,23 @@ export function FinancePage(){
   },[from,to])
 
   useEffect(()=>{void load()},[load])
+
+
+  const loadCashAdvances=useCallback(async()=>{
+    const [employeesResult,advancesResult]=await Promise.all([
+      supabase.rpc('v113122_finance_list_employees'),
+      supabase.rpc('v113122_finance_list_cash_advances')
+    ])
+    const error=employeesResult.error||advancesResult.error
+    if(error){
+      setMessage(error.message)
+      return
+    }
+    setCashAdvanceEmployees((employeesResult.data as FinanceCashAdvanceEmployee[])||[])
+    setFinanceCashAdvances((advancesResult.data as FinanceCashAdvanceRow[])||[])
+  },[])
+
+  useEffect(()=>{void loadCashAdvances()},[loadCashAdvances])
 
   const allExpenses=useMemo(()=>
     [...expenses,...payrollExpenses].sort((a,b)=>b.expense_date.localeCompare(a.expense_date))
@@ -383,6 +423,42 @@ export function FinancePage(){
     }
   }
 
+  const openCashAdvanceInput=()=>{
+    setCashAdvanceForm({
+      employee_id:cashAdvanceEmployees[0]?.id||'',
+      amount:'',
+      payment_method:'cash',
+      note:''
+    })
+    setMessage('')
+    setCashAdvanceOpen(true)
+  }
+
+  const saveFinanceCashAdvance=async(event:FormEvent)=>{
+    event.preventDefault()
+    const amount=Math.max(0,Number(cashAdvanceForm.amount)||0)
+    if(!cashAdvanceForm.employee_id){setMessage('Pilih karyawan.');return}
+    if(amount<=0){setMessage('Nominal kas bon harus lebih dari Rp 0.');return}
+
+    setCashAdvanceBusy(true);setMessage('')
+    const {error}=await supabase.rpc('v113122_add_cash_advance',{
+      p_employee_id:cashAdvanceForm.employee_id,
+      p_amount:amount,
+      p_note:cashAdvanceForm.note.trim()||null,
+      p_payment_method:cashAdvanceForm.payment_method
+    })
+    if(error){
+      setMessage(error.message)
+      setCashAdvanceBusy(false)
+      return
+    }
+
+    setCashAdvanceOpen(false)
+    setCashAdvanceForm({employee_id:'',amount:'',payment_method:'cash',note:''})
+    await Promise.all([loadCashAdvances(),load()])
+    setCashAdvanceBusy(false)
+  }
+
   const submitDeleteExpense=async()=>{
     if(!deleteExpense)return
     if(deleteReason.trim().length<5){setMessage('Alasan penghapusan minimal 5 karakter.');return}
@@ -434,14 +510,47 @@ export function FinancePage(){
         : "Catat dan pantau pengeluaran operasional sesuai hak akses karyawan."}
       action={<div className="finance-actions">
         <button className="secondary-button" onClick={exportCSV}><FileSpreadsheet size={17}/>Export CSV</button>
+        <button className="secondary-button cash-advance-input-button" onClick={openCashAdvanceInput}><HandCoins size={17}/>Input Kas Bon</button>
         <button className="primary-button" onClick={()=>setOpen(true)}><Plus size={17}/>Tambah Pengeluaran</button>
       </div>}
     />
 
     {!isOwner&&<div className="employee-finance-note">
-      <b>Akses Karyawan: Input Pengeluaran</b>
-      <span>Anda dapat mencatat pengeluaran. Pengaturan Bagi Hasil hanya tersedia untuk Owner.</span>
+      <b>Akses Karyawan: Keuangan</b>
+      <span>Anda dapat mencatat pengeluaran dan kas bon karyawan. Kas bon dicatat sebagai kas keluar + piutang karyawan, bukan biaya laba rugi. Pengaturan Bagi Hasil hanya tersedia untuk Owner.</span>
     </div>}
+
+    <section className="panel finance-cash-advance-panel">
+      <div className="finance-cash-advance-heading">
+        <div>
+          <span className="eyebrow">KAS BON KARYAWAN</span>
+          <h3>Kas Bon / Piutang Karyawan</h3>
+          <p>Saat kas bon diberikan, Kas Harian berkurang. Saldo kas bon tetap menjadi piutang karyawan dan tidak masuk biaya operasional.</p>
+        </div>
+        <button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button>
+      </div>
+      <div className="finance-cash-advance-summary">
+        <div><span>Kas Bon Aktif</span><b>{financeCashAdvances.filter(row=>Number(row.remaining_amount)>0).length}</b></div>
+        <div><span>Total Sisa Piutang Karyawan</span><b>{formatRupiah(financeCashAdvances.reduce((sum,row)=>sum+Number(row.remaining_amount||0),0))}</b></div>
+      </div>
+      <div className="table-wrap finance-cash-advance-table">
+        <table>
+          <thead><tr><th>Karyawan</th><th>Kas Bon</th><th>Sisa</th><th>Keterangan</th><th>Tanggal</th><th>Status</th></tr></thead>
+          <tbody>
+            {financeCashAdvances.slice(0,10).map(row=><tr key={row.id}>
+              <td><b>{row.employee_name}</b></td>
+              <td>{formatRupiah(Number(row.amount||0))}</td>
+              <td><b>{formatRupiah(Number(row.remaining_amount||0))}</b></td>
+              <td>{row.note||'—'}</td>
+              <td>{new Date(row.issued_at).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</td>
+              <td><span className={`badge ${Number(row.remaining_amount)>0?'payment-partial':'payment-paid'}`}>{Number(row.remaining_amount)>0?'Aktif':'Lunas'}</span></td>
+            </tr>)}
+            {financeCashAdvances.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada kas bon karyawan.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <div className="finance-cash-advance-footnote">Pembayaran melalui potong gaji dilakukan Owner dari menu Absensi & Gaji. Potongan gaji mengurangi saldo kas bon tanpa mencatat kas masuk baru.</div>
+    </section>
 
     <section className="panel finance-filter">
       <label>Dari<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label>
@@ -633,6 +742,37 @@ export function FinancePage(){
         <div className="form-actions">
           <button type="button" className="secondary-button" onClick={()=>setShareOpen(false)}>Batal</button>
           <button className="primary-button" disabled={shareBusy}>{shareBusy?'Menyimpan...':'Simpan Persentase'}</button>
+        </div>
+      </form>
+    </Modal>}
+
+    {cashAdvanceOpen&&<Modal title="Input Kas Bon Karyawan" onClose={()=>!cashAdvanceBusy&&setCashAdvanceOpen(false)}>
+      <form className="modal-form" onSubmit={saveFinanceCashAdvance}>
+        <div className="info-box">Kas bon akan tercatat sebagai <b>Kas Keluar</b> di Kas Harian dan sebagai <b>Piutang Karyawan</b>. Kas bon tidak dihitung sebagai biaya operasional/laba rugi.</div>
+        <label>Karyawan
+          <select value={cashAdvanceForm.employee_id} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,employee_id:e.target.value})} required>
+            <option value="">Pilih karyawan</option>
+            {cashAdvanceEmployees.map(employee=><option value={employee.id} key={employee.id}>{employee.full_name} — {employee.login_id}</option>)}
+          </select>
+        </label>
+        <label>Nominal Kas Bon
+          <input type="number" min="1" value={cashAdvanceForm.amount} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,amount:e.target.value})} placeholder="Contoh: 500000" required/>
+        </label>
+        <label>Uang Diberikan Melalui
+          <select value={cashAdvanceForm.payment_method} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,payment_method:e.target.value})}>
+            <option value="cash">Tunai</option>
+            <option value="transfer">Transfer</option>
+            <option value="qris">QRIS</option>
+            <option value="other">Lainnya</option>
+          </select>
+        </label>
+        <label>Keterangan
+          <textarea rows={3} value={cashAdvanceForm.note} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,note:e.target.value})} placeholder="Contoh: Kas bon kebutuhan keluarga"/>
+        </label>
+        {message&&<div className="error-box">{message}</div>}
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setCashAdvanceOpen(false)} disabled={cashAdvanceBusy}>Batal</button>
+          <button className="primary-button" disabled={cashAdvanceBusy||!cashAdvanceForm.employee_id||Number(cashAdvanceForm.amount)<=0}><HandCoins size={16}/>{cashAdvanceBusy?'Menyimpan...':'Simpan Kas Bon'}</button>
         </div>
       </form>
     </Modal>}

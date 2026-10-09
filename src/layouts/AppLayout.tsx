@@ -313,7 +313,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.121 True Global Uniform Typography</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.122 Employee Finance Cash Advance</span></div>
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
