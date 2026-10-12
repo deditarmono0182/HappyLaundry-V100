@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, LocateFixed, MapPin, QrCode, ScanLine, ShieldCheck, StopCircle } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { PageHeader } from '../components/PageHeader'
@@ -30,6 +31,7 @@ const deviceLabel=()=>{
 
 export function AttendancePage(){
   const{profile}=useAuth()
+  const navigate=useNavigate()
   const scannerRef=useRef<Html5Qrcode|null>(null)
   const[scanning,setScanning]=useState(false)
   const[busy,setBusy]=useState(false)
@@ -120,9 +122,33 @@ export function AttendancePage(){
     const row=(Array.isArray(data)?data[0]:data) as AttendanceResult|null
     if(row?.ok){
       setResult(row)
+
+      if(row.action==='check_in'){
+        setAttendanceState(previous=>({
+          ...(previous||{}),
+          attendance_required:true,
+          attended_today:true,
+          checked_out:false
+        }))
+      }else if(row.action==='check_out'){
+        setAttendanceState(previous=>({
+          ...(previous||{}),
+          attendance_required:true,
+          attended_today:true,
+          checked_out:true
+        }))
+      }
+
+      window.dispatchEvent(new CustomEvent('happylaundry-attendance-changed',{
+        detail:{action:row.action}
+      }))
+
       const{data:state}=await supabase.rpc('v11322_current_attendance_state')
       if(state)setAttendanceState((Array.isArray(state)?state[0]:state) as typeof attendanceState)
-      window.dispatchEvent(new Event('happylaundry-attendance-changed'))
+
+      if(row.action==='check_in'){
+        window.setTimeout(()=>navigate('/',{replace:true}),450)
+      }
     }else{
       setMessage(row?.message||'Absensi tidak berhasil.')
     }

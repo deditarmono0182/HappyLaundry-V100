@@ -755,3 +755,13 @@ Requires SQL 067.
 - Semua koreksi disimpan dalam audit table.
 - Selisih nominal otomatis membuat penyesuaian Kas Harian.
 - Potong Kas Bon dari Gaji tetap terpisah dari Koreksi Kas Bon.
+
+
+## V113.0.124 — Employee Menu Unlock Fix
+- Memperbaiki kasus karyawan sudah login dan Absen Masuk berhasil tetapi sidebar tetap hanya menampilkan menu Absen.
+- Setelah check-in sukses, attendance gate dibuka langsung di browser tanpa menunggu refresh RPC.
+- Status attendance tetap diverifikasi ulang ke server setelahnya.
+- Refresh status attendance dipercepat menjadi 15 detik dan juga dicek saat app kembali aktif/focus.
+- Setelah Absen Masuk berhasil, karyawan otomatis kembali ke Dashboard.
+- Jika absensi sudah aktif tetapi semua hak akses menu karyawan = false, aplikasi menampilkan peringatan jelas agar Owner mengaktifkan hak akses di Pengaturan Karyawan.
+- Tidak ada SQL baru.

@@ -12777,3 +12777,13 @@ html[data-density="ultra"] .main-content *{
   gap:6px;
   flex-wrap:wrap;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.124 — Employee Menu Unlock Fix
+   ========================================================= */
+.attendance-access-notice,
+.page-container>.warning-box.inline-message{
+  position:relative;
+  z-index:2;
+}

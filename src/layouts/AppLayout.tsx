@@ -53,6 +53,11 @@ export function AppLayout() {
   const { profile, signOut } = useAuth()
   const role = profile?.role ?? 'staff'
   const isOwner=role==='owner'
+  const employeeWorkPermissionCount=useMemo(()=>{
+    if(role!=='employee'||!profile?.permissions)return 0
+    return Object.values(profile.permissions).filter(Boolean).length
+  },[role,profile?.permissions])
+
 
   const problemSummary=useMemo(()=>{
     const now=Date.now()
@@ -209,16 +214,48 @@ export function AppLayout() {
     }
 
     const firstCheck=window.setTimeout(()=>{void checkAttendance()},250)
-    timer=window.setInterval(()=>{void checkAttendance()},30000)
-    const changed=()=>{void checkAttendance()}
-    window.addEventListener('focus',changed)
-    window.addEventListener('happylaundry-attendance-changed',changed)
+    timer=window.setInterval(()=>{void checkAttendance()},15000)
+
+    const changed=(event?:Event)=>{
+      const detail=(event as CustomEvent<{action?:'check_in'|'check_out'}>|undefined)?.detail
+      if(detail?.action==='check_in'){
+        setAttendanceGate(previous=>({
+          attendance_required:previous?.attendance_required??true,
+          attended_today:true,
+          checked_out:false,
+          within_work_hours:previous?.within_work_hours??true,
+          logout_at:previous?.logout_at??null,
+          work_start:previous?.work_start??'',
+          work_end:previous?.work_end??''
+        }))
+        setAttendanceNotice('')
+        if(window.location.pathname==='/attendance')navigate('/',{replace:true})
+      }else if(detail?.action==='check_out'){
+        setAttendanceGate(previous=>({
+          attendance_required:previous?.attendance_required??true,
+          attended_today:true,
+          checked_out:true,
+          within_work_hours:previous?.within_work_hours??true,
+          logout_at:previous?.logout_at??null,
+          work_start:previous?.work_start??'',
+          work_end:previous?.work_end??''
+        }))
+      }
+      window.setTimeout(()=>{void checkAttendance()},250)
+    }
+
+    const onFocus=()=>{void checkAttendance()}
+    const onVisibility=()=>{if(document.visibilityState==='visible')void checkAttendance()}
+    window.addEventListener('focus',onFocus)
+    document.addEventListener('visibilitychange',onVisibility)
+    window.addEventListener('happylaundry-attendance-changed',changed as EventListener)
     return()=>{
       active=false
       window.clearTimeout(firstCheck)
       if(timer)window.clearInterval(timer)
-      window.removeEventListener('focus',changed)
-      window.removeEventListener('happylaundry-attendance-changed',changed)
+      window.removeEventListener('focus',onFocus)
+      document.removeEventListener('visibilitychange',onVisibility)
+      window.removeEventListener('happylaundry-attendance-changed',changed as EventListener)
     }
   },[role,navigate,signOut])
 
@@ -313,7 +350,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.123 Owner Cash Advance Correction</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.124 Employee Menu Unlock Fix</span></div>
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
@@ -403,6 +440,10 @@ export function AppLayout() {
         </header>
         <div className="page-container">
           {role==='employee'&&attendanceNotice&&<div className="attendance-access-notice">{attendanceNotice}</div>}
+          {role==='employee'&&attendanceGate?.attended_today&&!attendanceGate.checked_out&&employeeWorkPermissionCount===0&&
+            <div className="warning-box inline-message">
+              Absensi sudah aktif, tetapi akun ini belum memiliki hak akses menu kerja. Owner perlu membuka Pengaturan Karyawan dan mengaktifkan Kasir / Order / Produksi atau menu lain untuk akun ini.
+            </div>}
           <Outlet />
         </div>
       </main>
