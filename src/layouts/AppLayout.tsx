@@ -274,11 +274,11 @@ export function AppLayout() {
       const now=Date.now()
       let startedAt=Number(localStorage.getItem(markerKey)||0)
 
-      // Lindungi login yang baru berhasil dari state/marker browser yang telat tersinkron.
-      // Grace 60 detik hanya mencegah logout palsu sesaat setelah login; aturan 21:00 tetap berlaku.
-      if(Number.isFinite(startedAt)&&startedAt>0&&now-startedAt<60000){
-        const current=businessParts(now)
-        if(current.hour<21)return
+      // Lindungi login baru dari race auth/session mobile.
+      // Selama 2 menit pertama setelah login, jangan pernah melakukan auto-logout.
+      // Ini tidak memengaruhi tombol Keluar manual.
+      if(Number.isFinite(startedAt)&&startedAt>0&&now-startedAt<120000){
+        return
       }
 
       // Sesi lama dari versi sebelum V113.0.50 belum memiliki marker.
@@ -355,7 +355,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.125 Employee Session Stability</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.127 Stable Employee Login</span></div>
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

@@ -775,3 +775,25 @@ Requires SQL 067.
 - Profil karyawan yang sudah berhasil diverifikasi tidak langsung dihapus hanya karena satu RPC profil gagal sementara saat refresh session.
 - Fitur unlock menu setelah Absen Masuk dari V113.0.124 tetap dipertahankan.
 - Tidak ada SQL baru.
+
+
+## V113.0.126 — Employee Login Race Fix
+- Memperbaiki race condition sesi karyawan yang dapat membuat akun seperti Santos masuk aplikasi lalu kembali ke Login beberapa detik kemudian.
+- Menghapus refreshSession paksa setelah bind employee karena tidak diperlukan dan dapat memicu pergantian token anonymous di mobile.
+- Auth state listener tidak lagi melakukan query Supabase dengan await langsung di callback; profile refresh dijalankan setelah callback selesai.
+- Marker sesi karyawan sekarang ditulis sebelum profile employee dipasang, sehingga effect auto logout tidak pernah membaca marker login lama.
+- Auto logout dilindungi 2 menit pertama setelah login untuk mencegah logout palsu akibat race mobile.
+- Auto logout 21:00 WIB tetap dipertahankan setelah masa proteksi login baru.
+- Fix unlock menu setelah Absen dari V113.0.124 tetap dipertahankan.
+- Tidak ada SQL baru.
+
+
+## V113.0.127 — Stable Employee Login
+- Fokus khusus stabilitas login karyawan pada HP/browser yang dipakai bergantian untuk beberapa akun.
+- Sebelum login akun baru, binding employee lama dilepas melalui v109_employee_logout lalu session Supabase lama ditutup.
+- Login baru tidak lagi terganggu event SIGNED_OUT/SIGNED_IN sementara selama proses pergantian akun.
+- Profile load memakai sequence guard sehingga request lama tidak dapat menimpa profile akun yang baru.
+- Session/profile baru baru dibuka setelah login token, anonymous auth, bind employee, dan verifikasi profile semuanya berhasil.
+- ID employee aktif disimpan lokal untuk membantu mencegah campur session antar akun.
+- Logout membersihkan session, binding employee, marker, dan identitas employee aktif secara lengkap.
+- Tidak ada SQL baru.
