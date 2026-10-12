@@ -765,3 +765,13 @@ Requires SQL 067.
 - Setelah Absen Masuk berhasil, karyawan otomatis kembali ke Dashboard.
 - Jika absensi sudah aktif tetapi semua hak akses menu karyawan = false, aplikasi menampilkan peringatan jelas agar Owner mengaktifkan hak akses di Pengaturan Karyawan.
 - Tidak ada SQL baru.
+
+
+## V113.0.125 — Employee Session Stability
+- Memperbaiki kasus karyawan berhasil login lalu beberapa detik kemudian kembali ke Login.
+- Aplikasi tidak lagi memaksa logout berdasarkan `logout_at` dari attendance RPC yang bisa membawa jadwal/state lama.
+- Auto logout karyawan tetap berlaku pada 21:00 WIB melalui aturan sesi khusus.
+- Menambahkan grace 60 detik untuk login baru sebelum jam 21:00 agar marker sesi mobile tidak memicu logout palsu.
+- Profil karyawan yang sudah berhasil diverifikasi tidak langsung dihapus hanya karena satu RPC profil gagal sementara saat refresh session.
+- Fitur unlock menu setelah Absen Masuk dari V113.0.124 tetap dipertahankan.
+- Tidak ada SQL baru.

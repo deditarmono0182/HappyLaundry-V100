@@ -204,13 +204,11 @@ export function AppLayout() {
         setAttendanceNotice('')
       }
 
-      if(state.attendance_required&&state.logout_at){
-        const logoutAt=new Date(state.logout_at).getTime()
-        if(Date.now()>=logoutAt){
-          await signOut()
-          navigate('/login',{replace:true})
-        }
-      }
+      // V113.0.125:
+      // Jangan logout berdasarkan logout_at dari attendance RPC.
+      // Nilai ini dapat berasal dari konfigurasi/jadwal lama dan menyebabkan
+      // karyawan yang baru login langsung dilempar kembali ke halaman Login.
+      // Auto logout resmi tetap ditangani oleh aturan 21:00 WIB di effect terpisah.
     }
 
     const firstCheck=window.setTimeout(()=>{void checkAttendance()},250)
@@ -275,6 +273,13 @@ export function AppLayout() {
       if(!active||signingOut)return
       const now=Date.now()
       let startedAt=Number(localStorage.getItem(markerKey)||0)
+
+      // Lindungi login yang baru berhasil dari state/marker browser yang telat tersinkron.
+      // Grace 60 detik hanya mencegah logout palsu sesaat setelah login; aturan 21:00 tetap berlaku.
+      if(Number.isFinite(startedAt)&&startedAt>0&&now-startedAt<60000){
+        const current=businessParts(now)
+        if(current.hour<21)return
+      }
 
       // Sesi lama dari versi sebelum V113.0.50 belum memiliki marker.
       // Jika pertama kali terdeteksi sudah lewat pukul 21:00, putuskan langsung.
@@ -350,7 +355,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.124 Employee Menu Unlock Fix</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.125 Employee Session Stability</span></div>
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

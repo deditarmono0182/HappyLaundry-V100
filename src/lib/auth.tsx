@@ -126,7 +126,11 @@ export function AuthProvider({children}:{children:React.ReactNode}){
         }
       }
 
-      if(mounted)setProfile(null)
+      // Jangan langsung menghapus profil aktif karena satu kegagalan RPC sementara.
+      // Ini penting untuk koneksi mobile yang kadang lambat setelah anonymous session refresh.
+      if(mounted){
+        setProfile(previous=>previous??null)
+      }
     }
 
     retry(()=>withTimeout(supabase.auth.getSession(),10000,'Memuat sesi'),2).then(async({data})=>{
@@ -136,9 +140,11 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       setLoading(false)
     }).catch(()=>{if(mounted){setSession(null);setProfile(null);setLoading(false)}})
 
-    const{data:s}=supabase.auth.onAuthStateChange(async(_event,next)=>{
+    const{data:s}=supabase.auth.onAuthStateChange(async(event,next)=>{
       setSession(next)
       await loadProfile(next)
+      // TOKEN_REFRESHED/SIGNED_IN pada sesi karyawan dapat datang beberapa kali.
+      // loadProfile mempertahankan profil lama jika RPC sementara belum siap.
       setLoading(false)
     })
 
