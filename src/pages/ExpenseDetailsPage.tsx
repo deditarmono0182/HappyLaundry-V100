@@ -88,11 +88,14 @@ export function ExpenseDetailsPage(){
     }
     if(categoryResult.status==='rejected'){
       setCategories([])
-    }else if(categoryResult.value.error){
-      setMessage(current=>current||categoryResult.value.error.message)
-      setCategories([])
     }else{
-      setCategories((categoryResult.value.data as ExpenseCategory[])||[])
+      const categoryResponse=categoryResult.value
+      if(categoryResponse.error){
+        setMessage(current=>current||categoryResponse.error.message)
+        setCategories([])
+      }else{
+        setCategories((categoryResponse.data as ExpenseCategory[])||[])
+      }
     }
     setLoading(false)
   },[from,to])

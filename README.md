@@ -807,3 +807,10 @@ Requires SQL 067.
 - Pengeluaran payroll/gaji otomatis tidak dapat diedit dari daftar pengeluaran agar sumber payroll tetap konsisten.
 - Hak akses mengikuti policy finance yang sudah ada; tidak membutuhkan SQL baru.
 - Fitur stabilitas login V113.0.127 tetap dipertahankan.
+
+
+## V113.0.129 — Expense Edit Build Fix
+- Memperbaiki TypeScript build error TS18047 di ExpenseDetailsPage.tsx.
+- categoryResult.value.error sekarang disimpan ke variabel response terlebih dahulu sehingga TypeScript dapat melakukan null narrowing dengan benar.
+- Tidak mengubah fungsi Edit Pengeluaran dari V113.0.128.
+- Tidak ada SQL baru.
