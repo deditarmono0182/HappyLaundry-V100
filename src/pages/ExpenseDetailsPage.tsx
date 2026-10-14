@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Eye, FileSpreadsheet, FileText, Search, Trash2, TrendingDown, WalletCards } from 'lucide-react'
+import { AlertTriangle, Eye, FileSpreadsheet, FileText, Pencil, Save, Search, Trash2, TrendingDown, WalletCards } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
@@ -10,9 +10,16 @@ import { loadPayrollExpenseRows, type PayrollExpenseRow } from '../lib/payrollEx
 import { useAuth } from '../lib/auth'
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 
+interface ExpenseCategory{
+  id:string
+  name:string
+  group_name:string
+}
+
 interface ExpenseRow{
   id:string
   expense_date:string
+  category_id:string|null
   category_name:string
   group_name:string|null
   amount:number
@@ -41,17 +48,30 @@ export function ExpenseDetailsPage(){
   const [deleteReason,setDeleteReason]=useState('')
   const [deletePhrase,setDeletePhrase]=useState('')
   const [deleteBusy,setDeleteBusy]=useState(false)
+  const [categories,setCategories]=useState<ExpenseCategory[]>([])
+  const [editExpense,setEditExpense]=useState<ExpenseRow|null>(null)
+  const [editBusy,setEditBusy]=useState(false)
+  const [editForm,setEditForm]=useState({
+    expense_date:'',category_id:'',amount:'',payment_method:'cash',
+    description:'',reference:''
+  })
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
-    const [expenseResult,payrollResult]=await Promise.allSettled([
+    const [expenseResult,payrollResult,categoryResult]=await Promise.allSettled([
       supabase
         .from('v106_expenses_view')
         .select('*')
         .gte('expense_date',from)
         .lte('expense_date',to)
         .order('expense_date',{ascending:false}),
-      loadPayrollExpenseRows(from,to)
+      loadPayrollExpenseRows(from,to),
+      supabase
+        .from('v106_expense_categories')
+        .select('id,name,group_name')
+        .eq('is_active',true)
+        .order('group_name')
+        .order('name')
     ])
     if(expenseResult.status==='rejected'){
       setMessage(String(expenseResult.reason||'Gagal memuat pengeluaran.'))
@@ -65,6 +85,14 @@ export function ExpenseDetailsPage(){
       setPayrollRows([])
     }else{
       setPayrollRows(payrollResult.value)
+    }
+    if(categoryResult.status==='rejected'){
+      setCategories([])
+    }else if(categoryResult.value.error){
+      setMessage(current=>current||categoryResult.value.error.message)
+      setCategories([])
+    }else{
+      setCategories((categoryResult.value.data as ExpenseCategory[])||[])
     }
     setLoading(false)
   },[from,to])
@@ -89,6 +117,51 @@ export function ExpenseDetailsPage(){
     const {data,error}=await supabase.storage.from('expense-proofs').createSignedUrl(proofPath,300)
     if(error){setMessage(error.message);return}
     window.open(data.signedUrl,'_blank','noopener,noreferrer')
+  }
+
+  const openEditExpense=(row:ExpenseRow)=>{
+    setEditExpense(row)
+    setEditForm({
+      expense_date:row.expense_date,
+      category_id:row.category_id||'',
+      amount:String(Number(row.amount||0)),
+      payment_method:row.payment_method||'cash',
+      description:row.description||'',
+      reference:row.reference||''
+    })
+    setMessage('')
+  }
+
+  const saveEditExpense=async()=>{
+    if(!editExpense)return
+    const category=categories.find(item=>item.id===editForm.category_id)
+    if(!category){setMessage('Pilih kategori pengeluaran.');return}
+    const amount=Number(editForm.amount)
+    if(!Number.isFinite(amount)||amount<=0){setMessage('Nominal harus lebih dari 0.');return}
+
+    setEditBusy(true);setMessage('')
+    try{
+      const{error}=await supabase
+        .from('v106_expenses')
+        .update({
+          expense_date:editForm.expense_date,
+          category_id:category.id,
+          category_name:category.name,
+          amount,
+          payment_method:editForm.payment_method,
+          description:editForm.description.trim()||null,
+          reference:editForm.reference.trim()||null
+        })
+        .eq('id',editExpense.id)
+      if(error)throw error
+
+      setEditExpense(null)
+      await load()
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Gagal mengubah pengeluaran.')
+    }finally{
+      setEditBusy(false)
+    }
   }
 
   const submitDeleteExpense=async()=>{
@@ -188,13 +261,65 @@ export function ExpenseDetailsPage(){
                 : <span className="expense-proof-empty">-</span>}</td>
               <td><b className="expense-amount">{formatRupiah(Number(r.amount))}</b></td>
               <td>{r.payment_method!=='payroll'
-                ? <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(r as ExpenseRow);setDeleteReason('');setDeletePhrase('')}}><Trash2 size={14}/><span className="delete-label">{isOwner?'Hapus':'Ajukan Hapus'}</span></button>
+                ? <div className="expense-row-actions">
+                    <button type="button" className="expense-edit-button" onClick={()=>openEditExpense(r as ExpenseRow)}><Pencil size={14}/><span>Edit</span></button>
+                    <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(r as ExpenseRow);setDeleteReason('');setDeletePhrase('')}}><Trash2 size={14}/><span className="delete-label">{isOwner?'Hapus':'Ajukan Hapus'}</span></button>
+                  </div>
                 : <span className="expense-proof-empty">-</span>}</td>
             </tr>)}
           </tbody>
         </table>
       </div>
     </section>
+
+    {editExpense&&<Modal title="Edit Pengeluaran" onClose={()=>setEditExpense(null)}>
+      <div className="modal-form expense-edit-form">
+        <div className="expense-edit-note">
+          <Pencil size={19}/>
+          <div><b>Koreksi pengeluaran</b><span>Ubah data yang salah lalu simpan. Bukti nota yang sudah ada tetap dipertahankan.</span></div>
+        </div>
+
+        <div className="form-grid-two">
+          <label>Tanggal
+            <input type="date" value={editForm.expense_date} onChange={e=>setEditForm({...editForm,expense_date:e.target.value})}/>
+          </label>
+          <label>Kategori
+            <select value={editForm.category_id} onChange={e=>setEditForm({...editForm,category_id:e.target.value})}>
+              <option value="">Pilih kategori</option>
+              {categories.map(category=><option key={category.id} value={category.id}>{category.group_name} — {category.name}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <div className="form-grid-two">
+          <label>Nominal
+            <input type="number" min="1" step="1" value={editForm.amount} onChange={e=>setEditForm({...editForm,amount:e.target.value})}/>
+          </label>
+          <label>Metode
+            <select value={editForm.payment_method} onChange={e=>setEditForm({...editForm,payment_method:e.target.value})}>
+              <option value="cash">Tunai</option>
+              <option value="transfer">Transfer</option>
+              <option value="qris">QRIS</option>
+              <option value="other">Lainnya</option>
+            </select>
+          </label>
+        </div>
+
+        <label>Keterangan
+          <textarea rows={3} value={editForm.description} onChange={e=>setEditForm({...editForm,description:e.target.value})}/>
+        </label>
+        <label>Referensi
+          <input value={editForm.reference} onChange={e=>setEditForm({...editForm,reference:e.target.value})}/>
+        </label>
+
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={()=>setEditExpense(null)}>Batal</button>
+          <button type="button" className="primary-button" disabled={editBusy} onClick={()=>void saveEditExpense()}>
+            <Save size={15}/>{editBusy?'Menyimpan...':'Simpan Perubahan'}
+          </button>
+        </div>
+      </div>
+    </Modal>}
 
     {deleteExpense&&<Modal title={`${isOwner?'Hapus':'Ajukan Hapus'} Pengeluaran`} onClose={()=>setDeleteExpense(null)}>
       <div className="modal-form delete-request-form">

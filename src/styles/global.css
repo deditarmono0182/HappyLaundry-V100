@@ -12787,3 +12787,48 @@ html[data-density="ultra"] .main-content *{
   position:relative;
   z-index:2;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.128 — Expense Edit
+   ========================================================= */
+.expense-row-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.expense-edit-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:36px;
+  padding:7px 11px;
+  border:1px solid #a9d7c7;
+  background:#f0fbf7;
+  color:#126b51;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+.expense-edit-button:hover{background:#e5f7f0}
+.expense-edit-note{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:12px 14px;
+  border:1px solid #cfe8de;
+  background:#f4fbf8;
+  border-radius:12px;
+}
+.expense-edit-note>div{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.expense-edit-note span{color:#607b73}
+@media(max-width:720px){
+  .expense-row-actions{align-items:stretch}
+  .expense-edit-button,.expense-delete-request{min-height:40px}
+}

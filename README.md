@@ -797,3 +797,13 @@ Requires SQL 067.
 - ID employee aktif disimpan lokal untuk membantu mencegah campur session antar akun.
 - Logout membersihkan session, binding employee, marker, dan identitas employee aktif secara lengkap.
 - Tidak ada SQL baru.
+
+
+## V113.0.128 — Expense Edit
+- Menambahkan tombol Edit pada pengeluaran operasional/manual.
+- Edit tersedia dari Daftar Pengeluaran dan halaman Keuangan.
+- Bisa mengubah tanggal, kategori, nominal, metode pembayaran, keterangan, dan referensi.
+- Bukti nota yang sudah ada tetap dipertahankan.
+- Pengeluaran payroll/gaji otomatis tidak dapat diedit dari daftar pengeluaran agar sumber payroll tetap konsisten.
+- Hak akses mengikuti policy finance yang sudah ada; tidak membutuhkan SQL baru.
+- Fitur stabilitas login V113.0.127 tetap dipertahankan.
