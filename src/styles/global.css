@@ -12895,3 +12895,6 @@ html[data-density="ultra"] .main-content *{
 .cash-advance-employee-link{background:transparent;border:0;padding:5px 2px;color:#11699f;text-decoration:underline;text-underline-offset:3px;font:inherit;font-weight:700;text-align:left;cursor:pointer;}
 .cash-advance-employee-link:hover{color:#07507f;}
 .cash-advance-employee-link:focus-visible{outline:2px solid #1681bd;outline-offset:2px;border-radius:3px;}
+
+/* V113.0.137 — Batas kasbon */
+.cash-advance-limit{border:1px solid #d6e6df;border-radius:10px;padding:12px;display:grid;gap:8px}.cash-advance-limit p{margin:0}.cash-advance-limit label{display:grid;gap:6px}.cash-advance-over{display:block;color:#b42318;font-weight:700;margin-top:5px}

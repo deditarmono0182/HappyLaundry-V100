@@ -865,3 +865,18 @@ Rincian mencakup seluruh kasbon aktif/lunas, total, potongan/selisih saldo,
 riwayat potongan gaji dan koreksi. Print/Excel per karyawan terpisah dari
 export ringkasan global. Riwayat pemberian awal tidak menghitung koreksi dua kali.
 Lihat PANDUAN_V113_0_136_DETAIL_KASBON.txt. Tidak ada SQL baru setelah SQL 071.
+
+## V113.0.137 — Peringatan kasbon melebihi gaji
+Kasbon baru dibandingkan dengan gaji tercatat bulan berjalan WIB setelah
+potongan kasbon dan pembayaran gaji. Karyawan tidak dapat melampaui batas;
+Owner wajib memberi alasan persetujuan. Database memeriksa kembali saat
+menyimpan dan mencatat audit persetujuan. Peringatan muncul pada input,
+koreksi, serta laporan kasbon. Jalankan SQL 072 sebelum memakai versi ini.
+Rincian pemasangan dan rumus: PANDUAN_V113_0_137_WARNING_OVER_KASBON.txt.
+
+## V113.0.138 — Detail kasbon bagi staf Keuangan
+Staf aktif dengan izin Keuangan dapat mengeklik nama karyawan untuk membaca
+rincian kasbon, Print, dan Excel. Akses diperbaiki pada tautan, halaman,
+route dan fungsi database. Persetujuan over kasbon tetap khusus Owner.
+Jalankan SQL 073 setelah SQL 072, lalu deploy versi ini.
+Lihat PANDUAN_V113_0_138_AKSES_DETAIL_KASBON.txt.

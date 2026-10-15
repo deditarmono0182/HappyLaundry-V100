@@ -69,7 +69,7 @@ export default function App(){
       <Route path="daily-closing" element={<PermissionRoute permission="cash"><DailyClosingPage/></PermissionRoute>}/>
       <Route path="finance-reports" element={<FinanceReportsHubPage/>}/>
       <Route path="finance" element={<PermissionRoute permission="finance"><FinancePage/></PermissionRoute>}/>
-      <Route path="finance/cash-advances" element={<CashAdvanceReportPage/>}/>
+      <Route path="finance/cash-advances" element={<PermissionRoute permission="finance"><CashAdvanceReportPage/></PermissionRoute>}/>
       <Route path="profit-target" element={<ProfitTargetDashboardPage/>}/>
       <Route path="delete-approvals" element={<DeleteApprovalsPage/>}/>
       <Route path="finance/income" element={<IncomeDetailsPage/>}/>

@@ -1,0 +1,64 @@
+HappyLaundry V113.0.137 — Peringatan Kasbon Melebihi Gaji
+
+Paket lengkap berdasarkan V113.0.136. Semua detail kasbon, Print, Excel,
+login dan absensi GPS sebelumnya tetap disertakan.
+
+WAJIB SEBELUM MEMAKAI VERSI INI
+1. Jalankan SQL baru di Supabase SQL Editor:
+   supabase/072_v113_0_137_cash_advance_salary_guard.sql
+   Prasyarat: SQL 071 (dan SQL sebelumnya) sudah dijalankan.
+2. Deploy source V113.0.137 seperti pembaruan sebelumnya.
+3. Muat ulang aplikasi. Buka Keuangan > Input Kas Bon.
+   Jika muncul pesan belum dapat memeriksa batas, jangan lanjutkan input;
+   periksa SQL 072 lalu tekan Coba Lagi.
+
+ATURAN BATAS
+Gaji tersedia bulan berjalan WIB:
+  uang hadir yang tercatat + tunjangan bulanan + bonus tersimpan
+  + bagi hasil kategori order masuk bulan ini + komisi order bulan ini
+  - potongan kasbon bulan ini - pembayaran gaji bulan ini.
+Nilai minimum gaji tersedia adalah Rp0.
+Hari kerja mendatang, bonus yang belum disimpan, dan gaji bulan lain
+belum masuk perhitungan. Batas memakai bulan berjalan meskipun Owner
+sedang melihat periode lain di menu Absensi & Gaji.
+
+Sisa seluruh kasbon lama + pengajuan baru dibandingkan dengan gaji tersedia.
+- Tepat sama dengan batas: boleh disimpan.
+- Di atas batas: karyawan tidak bisa menyimpan.
+- Owner dapat melanjutkan dengan alasan minimal 5 karakter.
+- Alasan, waktu, akun Owner, gaji tersedia, saldo kasbon dan kelebihan
+  saat persetujuan disimpan sebagai audit.
+- Saldo lama tidak diubah dan tidak dibatalkan otomatis.
+- Pembayaran/potongan kasbon tetap dapat mengurangi saldo.
+
+LOKASI PERINGATAN
+- Keuangan > Input Kas Bon.
+- Absensi & Gaji > Kas Bon.
+- Koreksi nominal kasbon oleh Owner; alasan koreksi juga menjadi alasan
+  persetujuan jika kenaikan nominal menyebabkan kelebihan kasbon.
+- Laporan Kasbon Seluruh Karyawan: tanda peringatan pada nama karyawan,
+  gaji tersedia, kelebihan pada rincian, dan riwayat persetujuan Owner.
+- Excel/Print menyertakan informasi batas dan kelebihan; rincian karyawan
+  menyertakan alasan persetujuan.
+
+Pemeriksaan saat menyimpan dilakukan kembali oleh database, sehingga
+saldo/komisi yang berubah setelah formulir dibuka tetap diperhitungkan.
+Menu lama juga tidak bisa membuat kasbon berlebih tanpa persetujuan.
+
+VALIDASI
+TypeScript dan build Vite berhasil.
+Uji UI: warning, blokir karyawan, alasan Owner, batas tepat sama,
+pergantian karyawan, kegagalan jaringan, serta detail/Print/Excel.
+Uji SQL pada PostgreSQL terpisah: migrasi dua kali, perhitungan komponen
+pendapatan, blokir RPC lama dan insert langsung, persetujuan Owner,
+audit, koreksi, pembayaran, pembatasan akses dan alasan yang tidak bocor
+ke transaksi berikutnya. Tidak mengakses atau mengubah database produksi.
+Kode login, sesi karyawan, dan absensi GPS tidak diubah.
+
+ULANG UJI LOKAL (opsional)
+npm install
+npm install --no-save --package-lock=false jsdom @electric-sql/pglite
+node verification/cash-advance-warning-ui.mjs
+node verification/cash-advance-salary-guard.mjs
+node verification/cash-advance-report.mjs
+npm run build

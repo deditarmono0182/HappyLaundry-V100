@@ -1,3 +1,5 @@
+import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
+import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -128,9 +130,12 @@ export function FinancePage(){
   const [financeCashAdvances,setFinanceCashAdvances]=useState<FinanceCashAdvanceRow[]>([])
   const [cashAdvanceOpen,setCashAdvanceOpen]=useState(false)
   const [cashAdvanceBusy,setCashAdvanceBusy]=useState(false)
+  const [cashAdvanceOverride,setCashAdvanceOverride]=useState('')
   const [cashAdvanceForm,setCashAdvanceForm]=useState({
     employee_id:'',amount:'',payment_method:'cash',note:''
   })
+
+  const cashAdvanceLimit=useCashAdvanceLimit(cashAdvanceForm.employee_id,cashAdvanceOpen)
 
   const [form,setForm]=useState({
     expense_date:today(),category_id:'',amount:'',payment_method:'cash',
@@ -475,6 +480,7 @@ export function FinancePage(){
   }
 
   const openCashAdvanceInput=()=>{
+    setCashAdvanceOverride('')
     setCashAdvanceForm({
       employee_id:cashAdvanceEmployees[0]?.id||'',
       amount:'',
@@ -491,16 +497,19 @@ export function FinancePage(){
     if(!cashAdvanceForm.employee_id){setMessage('Pilih karyawan.');return}
     if(amount<=0){setMessage('Nominal kas bon harus lebih dari Rp 0.');return}
 
+    if(cashAdvanceBlocked(cashAdvanceLimit,amount,isOwner,cashAdvanceOverride)){setMessage('Periksa batas kasbon dan persetujuan Owner.');return}
     setCashAdvanceBusy(true);setMessage('')
-    const {error}=await supabase.rpc('v113122_add_cash_advance',{
+    const {error}=await supabase.rpc('v113137_add_cash_advance',{
       p_employee_id:cashAdvanceForm.employee_id,
       p_amount:amount,
       p_note:cashAdvanceForm.note.trim()||null,
-      p_payment_method:cashAdvanceForm.payment_method
+      p_payment_method:cashAdvanceForm.payment_method,
+      p_override_reason:cashAdvanceOverride.trim()||null
     })
     if(error){
       setMessage(error.message)
       setCashAdvanceBusy(false)
+      cashAdvanceLimit.refresh()
       return
     }
 
@@ -578,7 +587,7 @@ export function FinancePage(){
           <h3>Kas Bon / Piutang Karyawan</h3>
           <p>Saat kas bon diberikan, Kas Harian berkurang. Saldo kas bon tetap menjadi piutang karyawan dan tidak masuk biaya operasional.</p>
         </div>
-        <div className="cash-report-actions">{isOwner&&<button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button>}<button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
+        <div className="cash-report-actions"><button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button><button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
       </div>
       <div className="finance-cash-advance-summary">
         <div><span>Kas Bon Aktif</span><b>{financeCashAdvances.filter(row=>Number(row.remaining_amount)>0).length}</b></div>
@@ -589,9 +598,7 @@ export function FinancePage(){
           <thead><tr><th>Karyawan</th><th>Kas Bon</th><th>Sisa</th><th>Keterangan</th><th>Tanggal</th><th>Status</th></tr></thead>
           <tbody>
             {financeCashAdvances.slice(0,10).map(row=><tr key={row.id}>
-              <td>{isOwner
-                ? <button type="button" className="cash-advance-employee-link" title={`Lihat rincian kasbon ${row.employee_name}`} onClick={()=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(row.employee_id)}`)}>{row.employee_name}</button>
-                : <b>{row.employee_name}</b>}</td>
+              <td><button type="button" className="cash-advance-employee-link" title={`Lihat rincian kasbon ${row.employee_name}`} onClick={()=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(row.employee_id)}`)}>{row.employee_name}</button></td>
               <td>{formatRupiah(Number(row.amount||0))}</td>
               <td><b>{formatRupiah(Number(row.remaining_amount||0))}</b></td>
               <td>{row.note||'—'}</td>
@@ -855,7 +862,7 @@ export function FinancePage(){
       <form className="modal-form" onSubmit={saveFinanceCashAdvance}>
         <div className="info-box">Kas bon akan tercatat sebagai <b>Kas Keluar</b> di Kas Harian dan sebagai <b>Piutang Karyawan</b>. Kas bon tidak dihitung sebagai biaya operasional/laba rugi.</div>
         <label>Karyawan
-          <select value={cashAdvanceForm.employee_id} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,employee_id:e.target.value})} required>
+          <select value={cashAdvanceForm.employee_id} onChange={e=>{setCashAdvanceOverride('');setCashAdvanceForm({...cashAdvanceForm,employee_id:e.target.value})}} required>
             <option value="">Pilih karyawan</option>
             {cashAdvanceEmployees.map(employee=><option value={employee.id} key={employee.id}>{employee.full_name} — {employee.login_id}</option>)}
           </select>
@@ -863,6 +870,7 @@ export function FinancePage(){
         <label>Nominal Kas Bon
           <input type="number" min="1" value={cashAdvanceForm.amount} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,amount:e.target.value})} placeholder="Contoh: 500000" required/>
         </label>
+        <CashAdvanceWarning state={cashAdvanceLimit} amount={Number(cashAdvanceForm.amount)} owner={isOwner} reason={cashAdvanceOverride} onReason={setCashAdvanceOverride} onRefresh={cashAdvanceLimit.refresh}/>
         <label>Uang Diberikan Melalui
           <select value={cashAdvanceForm.payment_method} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,payment_method:e.target.value})}>
             <option value="cash">Tunai</option>
@@ -877,7 +885,7 @@ export function FinancePage(){
         {message&&<div className="error-box">{message}</div>}
         <div className="form-actions">
           <button type="button" className="secondary-button" onClick={()=>setCashAdvanceOpen(false)} disabled={cashAdvanceBusy}>Batal</button>
-          <button className="primary-button" disabled={cashAdvanceBusy||!cashAdvanceForm.employee_id||Number(cashAdvanceForm.amount)<=0}><HandCoins size={16}/>{cashAdvanceBusy?'Menyimpan...':'Simpan Kas Bon'}</button>
+          <button className="primary-button" disabled={cashAdvanceBusy||!cashAdvanceForm.employee_id||Number(cashAdvanceForm.amount)<=0||cashAdvanceBlocked(cashAdvanceLimit,Number(cashAdvanceForm.amount),isOwner,cashAdvanceOverride)}><HandCoins size={16}/>{cashAdvanceBusy?'Menyimpan...':'Simpan Kas Bon'}</button>
         </div>
       </form>
     </Modal>}

@@ -1,3 +1,5 @@
+import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
+import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CalendarCheck2, CheckCircle2, FileSpreadsheet, FileText, Gift,
@@ -143,6 +145,7 @@ const monthRange=(month:string)=>{
 }
 
 export function PayrollPage(){
+  const[cashAdvanceOverride,setCashAdvanceOverride]=useState('')
   const[employees,setEmployees]=useState<Employee[]>([])
   const[attendance,setAttendance]=useState<Attendance[]>([])
   const[settings,setSettings]=useState<PayrollSetting[]>([])
@@ -187,6 +190,10 @@ export function PayrollPage(){
   const[bonusDraft,setBonusDraft]=useState<Record<string,string>>({})
   const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus}|null>(null)
   const[overrideReason,setOverrideReason]=useState('')
+
+  const cashAdvanceLimit=useCashAdvanceLimit(cashAdvanceEmployee?.id||'',!!cashAdvanceEmployee)
+
+  const correctionLimit=useCashAdvanceLimit(correctCashAdvance?.employee_id||'',!!correctCashAdvance)
 
   const load=useCallback(async()=>{
     setLoading(true);setMessage('')
@@ -564,6 +571,7 @@ export function PayrollPage(){
   }
 
   const openCashAdvance=(employee:Employee)=>{
+    setCashAdvanceOverride('')
     setCashAdvanceEmployee(employee)
     setCashAdvanceForm({amount:'0',note:''})
     setMessage('');setSuccess('')
@@ -574,16 +582,18 @@ export function PayrollPage(){
     if(!cashAdvanceEmployee)return
     const amount=Math.max(0,Number(cashAdvanceForm.amount)||0)
     if(amount<=0){setMessage('Nominal kas bon harus lebih dari Rp 0.');return}
+    if(cashAdvanceBlocked(cashAdvanceLimit,amount,true,cashAdvanceOverride)){setMessage('Periksa batas kasbon dan isi alasan persetujuan Owner.');return}
     setBusy(true);setMessage('');setSuccess('')
-    const add=await supabase.rpc('v113072_add_cash_advance',{
+    const add=await supabase.rpc('v113137_add_cash_advance',{
       p_employee_id:cashAdvanceEmployee.id,
       p_amount:amount,
-      p_note:cashAdvanceForm.note.trim()||null
+      p_note:cashAdvanceForm.note.trim()||null,
+      p_payroll_entry:true,p_override_reason:cashAdvanceOverride.trim()||null
     })
-    if(add.error){setMessage(add.error.message);setBusy(false);return}
+    if(add.error){setMessage(add.error.message);setBusy(false);cashAdvanceLimit.refresh();return}
 
     const row=payrollRows.find(item=>item.employee.id===cashAdvanceEmployee.id)
-    const available=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
+    const available=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0)-Number(row?.paidAmount||0))
     const deduction=Math.min(amount,available)
     if(deduction>0){
       const apply=await supabase.rpc('v113072_apply_cash_advance_deduction',{
@@ -670,8 +680,9 @@ export function PayrollPage(){
       return
     }
 
+    if(cashAdvanceBlocked(correctionLimit,Math.max(0,Number(correctCashAdvanceForm.amount)-Number(correctCashAdvance.amount)),true,correctCashAdvanceForm.reason)){setMessage('Periksa batas kasbon dan isi alasan persetujuan Owner.');return}
     setBusy(true);setMessage('');setSuccess('')
-    const result=await supabase.rpc('v113123_owner_correct_cash_advance',{
+    const result=await supabase.rpc('v113137_correct_cash_advance',{
       p_cash_advance_id:correctCashAdvance.id,
       p_new_amount:amount,
       p_new_note:correctCashAdvanceForm.note.trim()||null,
@@ -1126,7 +1137,8 @@ export function PayrollPage(){
               placeholder="Keterangan kas bon"
             />
           </label>
-          <label>Alasan Koreksi
+          <CashAdvanceWarning state={correctionLimit} amount={Math.max(0,newAmount-Number(correctCashAdvance.amount))} owner={true} reason={correctCashAdvanceForm.reason} onReason={reason=>setCorrectCashAdvanceForm({...correctCashAdvanceForm,reason})} onRefresh={correctionLimit.refresh} showReason={false}/>
+          <label>Alasan Koreksi / Persetujuan Owner atas Kelebihan Kasbon
             <textarea
               rows={3}
               value={correctCashAdvanceForm.reason}
@@ -1141,7 +1153,7 @@ export function PayrollPage(){
           {message&&<div className="error-box">{message}</div>}
           <div className="form-actions">
             <button type="button" className="secondary-button" onClick={()=>setCorrectCashAdvance(null)} disabled={busy}>Batal</button>
-            <button className="primary-button" disabled={busy||newAmount<=0||correctCashAdvanceForm.reason.trim().length<5}>
+            <button className="primary-button" disabled={busy||newAmount<=0||correctCashAdvanceForm.reason.trim().length<5||cashAdvanceBlocked(correctionLimit,Math.max(0,newAmount-Number(correctCashAdvance.amount)),true,correctCashAdvanceForm.reason)}>
               <Pencil size={16}/>{busy?'Menyimpan...':'Simpan Koreksi'}
             </button>
           </div>
@@ -1177,11 +1189,12 @@ export function PayrollPage(){
           <label>Keterangan
             <textarea rows={3} value={cashAdvanceForm.note} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,note:e.target.value})} placeholder="Contoh: Kas bon kebutuhan keluarga"/>
           </label>
+          <CashAdvanceWarning state={cashAdvanceLimit} amount={Number(cashAdvanceForm.amount)} owner={true} reason={cashAdvanceOverride} onReason={setCashAdvanceOverride} onRefresh={cashAdvanceLimit.refresh}/>
           <div className="info-box">Kas bon akan langsung dipotong dari gaji periode ini sebesar hak gaji yang tersedia. Jika kas bon lebih besar dari gaji, sisanya otomatis dibawa ke periode berikutnya.</div>
           {message&&<div className="error-box">{message}</div>}
           <div className="form-actions">
             <button type="button" className="secondary-button" onClick={()=>setCashAdvanceEmployee(null)} disabled={busy}>Batal</button>
-            <button className="primary-button" disabled={busy||Number(cashAdvanceForm.amount)<=0}><Save size={16}/>{busy?'Menyimpan...':'Simpan Kas Bon'}</button>
+            <button className="primary-button" disabled={busy||Number(cashAdvanceForm.amount)<=0||cashAdvanceBlocked(cashAdvanceLimit,Number(cashAdvanceForm.amount),true,cashAdvanceOverride)}><Save size={16}/>{busy?'Menyimpan...':'Simpan Kas Bon'}</button>
           </div>
         </form>
       </Modal>

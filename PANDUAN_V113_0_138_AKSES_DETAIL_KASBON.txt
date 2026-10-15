@@ -1,0 +1,32 @@
+HappyLaundry V113.0.138 — Detail Kasbon untuk Karyawan Akses Keuangan
+
+Paket lengkap berdasarkan V113.0.137.
+
+PEMASANGAN
+1. Pastikan SQL 072 dari V113.0.137 sudah dijalankan.
+2. Jalankan SQL baru di Supabase SQL Editor:
+   supabase/073_v113_0_138_finance_cash_advance_detail_access.sql
+3. Deploy source V113.0.138 seperti biasa, lalu muat ulang aplikasi.
+4. Login karyawan yang aktif dan memiliki izin Keuangan.
+5. Buka Keuangan > klik nama karyawan pada tabel Kas Bon.
+   Atau tekan Laporan Seluruh Karyawan > klik nama / Lihat Rincian.
+
+PERBAIKAN
+- Nama karyawan di Keuangan sekarang dapat diklik oleh staf Keuangan.
+- Halaman laporan, rincian transaksi, Print dan Excel mengikuti izin Keuangan.
+- Database mengizinkan pembacaan laporan dan batas kasbon untuk staf Keuangan.
+- Karyawan tanpa izin Keuangan atau nonaktif tetap ditolak.
+- Persetujuan over kasbon, koreksi kasbon, dan riwayat persetujuan
+  Owner tersendiri tetap khusus Owner. Alasan koreksi tetap terlihat pada
+  riwayat transaksi kasbon. Batas kasbon dari V113.0.137 tetap berlaku.
+- Tidak mengubah saldo, kasbon lama, pengaturan gaji, login atau absensi GPS.
+
+VERIFIKASI
+Build TypeScript + Vite berhasil.
+Uji UI laporan: Owner, karyawan berizin Keuangan, izin dicabut, karyawan
+nonaktif, klik nama, rincian, Print dan Excel.
+Uji SQL pada PostgreSQL terpisah: migrasi 073 dapat diulang, staf Keuangan
+bisa membaca laporan, staf tanpa izin ditolak, staf Keuangan tidak bisa
+menyetujui over kasbon atau mengoreksi nominal, audit Owner tetap privat.
+Uji blokir over kasbon dan persetujuan Owner versi sebelumnya tetap lulus.
+Belum diterapkan atau diuji pada database produksi.
