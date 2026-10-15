@@ -844,3 +844,11 @@ Requires SQL 067.
 - Karyawan Bebas Absensi langsung masuk aplikasi tanpa GPS.
 - Multi-device session dari SQL 069 tetap dipertahankan.
 - Memerlukan SQL 070 setelah SQL 069.
+
+
+## V113.0.133 — GPS Attendance Cleanup
+- Menghapus tampilan QR Absen lama dari Pengaturan Absensi Owner.
+- Menghapus tombol Generate QR, Download QR, Print QR, counter pemakaian QR, dan preview QR.
+- Pengaturan Absensi sekarang hanya menampilkan lokasi toko, radius GPS, jam kerja, dan status Login + GPS.
+- Teks di halaman Pengaturan juga diperbarui agar tidak lagi menyebut QR.
+- Tidak ada SQL baru; tetap memakai SQL 069 + SQL 070.

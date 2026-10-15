@@ -182,7 +182,7 @@ export function SettingsPage() {
       </section>
 
       <section className="panel settings-card settings-wide employee-settings-link">
-        <header><CalendarCheck2 size={21}/><div><b>Pengaturan Absensi Karyawan</b><small>Kelola QR Absen, koordinat toko, radius GPS, dan batas jam. Bisa dikelola Owner dari mana saja.</small></div></header>
+        <header><CalendarCheck2 size={21}/><div><b>Pengaturan Absensi Karyawan</b><small>Kelola lokasi toko, radius GPS, jam kerja, dan toleransi logout. Absensi karyawan menggunakan GPS tanpa kamera/QR.</small></div></header>
         <button type="button" className="primary-button" onClick={()=>navigate('/settings/attendance')}><CalendarCheck2 size={17}/>Buka Pengaturan Absensi</button>
       </section>
 

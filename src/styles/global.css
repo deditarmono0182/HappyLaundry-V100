@@ -12843,3 +12843,40 @@ html[data-density="ultra"] .main-content *{
 .attendance-scan-placeholder svg{
   opacity:.9;
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.133 — Remove Legacy QR Attendance UI
+   ========================================================= */
+.attendance-settings-gps-only{
+  grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);
+}
+.attendance-gps-owner-card{
+  align-self:start;
+}
+.attendance-gps-summary{
+  display:grid;
+  gap:10px;
+  margin:14px 0;
+}
+.attendance-gps-summary>div{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 14px;
+  border:1px solid #d8e9e2;
+  border-radius:12px;
+  background:#f7fbf9;
+}
+.attendance-gps-summary span{
+  color:#607b73;
+}
+.attendance-gps-summary b{
+  text-align:right;
+}
+@media(max-width:900px){
+  .attendance-settings-gps-only{
+    grid-template-columns:1fr;
+  }
+}
