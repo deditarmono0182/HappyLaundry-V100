@@ -190,7 +190,7 @@ export function EmployeesPage(){
       })
       if(error)throw error
       setResetEmployee(null)
-      setSuccess(`Password ${resetEmployee.login_id} berhasil diubah.`)
+      setSuccess(`Password ${resetEmployee.login_id} berhasil diubah dan sesi lama sudah direset. Karyawan dapat login kembali dengan password baru.`)
     }catch(error){
       setMessage(error instanceof Error?error.message:'Reset password gagal.')
     }finally{
@@ -312,6 +312,10 @@ export function EmployeesPage(){
 
     {resetEmployee&&<Modal title={`Reset Password — ${resetEmployee.login_id}`} onClose={()=>setResetEmployee(null)}>
       <form className="modal-form" onSubmit={submitReset}>
+        <div className="employee-auth-note employee-auth-ready">
+          <KeyRound size={18}/>
+          <div><b>Reset Password + Session</b><span>Password baru akan memutus sesi lama karyawan agar login berikutnya dimulai dari sesi yang bersih.</span></div>
+        </div>
         <div className="employee-password-box">
           <div className="employee-password-title"><RefreshCw size={18}/><div><b>Password Baru</b><small>{resetEmployee.full_name}</small></div></div>
           <div className="form-grid-two">

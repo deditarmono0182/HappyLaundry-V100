@@ -814,3 +814,11 @@ Requires SQL 067.
 - categoryResult.value.error sekarang disimpan ke variabel response terlebih dahulu sehingga TypeScript dapat melakukan null narrowing dengan benar.
 - Tidak mengubah fungsi Edit Pengeluaran dari V113.0.128.
 - Tidak ada SQL baru.
+
+
+## V113.0.130 — Employee Password & Session Reset Fix
+- Reset password karyawan sekarang dipasangkan dengan SQL 068.
+- SQL 068 mereset password hash, failed login count, lock, login token, dan binding auth_uid lama.
+- Sesi lama karyawan diputus sehingga login berikutnya memakai session baru yang bersih.
+- Owner mendapat pesan sukses yang jelas bahwa password dan session lama sudah direset.
+- Mempertahankan stabilitas login V113.0.127 dan fitur Edit Pengeluaran V113.0.128/129.
