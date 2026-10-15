@@ -1,0 +1,44 @@
+HappyLaundry V113.0.136 — Detail Kasbon Karyawan
+
+Dasar source: V113.0.134 dengan perbaikan tautan nama dari V113.0.135.
+Paket lengkap; tidak perlu memasang V113.0.135 terlebih dahulu.
+
+CARA MEMAKAI
+1. Deploy source ini seperti pembaruan HappyLaundry sebelumnya.
+2. Jika SQL 071 belum pernah dijalankan, jalankan:
+   supabase/071_v113_0_134_owner_cash_advance_report.sql
+   Prasyarat: SQL 067 dan 070 sudah terpasang.
+   Jika SQL 071 sudah dijalankan untuk V113.0.134, tidak ada SQL baru.
+3. Login Owner, buka Keuangan, klik nama karyawan pada daftar Kas Bon.
+   Alternatif: Laporan Seluruh Karyawan > nama karyawan / Lihat Rincian.
+4. Detail otomatis bergulir ke rincian karyawan yang dipilih.
+5. Excel Karyawan / Print Karyawan mengambil ringkasan setiap kasbon dan
+   riwayat pemberian, potongan gaji, serta koreksi karyawan tersebut.
+   Tombol Excel / Print di bagian atas mengambil ringkasan semua karyawan
+   yang sesuai filter pencarian.
+6. Tutup Rincian kembali ke ringkasan. Kasbon lunas tetap tersedia.
+
+PERHITUNGAN
+- Total kasbon menggunakan nominal terakhir setelah koreksi.
+- Terbayar / selisih saldo = total kasbon dikurangi saldo tersisa.
+- Potongan gaji yang memiliki catatan transaksi tampil pada riwayat.
+- Data lama tidak memiliki catatan pembayaran tunai terpisah; selisih saldo
+  tidak dibuat menjadi transaksi pembayaran tunai fiktif.
+- Pemberian awal memakai nominal sebelum koreksi pertama, sehingga koreksi
+  tidak dihitung ganda pada riwayat.
+- Kasbon dibatalkan tidak masuk laporan saldo aktif/lunas.
+- Excel memakai format .xls yang sudah digunakan aplikasi.
+
+VERIFIKASI
+Build TypeScript + Vite berhasil.
+Pengujian UI dengan data sintetis berhasil: klik nama, tautan langsung,
+tutup rincian, saldo, koreksi, Print/Excel per karyawan, export global,
+karyawan tidak ditemukan, kegagalan jaringan, dan pembatasan Owner.
+File login, sesi karyawan, absensi GPS, serta SQL lama tidak diubah.
+Belum diuji terhadap database produksi. Jumlah 25 kasbon aktif dan saldo
+Rp5.053.228 harus dicocokkan setelah deploy; tidak ditanam sebagai angka tetap.
+
+Untuk mengulang uji UI lokal (opsional):
+npm install
+npm install --no-save --package-lock=false jsdom
+node verification/cash-advance-report.mjs

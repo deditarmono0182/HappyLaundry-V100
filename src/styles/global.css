@@ -12890,3 +12890,8 @@ html[data-density="ultra"] .main-content *{
 .cash-report-stats span,.cash-report-note{color:#607b73}.cash-report-stats strong{overflow-wrap:anywhere}
 .cash-report-note{font-size:13px;margin-top:14px}
 @media(max-width:720px){.cash-report-stats{grid-template-columns:1fr}.cash-report-toolbar>*{width:100%}.cash-report-toolbar label{width:auto}}
+
+/* V113.0.135 clickable cash advance employee names */
+.cash-advance-employee-link{background:transparent;border:0;padding:5px 2px;color:#11699f;text-decoration:underline;text-underline-offset:3px;font:inherit;font-weight:700;text-align:left;cursor:pointer;}
+.cash-advance-employee-link:hover{color:#07507f;}
+.cash-advance-employee-link:focus-visible{outline:2px solid #1681bd;outline-offset:2px;border-radius:3px;}

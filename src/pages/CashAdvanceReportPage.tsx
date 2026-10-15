@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FileSpreadsheet, Printer, RefreshCw, Search, ChevronLeft } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { FileSpreadsheet, Printer, RefreshCw, ChevronLeft } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
@@ -18,19 +18,24 @@ const number=(value:unknown)=>Number(value||0)
 
 export function CashAdvanceReportPage(){
   const navigate=useNavigate()
+  const [searchParams,setSearchParams]=useSearchParams()
+  const selectedParam=searchParams.get('employee')
   const {profile}=useAuth()
   const [data,setData]=useState<Report|null>(null)
   const [loading,setLoading]=useState(true)
   const [error,setError]=useState('')
   const [query,setQuery]=useState('')
-  const [selected,setSelected]=useState<string|null>(null)
   const [includeClosed,setIncludeClosed]=useState(true)
+  const detailsRef=useRef<HTMLElement|null>(null)
   const load=useCallback(async()=>{
     setLoading(true);setError('')
-    const {data:response,error:rpcError}=await supabase.rpc('v113134_owner_cash_advance_report')
-    if(rpcError){setError(rpcError.message);setData(null)}
-    else setData(response as Report)
-    setLoading(false)
+    try{
+      const {data:response,error:rpcError}=await supabase.rpc('v113134_owner_cash_advance_report')
+      if(rpcError)throw rpcError
+      if(!response||!Array.isArray(response.employees)||!Array.isArray(response.advances)||!Array.isArray(response.deductions)||!Array.isArray(response.corrections))throw new Error('Format laporan tidak valid')
+      setData(response as Report)
+    }catch(cause){setError(cause instanceof Error?cause.message:String((cause as {message?:string})?.message||cause));setData(null)}
+    finally{setLoading(false)}
   },[])
   useEffect(()=>{if(profile?.role==='owner')void load()},[load,profile?.role])
 
@@ -45,24 +50,34 @@ export function CashAdvanceReportPage(){
   },[data])
   const filtered=useMemo(()=>summaries.filter(s=>(includeClosed||s.remaining>0)&&`${s.employee.name} ${s.employee.login_id}`.toLowerCase().includes(query.toLowerCase())),[summaries,query,includeClosed])
   const grand=useMemo(()=>summaries.reduce((a,s)=>({total:a.total+s.total,paid:a.paid+s.paid,remaining:a.remaining+s.remaining}),{total:0,paid:0,remaining:0}),[summaries])
-  const current=useMemo(()=>summaries.find(row=>row.employee.id===selected)||null,[summaries,selected])
-  const advances=useMemo(()=>data?.advances.filter(a=>a.employee_id===selected&&!a.cancelled_at)||[],[data,selected])
+  const effectiveSelected=selectedParam
+  const currentSelection=useMemo(()=>summaries.find(row=>row.employee.id===effectiveSelected)||null,[summaries,effectiveSelected])
+  useEffect(()=>{if(currentSelection&&detailsRef.current)detailsRef.current.scrollIntoView({behavior:'smooth',block:'start'})},[currentSelection?.employee.id])
+  const advances=useMemo(()=>data?.advances.filter(a=>a.employee_id===effectiveSelected&&!a.cancelled_at)||[],[data,effectiveSelected])
   const events=useMemo(()=>{
-    if(!data||!selected)return [] as {id:string;date:string;kind:string;amount:number;details:string}[]
-    const issue=advances.map(a=>({id:'i'+a.id,date:a.issued_at,kind:'Kasbon diberikan',amount:number(a.amount),details:a.note||'—'}))
-    const deductions=data.deductions.filter(d=>d.employee_id===selected&&advances.some(a=>a.id===d.cash_advance_id)).map(d=>({id:'d'+d.id,date:d.created_at,kind:'Potongan gaji',amount:-number(d.amount),details:'Periode gaji '+d.payroll_month}))
-    const corrections=data.corrections.filter(c=>c.employee_id===selected&&advances.some(a=>a.id===c.cash_advance_id)).map(c=>({id:'c'+c.id,date:c.corrected_at,kind:'Koreksi nominal',amount:number(c.new_amount)-number(c.old_amount),details:`${c.reason} • ${formatRupiah(number(c.old_amount))} → ${formatRupiah(number(c.new_amount))}`}))
+    if(!data||!effectiveSelected)return [] as {id:string;date:string;kind:string;amount:number;details:string}[]
+    const issue=advances.map(a=>{
+      const corrections=data.corrections.filter(c=>c.cash_advance_id===a.id).sort((x,y)=>x.corrected_at.localeCompare(y.corrected_at)||x.id.localeCompare(y.id))
+      const original=corrections.length?number(corrections[0].old_amount):number(a.amount)
+      return {id:'i'+a.id,date:a.issued_at,kind:'Kasbon diberikan',amount:original,details:a.note||'—'}
+    })
+    const deductions=data.deductions.filter(d=>d.employee_id===effectiveSelected&&advances.some(a=>a.id===d.cash_advance_id)).map(d=>({id:'d'+d.id,date:d.created_at,kind:'Potongan gaji',amount:-number(d.amount),details:'Periode gaji '+d.payroll_month}))
+    const corrections=data.corrections.filter(c=>c.employee_id===effectiveSelected&&advances.some(a=>a.id===c.cash_advance_id)).map(c=>({id:'c'+c.id,date:c.corrected_at,kind:'Koreksi nominal',amount:number(c.new_amount)-number(c.old_amount),details:`${c.reason} • ${formatRupiah(number(c.old_amount))} → ${formatRupiah(number(c.new_amount))}`}))
     return [...issue,...deductions,...corrections].sort((a,b)=>b.date.localeCompare(a.date))
-  },[data,selected,advances])
-  const exportOptions=()=>({
+  },[data,effectiveSelected,advances])
+  const exportOptions=(detail=false)=>{
+    const current=detail?currentSelection:null
+    const totals=filtered.reduce((a,s)=>({total:a.total+s.total,paid:a.paid+s.paid,remaining:a.remaining+s.remaining}),{total:0,paid:0,remaining:0})
+    return ({
     title:current?`Rincian Kasbon - ${current.employee.name}`:'Laporan Kasbon Seluruh Karyawan',
     filename:current?`kasbon-${current.employee.login_id}`:'laporan-kasbon-semua-karyawan',
     subtitle:'HappyLaundry Babakan CRB • Saldo kasbon adalah piutang karyawan, bukan biaya operasional',
-    headers:current?['Tanggal','Jenis','Perubahan Kasbon','Keterangan']:['Karyawan','ID Akun','Total Kasbon','Sudah Dilunasi / Dikoreksi','Sisa Kasbon','Jumlah Kasbon'],
-    rows:current?events.map(e=>[date(e.date),e.kind,e.amount,e.details]):filtered.map(s=>[s.employee.name,s.employee.login_id,s.total,s.paid,s.remaining,s.count]),
-    summary:[['Total Kasbon',current?current.total:grand.total],['Total Terbayar / Selisih Saldo',current?current.paid:grand.paid],['Total Sisa',current?current.remaining:grand.remaining]] as Array<[string,string|number]>
-  })
+    headers:current?['Tanggal','Jenis','Kasbon / Perubahan','Potongan / Pembayaran','Saldo Tersisa','Keterangan']:['Karyawan','ID Akun','Total Kasbon','Sudah Dilunasi / Dikoreksi','Sisa Kasbon','Jumlah Kasbon'],
+    rows:current?[...advances.map(a=>[date(a.issued_at),'Ringkasan kasbon',number(a.amount),Math.max(0,number(a.amount)-number(a.remaining_amount)),number(a.remaining_amount),a.note||'—']),...events.map(e=>[date(e.date),e.kind,e.amount,'','',e.details])]:filtered.map(s=>[s.employee.name,s.employee.login_id,s.total,s.paid,s.remaining,s.count]),
+    summary:[['Total Kasbon',current?current.total:totals.total],['Total Terbayar / Selisih Saldo',current?current.paid:totals.paid],['Total Sisa',current?current.remaining:totals.remaining]] as Array<[string,string|number]>
+  })}
 
+  const current=currentSelection
   if(profile?.role!=='owner')return <div className="error-box">Laporan kasbon seluruh karyawan hanya untuk Owner.</div>
   return <>
     <PageHeader eyebrow="OWNER • KEUANGAN" title="Laporan Kasbon Karyawan" description="Ringkasan seluruh karyawan dan riwayat rinci. Data langsung dari Supabase; laporan hanya baca." action={<button className="secondary-button" onClick={()=>navigate('/finance')}><ChevronLeft size={16}/>Keuangan</button>}/>
@@ -71,8 +86,8 @@ export function CashAdvanceReportPage(){
         <input aria-label="Cari karyawan" placeholder="Cari nama / ID karyawan..." value={query} onChange={e=>setQuery(e.target.value)}/>
         <label><input type="checkbox" checked={includeClosed} onChange={e=>setIncludeClosed(e.target.checked)}/> Tampilkan kasbon lunas</label>
         <button className="secondary-button" disabled={loading} onClick={()=>void load()}><RefreshCw size={16}/>Refresh</button>
-        <button className="secondary-button" disabled={!data} onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>Excel</button>
-        <button className="secondary-button" disabled={!data} onClick={()=>printPdf(exportOptions())}><Printer size={16}/>Print / PDF</button>
+        <button className="secondary-button" disabled={!data||loading} onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>Excel</button>
+        <button className="secondary-button" disabled={!data||loading} onClick={()=>printPdf(exportOptions())}><Printer size={16}/>Print / PDF</button>
       </div>
       {error&&<div className="error-box">Gagal mengambil laporan: {error}. Pastikan SQL 071 sudah dijalankan.</div>}
       {loading&&<p>Memuat seluruh kasbon...</p>}
@@ -83,19 +98,25 @@ export function CashAdvanceReportPage(){
           <div><span>Sisa Piutang Karyawan</span><strong>{formatRupiah(grand.remaining)}</strong></div>
         </div>
         <div className="table-wrap"><table><thead><tr><th>Karyawan</th><th>Total Kasbon</th><th>Terbayar / Selisih</th><th>Sisa Kasbon</th><th>Transaksi</th><th>Aksi</th></tr></thead><tbody>
-          {filtered.map(s=><tr key={s.employee.id}><td><b>{s.employee.name}</b><small style={{display:'block'}}>{s.employee.login_id}</small></td><td>{formatRupiah(s.total)}</td><td>{formatRupiah(s.paid)}</td><td><b>{formatRupiah(s.remaining)}</b></td><td>{s.count}</td><td><button className="secondary-button" onClick={()=>setSelected(s.employee.id)}>Lihat Rincian</button></td></tr>)}
+          {filtered.map(s=><tr key={s.employee.id}><td><button type="button" className="cash-advance-employee-link" onClick={()=>{setSearchParams({employee:s.employee.id})}}>{s.employee.name}</button><small style={{display:'block'}}>{s.employee.login_id}</small></td><td>{formatRupiah(s.total)}</td><td>{formatRupiah(s.paid)}</td><td><b>{formatRupiah(s.remaining)}</b></td><td>{s.count}</td><td><button className="secondary-button" onClick={()=>{setSearchParams({employee:s.employee.id})}}>Lihat Rincian</button></td></tr>)}
           {filtered.length===0&&<tr><td colSpan={6}>Belum ada kasbon pada filter ini.</td></tr>}
         </tbody></table></div>
         <p className="cash-report-note">Nilai terbayar/selisih dihitung dari nominal kasbon dikurangi saldo tersisa. Termasuk potongan gaji dan penyesuaian saldo; bukan otomatis berarti uang kas masuk.</p>
       </>}
     </section>
-    {current&&<section className="panel" style={{padding:16}}>
-      <div className="cash-report-detail-heading"><div><h3>Riwayat Kasbon — {current.employee.name}</h3><p>Total {formatRupiah(current.total)} • Sisa {formatRupiah(current.remaining)}</p></div><button className="secondary-button" onClick={()=>setSelected(null)}>Tutup Rincian</button></div>
+    {data&&!loading&&selectedParam&&!current&&<div className="error-box">Karyawan ini tidak memiliki kasbon aktif atau lunas yang dapat ditampilkan.</div>}
+    {current&&<section ref={detailsRef} className="panel" style={{padding:16,scrollMarginTop:90}}>
+      <div className="cash-report-detail-heading"><div><h3>Riwayat Kasbon — {current.employee.name}</h3><p>Total kasbon {formatRupiah(current.total)} • Terbayar / selisih saldo {formatRupiah(current.paid)} • Sisa {formatRupiah(current.remaining)}</p></div><div className="cash-report-actions"><button className="secondary-button" disabled={loading} onClick={()=>downloadXls(exportOptions(true))}><FileSpreadsheet size={16}/>Excel Karyawan</button><button className="secondary-button" disabled={loading} onClick={()=>printPdf(exportOptions(true))}><Printer size={16}/>Print Karyawan</button><button className="secondary-button" onClick={()=>{setSearchParams({})}}>Tutup Rincian</button></div></div>
+      <h4>Seluruh Kasbon Karyawan</h4>
+      <div className="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kasbon (setelah koreksi)</th><th>Potongan / Pembayaran</th><th>Saldo Tersisa</th><th>Status</th><th>Keterangan</th></tr></thead><tbody>
+        {advances.map(a=><tr key={a.id}><td>{date(a.issued_at)}</td><td>{formatRupiah(number(a.amount))}</td><td>{formatRupiah(Math.max(0,number(a.amount)-number(a.remaining_amount)))}</td><td>{formatRupiah(number(a.remaining_amount))}</td><td>{number(a.remaining_amount)>0?'Aktif':'Lunas'}</td><td>{a.note||'—'}</td></tr>)}
+      </tbody></table></div>
+      <h4>Riwayat Transaksi & Potongan Gaji</h4>
       <div className="table-wrap"><table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Nominal / Perubahan</th><th>Keterangan</th></tr></thead><tbody>
         {events.map(e=><tr key={e.id}><td>{date(e.date)}</td><td>{e.kind}</td><td>{formatRupiah(e.amount)}</td><td>{e.details}</td></tr>)}
         {events.length===0&&<tr><td colSpan={4}>Belum ada riwayat.</td></tr>}
       </tbody></table></div>
-      <p className="cash-report-note">Nominal potongan gaji ditampilkan negatif; koreksi mencatat perubahan nominal. Pelunasan tunai di luar potongan gaji tercermin pada saldo bila telah dicatat di sistem.</p>
+      <p className="cash-report-note">Nominal potongan gaji ditampilkan negatif; koreksi mencatat perubahan nominal. Saldo tersisa mengikuti catatan kasbon. Selisih saldo di luar potongan gaji tidak memiliki rincian metode/tanggal pembayaran pada data lama dan tidak dianggap otomatis sebagai pembayaran tunai.</p>
     </section>}
   </>
 }

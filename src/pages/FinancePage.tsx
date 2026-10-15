@@ -589,7 +589,9 @@ export function FinancePage(){
           <thead><tr><th>Karyawan</th><th>Kas Bon</th><th>Sisa</th><th>Keterangan</th><th>Tanggal</th><th>Status</th></tr></thead>
           <tbody>
             {financeCashAdvances.slice(0,10).map(row=><tr key={row.id}>
-              <td><b>{row.employee_name}</b></td>
+              <td>{isOwner
+                ? <button type="button" className="cash-advance-employee-link" title={`Lihat rincian kasbon ${row.employee_name}`} onClick={()=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(row.employee_id)}`)}>{row.employee_name}</button>
+                : <b>{row.employee_name}</b>}</td>
               <td>{formatRupiah(Number(row.amount||0))}</td>
               <td><b>{formatRupiah(Number(row.remaining_amount||0))}</b></td>
               <td>{row.note||'—'}</td>

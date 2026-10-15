@@ -853,5 +853,15 @@ Requires SQL 067.
 - Teks di halaman Pengaturan juga diperbarui agar tidak lagi menyebut QR.
 - Tidak ada SQL baru; tetap memakai SQL 069 + SQL 070.
 
-## V113.0.134 - Laporan Kasbon Seluruh Karyawan
-Owner: Keuangan → Laporan Seluruh Karyawan. Ringkasan, rincian tiap karyawan, Excel, Print/PDF. SQL 071 required. Read-only reporting.
+
+## V113.0.135 — Cash Advance Detail Link
+- Owner klik nama karyawan di Keuangan → Kas Bon untuk membuka rincian.
+- Laporan seluruh karyawan mendukung deep link ?employee=UUID dan nama juga dapat diklik.
+- Saldo dan sumber database tidak diubah; tetap menggunakan SQL 071 dari versi V134.
+
+## V113.0.136 — Detail Kasbon Karyawan
+Klik nama dari Keuangan membuka laporan karyawan melalui parameter URL.
+Rincian mencakup seluruh kasbon aktif/lunas, total, potongan/selisih saldo,
+riwayat potongan gaji dan koreksi. Print/Excel per karyawan terpisah dari
+export ringkasan global. Riwayat pemberian awal tidak menghitung koreksi dua kali.
+Lihat PANDUAN_V113_0_136_DETAIL_KASBON.txt. Tidak ada SQL baru setelah SQL 071.
