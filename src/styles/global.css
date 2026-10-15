@@ -12832,3 +12832,14 @@ html[data-density="ultra"] .main-content *{
   .expense-row-actions{align-items:stretch}
   .expense-edit-button,.expense-delete-request{min-height:40px}
 }
+
+
+/* =========================================================
+   HappyLaundry V113.0.132 — GPS Auto Attendance
+   ========================================================= */
+.attendance-scan-placeholder{
+  min-height:210px;
+}
+.attendance-scan-placeholder svg{
+  opacity:.9;
+}

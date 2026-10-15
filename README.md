@@ -833,3 +833,14 @@ Requires SQL 067.
 - Deactivate employee juga memutus semua session aktif.
 - Kolom legacy v109_users.auth_uid tetap dipertahankan untuk kompatibilitas, tetapi bukan lagi sumber utama identitas session.
 - Fitur Edit Pengeluaran dan stabilitas frontend versi sebelumnya tetap dipertahankan.
+
+
+## V113.0.132 — GPS Auto Attendance
+- Menghapus kebutuhan kamera/scan QR dari alur absensi karyawan.
+- Setelah login, karyawan Wajib Absensi otomatis diminta izin GPS.
+- Jika berada dalam radius toko dan masih dalam jam kerja, Absen Masuk tercatat otomatis lalu menu kerja terbuka.
+- Jika GPS ditolak/gagal atau di luar radius, karyawan diarahkan ke halaman Absen dengan tombol Absen Masuk GPS untuk mencoba ulang.
+- Absen Pulang memakai tombol GPS, bukan kamera.
+- Karyawan Bebas Absensi langsung masuk aplikasi tanpa GPS.
+- Multi-device session dari SQL 069 tetap dipertahankan.
+- Memerlukan SQL 070 setelah SQL 069.
