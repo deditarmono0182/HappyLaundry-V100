@@ -1,0 +1,45 @@
+HappyLaundry V113.0.139 — Total Kasbon per Karyawan di Keuangan
+
+MASALAH SEBELUMNYA
+Tabel Keuangan menampilkan satu transaksi, misalnya Rp200.000, bukan total
+seluruh kasbon karyawan. Rincian karyawan bisa benar dan lebih besar.
+
+PERBAIKAN
+Tabel Keuangan sekarang satu baris per karyawan:
+- Total Kasbon (semua catatan aktif/lunas, menggunakan nominal setelah koreksi).
+- Potongan/Pembayaran atau selisih saldo.
+- Total Sisa Kasbon.
+- Jumlah catatan dan jumlah catatan yang masih aktif.
+Klik nama tetap membuka seluruh rincian karyawan tersebut.
+Perhitungan dilakukan langsung dari seluruh catatan di database, tanpa
+batas 250 transaksi dan tanpa hanya menampilkan 10 baris transaksi terbaru.
+Nama yang sama tetapi ID karyawan berbeda tidak digabung.
+Kasbon dibatalkan tidak dihitung; utang karyawan nonaktif tetap dihitung.
+Saldo dan transaksi lama tidak diubah.
+
+CARA MEMASANG
+1. Pastikan SQL 071, 072, 073 sebelumnya sudah dijalankan.
+2. Jalankan file supabase/074_v113_0_139_finance_cash_advance_employee_totals.sql
+   di Supabase > SQL Editor > New query > Run.
+3. Deploy source V113.0.139 seperti biasa dan muat ulang aplikasi.
+4. Cocokkan Total Kasbon dan Total Sisa Tri Dede pada Keuangan dengan rincian.
+Angka contoh pada pengujian bukan angka produksi milik Tri Dede.
+
+PENGUJIAN
+TypeScript + build Vite berhasil.
+Pengujian SQL PostgreSQL terpisah: total tabel cocok dengan rincian,
+lebih dari 300 transaksi, kasbon dibatalkan, catatan lunas, karyawan
+nonaktif, nama sama/ID berbeda, serta pembatasan akses.
+Pengujian UI: total, saldo, potongan, jumlah catatan, lebih dari 10
+karyawan, klik nama ke ID yang benar, dan daftar kosong.
+Pengujian laporan serta batas over kasbon versi sebelumnya tetap lulus.
+Kode login dan absensi GPS tidak diubah. Belum diterapkan pada produksi.
+
+Uji lokal (opsional):
+npm install
+npm install --no-save --package-lock=false jsdom @electric-sql/pglite
+node verification/finance-cash-advance-summary.mjs
+node verification/cash-advance-salary-guard.mjs
+node verification/cash-advance-report.mjs
+node verification/cash-advance-warning-ui.mjs
+npm run build

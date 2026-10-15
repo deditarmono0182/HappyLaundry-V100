@@ -1,3 +1,4 @@
+import {FinanceCashAdvanceSummary,type FinanceCashAdvanceSummaryRow} from '../components/FinanceCashAdvanceSummary'
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
 import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
@@ -77,15 +78,6 @@ interface FinanceCashAdvanceEmployee{
   login_id:string
 }
 
-interface FinanceCashAdvanceRow{
-  id:string
-  employee_id:string
-  employee_name:string
-  amount:number
-  remaining_amount:number
-  note:string|null
-  issued_at:string
-}
 
 const today=()=>businessDateKey()
 const monthStart=()=>businessMonthStartKey()
@@ -127,7 +119,9 @@ export function FinancePage(){
     description:'',reference:''
   })
   const [cashAdvanceEmployees,setCashAdvanceEmployees]=useState<FinanceCashAdvanceEmployee[]>([])
-  const [financeCashAdvances,setFinanceCashAdvances]=useState<FinanceCashAdvanceRow[]>([])
+  const [financeCashAdvances,setFinanceCashAdvances]=useState<FinanceCashAdvanceSummaryRow[]>([])
+  const [cashAdvanceSummaryLoading,setCashAdvanceSummaryLoading]=useState(true)
+  const [cashAdvanceSummaryError,setCashAdvanceSummaryError]=useState('')
   const [cashAdvanceOpen,setCashAdvanceOpen]=useState(false)
   const [cashAdvanceBusy,setCashAdvanceBusy]=useState(false)
   const [cashAdvanceOverride,setCashAdvanceOverride]=useState('')
@@ -179,17 +173,19 @@ export function FinancePage(){
 
 
   const loadCashAdvances=useCallback(async()=>{
-    const [employeesResult,advancesResult]=await Promise.all([
-      supabase.rpc('v113122_finance_list_employees'),
-      supabase.rpc('v113122_finance_list_cash_advances')
-    ])
-    const error=employeesResult.error||advancesResult.error
-    if(error){
-      setMessage(error.message)
-      return
-    }
-    setCashAdvanceEmployees((employeesResult.data as FinanceCashAdvanceEmployee[])||[])
-    setFinanceCashAdvances((advancesResult.data as FinanceCashAdvanceRow[])||[])
+    setCashAdvanceSummaryLoading(true);setCashAdvanceSummaryError('')
+    try{
+      const [employeesResult,advancesResult]=await Promise.all([
+        supabase.rpc('v113122_finance_list_employees'),
+        supabase.rpc('v113139_finance_cash_advance_summary')
+      ])
+      const error=employeesResult.error||advancesResult.error
+      if(error)throw error
+      if(!Array.isArray(advancesResult.data))throw new Error('Format ringkasan kasbon tidak valid.')
+      setCashAdvanceEmployees((employeesResult.data as FinanceCashAdvanceEmployee[])||[])
+      setFinanceCashAdvances(advancesResult.data as FinanceCashAdvanceSummaryRow[])
+    }catch(cause){setCashAdvanceSummaryError(String((cause as {message?:string})?.message||cause));setFinanceCashAdvances([])}
+    finally{setCashAdvanceSummaryLoading(false)}
   },[])
 
   useEffect(()=>{void loadCashAdvances()},[loadCashAdvances])
@@ -589,26 +585,7 @@ export function FinancePage(){
         </div>
         <div className="cash-report-actions"><button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button><button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
       </div>
-      <div className="finance-cash-advance-summary">
-        <div><span>Kas Bon Aktif</span><b>{financeCashAdvances.filter(row=>Number(row.remaining_amount)>0).length}</b></div>
-        <div><span>Total Sisa Piutang Karyawan</span><b>{formatRupiah(financeCashAdvances.reduce((sum,row)=>sum+Number(row.remaining_amount||0),0))}</b></div>
-      </div>
-      <div className="table-wrap finance-cash-advance-table">
-        <table>
-          <thead><tr><th>Karyawan</th><th>Kas Bon</th><th>Sisa</th><th>Keterangan</th><th>Tanggal</th><th>Status</th></tr></thead>
-          <tbody>
-            {financeCashAdvances.slice(0,10).map(row=><tr key={row.id}>
-              <td><button type="button" className="cash-advance-employee-link" title={`Lihat rincian kasbon ${row.employee_name}`} onClick={()=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(row.employee_id)}`)}>{row.employee_name}</button></td>
-              <td>{formatRupiah(Number(row.amount||0))}</td>
-              <td><b>{formatRupiah(Number(row.remaining_amount||0))}</b></td>
-              <td>{row.note||'—'}</td>
-              <td>{new Date(row.issued_at).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</td>
-              <td><span className={`badge ${Number(row.remaining_amount)>0?'payment-partial':'payment-paid'}`}>{Number(row.remaining_amount)>0?'Aktif':'Lunas'}</span></td>
-            </tr>)}
-            {financeCashAdvances.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada kas bon karyawan.</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      {cashAdvanceSummaryLoading?<p role="status">Memuat total kasbon per karyawan...</p>:cashAdvanceSummaryError?<div className="error-box">Gagal mengambil ringkasan kasbon: {cashAdvanceSummaryError}. Pastikan SQL 074 sudah dijalankan. <button type="button" className="secondary-button" onClick={()=>void loadCashAdvances()}>Coba Lagi</button></div>:<FinanceCashAdvanceSummary rows={financeCashAdvances} onSelect={id=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(id)}`)}/>}
       <div className="finance-cash-advance-footnote">Pembayaran melalui potong gaji dilakukan Owner dari menu Absensi & Gaji. Potongan gaji mengurangi saldo kas bon tanpa mencatat kas masuk baru.</div>
     </section>
 

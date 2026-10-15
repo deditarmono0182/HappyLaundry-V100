@@ -100,4 +100,26 @@ await assert.rejects(()=>db.query('select v113137_cash_advance_limits()'),/Akses
 await db.exec(`set test.actor='owner'`)
 assert.equal((await db.query('select v113137_cash_advance_limits() value')).rows[0].value[0].approvals.length,2)
 console.log('PASS V138: migration repeatable; finance report and all limits accessible; Owner audit stays private; staff cannot approve/correct; unauthorized users denied.')
+// V139 summary uses every loan, groups by ID, and excludes cancellations.
+await db.exec(await readFile('supabase/074_v113_0_139_finance_cash_advance_employee_totals.sql','utf8'))
+await db.exec(await readFile('supabase/074_v113_0_139_finance_cash_advance_employee_totals.sql','utf8'))
+await db.exec(`update v111_employee_payroll_settings set monthly_allowance=1000000000 where employee_id='${id}';
+insert into v113072_employee_cash_advances(employee_id,amount,remaining_amount) select '${id}',1,1 from generate_series(1,300);
+insert into v109_users values('00000000-0000-0000-0000-000000000022','Robet','robet2',false);
+insert into v111_employee_payroll_settings values('00000000-0000-0000-0000-000000000022',0,1000);
+insert into v113072_employee_cash_advances(employee_id,amount,remaining_amount) values('00000000-0000-0000-0000-000000000022',500,500);
+set test.actor='finance';`)
+const summary=(await db.query('select v113139_finance_cash_advance_summary() value')).rows[0].value
+assert.equal(summary.length,2,'same names are separate employees; inactive debts are included')
+const first=summary.find(s=>s.employee_id===id)
+assert.equal(first.transaction_count,303);assert.equal(first.active_count,302)
+assert.equal(first.amount,1360300);assert.equal(first.remaining_amount,1300300);assert.equal(first.paid_amount,60000)
+const details=(await db.query('select v113134_owner_cash_advance_report() value')).rows[0].value
+for(const row of summary){
+ const loans=details.advances.filter(a=>a.employee_id===row.employee_id&&!a.cancelled_at)
+ assert.equal(row.amount,loans.reduce((s,a)=>s+a.amount,0));assert.equal(row.remaining_amount,loans.reduce((s,a)=>s+a.remaining_amount,0))
+}
+await db.exec(`set test.actor='employee'`)
+await assert.rejects(()=>db.query('select v113139_finance_cash_advance_summary()'),/akses Keuangan/)
+console.log('PASS V139: summary matches detail; 300+ loans are not truncated; same names stay separate; cancelled loans excluded; paid/active counts; inactive employee debts retained; finance-only access.')
 await db.close()

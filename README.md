@@ -880,3 +880,10 @@ rincian kasbon, Print, dan Excel. Akses diperbaiki pada tautan, halaman,
 route dan fungsi database. Persetujuan over kasbon tetap khusus Owner.
 Jalankan SQL 073 setelah SQL 072, lalu deploy versi ini.
 Lihat PANDUAN_V113_0_138_AKSES_DETAIL_KASBON.txt.
+
+## V113.0.139 — Total kasbon per karyawan di Keuangan
+Tabel Keuangan kini merangkum seluruh kasbon per ID karyawan, bukan
+menampilkan transaksi satu per satu. Total kasbon, potongan/selisih saldo,
+sisa, dan jumlah catatan dihitung database tanpa batas 250 transaksi.
+Klik nama tetap membuka rincian. Jalankan SQL 074 setelah SQL 073.
+Lihat PANDUAN_V113_0_139_TOTAL_KASBON_PER_KARYAWAN.txt.
