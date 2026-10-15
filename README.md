@@ -822,3 +822,14 @@ Requires SQL 067.
 - Sesi lama karyawan diputus sehingga login berikutnya memakai session baru yang bersih.
 - Owner mendapat pesan sukses yang jelas bahwa password dan session lama sudah direset.
 - Mempertahankan stabilitas login V113.0.127 dan fitur Edit Pengeluaran V113.0.128/129.
+
+
+## V113.0.131 — Multi-Device Employee Session Stability
+- Perbaikan arsitektur login employee, bukan patch tampilan.
+- SQL 069 menambahkan tabel session terpisah per auth UID/device.
+- Satu karyawan dapat login dari HP/laptop berbeda tanpa login baru menimpa session device lain.
+- Current employee, permission helper, absensi QR/GPS, logout, reset password, finance permission, QR Center, dan daily closing memakai session resolver baru.
+- Reset password memutus semua session karyawan tersebut secara terkontrol.
+- Deactivate employee juga memutus semua session aktif.
+- Kolom legacy v109_users.auth_uid tetap dipertahankan untuk kompatibilitas, tetapi bukan lagi sumber utama identitas session.
+- Fitur Edit Pengeluaran dan stabilitas frontend versi sebelumnya tetap dipertahankan.
