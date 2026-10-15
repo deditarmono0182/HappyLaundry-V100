@@ -578,7 +578,7 @@ export function FinancePage(){
           <h3>Kas Bon / Piutang Karyawan</h3>
           <p>Saat kas bon diberikan, Kas Harian berkurang. Saldo kas bon tetap menjadi piutang karyawan dan tidak masuk biaya operasional.</p>
         </div>
-        <button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button>
+        <div className="cash-report-actions">{isOwner&&<button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button>}<button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
       </div>
       <div className="finance-cash-advance-summary">
         <div><span>Kas Bon Aktif</span><b>{financeCashAdvances.filter(row=>Number(row.remaining_amount)>0).length}</b></div>

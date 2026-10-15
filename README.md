@@ -852,3 +852,6 @@ Requires SQL 067.
 - Pengaturan Absensi sekarang hanya menampilkan lokasi toko, radius GPS, jam kerja, dan status Login + GPS.
 - Teks di halaman Pengaturan juga diperbarui agar tidak lagi menyebut QR.
 - Tidak ada SQL baru; tetap memakai SQL 069 + SQL 070.
+
+## V113.0.134 - Laporan Kasbon Seluruh Karyawan
+Owner: Keuangan → Laporan Seluruh Karyawan. Ringkasan, rincian tiap karyawan, Excel, Print/PDF. SQL 071 required. Read-only reporting.

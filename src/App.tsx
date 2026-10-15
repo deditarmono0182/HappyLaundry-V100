@@ -26,6 +26,7 @@ const UserAuditPage=lazy(()=>import('./pages/UserAuditPage').then(m=>({default:m
 const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(m=>({default:m.ReportsPage})))
 const ProfitLossPage=lazy(()=>import('./pages/ProfitLossPage').then(m=>({default:m.ProfitLossPage})))
 const FinancePage=lazy(()=>import('./pages/FinancePage').then(m=>({default:m.FinancePage})))
+const CashAdvanceReportPage=lazy(()=>import('./pages/CashAdvanceReportPage').then(m=>({default:m.CashAdvanceReportPage})))
 const FinanceReportsHubPage=lazy(()=>import('./pages/FinanceReportsHubPage').then(m=>({default:m.FinanceReportsHubPage})))
 const IncomeDetailsPage=lazy(()=>import('./pages/IncomeDetailsPage').then(m=>({default:m.IncomeDetailsPage})))
 const ExpenseDetailsPage=lazy(()=>import('./pages/ExpenseDetailsPage').then(m=>({default:m.ExpenseDetailsPage})))
@@ -68,6 +69,7 @@ export default function App(){
       <Route path="daily-closing" element={<PermissionRoute permission="cash"><DailyClosingPage/></PermissionRoute>}/>
       <Route path="finance-reports" element={<FinanceReportsHubPage/>}/>
       <Route path="finance" element={<PermissionRoute permission="finance"><FinancePage/></PermissionRoute>}/>
+      <Route path="finance/cash-advances" element={<CashAdvanceReportPage/>}/>
       <Route path="profit-target" element={<ProfitTargetDashboardPage/>}/>
       <Route path="delete-approvals" element={<DeleteApprovalsPage/>}/>
       <Route path="finance/income" element={<IncomeDetailsPage/>}/>
