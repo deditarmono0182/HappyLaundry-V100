@@ -894,3 +894,10 @@ izin GPS dan error jaringan, pemeriksaan status, serta respons hari kerja
 sudah selesai. Jalankan SQL 076 yang sudah mencakup SQL 075 sebelum deploy.
 Mekanisme autentikasi tetap menggunakan versi sebelumnya.
 Lihat PANDUAN_V113_0_140_STABILITAS_ABSEN.txt.
+
+## V113.0.141 — XLS gaji memuat sisa kasbon
+Ekspor daftar gaji memisahkan potongan periode, sisa kasbon, gaji setelah
+potongan tercatat dan saldo simulasi setelah sisa utang. Ringkasan serta
+rincian individu mengikuti nilai yang sama. Label tampilan diperjelas;
+tidak mengubah saldo/transaksi atau mencatat potongan baru. Tidak ada SQL baru.
+Lihat PANDUAN_V113_0_141_XLS_GAJI_KASBON.txt.

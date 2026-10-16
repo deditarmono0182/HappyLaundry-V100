@@ -1,3 +1,4 @@
+import {buildPayrollExport} from '../lib/payrollExport'
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
 import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
@@ -760,27 +761,7 @@ export function PayrollPage(){
     ] as Array<[string,string|number]>
   })
 
-  const payrollExport=()=>({
-    title:'Daftar Gaji Karyawan',
-    filename:`gaji-karyawan-${month}`,
-    subtitle:`Periode ${month} • Omzet aktual ${formatRupiah(monthlyRevenue)}`,
-    headers:['Karyawan','Hadir','Tarif/Hari','Uang Kehadiran','Tunjangan','Bonus','Bagi Hasil Kategori','Komisi Produksi','Komisi Kurir','Gaji Kotor','Potongan Kas Bon','Gaji Bersih','Sudah Dibayar','Sisa','Status'],
-    rows:filteredPayroll.map(r=>[
-      r.employee.full_name,r.presentDays,r.attendanceRate,
-      Math.round(r.attendancePay),Math.round(r.allowance),Math.round(r.bonus),
-      r.shareDetails.length
-        ? r.shareDetails.map(item=>`${item.category} ${item.percent.toFixed(2)}% x ${Math.round(item.baseRevenue)} = ${Math.round(item.amount)}`).join(' | ')
-        : '-',
-      Math.round(r.productionCommission),Math.round(r.courierCommission),Math.round(r.grossTotal),Math.round(r.cashAdvanceApplied),Math.round(r.total),
-      Math.round(r.paidAmount),Math.round(r.outstanding),r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'
-    ]),
-    summary:[
-      ['Omzet Bulan',Math.round(monthlyRevenue)],
-      ['Total Gaji Kotor',Math.round(filteredPayroll.reduce((s,r)=>s+r.grossTotal,0))],
-      ['Potongan Kas Bon',Math.round(filteredPayroll.reduce((s,r)=>s+r.cashAdvanceApplied,0))],
-      ['Total Gaji Bersih',Math.round(filteredPayroll.reduce((s,r)=>s+r.total,0))]
-    ] as Array<[string,string|number]>
-  })
+  const payrollExport=()=>buildPayrollExport(filteredPayroll,month,monthlyRevenue)
 
   const commissionDetailExport=(employee:Employee)=>{
     const row=payrollRows.find(item=>item.employee.id===employee.id)
@@ -807,9 +788,10 @@ export function PayrollPage(){
         ['Komisi Kurir',Math.round(row?.courierCommission||0)],
         ['Total Komisi Order',Math.round(row?.orderCommission||0)],
         ['Gaji Kotor',Math.round(row?.grossTotal||0)],
-        ['Potongan Kas Bon',Math.round(row?.cashAdvanceApplied||0)],
+        ['Potongan Kas Bon Periode Ini',Math.round(row?.cashAdvanceApplied||0)],
         ['Sisa Kas Bon',Math.round(row?.cashAdvanceOutstanding||0)],
-        ['Gaji Bersih',Math.round(row?.total||0)],
+        ['Gaji Bersih (Potongan Tercatat)',Math.round(row?.total||0)],
+        ['Saldo Setelah Sisa Kas Bon (Simulasi)',Math.round(row?.payrollBalance||0)],
         ['Sudah Dibayar',Math.round(row?.paidAmount||0)],
         ['Sisa Gaji',Math.round(row?.outstanding||0)],
         ['Status Pembayaran',row?.paymentStatus==='cashbon'?'Terpotong Kas Bon':row?.paymentStatus==='nil'?'Nihil':row?.paymentStatus==='paid'?'Lunas':row?.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'],
@@ -935,7 +917,7 @@ export function PayrollPage(){
 
       <section className="panel payroll-formula">
         <HandCoins size={21}/>
-        <div><b>Rumus Gaji</b><span>Gaji Bersih = Uang Kehadiran + Tunjangan + Bonus + Bagi Hasil Kategori + Komisi Order − Kas Bon. Sisa kas bon otomatis tetap tersimpan untuk periode berikutnya.</span></div>
+        <div><b>Rumus Gaji</b><span>Gaji bersih = gaji kotor − potongan kasbon yang sudah tercatat pada periode ini. Saldo setelah kasbon = gaji bersih − sisa utang kasbon (simulasi). Sisa utang tidak otomatis menjadi potongan baru.</span></div>
       </section>
 
       <section className="panel data-panel payroll-list-panel">
@@ -947,7 +929,7 @@ export function PayrollPage(){
           <table className="payroll-table">
             <thead><tr>
               <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>
-              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Gaji Kotor</th><th>Kas Bon</th><th>Gaji Bersih</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
+              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Gaji Kotor</th><th>Kas Bon</th><th>Saldo Setelah Kasbon (Simulasi)</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
             </tr></thead>
             <tbody>
               {filteredPayroll.map(r=><tr key={r.employee.id}>
@@ -976,7 +958,7 @@ export function PayrollPage(){
                   </div>
                 </td>
                 <td><b>{formatRupiah(r.grossTotal)}</b></td>
-                <td><b className="payroll-deduction">− {formatRupiah(r.cashAdvanceApplied)}</b><small>Sisa {formatRupiah(r.cashAdvanceOutstanding)}</small></td>
+                <td><b className="payroll-deduction">Potongan: − {formatRupiah(r.cashAdvanceApplied)}</b><small>Sisa kasbon: {formatRupiah(r.cashAdvanceOutstanding)}</small></td>
                 <td><b className={`payroll-total ${r.payrollBalance<0?'negative':''}`}>{formatRupiah(r.payrollBalance)}</b></td>
                 <td><b>{formatRupiah(r.paidAmount)}</b></td>
                 <td><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
@@ -1010,7 +992,7 @@ export function PayrollPage(){
           <div><span>Gaji Kotor</span><b>{formatRupiah(row?.grossTotal||0)}</b></div>
           <div><span>Potongan Kas Bon</span><b>− {formatRupiah(row?.cashAdvanceApplied||0)}</b></div>
           <div><span>Sisa Kas Bon</span><b>{formatRupiah(row?.cashAdvanceOutstanding||0)}</b></div>
-          <div><span>Saldo Gaji Setelah Kas Bon</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
+          <div><span>Saldo Setelah Sisa Kasbon (Simulasi)</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
           <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
           <div><span>Sisa Gaji</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
         </div>
@@ -1205,7 +1187,7 @@ export function PayrollPage(){
       return <Modal title={`Pembayaran Gaji — ${paymentEmployee.full_name}`} onClose={()=>!busy&&setPaymentEmployee(null)}>
         <form className="modal-form" onSubmit={savePayrollPayment}>
           <div className="payroll-payment-card">
-            <div><span>Saldo Gaji Setelah Kas Bon</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
+            <div><span>Saldo Setelah Sisa Kasbon (Simulasi)</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
             <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
           </div>

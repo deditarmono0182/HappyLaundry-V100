@@ -1,0 +1,51 @@
+HappyLaundry V113.0.141 — Rincian Kasbon pada XLS Daftar Gaji
+Dasar source V113.0.140. Tidak ada SQL baru untuk perbaikan ekspor ini.
+
+YANG DITEMUKAN
+Layar gaji memuat potongan periode dan sisa kasbon dalam satu sel.
+XLS daftar gaji sebelumnya hanya memuat potongan periode.
+Nilai gaji pada tabel juga sudah dikurangi sisa kasbon, sementara XLS
+memuat gaji setelah potongan yang sudah tercatat saja.
+
+PERBAIKAN
+XLS sekarang menyertakan kolom terpisah:
+- Potongan Kas Bon Periode Ini: potongan yang benar-benar tercatat di periode.
+- Sisa Kas Bon: seluruh utang kasbon yang masih tersisa.
+- Gaji Bersih (Potongan Tercatat): gaji setelah potongan periode.
+- Saldo Setelah Sisa Kas Bon (Simulasi): gaji bersih dikurangi sisa utang.
+- Status Saldo (Simulasi): menunjukkan jika saldo simulasi minus.
+Ringkasan total dan ekspor rincian individu juga dilengkapi.
+Label layar diperjelas agar potongan, sisa, dan simulasi tidak tertukar.
+
+CONTOH PENJELASAN (bukan data produksi)
+Gaji kotor Rp1.000.000; potongan tercatat Rp0; sisa kasbon Rp2.000.000.
+XLS menampilkan potongan Rp0, sisa kasbon Rp2.000.000,
+gaji bersih Rp1.000.000 dan saldo simulasi minus Rp1.000.000.
+Utang Rp2.000.000 tidak dibuat menjadi potongan baru hanya karena diekspor.
+
+CARA MEMAKAI
+Deploy source V113.0.141, lalu muat ulang aplikasi.
+Buka Absensi & Gaji, pilih periode dan tab daftar gaji, kemudian ekspor
+XLS baru. File XLS yang sudah pernah diunduh tidak berubah otomatis.
+Perbaikan ekspor tidak memerlukan SQL baru; SQL versi sebelumnya tetap
+mengikuti panduan masing-masing (termasuk SQL 076 untuk absensi GPS).
+
+BATAS PERUBAHAN
+Tidak mengubah saldo utang, potongan, pembayaran gaji, atau transaksi lama.
+Alur input kasbon tidak diubah pada versi ini. Perubahan ditujukan pada
+kelengkapan ekspor dan kejelasan label tampilan.
+Kode login dan absensi GPS dari V113.0.140 tetap dipertahankan.
+
+VERIFIKASI
+Build TypeScript/Vite berhasil.
+Uji isi XML XLS sebenarnya: nilai numerik potongan/sisa/saldo, potongan nol
+namun masih berutang, potongan yang sudah tercatat, saldo simulasi negatif,
+pembayaran gaji sebagian, total sesuai filter karyawan, ekspor kosong,
+dan tidak ada mutasi data.
+Belum dibandingkan dengan database atau XLS produksi milik pengguna.
+
+Uji lokal (opsional):
+npm ci
+npm install --no-save --package-lock=false jsdom
+node verification/payroll-xls.mjs
+npm run build
