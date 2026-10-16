@@ -1,55 +1,10 @@
-import { useEffect, useState } from 'react'
+import {attendanceError,attendanceEventAction,loadAttendanceState,recordEmployeeAttendance,type AttendanceState,type AttendanceResult} from '../lib/attendance'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, LocateFixed, MapPin, ShieldCheck, LogIn, LogOut } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../lib/auth'
-import { supabase } from '../lib/supabase'
-import { businessDateTimeLabel } from '../lib/businessTime'
-
-type AttendanceState={
-  attendance_required?:boolean
-  attended_today?:boolean
-  checked_out?:boolean
-  within_work_hours?:boolean
-  work_start?:string
-  work_end?:string
-  check_in_at?:string|null
-  check_out_at?:string|null
-}
-
-type AttendanceResult={
-  ok?:boolean
-  created?:boolean
-  status?:string
-  distance_meters?:number
-  attendance_date?:string
-  check_in_at?:string
-  check_out_at?:string
-  action?:'check_in'|'check_out'|'already_checked_in'|'already_done'|'exempt'
-  message?:string
-}
-
-const deviceLabel=()=>{
-  const ua=navigator.userAgent||''
-  if(/iPhone/i.test(ua))return 'iPhone'
-  if(/iPad/i.test(ua))return 'iPad'
-  if(/Android/i.test(ua))return 'Android'
-  if(/Windows/i.test(ua))return 'Windows'
-  if(/Macintosh/i.test(ua))return 'Mac'
-  return 'Browser'
-}
-
-const getLocation=()=>new Promise<GeolocationPosition>((resolve,reject)=>{
-  if(!navigator.geolocation){
-    reject(new Error('GPS tidak tersedia di perangkat ini.'))
-    return
-  }
-  navigator.geolocation.getCurrentPosition(
-    resolve,
-    reject,
-    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
-  )
-})
+import { businessDateKey,businessDateTimeLabel } from '../lib/businessTime'
 
 export function AttendancePage(){
   const{profile}=useAuth()
@@ -59,73 +14,42 @@ export function AttendancePage(){
   const[result,setResult]=useState<AttendanceResult|null>(null)
   const[locationText,setLocationText]=useState('GPS belum diperiksa')
   const[attendanceState,setAttendanceState]=useState<AttendanceState|null>(null)
+  const[stateBusy,setStateBusy]=useState(true)
+  const[stateError,setStateError]=useState('')
+  const recordLock=useRef(false)
+  const stateRequest=useRef(0)
+  const lastDay=useRef(businessDateKey())
 
-  const loadState=async()=>{
-    const{data}=await supabase.rpc('v11322_current_attendance_state')
-    if(!data)return
-    const row=(Array.isArray(data)?data[0]:data) as AttendanceState
-    setAttendanceState(row)
-  }
+  const loadState=useCallback(async()=>{
+    const request=++stateRequest.current
+    setStateBusy(true);setStateError('')
+    try{const row=await loadAttendanceState();if(request!==stateRequest.current)return null;if(lastDay.current!==(row.attendance_date||businessDateKey())){lastDay.current=row.attendance_date||businessDateKey();setResult(null);setLocationText('GPS belum diperiksa')}setAttendanceState(row);return row}
+    catch(error){if(request===stateRequest.current){setStateError(attendanceError(error));setAttendanceState(null)}return null}
+    finally{if(request===stateRequest.current)setStateBusy(false)}
+  },[])
 
-  useEffect(()=>{void loadState()},[])
+  useEffect(()=>{
+    void loadState()
+    const refresh=()=>{if(!recordLock.current)void loadState()}
+    const visible=()=>{if(document.visibilityState==='visible')refresh()}
+    const timer=window.setInterval(refresh,30000)
+    window.addEventListener('focus',refresh);window.addEventListener('happylaundry-attendance-changed',refresh)
+    document.addEventListener('visibilitychange',visible)
+    return()=>{stateRequest.current++;window.clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('happylaundry-attendance-changed',refresh);document.removeEventListener('visibilitychange',visible)}
+  },[loadState,profile?.id])
 
   const record=async(action:'check_in'|'check_out')=>{
-    setBusy(true)
-    setMessage('')
-    setResult(null)
-    setLocationText('Memeriksa GPS...')
-
-    let pos:GeolocationPosition
+    if(recordLock.current||!profile?.id)return
+    recordLock.current=true;setBusy(true);setMessage('');setResult(null);setLocationText('Memeriksa GPS...')
     try{
-      pos=await getLocation()
-    }catch(error){
-      setLocationText('GPS gagal')
-      const text=error instanceof GeolocationPositionError
-        ? error.code===1
-          ? 'Izin Location/GPS ditolak. Aktifkan Location untuk HappyLaundry lalu coba lagi.'
-          : 'Lokasi GPS tidak dapat dibaca. Pastikan Location aktif lalu coba lagi.'
-        : error instanceof Error?error.message:'GPS gagal dibaca.'
-      setMessage(text)
-      setBusy(false)
-      return
-    }
-
-    setLocationText(`GPS akurasi ±${Math.round(pos.coords.accuracy)} m`)
-
-    const{data,error}=await supabase.rpc('v113070_record_gps_attendance',{
-      p_action:action,
-      p_latitude:pos.coords.latitude,
-      p_longitude:pos.coords.longitude,
-      p_accuracy_meters:pos.coords.accuracy,
-      p_device:deviceLabel()
-    })
-
-    if(error){
-      setMessage(error.message)
-      setBusy(false)
-      return
-    }
-
-    const row=(Array.isArray(data)?data[0]:data) as AttendanceResult|null
-    if(row?.ok){
+      const {result:row,position}=await recordEmployeeAttendance(profile.id,action)
+      setLocationText(`GPS akurasi ±${Math.round(position.coords.accuracy)} m`)
       setResult(row)
-      await loadState()
-
-      if(action==='check_in'){
-        window.dispatchEvent(new CustomEvent('happylaundry-attendance-changed',{
-          detail:{action:'check_in'}
-        }))
-        window.setTimeout(()=>navigate('/',{replace:true}),350)
-      }else{
-        window.dispatchEvent(new CustomEvent('happylaundry-attendance-changed',{
-          detail:{action:'check_out'}
-        }))
-      }
-    }else{
-      setMessage(row?.message||'Absensi tidak berhasil.')
-    }
-
-    setBusy(false)
+      const state=await loadState()
+      window.dispatchEvent(new CustomEvent('happylaundry-attendance-changed',{detail:{action:attendanceEventAction(row)}}))
+      if(state&&row.action!=='already_done'&&(action==='check_in'||row.action==='exempt'))navigate('/',{replace:true})
+    }catch(error){setLocationText('Absensi belum dapat dikonfirmasi');setMessage(attendanceError(error));await loadState()}
+    finally{recordLock.current=false;setBusy(false)}
   }
 
   if(profile?.role!=='employee'){
@@ -158,6 +82,8 @@ export function AttendancePage(){
       }
     />
 
+    {stateError&&<div className="error-box" role="alert">{stateError}</div>}
+    <button type="button" className="secondary-button" disabled={stateBusy||busy} onClick={()=>void loadState()}>{stateBusy?'Memeriksa status...':'Periksa Status'}</button>
     <section className="attendance-employee-grid">
       <article className="panel attendance-scan-card">
         <div className="attendance-scan-heading">
@@ -178,7 +104,7 @@ export function AttendancePage(){
           {!finished&&
             <button
               className="primary-button attendance-big-button"
-              disabled={busy}
+              disabled={busy||stateBusy||!attendanceState||!!stateError}
               onClick={()=>void record(alreadyIn?'check_out':'check_in')}
             >
               {alreadyIn?<LogOut size={20}/>:<LogIn size={20}/>}
@@ -200,7 +126,7 @@ export function AttendancePage(){
     {result&&<section className="panel attendance-success-card">
       <div className="attendance-success-icon"><CheckCircle2 size={38}/></div>
       <div>
-        <span>{result.action==='check_out'?'ABSEN PULANG BERHASIL':'ABSEN BERHASIL'}</span>
+        <span>{result.action==='already_done'?'ABSENSI SUDAH SELESAI':result.action==='check_out'?'ABSEN PULANG BERHASIL':'ABSEN BERHASIL'}</span>
         <h2>{profile.full_name}</h2>
         <p>{
           result.action==='check_out'&&result.check_out_at

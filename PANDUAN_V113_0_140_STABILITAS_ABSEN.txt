@@ -1,0 +1,54 @@
+HappyLaundry V113.0.140 — Perbaikan Alur Login ke Absensi GPS
+Dasar source: V113.0.139. Fitur kasbon sebelumnya tetap disertakan.
+
+PEMASANGAN
+1. Pastikan SQL 070 (fungsi GPS) dan SQL kasbon yang diperlukan sudah terpasang.
+2. Jalankan supabase/076_v113_0_140_attendance_stability.sql di Supabase SQL Editor.
+   SQL 076 sudah mencakup SQL 075; aman bila SQL 075 sudah dijalankan.
+   Jalankan seluruh file sampai COMMIT, bukan hanya sebagian.
+3. Deploy source V113.0.140 seperti biasa. Muat ulang aplikasi di perangkat.
+4. Karyawan yang belum absen hari ini dapat login dan mencoba Absen Masuk.
+   Jika penyimpanan belum dapat dipastikan, tekan Periksa Status terlebih dahulu.
+   Untuk menguji Absen Pulang, gunakan akun percobaan agar jam kerja nyata
+   karyawan tidak ditutup hanya untuk pengujian.
+
+YANG DIPERBAIKI
+- Database menerima sumber login_gps yang dipakai fungsi absen otomatis.
+- Absen GPS untuk karyawan yang sama diserialkan; konflik insert harian
+  ditangani tanpa membuat dua catatan. Absen pulang berulang tidak dicatat ulang.
+- Input koordinat, radius, akurasi, jam kerja dan status sesi tetap diperiksa.
+- Error izin GPS dibaca tanpa bergantung pada konstruktor browser yang bisa
+  tidak tersedia pada perangkat tertentu.
+- Permintaan otomatis dan manual yang sama berbagi satu proses yang sedang jalan.
+- Tombol tidak terus sibuk ketika GPS/jaringan gagal. Permintaan dibatasi waktunya.
+- Tidak melakukan pengulangan otomatis operasi simpan setelah timeout, karena
+  server mungkin sudah menyimpan. Periksa Status menyediakan cara memastikan.
+- Halaman membaca status ulang saat fokus, pergantian visibilitas dan secara
+  berkala. Tanggal absensi mengikuti server WIB. Respons status lama tidak
+  menimpa respons pemeriksaan yang lebih baru.
+- Respons sudah absen pulang tidak dianggap sebagai absen masuk baru.
+- Status sesi tidak valid tidak ditampilkan sebagai akun bebas absensi.
+
+BATAS PERUBAHAN
+Tidak mengubah password, mekanisme autentikasi di src/lib/auth.tsx,
+pengaturan jam kerja/radius toko, transaksi lama, ataupun saldo kasbon.
+Belum membuktikan semua kemungkinan kendala login akun; jika ada kegagalan
+pada langkah ID/password, pesan error dan waktu kejadiannya tetap diperlukan.
+
+VERIFIKASI
+Pengujian SQL pada PostgreSQL terpisah mereproduksi error constraint lama,
+lalu memverifikasi migrasi 076 dua kali, status, masuk/pulang, permintaan
+berulang/perangkat kedua, hari kerja yang selesai, data hari sebelumnya,
+audit satu kali, radius/jam/akurasi, akun bebas absensi dan sesi tidak valid.
+Pengujian UI mencakup GPS ditolak tanpa konstruktor global, kegagalan
+jaringan, pemeriksaan status gagal lalu dicoba ulang, klik ganda, pulang,
+respons already_done dan pembagian permintaan otomatis/manual.
+Build TypeScript/Vite serta pengujian kasbon versi sebelumnya berhasil.
+Belum diterapkan atau diuji langsung di database produksi/perangkat karyawan.
+
+UJI LOKAL (opsional)
+npm ci
+npm install --no-save --package-lock=false jsdom @electric-sql/pglite
+node verification/attendance-gps-sql.mjs
+node verification/attendance-ui.mjs
+npm run build

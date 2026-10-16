@@ -1,3 +1,4 @@
+import {attendanceError,attendanceEventAction,loadAttendanceState,recordEmployeeAttendance} from '../lib/attendance'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
   CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign, AlertTriangle, CalendarCheck2, ScanLine, Target, ShieldAlert } from 'lucide-react'
@@ -50,6 +51,7 @@ export function AppLayout() {
   const [problemAlertOpen,setProblemAlertOpen]=useState(false)
   const [problemAlertLoading,setProblemAlertLoading]=useState(false)
   const autoGpsAttendanceRef=useRef(false)
+  const autoGpsDayRef=useRef('')
 
   const { profile, signOut } = useAuth()
   const role = profile?.role ?? 'staff'
@@ -188,48 +190,20 @@ export function AppLayout() {
     let active=true
     let timer:number|undefined
 
-    const requestGps=()=>new Promise<GeolocationPosition>((resolve,reject)=>{
-      if(!navigator.geolocation){
-        reject(new Error('GPS tidak tersedia di perangkat ini.'))
-        return
-      }
-      navigator.geolocation.getCurrentPosition(
-        resolve,
-        reject,
-        {enableHighAccuracy:true,timeout:15000,maximumAge:0}
-      )
-    })
-
     const autoCheckIn=async()=>{
       if(autoGpsAttendanceRef.current||!active)return
       autoGpsAttendanceRef.current=true
       setAttendanceNotice('Memeriksa GPS untuk Absen Masuk otomatis...')
 
       try{
-        const pos=await requestGps()
-        if(!active)return
-
-        const{data,error}=await supabase.rpc('v113070_record_gps_attendance',{
-          p_action:'check_in',
-          p_latitude:pos.coords.latitude,
-          p_longitude:pos.coords.longitude,
-          p_accuracy_meters:pos.coords.accuracy,
-          p_device:/iPhone/i.test(navigator.userAgent)?'iPhone':/iPad/i.test(navigator.userAgent)?'iPad':/Android/i.test(navigator.userAgent)?'Android':/Windows/i.test(navigator.userAgent)?'Windows':/Macintosh/i.test(navigator.userAgent)?'Mac':'Browser'
-        })
+        const {result}=await recordEmployeeAttendance(profile?.id||'','check_in')
 
         if(!active)return
-        if(error){
-          setAttendanceNotice(error.message)
-          if(window.location.pathname!=='/attendance')navigate('/attendance',{replace:true})
-          return
-        }
-
-        const result=(Array.isArray(data)?data[0]:data) as {ok?:boolean;action?:string;message?:string}|null
         if(result?.ok){
           setAttendanceGate(previous=>({
             attendance_required:previous?.attendance_required??true,
             attended_today:true,
-            checked_out:false,
+            checked_out:attendanceEventAction(result)==='check_out',
             within_work_hours:previous?.within_work_hours??true,
             logout_at:previous?.logout_at??null,
             work_start:previous?.work_start??'',
@@ -237,28 +211,25 @@ export function AppLayout() {
           }))
           setAttendanceNotice('')
           window.dispatchEvent(new CustomEvent('happylaundry-attendance-changed',{
-            detail:{action:'check_in'}
+            detail:{action:attendanceEventAction(result)}
           }))
-          if(window.location.pathname==='/attendance')navigate('/',{replace:true})
+          if(result.action!=='already_done'&&window.location.pathname==='/attendance')navigate('/',{replace:true})
         }
       }catch(error){
         if(!active)return
-        const text=error instanceof GeolocationPositionError
-          ? error.code===1
-            ?'Izin Location/GPS diperlukan untuk Absen Masuk otomatis. Aktifkan Location lalu tekan Absen Masuk.'
-            :'GPS belum dapat dibaca. Pastikan Location aktif lalu tekan Absen Masuk.'
-          :error instanceof Error?error.message:'GPS belum dapat dibaca.'
+        const text=attendanceError(error)
         setAttendanceNotice(text)
         if(window.location.pathname!=='/attendance')navigate('/attendance',{replace:true})
       }
     }
 
     const checkAttendance=async()=>{
-      const{data,error}=await supabase.rpc('v11322_current_attendance_state')
-      if(!active||error||!data)return
-
-      const state=(Array.isArray(data)?data[0]:data) as typeof attendanceGate
-      if(!state)return
+      let state:NonNullable<typeof attendanceGate>&{attendance_date?:string}
+      try{state=await loadAttendanceState() as NonNullable<typeof attendanceGate>&{attendance_date?:string}}
+      catch(error){if(active){setAttendanceNotice(attendanceError(error));if(window.location.pathname!=='/attendance')navigate('/attendance',{replace:true})}return}
+      if(!active)return
+      const key=`${profile?.id}:${state.attendance_date||businessDateKey()}`
+      if(autoGpsDayRef.current!==key){autoGpsDayRef.current=key;autoGpsAttendanceRef.current=false}
       setAttendanceGate(state)
 
       if(state.attendance_required&&!state.attended_today){
@@ -322,7 +293,7 @@ export function AppLayout() {
       document.removeEventListener('visibilitychange',onVisibility)
       window.removeEventListener('happylaundry-attendance-changed',changed as EventListener)
     }
-  },[role,navigate])
+  },[role,profile?.id,navigate])
 
   // V113.0.50 - Auto logout karyawan setiap melewati batas pukul 21:00.
   // Marker sesi disimpan saat login sehingga jika aplikasi ditutup pada jam 21:00,
@@ -422,7 +393,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.139 Employee Cash Advance Totals</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.140 Employee Attendance Stability</span></div>
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>

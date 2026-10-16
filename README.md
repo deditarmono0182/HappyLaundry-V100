@@ -887,3 +887,10 @@ menampilkan transaksi satu per satu. Total kasbon, potongan/selisih saldo,
 sisa, dan jumlah catatan dihitung database tanpa batas 250 transaksi.
 Klik nama tetap membuka rincian. Jalankan SQL 074 setelah SQL 073.
 Lihat PANDUAN_V113_0_139_TOTAL_KASBON_PER_KARYAWAN.txt.
+
+## V113.0.140 — Alur login ke absensi GPS
+Memperbaiki constraint sumber GPS, permintaan absensi berulang, penanganan
+izin GPS dan error jaringan, pemeriksaan status, serta respons hari kerja
+sudah selesai. Jalankan SQL 076 yang sudah mencakup SQL 075 sebelum deploy.
+Mekanisme autentikasi tetap menggunakan versi sebelumnya.
+Lihat PANDUAN_V113_0_140_STABILITAS_ABSEN.txt.
