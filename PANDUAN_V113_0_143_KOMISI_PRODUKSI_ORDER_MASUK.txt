@@ -1,0 +1,23 @@
+HappyLaundry V113.0.143 — Komisi Produksi dari Order Masuk
+
+Dasar source: V113.0.142. Memerlukan SQL 077 sudah terpasang.
+1. Jalankan seluruh SQL_078_KOMISI_PRODUKSI_ORDER_MASUK.sql di Supabase SQL Editor.
+2. Deploy source paket V113.0.143 seperti versi sebelumnya.
+3. Muat ulang Absensi Gaji dan pilih periode yang sama saat membandingkan hasil SQL.
+
+Produksi sekarang sama dengan kurir: diakui sejak order masuk dan nama ditugaskan,
+tanpa menunggu selesai/lunas. Pembagian tim tetap berlaku. Order batal dikeluarkan.
+Pengakuan tertunda sejak 1 Oktober 2026 WIB dilengkapi menggunakan tanggal masuk order.
+Tanggal komisi yang SUDAH diakui dipertahankan agar riwayat periode lama tidak bergeser.
+Penerima, tarif dan nominal tersimpan tidak diganti; termasuk tarif lama 0%.
+Order tanpa penugasan tidak diberi penerima secara otomatis.
+Pembayaran gaji yang sudah dicatat tetap; hak gaji belum dibayar dapat bertambah.
+SQL bisa dijalankan ulang tanpa menggandakan hak komisi. Snapshot backfill tersimpan
+pada v113143_production_recognition_audit (akses owner).
+Tarif produksi tim yang sama dipertahankan saat penugasan disimpan ulang.
+Koreksi komisi kurir Haris Rp12.800 tidak ditimpa oleh SQL 078.
+Tidak ada perubahan source login, GPS, kasbon, atau ekspor XLS pada versi ini.
+
+Pengecekan: hasil akhir SQL menampilkan komisi produksi per karyawan bulan berjalan WIB.
+Bandingkan dengan komisi Produksi di aplikasi untuk rentang tanggal yang sama.
+Jumlah nota antar karyawan dapat berulang pada order yang dikerjakan tim.

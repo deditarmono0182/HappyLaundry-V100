@@ -926,7 +926,7 @@ export function PayrollPage(){
 
       <section className="panel data-panel payroll-list-panel">
         <div className="payroll-table-head payroll-list-fixed-head">
-          <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Komisi kurir dicatat dari order masuk setelah kurir ditetapkan, tanpa menunggu lunas atau bukti antar. Komisi produksi mengikuti aturan sebelumnya.</small></div>
+          <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Komisi produksi dan kurir dicatat dari order masuk setelah masing-masing karyawan ditugaskan, tanpa menunggu selesai atau lunas. Order batal tidak dihitung.</small></div>
           <button className="primary-button" onClick={()=>void saveBonuses()} disabled={busy}><Save size={16}/>{busy?'Menyimpan...':'Simpan Bonus'}</button>
         </div>
         <div className="info-box">Komisi kurir periode ini: <b>{courierUniqueOrderCount} nota unik</b> • <b>{activeCourierEntries.length} hak komisi kurir aktif</b>. Satu nota tim dapat memiliki beberapa penerima. Nota tanpa pembayaran lunas atau bukti antar tetap dihitung setelah kurir ditetapkan.</div>
