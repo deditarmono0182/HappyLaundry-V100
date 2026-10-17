@@ -12,7 +12,7 @@ import { StatCard } from '../components/StatCard'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { formatRupiah } from '../lib/format'
 import { supabase } from '../lib/supabase'
-import { BUSINESS_TIME_ZONE, businessDateKey, businessMonthKey } from '../lib/businessTime'
+import { BUSINESS_TIME_ZONE, businessDateKey, businessMonthKey, businessDateTimeIso } from '../lib/businessTime'
 
 type AttendanceStatus='present'|'permission'|'sick'|'absent'
 
@@ -209,7 +209,7 @@ export function PayrollPage(){
       supabase.from('v113072_employee_cash_advances').select('id,employee_id,amount,remaining_amount,note,issued_at,cancelled_at,cancel_reason').order('issued_at',{ascending:false}),
       supabase.from('v113072_cash_advance_deductions').select('id,cash_advance_id,employee_id,payroll_month,amount,created_at').eq('payroll_month',range.start),
       supabase.from('v113_employee_commission_settings').select('*'),
-      supabase.from('v113_commission_ledger').select('*').gte('earned_at',`${range.start}T00:00:00`).lte('earned_at',`${range.end}T23:59:59.999`),
+      supabase.from('v113_commission_ledger').select('*').gte('earned_at',businessDateTimeIso(range.start)).lte('earned_at',businessDateTimeIso(range.end,'23:59:59.999')),
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_orders_view').select('id,subtotal,total,status,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
@@ -381,6 +381,7 @@ export function PayrollPage(){
       attendanceRate,attendancePay,allowance,
       shareDetails,revenueShare,productionCommission,courierCommission,orderCommission,
       commissionOrderCount:new Set(employeeLedger.map(item=>item.order_id)).size,
+      courierOrderCount:new Set(employeeLedger.filter(item=>item.commission_type==='courier').map(item=>item.order_id)).size,
       commissionDetails:[...employeeLedger].sort((a,b)=>new Date(b.earned_at).getTime()-new Date(a.earned_at).getTime()),
       bonus,grossTotal,cashAdvanceApplied,cashAdvanceOutstanding,total,payrollBalance,paymentHistory,paidAmount,outstanding,paymentStatus
     }
@@ -803,6 +804,9 @@ export function PayrollPage(){
     }
   }
 
+  const activeCourierEntries=commissionLedger.filter(r=>r.commission_type==='courier'&&employees.some(e=>e.id===r.employee_id))
+  const courierUniqueOrderCount=new Set(activeCourierEntries.map(r=>r.order_id)).size
+
   const totalPayroll=payrollRows.reduce((sum,r)=>sum+r.total,0)
   const totalCashAdvanceApplied=payrollRows.reduce((sum,r)=>sum+r.cashAdvanceApplied,0)
   const totalCashAdvanceOutstanding=payrollRows.reduce((sum,r)=>sum+r.cashAdvanceOutstanding,0)
@@ -922,9 +926,10 @@ export function PayrollPage(){
 
       <section className="panel data-panel payroll-list-panel">
         <div className="payroll-table-head payroll-list-fixed-head">
-          <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Komisi per order otomatis terakumulasi sesuai karyawan produksi dan kurir yang dipilih saat transaksi.</small></div>
+          <div><b>Daftar Gaji — {new Date(`${month}-01T00:00:00`).toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</b><small>Komisi kurir dicatat dari order masuk setelah kurir ditetapkan, tanpa menunggu lunas atau bukti antar. Komisi produksi mengikuti aturan sebelumnya.</small></div>
           <button className="primary-button" onClick={()=>void saveBonuses()} disabled={busy}><Save size={16}/>{busy?'Menyimpan...':'Simpan Bonus'}</button>
         </div>
+        <div className="info-box">Komisi kurir periode ini: <b>{courierUniqueOrderCount} nota unik</b> • <b>{activeCourierEntries.length} hak komisi kurir aktif</b>. Satu nota tim dapat memiliki beberapa penerima. Nota tanpa pembayaran lunas atau bukti antar tetap dihitung setelah kurir ditetapkan.</div>
         <div className="table-wrap payroll-list-scroll">
           <table className="payroll-table">
             <thead><tr>
@@ -954,7 +959,7 @@ export function PayrollPage(){
                   <div className="payroll-share-lines">
                     <small>Produksi: {formatRupiah(r.productionCommission)}</small>
                     <small>Kurir: {formatRupiah(r.courierCommission)}</small>
-                    <small>{r.commissionOrderCount} order</small>
+                    <small>{r.courierOrderCount} nota kurir • {r.commissionOrderCount} nota komisi total</small>
                   </div>
                 </td>
                 <td><b>{formatRupiah(r.grossTotal)}</b></td>

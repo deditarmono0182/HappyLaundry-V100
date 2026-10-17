@@ -1,0 +1,70 @@
+HappyLaundry V113.0.142 — Komisi Kurir dari Order Masuk
+Dasar source V113.0.141.
+
+SOLUSI UNTUK HASIL PEMERIKSAAN
+57 nota sudah masuk komisi, 62 belum lunas, 75 belum ada bukti antar.
+Aturan baru: kurir yang sudah ditetapkan mendapat pengakuan komisi sejak
+tanggal order masuk. Tidak perlu menunggu lunas atau bukti antar.
+Angka di atas adalah hasil pemeriksaan saat itu; jumlah aktual bisa berubah.
+
+PEMASANGAN
+1. Buka file SQL_077_KOMISI_KURIR_ORDER_MASUK.sql di bagian luar ZIP
+   dengan Notepad, salin seluruh isinya ke Supabase > SQL Editor > New query,
+   lalu Run. File yang sama tersedia di folder supabase sebagai SQL 077.
+   Cukup jalankan salah satunya, karena isinya identik.
+   Prasyarat: SQL 049, 050, dan 063/team commission sebelumnya sudah terpasang.
+2. Pastikan tidak ada error. Hasil terakhir menampilkan jumlah nota unik,
+   jumlah hak komisi, jumlah hak nominal nol, dan total komisi bulan ini.
+3. Deploy source V113.0.142, lalu muat ulang aplikasi.
+4. Buka Absensi & Gaji dengan periode Oktober 2026 dan cocokkan nota unik
+   komisi kurir terhadap nota masuk yang memiliki penugasan kurir.
+
+DATA LAMA
+SQL 077 melengkapi catatan kurir yang earned_at-nya masih kosong pada
+nota tidak dibatalkan sejak 1 Oktober 2026 sampai saat SQL dijalankan.
+Menggunakan kurir, tarif, dan nominal yang SUDAH tersimpan per nota.
+Tidak menebak kurir dan tidak mengganti tarif lama memakai tarif terbaru.
+Catatan tim didahulukan; catatan primary/legacy tidak dihitung dua kali.
+Catatan yang sudah tercatat tidak ditambah menjadi baris komisi baru.
+Tanggal komisi lama yang sudah diakui dipertahankan, agar tidak memindahkan
+riwayat pengakuan antarperiode. Catatan yang baru dilengkapi memakai tanggal
+nota masuk. Perubahan ini membuat hak komisi yang sebelumnya tertahan
+masuk ke hak gaji periode terkait; pembayaran gaji yang telah dicatat tetap.
+
+PERHATIAN UNTUK NILAI NOL
+Jika tarif/nominal yang tersimpan sejak awal Rp0, nilainya tetap Rp0.
+Hasil SQL menampilkan jumlah kasus tersebut agar bisa diperiksa.
+Itu memerlukan penetapan tarif yang benar terpisah, bukan perubahan massal
+ke tarif terbaru. Nota tanpa penugasan kurir juga tidak diisi dengan tebakan.
+
+ORDER BERIKUTNYA
+- Komisi kurir diakui saat nota dibuat dan kurir/tim ditetapkan.
+- Tarif diambil dari pengaturan saat penugasan baru dibuat.
+- Perubahan pengaturan tarif tidak menghitung ulang snapshot nota lama.
+- Pembayaran/bukti antar berikutnya tidak membuat komisi baru atau mengubah
+  tanggal pengakuan yang sudah ada.
+- Order dibatalkan tidak masuk komisi kurir.
+- Komisi produksi tetap mengikuti aturan sebelumnya.
+
+TAMPILAN
+Daftar gaji memisahkan jumlah nota unik kurir dan jumlah hak kurir aktif.
+Satu nota bisa memiliki dua penerima, sehingga 194 nota tidak harus sama
+dengan jumlah hak komisinya. Periode komisi Owner dan Gaji Saya memakai WIB.
+
+AUDIT DAN BATAS PERUBAHAN
+Snapshot sebelum pelengkapan tersimpan pada tabel audit khusus Owner.
+SQL dapat dijalankan ulang tanpa menambah pengakuan yang sama dua kali.
+Tidak mengubah data pelanggan, saldo kasbon, login atau absensi GPS.
+Fitur XLS gaji dari V113.0.141 tetap tersedia.
+
+VERIFIKASI
+Pengujian PostgreSQL terpisah menggunakan trigger dan tabel versi lama:
+- Pelengkapan komisi belum lunas/belum ada bukti antar.
+- Tarif dan nominal lama tetap, termasuk nol.
+- Komisi sudah tercatat dan komisi produksi tidak berubah saat migrasi.
+- Tim + legacy tidak dihitung dua kali; migrasi aman diulang.
+- Nota baru belum lunas; simpan ulang tim yang sama setelah perubahan tarif.
+- Pelunasan/bukti antar berikutnya; pembatalan; periode WIB dini hari.
+Build TypeScript/Vite dan regresi XLS gaji, absensi serta kasbon berhasil.
+Belum dijalankan pada database produksi. Cocokkan ringkasan hasil SQL setelah
+pemasangan; angka produksi tidak ditanam sebagai nilai tetap pada program.

@@ -901,3 +901,11 @@ potongan tercatat dan saldo simulasi setelah sisa utang. Ringkasan serta
 rincian individu mengikuti nilai yang sama. Label tampilan diperjelas;
 tidak mengubah saldo/transaksi atau mencatat potongan baru. Tidak ada SQL baru.
 Lihat PANDUAN_V113_0_141_XLS_GAJI_KASBON.txt.
+
+## V113.0.142 — Komisi kurir berdasarkan order masuk
+Komisi kurir diakui saat nota dan penugasan tersedia, tanpa menunggu lunas
+atau bukti antar. SQL 077 melengkapi pengakuan kosong sejak 1 Oktober 2026
+menggunakan penerima/tarif/nominal tersimpan, disertai audit dan perlindungan
+penghitungan tim/legacy ganda. Pengakuan lama dipertahankan. Nota batal tidak
+masuk komisi kurir. Produksi mengikuti aturan sebelumnya. Periode komisi WIB.
+Lihat PANDUAN_V113_0_142_KOMISI_KURIR_ORDER_MASUK.txt sebelum memasang.
