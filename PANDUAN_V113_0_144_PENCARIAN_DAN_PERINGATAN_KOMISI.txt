@@ -1,0 +1,24 @@
+HappyLaundry V113.0.144 — Pencarian seluruh order dan peringatan tarif komisi 0%
+Dasar source V113.0.143. SQL 077 dan 078 tetap berlaku.
+
+1. Jalankan seluruh SQL_079_PENCARIAN_SELURUH_ORDER.sql di Supabase.
+2. Deploy source V113.0.144 ke Netlify seperti sebelumnya.
+3. Muat ulang aplikasi. Cari 00141 atau Mamah Alghi langsung tanpa memuat order lama.
+Filter Tanggal Masuk Dari–Sampai memakai WIB, termasuk seluruh hari tanggal akhir.
+Kosongkan tanggal untuk semua tanggal; tombol Semua juga menghapus rentang tanggal.
+Tanggal yang dipakai adalah tanggal masuk order, bukan estimasi selesai atau tanggal lunas.
+Pencarian nomor, pelanggan, telepon, layanan, kategori, status dan pembayaran berlaku
+ke seluruh database yang boleh diakses akun. Ketikan ditunggu sebentar sebelum pencarian.
+Hasil tetap bertahap 100; tombol Muat 100 Order Lagi memuat hasil tambahan.
+Filter status/pembayaran/kategori/penugasan yang dipilih tetap berlaku pada hasil.
+Jika hasil tidak tampak, periksa filter yang masih aktif. Data terkait order lama
+(layanan, tim, foto, koreksi) diambil khusus untuk hasil yang ditampilkan.
+
+Tarif 0% diperingatkan di Kasir dan Koreksi Penanggung Jawab oleh owner.
+Sebelum menyimpan, tarif dibaca lagi untuk mengurangi data pengaturan yang kedaluwarsa.
+Tarif 0% sah tetap boleh dipakai setelah memilih lanjut pada peringatan.
+Untuk tim yang sama, peringatan koreksi memakai tarif snapshot tersimpan, bukan tarif
+pengaturan terbaru. Untuk tim baru, acuan tim mengikuti fungsi SQL penugasan yang sudah ada.
+Peringatan tidak mengubah tarif atau menghitung ulang nota lama otomatis.
+SQL 079 hanya menambah fungsi baca; tidak mengubah order, komisi, gaji, login atau GPS.
+SQL 078 produksi dan SQL 077 kurir tetap diakui sejak order masuk + penugasan.

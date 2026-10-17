@@ -7034,7 +7034,10 @@ body{
   font-size:8.5px;
   font-weight:850;
 }
-.order-filter-field select{
+.order-filter-field select,
+.order-filter-field input[type="date"]{
+  box-sizing:border-box;
+  min-width:0;
   min-height:42px;
   width:100%;
   padding:0 9px;

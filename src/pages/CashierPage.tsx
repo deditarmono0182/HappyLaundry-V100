@@ -8,6 +8,7 @@ import { PageHeader } from '../components/PageHeader'
 import { Modal } from '../components/Modal'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
+import {zeroCommissionWarnings,confirmZeroCommission} from '../lib/commissionWarnings'
 import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
 import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
 import { businessDayStart, businessDateTimeLabel, businessParts, BUSINESS_UTC_OFFSET } from '../lib/businessTime'
@@ -529,7 +530,7 @@ export function CashierPage() {
   }
 
   const submit=async(e:FormEvent)=>{
-    e.preventDefault();setMessage('');setSuccess(null)
+    e.preventDefault();if(busy)return;setMessage('');setSuccess(null)
     if(items.length===0){setMessage('Tambahkan minimal satu layanan.');return}
     if(!newCustomer&&!customerId){setMessage('Pilih pelanggan.');return}
     if(newCustomer&&(!customerName.trim()||!customerPhone.trim())){
@@ -541,6 +542,13 @@ export function CashierPage() {
     }
     setBusy(true)
     try{
+      if(workerId||courierId){
+        const freshRates=await supabase.from('v113_employee_commission_settings').select('employee_id,production_percent,courier_percent')
+        if(freshRates.error)throw new Error('Tarif komisi belum dapat diperiksa. Coba simpan lagi setelah koneksi pulih.')
+        setCommissionSettings(freshRates.data||[])
+        const warnings=zeroCommissionWarnings(workerTeamIds,courierTeamIds,freshRates.data||[],commissionEmployees)
+        if(!confirmZeroCommission(warnings))return
+      }
       let selectedCustomer=customerId
       let selectedName=customers.find(c=>c.id===customerId)?.name||''
       let selectedPhone=customers.find(c=>c.id===customerId)?.phone||''
@@ -705,6 +713,8 @@ export function CashierPage() {
           <div className="cashier-section-title">
             <div><b>3. Penanggung Jawab & Komisi</b><small>Pilih karyawan produksi dan kurir. Persentase diambil otomatis dari pengaturan gaji.</small></div>
           </div>
+          {zeroCommissionWarnings(workerTeamIds,courierTeamIds,commissionSettings,commissionEmployees)
+            .map(warning=><div className="info-box" role="status" key={warning}>{warning} Periksa pengaturan komisi sebelum menyimpan.</div>)}
           <div className="form-grid-two">
             <label>Dikerjakan oleh
               <select value={workerId} onChange={e=>{setWorkerId(e.target.value);setWorkerExtraIds(current=>current.filter(id=>id!==e.target.value));if(!e.target.value)setWorkerTeamOpen(false)}}>

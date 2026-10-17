@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -26,6 +26,8 @@ import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {fetchOrderSearch,fetchOrderRelated} from '../lib/orderSearch'
+import {zeroCommissionWarnings,confirmZeroCommission,type CommissionRate} from '../lib/commissionWarnings'
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft, OrderRow, OrderStatus } from '../types/order'
@@ -78,6 +80,7 @@ type OrderCommissionTeamMember={
   employee_id:string
   is_primary:boolean
   share_percent:number
+  total_percent:number
 }
 
 type CommissionEmployeeName={
@@ -116,6 +119,14 @@ export function OrdersPage() {
   const [services, setServices] = useState<Service[]>([])
   const [orderServiceItems, setOrderServiceItems] = useState<OrderServiceItem[]>([])
   const [query, setQuery] = useState('')
+  const [serverQuery,setServerQuery]=useState('')
+  const [dateStart,setDateStart]=useState('')
+  const [dateEnd,setDateEnd]=useState('')
+  const [serverDateStart,setServerDateStart]=useState('')
+  const [serverDateEnd,setServerDateEnd]=useState('')
+  const [searchRevision,setSearchRevision]=useState(0)
+  const loadSequence=useRef(0)
+  const [commissionRates,setCommissionRates]=useState<CommissionRate[]>([])
   const [paymentFilter,setPaymentFilter]=useState<'all'|'unpaid'|'partial'|'paid'>('all')
   const [statusFilter,setStatusFilter]=useState<'all'|'overdue'|OrderStatus>('all')
   const [categoryFilter,setCategoryFilter]=useState('all')
@@ -163,60 +174,53 @@ export function OrdersPage() {
   const [extraChargeBusy,setExtraChargeBusy]=useState(false)
 
   const load = useCallback(async () => {
+    const sequence=++loadSequence.current
     setLoading(true)
     setMessage('')
-    const [ordersResult, customersResult, servicesResult, orderItemsResult, deliveryResult, commissionResult, commissionTeamResult, commissionEmployeesResult, correctionHistoryResult, extraChargeResult] = await Promise.all([
-      supabase
-        .from('v100_orders_view')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(orderLimit+1),
-      supabase
-        .from('v100_customers')
-        .select('id, store_id, name, phone, address, notes, created_at')
-        .order('name'),
-      supabase
-        .from('v100_services')
-        .select('id, store_id, name, category, unit, price, duration_hours, is_active, created_at')
-        .eq('is_active', true)
-        .order('name'),
-      supabase
-        .from('v100_order_items')
-        .select('order_id,service_name,unit,quantity')
-        .order('created_at'),
-      supabase
-        .from('v112_delivery_proofs')
-        .select('id,order_id,order_no,photo_url,photo_path,note,delivered_at,confirmed_by_name')
-        .order('delivered_at',{ascending:false}),
-      supabase
-        .from('v113_order_commissions')
-        .select('order_id,worker_id,courier_id'),
-      supabase
-        .from('v113097_order_commission_members')
-        .select('order_id,commission_type,employee_id,is_primary,share_percent'),
-      supabase.from('v109_users').select('id,full_name,login_id'),
-      supabase.from('v113_order_assignment_corrections').select('id,order_id,old_worker_id,new_worker_id,old_courier_id,new_courier_id,reason,changed_by,changed_at').order('changed_at',{ascending:false}),
-      supabase.from('v113099_order_extra_charges').select('id,order_id,charge_name,amount,reason,created_at').order('created_at',{ascending:false})
-    ])
-
-    const error = ordersResult.error || customersResult.error || servicesResult.error || orderItemsResult.error || deliveryResult.error || commissionResult.error || commissionTeamResult.error || commissionEmployeesResult.error || correctionHistoryResult.error || extraChargeResult.error
-    if (error) setMessage(error.message)
-    else {
-      const fetched=((ordersResult.data as OrderRow[])||[])
+    try{
+      const fetched=await fetchOrderSearch(serverQuery,orderLimit+1,serverDateStart,serverDateEnd)
+      if(sequence!==loadSequence.current)return
+      const visible=fetched.slice(0,orderLimit),ids=visible.map(row=>row.id)
+      const [customersResult,servicesResult,orderItems,delivery,assignments,team,employeesResult,history,charges,ratesResult]=await Promise.all([
+        supabase.from('v100_customers').select('id, store_id, name, phone, address, notes, created_at').order('name'),
+        supabase.from('v100_services').select('id, store_id, name, category, unit, price, duration_hours, is_active, created_at').eq('is_active',true).order('name'),
+        fetchOrderRelated<OrderServiceItem>('v100_order_items','order_id,service_name,unit,quantity',ids,'created_at'),
+        fetchOrderRelated<DeliveryProof>('v112_delivery_proofs','id,order_id,order_no,photo_url,photo_path,note,delivered_at,confirmed_by_name',ids,'delivered_at'),
+        fetchOrderRelated<OrderCommissionAssignment>('v113_order_commissions','order_id,worker_id,courier_id',ids,'order_id'),
+        fetchOrderRelated<OrderCommissionTeamMember>('v113097_order_commission_members','order_id,commission_type,employee_id,is_primary,share_percent,total_percent',ids,'employee_id'),
+        supabase.from('v109_users').select('id,full_name,login_id'),
+        fetchOrderRelated<AssignmentCorrectionHistory>('v113_order_assignment_corrections','id,order_id,old_worker_id,new_worker_id,old_courier_id,new_courier_id,reason,changed_by,changed_at',ids,'changed_at'),
+        fetchOrderRelated<OrderExtraCharge>('v113099_order_extra_charges','id,order_id,charge_name,amount,reason,created_at',ids,'created_at'),
+        supabase.from('v113_employee_commission_settings').select('employee_id,production_percent,courier_percent')
+      ])
+      if(sequence!==loadSequence.current)return
+      const error=customersResult.error||servicesResult.error||employeesResult.error||ratesResult.error
+      if(error)throw new Error(error.message)
       setMayHaveMore(fetched.length>orderLimit)
-      setRows(fetched.slice(0,orderLimit))
-      setCustomers((customersResult.data as Customer[]) || [])
-      setServices((servicesResult.data as Service[]) || [])
-      setOrderServiceItems((orderItemsResult.data as OrderServiceItem[]) || [])
-      setDeliveryProofs((deliveryResult.data as DeliveryProof[]) || [])
-      setCommissionAssignments((commissionResult.data as OrderCommissionAssignment[]) || [])
-      setCommissionTeamMembers((commissionTeamResult.data as OrderCommissionTeamMember[]) || [])
-      setCommissionEmployeeNames((commissionEmployeesResult.data as CommissionEmployeeName[]) || [])
-      setAssignmentCorrectionHistory((correctionHistoryResult.data as AssignmentCorrectionHistory[]) || [])
-      setExtraCharges((extraChargeResult.data as OrderExtraCharge[]) || [])
-    }
-    setLoading(false)
-  }, [orderLimit])
+      setRows(visible)
+      setCustomers((customersResult.data as Customer[])||[])
+      setServices((servicesResult.data as Service[])||[])
+      setOrderServiceItems(orderItems);setDeliveryProofs(delivery)
+      setCommissionAssignments(assignments);setCommissionTeamMembers(team)
+      setCommissionEmployeeNames((employeesResult.data as CommissionEmployeeName[])||[])
+      setAssignmentCorrectionHistory(history);setExtraCharges(charges)
+      setCommissionRates((ratesResult.data as CommissionRate[])||[])
+    }catch(error){
+      if(sequence===loadSequence.current){
+        setRows([]);setMayHaveMore(false)
+        setMessage(error instanceof Error?error.message:'Pencarian gagal. Coba muat ulang.')
+      }
+    }finally{if(sequence===loadSequence.current)setLoading(false)}
+  }, [orderLimit,serverQuery,serverDateStart,serverDateEnd,searchRevision])
+
+  useEffect(()=>{
+    ++loadSequence.current
+    setLoading(true);setRows([])
+    const timer=window.setTimeout(()=>{
+      setServerQuery(query.trim());setServerDateStart(dateStart);setServerDateEnd(dateEnd);setOrderLimit(ORDER_PAGE_SIZE);setSearchRevision(v=>v+1)
+    },300)
+    return ()=>{window.clearTimeout(timer);++loadSequence.current}
+  },[query,dateStart,dateEnd])
 
   useEffect(() => { void load() }, [load])
   useEffect(()=>{
@@ -360,7 +364,7 @@ export function OrdersPage() {
   }
 
   const submitAssignmentCorrection=async()=>{
-    if(!correctionOrder)return
+    if(!correctionOrder||correctionBusy)return
     if(correctionReason.trim().length<5){
       setMessage('Alasan koreksi minimal 5 karakter.')
       return
@@ -378,6 +382,13 @@ export function OrdersPage() {
     setCorrectionBusy(true)
     setMessage('')
     try{
+      const [rates,members]=await Promise.all([
+        supabase.from('v113_employee_commission_settings').select('employee_id,production_percent,courier_percent'),
+        supabase.from('v113097_order_commission_members').select('employee_id,commission_type,total_percent').eq('order_id',correctionOrder.id)
+      ])
+      if(rates.error||members.error)throw new Error('Tarif komisi belum dapat diperiksa. Coba lagi.')
+      const warnings=zeroCommissionWarnings(productionIds,courierIds,(rates.data||[]) as CommissionRate[],commissionEmployeeNames,members.data||[])
+      if(!confirmZeroCommission(warnings))return
       const {error}=await supabase.rpc('v113100_owner_correct_order_team',{
         p_order_id:correctionOrder.id,
         p_production_ids:productionIds,
@@ -548,8 +559,6 @@ export function OrdersPage() {
 
 
   const filtered = useMemo(() => {
-    const keyword=query.trim().toLowerCase()
-
     return rows.filter(row=>{
       if(paymentFilter!=='all'&&row.payment_status!==paymentFilter)return false
 
@@ -579,21 +588,8 @@ export function OrdersPage() {
         if(['ready','completed','cancelled'].includes(row.status)||row.due_at)return false
       }
 
-      if(!keyword)return true
+      return true // Keyword matching is performed across the database by SQL 079.
 
-      const haystack=[
-        row.order_no,
-        row.customer_name,
-        row.customer_phone,
-        statusLabels[row.status],
-        row.status,
-        paymentLabels[row.payment_status],
-        row.payment_status,
-        serviceSummary(row.id),
-        ...rowCategories
-      ].join(' ').toLowerCase()
-
-      return haystack.includes(keyword)
     })
   },[query,rows,serviceItemsByOrder,serviceCategoryByName,paymentFilter,statusFilter,categoryFilter,assignmentFilter,attentionFilter,orderAssignmentMap])
 
@@ -809,7 +805,7 @@ export function OrdersPage() {
       missing_both:'Keduanya Kosong'
     }[assignmentFilter]
     const attentionLabel=attentionFilter==='ready_long'?'Siap >24 Jam':attentionFilter==='no_due'?'Estimasi Kosong':''
-    return `Filter: ${status} • ${payment} • ${assignmentLabel}${attentionLabel?` • ${attentionLabel}`:''}`
+    return `Filter: ${status} • ${payment} • ${assignmentLabel}${attentionLabel?` • ${attentionLabel}`:''}${dateStart||dateEnd?` • Tanggal masuk WIB: ${dateStart||'awal'} s/d ${dateEnd||'terakhir'}`:''}${query.trim()?` • Cari: ${query.trim()}`:''}`
   }
 
   const openCustomerTracking=(row:OrderRow)=>{
@@ -1100,7 +1096,7 @@ export function OrdersPage() {
       />
 
       <section className="stats-grid compact-stats order-stats-grid">
-        <article className="stat-card"><div className="stat-icon"><ShoppingBag size={22}/></div><div><span>Total Order</span><strong>{rows.length}</strong><small>Seluruh order</small></div></article>
+        <article className="stat-card"><div className="stat-icon"><ShoppingBag size={22}/></div><div><span>Order Dimuat</span><strong>{rows.length}</strong><small>Hasil pencarian/periode ini</small></div></article>
         <article className="stat-card"><div className="stat-icon"><PackageCheck size={22}/></div><div><span>Siap Diambil</span><strong>{rows.filter(r => r.status === 'ready').length}</strong><small>Menunggu pelanggan</small></div></article>
         <button
           type="button"
@@ -1121,8 +1117,17 @@ export function OrdersPage() {
             <input
               value={query}
               onChange={event=>setQuery(event.target.value)}
-              placeholder="Cari order, pelanggan, layanan, kategori (Express/Kiloan/Satuan), status, atau pembayaran"
+              placeholder="Cari seluruh order: nomor nota, pelanggan, layanan, kategori, status, pembayaran"
             />
+          </label>
+
+          <label className="order-filter-field">
+            <span>Tanggal Masuk Dari (WIB)</span>
+            <input type="date" aria-label="Tanggal masuk dari" value={dateStart} max={dateEnd||undefined} onChange={e=>setDateStart(e.target.value)}/>
+          </label>
+          <label className="order-filter-field">
+            <span>Tanggal Masuk Sampai (WIB)</span>
+            <input type="date" aria-label="Tanggal masuk sampai" value={dateEnd} min={dateStart||undefined} onChange={e=>setDateEnd(e.target.value)}/>
           </label>
 
           <label className="order-filter-field">
@@ -1174,7 +1179,7 @@ export function OrdersPage() {
             type="button"
             className="secondary-button order-reset-filter"
             onClick={()=>{
-              setQuery('')
+              setQuery('');setDateStart('');setDateEnd('')
               setPaymentFilter('all')
               setStatusFilter('all')
               setCategoryFilter('all')
@@ -1191,7 +1196,7 @@ export function OrdersPage() {
             </button>
           </div>
 
-          <span className="record-count">{filtered.length} order</span>
+          <span className="record-count">{loading?'Mencari...':`${filtered.length} order${mayHaveMore?' • masih ada hasil lain':''}`}</span>
         </div>
 
         <div className="assignment-find-bar" aria-label="Cari order dengan penugasan kosong">
@@ -1701,6 +1706,12 @@ export function OrdersPage() {
                 Total anggota kurir: {correctionCourierExtraIds.length+1} orang • pembagian komisi rata
               </small>}
             </label>
+            {zeroCommissionWarnings(
+              correctionWorkerId?[correctionWorkerId,...correctionWorkerExtraIds]:[],
+              correctionCourierId?[correctionCourierId,...correctionCourierExtraIds]:[],
+              commissionRates,commissionEmployeeNames,
+              commissionTeamMembers.filter(m=>m.order_id===correctionOrder.id)
+            ).map(warning=><div className="info-box" role="status" key={warning}>{warning} Periksa pengaturan komisi sebelum menyimpan.</div>)}
             <label>Alasan Koreksi
               <textarea rows={3} value={correctionReason} onChange={e=>setCorrectionReason(e.target.value)} placeholder="Contoh: salah pilih nama saat input order"/>
             </label>
