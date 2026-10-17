@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Activity, Award, Building2, CalendarCheck2, CheckCircle2, ClipboardCopy, CreditCard, ExternalLink, Eye, MapPin, MessageCircle, Printer, QrCode, Save, Send, Store, UsersRound } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
 import { supabase } from '../lib/supabase'
-import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
+import { openWhatsApp } from '../lib/whatsapp'
+import {composeReceiptWhatsApp} from '../lib/orderReceipt'
 import type { StoreSettings } from '../types/settings'
 
 type OnlinePaymentSettings={
@@ -106,13 +107,13 @@ export function SettingsPage() {
 
   const previewWhatsAppText=()=>{
     const template=waPreviewType==='received'?form.whatsapp_order_template:form.whatsapp_ready_template
-    const base=fillTemplate(template,{
+    const base=composeReceiptWhatsApp(template,{
       pelanggan:previewData.pelanggan,
       order:previewData.order,
       total:previewData.total,
       estimasi:previewData.estimasi,
       usaha:form.business_name
-    })
+    },[{service_name:'Cuci Setrika',quantity:5,unit:'kg',price:8000,subtotal:40000},{service_name:'Setrika Saja',quantity:2,unit:'kg',price:5000,subtotal:10000}],[],{subtotal:50000,discount:0,total:50000,paid_amount:0})
     const payment=onlinePayment.qris_enabled||(onlinePayment.transfer_enabled&&bankAccounts.length>0)
       ? `\n\n💳 Pembayaran Online\nTotal: ${previewData.total}\nSudah dibayar: ${previewData.paid}\nSisa tagihan: ${previewData.remaining}\nMetode: ${paymentMethodText()}\n\nBuka tracking untuk melihat QRIS/rekening dan upload bukti pembayaran:\n${previewData.tracking}`
       : `\n\nCek status cucian:\n${previewData.tracking}`
@@ -193,7 +194,7 @@ export function SettingsPage() {
           <label>Pesan Order Diterima<textarea rows={9} value={form.whatsapp_order_template} onChange={e=>setForm({...form,whatsapp_order_template:e.target.value})}/></label>
           <label>Pesan Siap Diambil<textarea rows={9} value={form.whatsapp_ready_template} onChange={e=>setForm({...form,whatsapp_ready_template:e.target.value})}/></label>
         </div>
-        <small className="wa-template-help">Variabel: {'{{pelanggan}}'}, {'{{order}}'}, {'{{total}}'}, {'{{estimasi}}'}, dan {'{{usaha}}'}.</small>
+        <small className="wa-template-help">Variabel: {'{{pelanggan}}'}, {'{{order}}'}, {'{{total}}'}, {'{{estimasi}}'}, {'{{usaha}}'}, {'{{rincian}}'}, {'{{ringkasan}}'}, {'{{diskon}}'}, {'{{dibayar}}'}, dan {'{{sisa}}'}. Rincian layanan dan ringkasan pembayaran ditambahkan otomatis jika variabelnya belum dipakai.</small>
 
         <div className="wa-preview-toolbar">
           <div className="wa-preview-tabs">

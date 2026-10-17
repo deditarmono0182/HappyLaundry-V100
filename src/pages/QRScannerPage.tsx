@@ -9,6 +9,7 @@ import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { paymentLabels, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {openOrderReceiptWhatsApp,loadOrderReceipt,receiptItemsHtml,escapeReceiptHtml} from '../lib/orderReceipt'
 import type { OrderRow } from '../types/order'
 
 function extractOrderNo(value:string){
@@ -60,7 +61,7 @@ export function QRScannerPage(){
     await stopCamera();setLoading(true);setMessage('');setOrder(null);setManual(orderNo)
     try{
       const {data:direct,error}=await supabase.from('v100_orders')
-        .select('id,order_no,customer_id,status,payment_status,total,paid_amount,created_at')
+        .select('id,order_no,customer_id,status,payment_status,subtotal,discount,total,paid_amount,due_at,created_at')
         .eq('order_no',orderNo).maybeSingle()
       if(error)throw error
       if(!direct){setMessage(`Order ${orderNo} tidak ditemukan di aplikasi.`);return}
@@ -225,29 +226,36 @@ export function QRScannerPage(){
   const remaining=order?Math.max(0,Number(order.total)-Number(order.paid_amount)):0
 
   const openWhatsApp=()=>{
-    if(!order?.customer_phone)return
-    const phone=order.customer_phone.replace(/\D/g,'').replace(/^0/,'62')
-    const message=`Halo ${order.customer_name}, informasi order ${order.order_no}. Status: ${statusLabels[order.status]}. Total: ${formatIDR(Number(order.total))}.`
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,'_blank')
+    if(!order)return
+    void openOrderReceiptWhatsApp(order,'Halo {{pelanggan}}, berikut rincian order {{order}}. Status: {{status}}.')
+      .catch(error=>setMessage(error instanceof Error?error.message:'WhatsApp gagal dibuka.'))
   }
 
-  const printReceipt=()=>{
+  const printReceipt=async()=>{
     if(!order)return
     const w=window.open('','_blank','width=420,height=700')
     if(!w)return
+    w.document.body.textContent='Menyiapkan rincian nota...'
+    try{
+    const {items,charges}=await loadOrderReceipt(order.id)
+    w.document.open()
     w.document.write(`<!doctype html>
 <html><head><meta charset="utf-8"><title>${order.order_no}</title>
 <style>
 body{font-family:Arial,sans-serif;width:58mm;margin:0 auto;padding:4mm;color:#111}
 h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8px 0}
 .row{display:flex;justify-content:space-between;gap:10px;font-size:12px;margin:4px 0}
-.strong{font-weight:700}.small{font-size:11px}.qr{text-align:center;margin-top:12px}
+.service-row{display:flex;justify-content:space-between;gap:8px;font-size:11px;margin:6px 0}.service-row span{max-width:70%}.strong{font-weight:700}.small{font-size:11px}.qr{text-align:center;margin-top:12px}
 </style></head><body>
 <h2>HappyLaundry</h2><p class="small">Babakan, Cirebon</p><div class="line"></div>
 <div class="row"><span>No. Order</span><b>${order.order_no}</b></div>
 <div class="row"><span>Pelanggan</span><b>${order.customer_name}</b></div>
 <div class="row"><span>Status</span><span>${statusLabels[order.status]}</span></div>
 <div class="line"></div>
+${receiptItemsHtml(items)}
+${charges.map(c=>`<div class="row"><span>+ ${escapeReceiptHtml(c.charge_name)}</span><b>${formatIDR(Number(c.amount))}</b></div>`).join('')}
+<div class="row"><span>Subtotal</span><span>${formatIDR(Number(order.subtotal))}</span></div>
+<div class="row"><span>Diskon</span><span>${formatIDR(Number(order.discount))}</span></div>
 <div class="row strong"><span>Total</span><span>${formatIDR(Number(order.total))}</span></div>
 <div class="row"><span>Sudah Bayar</span><span>${formatIDR(Number(order.paid_amount))}</span></div>
 <div class="row"><span>Sisa</span><span>${formatIDR(remaining)}</span></div>
@@ -257,6 +265,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
 <script>window.onload=()=>window.print()</script>
 </body></html>`)
     w.document.close()
+    }catch(error){w.close();setMessage(error instanceof Error?error.message:'Rincian nota gagal dimuat.')}
   }
 
   return <>

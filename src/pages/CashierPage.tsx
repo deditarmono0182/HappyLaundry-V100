@@ -9,7 +9,8 @@ import { Modal } from '../components/Modal'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import {zeroCommissionWarnings,confirmZeroCommission} from '../lib/commissionWarnings'
-import { fillTemplate, openWhatsApp } from '../lib/whatsapp'
+import { openWhatsApp } from '../lib/whatsapp'
+import {composeReceiptWhatsApp} from '../lib/orderReceipt'
 import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
 import { businessDayStart, businessDateTimeLabel, businessParts, BUSINESS_UTC_OFFSET } from '../lib/businessTime'
 import { useAuth } from '../lib/auth'
@@ -520,10 +521,10 @@ export function CashierPage() {
       const template=storeSettings?.whatsapp_order_template||
         'Halo {{pelanggan}}, cucian Anda sudah kami terima. Nomor order: {{order}}. Total: {{total}}.'
       const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(success.orderNo)}`
-      const baseText=fillTemplate(template,{
+      const baseText=composeReceiptWhatsApp(template,{
         pelanggan:success.customer,order:success.orderNo,total:formatIDR(success.total),
         estimasi:success.due||'-',usaha:storeSettings?.business_name||'HappyLaundry Babakan'
-      })
+      },success.items,[],{subtotal:success.subtotal,discount:success.discount,total:success.total,paid_amount:success.paid})
       const text=`${baseText}\n\nCek status laundry Anda:\n${trackingUrl}`
       openWhatsApp(success.phone,text)
     }catch(err){setMessage(err instanceof Error?err.message:'WhatsApp gagal dibuka.')}

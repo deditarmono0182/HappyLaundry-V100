@@ -35,5 +35,7 @@ globalThis.__rateFailure=false;window.confirm=()=>{prompts++;return true}
 await click('Simpan Transaksi')
 assert.equal(globalThis.__mutations.filter(([name])=>name==='v100_create_order').length,1,'explicit zero commission allowed')
 assert.equal(globalThis.__mutations.filter(([name])=>name==='v113097_set_order_commission_team').length,1)
+let waUrl='';window.open=url=>{waUrl=url;return null};await click('WhatsApp')
+const draftText=new URL(waUrl).searchParams.get('text');assert.match(draftText,/Karpet/);assert.match(draftText.replace(/[\s\u00a0]/g,''),/1item×Rp64\.000=Rp64\.000/)
 await act(async()=>root.unmount());await unlink(file)
 console.log('PASS Kasir: zero warning visible; fresh-rate failure and cancel create no order; busy released; deliberate 0% saves order/team once after confirmation.')

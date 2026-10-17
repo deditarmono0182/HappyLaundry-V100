@@ -7,6 +7,7 @@ import { formatIDR } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {openOrderReceiptWhatsApp} from '../lib/orderReceipt'
 import type { OrderRow } from '../types/order'
 
 export function ReceivablesPage(){
@@ -79,12 +80,8 @@ export function ReceivablesPage(){
   const avgReceivable=rows.length?totalReceivable/rows.length:0
 
   const openWA=(row:OrderRow)=>{
-    const phone=(row.customer_phone||'').replace(/\D/g,'').replace(/^0/,'62')
-    if(!phone)return
-    const remaining=Math.max(0,Number(row.total)-Number(row.paid_amount))
-    const tracking=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
-    const text=`Halo ${row.customer_name}, kami mengingatkan sisa pembayaran order ${row.order_no} sebesar ${formatIDR(remaining)}.\n\nCek status laundry:\n${tracking}\n\nTerima kasih.`
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`,'_blank')
+    void openOrderReceiptWhatsApp(row,'Halo {{pelanggan}}, kami mengingatkan sisa pembayaran order {{order}} sebesar {{sisa}}. Terima kasih.')
+      .catch(error=>setMessage(error instanceof Error?error.message:'WhatsApp gagal dibuka.'))
   }
 
   return <>

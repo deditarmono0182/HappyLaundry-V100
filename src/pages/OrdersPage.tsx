@@ -9,6 +9,7 @@ import {
   FileText,
   ExternalLink,
   Image,
+  MessageCircle,
   PackageCheck,
   Plus,
   Printer,
@@ -26,6 +27,8 @@ import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {loadOrderReceipt,receiptItemsHtml,openOrderReceiptWhatsApp,escapeReceiptHtml} from '../lib/orderReceipt'
+import {loadReceiptPrintSettings} from '../lib/receiptSettings'
 import {fetchOrderSearch,fetchOrderRelated} from '../lib/orderSearch'
 import {zeroCommissionWarnings,confirmZeroCommission,type CommissionRate} from '../lib/commissionWarnings'
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
@@ -55,6 +58,8 @@ type OrderServiceItem={
   service_name:string
   unit:string
   quantity:number
+  price:number
+  subtotal:number
 }
 
 type DeliveryProof={
@@ -184,7 +189,7 @@ export function OrdersPage() {
       const [customersResult,servicesResult,orderItems,delivery,assignments,team,employeesResult,history,charges,ratesResult]=await Promise.all([
         supabase.from('v100_customers').select('id, store_id, name, phone, address, notes, created_at').order('name'),
         supabase.from('v100_services').select('id, store_id, name, category, unit, price, duration_hours, is_active, created_at').eq('is_active',true).order('name'),
-        fetchOrderRelated<OrderServiceItem>('v100_order_items','order_id,service_name,unit,quantity',ids,'created_at'),
+        fetchOrderRelated<OrderServiceItem>('v100_order_items','order_id,service_name,unit,quantity,price,subtotal',ids,'created_at'),
         fetchOrderRelated<DeliveryProof>('v112_delivery_proofs','id,order_id,order_no,photo_url,photo_path,note,delivered_at,confirmed_by_name',ids,'delivered_at'),
         fetchOrderRelated<OrderCommissionAssignment>('v113_order_commissions','order_id,worker_id,courier_id',ids,'order_id'),
         fetchOrderRelated<OrderCommissionTeamMember>('v113097_order_commission_members','order_id,commission_type,employee_id,is_primary,share_percent,total_percent',ids,'employee_id'),
@@ -876,25 +881,15 @@ export function OrdersPage() {
   },[extraCharges])
 
 
-  const printReceipt=(row:OrderRow)=>{
+  const printReceipt=async(row:OrderRow)=>{
     const printWindow=window.open('','_blank','width=520,height=850')
     if(!printWindow)return
 
-    const serviceRows=(serviceItemsByOrder.get(row.id)||[])
-      .map(item=>{
-        const qty=Number(item.quantity||0)
-        const formattedQty=Number.isInteger(qty)
-          ? String(qty)
-          : qty.toLocaleString('id-ID',{maximumFractionDigits:2})
-        return `<div class="service-row"><span>${item.service_name}</span><b>${formattedQty} ${item.unit}</b></div>`
-      })
-      .join('')
-
-    const extraChargeRows=(extraChargesByOrder.get(row.id)||[])
-      .slice()
-      .reverse()
-      .map(item=>`<div class="service-row extra-charge-row"><span>+ ${item.charge_name}</span><b>${formatRupiah(item.amount)}</b></div>`)
-      .join('')
+    printWindow.document.body.textContent='Menyiapkan rincian nota...'
+    try{
+    const [{items:receiptItems,charges:receiptCharges},printResult]=await Promise.all([loadOrderReceipt(row.id),loadReceiptPrintSettings()])
+    const serviceRows=receiptItemsHtml(receiptItems,printResult.settings.show_item_price)
+    const extraChargeRows=receiptCharges.map(item=>`<div class="service-row extra-charge-row"><span>+ ${escapeReceiptHtml(item.charge_name)}</span><b>${formatRupiah(item.amount)}</b></div>`).join('')
 
     const closeFallback=`${window.location.origin}/orders?order=${encodeURIComponent(row.order_no)}`
     const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
@@ -910,6 +905,7 @@ export function OrdersPage() {
       ?courierMembers.map(item=>commissionEmployeeNameMap.get(item.employee_id)||'-').join(' + ')
       :(commissionAssignment?.courier_id?commissionEmployeeNameMap.get(commissionAssignment.courier_id)||'-':'-')
 
+    printWindow.document.open()
     printWindow.document.write(`
       <!doctype html>
       <html>
@@ -1064,6 +1060,7 @@ export function OrdersPage() {
       </html>
     `)
     printWindow.document.close()
+    }catch(error){printWindow.close();setMessage(error instanceof Error?error.message:'Rincian nota gagal dimuat. Silakan coba lagi.')}
   }
 
   return (
@@ -1839,6 +1836,9 @@ export function OrdersPage() {
                 onClick={()=>openCustomerTracking(detail)}
               >
                 <ExternalLink size={16}/>Buka Tracking Pelanggan
+              </button>
+              <button className="whatsapp-button" onClick={()=>void openOrderReceiptWhatsApp(detail,'Halo {{pelanggan}}, berikut rincian nota {{order}}. Status cucian: {{status}}.').catch(error=>setMessage(error instanceof Error?error.message:'WhatsApp gagal dibuka.'))}>
+                <MessageCircle size={16}/>WhatsApp Rincian Nota
               </button>
               <button className="secondary-button order-detail-reprint" onClick={()=>printReceipt(detail)}>
                 <Printer size={16}/>Cetak Ulang Nota

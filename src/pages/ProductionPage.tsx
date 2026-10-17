@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {openOrderReceiptWhatsApp} from '../lib/orderReceipt'
 import type { OrderRow, OrderStatus } from '../types/order'
 
 const detailedColumns:OrderStatus[]=['received','washing','drying','ironing','packing','ready']
@@ -20,11 +21,6 @@ const next:Partial<Record<OrderStatus,OrderStatus>>={
   ironing:'packing',
   packing:'ready',
   ready:'completed'
-}
-
-const phone=(v:string)=>{
-  const x=v.replace(/\D/g,'')
-  return x.startsWith('0')?'62'+x.slice(1):x
 }
 
 const rupiah=(v:number)=>
@@ -172,21 +168,8 @@ export function ProductionPage(){
     Boolean(row.due_at&&new Date(row.due_at)<new Date()&&row.status!=='ready')
 
   const whatsapp=(r:OrderRow)=>{
-    const p=phone(r.customer_phone)
-    if(!p){
-      setMessage('Nomor WhatsApp pelanggan tidak tersedia.')
-      return
-    }
-
-    const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(r.order_no)}`
-    const baseText=settings.whatsapp_ready_template
-      .replaceAll('{nama}',r.customer_name)
-      .replaceAll('{order}',r.order_no)
-      .replaceAll('{total}',rupiah(Number(r.total)))
-      .replaceAll('{usaha}',settings.business_name)
-
-    const text=`${baseText}\n\nCek status laundry:\n${trackingUrl}`
-    window.open(`https://wa.me/${p}?text=${encodeURIComponent(text)}`,'_blank')
+    void openOrderReceiptWhatsApp(r,settings.whatsapp_ready_template,settings.business_name)
+      .catch(error=>setMessage(error instanceof Error?error.message:'WhatsApp gagal dibuka.'))
   }
 
   const quickTarget=(status:OrderStatus):OrderStatus|undefined=>{

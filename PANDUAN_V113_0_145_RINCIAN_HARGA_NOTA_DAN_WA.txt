@@ -1,0 +1,25 @@
+HappyLaundry V113.0.145 — Rincian harga nota dan WhatsApp
+Dasar source V113.0.144. Tidak ada SQL baru. SQL 077, 078 dan 079 tetap dipakai.
+Deploy source V113.0.145, lalu muat ulang aplikasi.
+
+Cetak ulang dari Daftar Order menampilkan nama layanan, jumlah/berat, harga satuan,
+dan subtotal tiap layanan menggunakan harga transaksi di v100_order_items.
+Harga master layanan yang telah berubah tidak dipakai untuk mencetak nota lama.
+Pilihan Harga per Item di Pengaturan Print Nota tetap mengatur harga satuan pada
+cetak Kasir dan cetak ulang Daftar Order. Total tiap layanan tetap ditampilkan.
+Biaya tambahan, diskon, total, dibayar dan sisa tagihan tetap tampil.
+
+WhatsApp Kasir, Siap Diambil (Produksi), pengingat Piutang, QR Center dan tombol
+WhatsApp Rincian Nota di detail Order memuat rincian layanan dan pembayaran.
+Template lama tetap dipakai. Tambahkan {{rincian}} dan/atau {{ringkasan}} untuk
+mengatur posisi; jika tidak dipakai, kedua blok otomatis ditambahkan.
+Variabel {{subtotal}}, {{diskon}}, {{dibayar}}, {{sisa}} juga tersedia.
+Template lama satu kurung {nama}, {order}, {total}, {usaha} tetap didukung.
+Pesan Kasir menggunakan data nota tersimpan setelah transaksi; halaman lain
+mengambil rincian harga transaksi dari database saat tombol diklik.
+Draf WA dibuka agar pengguna dapat memeriksa dan menekan Kirim sendiri.
+Jika rincian gagal dibaca, tampil pesan kesalahan dan draf dibatalkan untuk dicoba ulang.
+Tidak ada pengiriman otomatis, biaya Cloud API, atau perubahan data order/komisi/gaji.
+
+Coba nota dengan beberapa layanan dan berat desimal; cetak ulang dan buka draf WA.
+Cocokkan harga layanan, subtotal, diskon dan sisa tagihan dengan transaksi awal.
