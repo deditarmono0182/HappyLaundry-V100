@@ -46,5 +46,29 @@ const print=()=>document.querySelector('button.order-reprint-button')
 assert.ok(print())
 await act(async()=>print().click());assert.ok(compact(popup.document.body.textContent).includes('2,5kg×Rp8.000'));assert.match(popup.document.body.textContent,/Deep cleaning/);assert.doesNotMatch(popup.document.body.textContent,/99\.000/)
 showPrice=false;await act(async()=>print().click());assert.doesNotMatch(compact(popup.document.body.textContent),/Rp8\.000/);assert.match(compact(popup.document.body.textContent),/Rp20\.000/)
+// V146: actual detail and reprint must read the same complete teams.
+let revision=0
+const mountAgain=async()=>{
+ await act(async()=>root.render(React.createElement(MemoryRouter,{key:++revision},React.createElement(mod.OrdersPage))))
+ await act(async()=>{await new Promise(r=>setTimeout(r,350))})
+}
+const detailValue=label=>[...document.querySelectorAll('.modal-backdrop span')].find(e=>e.textContent===label)?.parentElement.querySelector('b')?.textContent
+const openDetail=async()=>act(async()=>document.querySelector('button[aria-label="Lihat Detail"]').click())
+dataset.v109_users=[{id:'ch',full_name:'CHOMENG'},{id:'ce',full_name:'CECE ADI R'},{id:'s',full_name:'SANTOS'},{id:'r',full_name:'HAJI ROBET'}]
+dataset.v113_order_commissions=[{order_id:oid,worker_id:'s',courier_id:'ce'}]
+dataset.v113097_order_commission_members=[
+ {order_id:oid,commission_type:'courier',employee_id:'ch',is_primary:false,share_percent:50,total_percent:20},
+ {order_id:oid,commission_type:'courier',employee_id:'ce',is_primary:true,share_percent:50,total_percent:20},
+ {order_id:oid,commission_type:'production',employee_id:'s',is_primary:true,share_percent:50,total_percent:20},
+ {order_id:oid,commission_type:'production',employee_id:'r',is_primary:false,share_percent:50,total_percent:20}
+]
+await mountAgain();await act(async()=>print().click());const teamPrint=popup.document.body.textContent
+await openDetail();assert.equal(detailValue('Kurir'),'CHOMENG + CECE ADI R');assert.equal(detailValue('Dikerjakan oleh'),'SANTOS + HAJI ROBET')
+assert.match(teamPrint,/CHOMENG \+ CECE ADI R/);assert.match(teamPrint,/SANTOS \+ HAJI ROBET/)
+dataset.v113097_order_commission_members=[]
+await mountAgain();await openDetail();assert.equal(detailValue('Kurir'),'CECE ADI R');assert.equal(detailValue('Dikerjakan oleh'),'SANTOS')
+dataset.v113_order_commissions=[]
+await mountAgain();await openDetail();assert.equal(detailValue('Kurir'),'-');assert.equal(detailValue('Dikerjakan oleh'),'-')
 await act(async()=>root.unmount());await unlink(file)
+console.log('PASS V146: both full courier and production teams match between actual detail and printed note; legacy single-person fallback; unassigned order.')
 console.log('PASS V145: saved prices vs changed master; decimal quantities; discounts/extra charges/partial payment; zero price; HTML escaping; old/new templates without duplicated details; WA draft/phone/tracking; blocked/error recovery; actual OrdersPage reprint and price visibility setting.')

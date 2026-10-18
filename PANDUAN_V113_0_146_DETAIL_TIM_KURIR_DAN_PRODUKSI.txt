@@ -1,0 +1,12 @@
+HappyLaundry V113.0.146 — Detail order menampilkan seluruh tim
+Dasar source: V113.0.145. Tidak ada SQL baru.
+
+Deploy V113.0.146 lalu muat ulang aplikasi.
+Buka detail nota HL-261018-00296 dan cocokkan dengan cetak ulang:
+Kurir seharusnya memuat CHOMENG + CECE ADI R sesuai data tim tersimpan.
+Dikerjakan oleh juga menampilkan semua anggota jika pengerjaan dilakukan tim.
+Detail dan cetak ulang menggunakan fungsi pembacaan nama tim yang sama.
+Order lama tanpa data tim tetap menampilkan karyawan utama yang tersimpan.
+Order tanpa penugasan tetap menampilkan tanda -.
+Tidak ada perubahan penerima, tarif, pembagian atau nominal komisi maupun gaji.
+Rincian harga nota/WhatsApp, pencarian tanggal, kasbon, login dan GPS tetap dipertahankan.

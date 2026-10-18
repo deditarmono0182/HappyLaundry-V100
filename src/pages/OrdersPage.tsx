@@ -860,6 +860,13 @@ export function OrdersPage() {
     return map
   },[commissionTeamMembers])
   const commissionEmployeeNameMap=useMemo(()=>new Map(commissionEmployeeNames.map(item=>[item.id,item.full_name])),[commissionEmployeeNames])
+  const commissionNamesForOrder=(orderId:string,kind:'production'|'courier')=>{
+    const members=(commissionTeamByOrder.get(orderId)||[]).filter(item=>item.commission_type===kind)
+    if(members.length)return members.map(item=>commissionEmployeeNameMap.get(item.employee_id)||'Karyawan tidak ditemukan').join(' + ')
+    const assignment=commissionAssignmentMap.get(orderId)
+    const employeeId=kind==='production'?assignment?.worker_id:assignment?.courier_id
+    return employeeId?commissionEmployeeNameMap.get(employeeId)||'Karyawan tidak ditemukan':'-'
+  }
   const correctionHistoryByOrder=useMemo(()=>{
     const map=new Map<string,AssignmentCorrectionHistory[]>()
     for(const item of assignmentCorrectionHistory){
@@ -894,16 +901,8 @@ export function OrdersPage() {
     const closeFallback=`${window.location.origin}/orders?order=${encodeURIComponent(row.order_no)}`
     const trackingUrl=`${window.location.origin}/track/${encodeURIComponent(row.order_no)}`
     const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(trackingUrl)}`
-    const commissionAssignment=commissionAssignmentMap.get(row.id)
-    const teamMembers=commissionTeamByOrder.get(row.id)||[]
-    const productionMembers=teamMembers.filter(item=>item.commission_type==='production')
-    const courierMembers=teamMembers.filter(item=>item.commission_type==='courier')
-    const workerName=productionMembers.length
-      ?productionMembers.map(item=>commissionEmployeeNameMap.get(item.employee_id)||'-').join(' + ')
-      :(commissionAssignment?.worker_id?commissionEmployeeNameMap.get(commissionAssignment.worker_id)||'-':'-')
-    const courierName=courierMembers.length
-      ?courierMembers.map(item=>commissionEmployeeNameMap.get(item.employee_id)||'-').join(' + ')
-      :(commissionAssignment?.courier_id?commissionEmployeeNameMap.get(commissionAssignment.courier_id)||'-':'-')
+    const workerName=commissionNamesForOrder(row.id,'production')
+    const courierName=commissionNamesForOrder(row.id,'courier')
 
     printWindow.document.open()
     printWindow.document.write(`
@@ -1031,8 +1030,8 @@ export function OrdersPage() {
         <div class="row"><span>WhatsApp</span><span>${row.customer_phone}</span></div>
         <div class="row"><span>Status Cucian</span><b>${statusLabels[row.status]}</b></div>
         <div class="row"><span>Pembayaran</span><b>${paymentLabels[row.payment_status]}</b></div>
-        <div class="row"><span>Dikerjakan oleh</span><b>${workerName}</b></div>
-        <div class="row"><span>Kurir</span><b>${courierName}</b></div>
+        <div class="row"><span>Dikerjakan oleh</span><b>${escapeReceiptHtml(workerName)}</b></div>
+        <div class="row"><span>Kurir</span><b>${escapeReceiptHtml(courierName)}</b></div>
 
         <div class="line"></div>
         <b>Layanan</b>
@@ -1775,8 +1774,8 @@ export function OrdersPage() {
                     <Truck size={15}/>Konfirmasi Kurir
                   </button>}
             </div>
-            <div><span>Dikerjakan oleh</span><b>{commissionAssignmentMap.get(detail.id)?.worker_id?commissionEmployeeNameMap.get(commissionAssignmentMap.get(detail.id)!.worker_id!)||'-':'-'}</b></div>
-            <div><span>Kurir</span><b>{commissionAssignmentMap.get(detail.id)?.courier_id?commissionEmployeeNameMap.get(commissionAssignmentMap.get(detail.id)!.courier_id!)||'-':'-'}</b></div>
+            <div><span>Dikerjakan oleh</span><b>{commissionNamesForOrder(detail.id,'production')}</b></div>
+            <div><span>Kurir</span><b>{commissionNamesForOrder(detail.id,'courier')}</b></div>
             <div><span>Status Cucian</span><b>{statusLabels[detail.status]}</b></div>
             <div><span>Status Pembayaran</span><b>{paymentLabels[detail.payment_status]}</b></div>
             <div><span>Estimasi Selesai</span><b className={isOrderOverdue(detail)?'order-detail-overdue':''}>{detail.due_at?new Date(detail.due_at).toLocaleString('id-ID'):'Belum diatur'}{isOrderOverdue(detail)?' • TERLAMBAT':''}</b></div>
