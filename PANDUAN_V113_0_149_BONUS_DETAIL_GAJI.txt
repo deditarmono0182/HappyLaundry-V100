@@ -1,0 +1,12 @@
+HappyLaundry V113.0.149 — Bonus dan komponen gaji pada detail
+Dasar source V113.0.148. Tidak ada SQL baru.
+Deploy V113.0.149 lalu muat ulang aplikasi.
+
+Absensi Gaji > Daftar Gaji > Detail sekarang menampilkan Uang Kehadiran (jumlah hari),
+Tunjangan, Bonus dan Bagi Hasil Kategori, di samping komisi dan rincian kasbon.
+Bonus yang diubah tetapi belum disimpan diberi keterangan Belum disimpan.
+Untuk menyimpan: tutup Detail, klik Simpan Bonus pada Daftar Gaji dan tunggu pesan
+Bonus bulanan berhasil disimpan. Muat ulang untuk memastikan bonus tetap terbaca.
+Bonus diisi per bulan; pastikan bulan laporan benar.
+Tidak ada perubahan rumus gaji, transaksi, jumlah hadir, komisi atau potongan kasbon.
+Tambahan uang hadir melalui Bonus tidak mengubah jumlah hari pada absensi.

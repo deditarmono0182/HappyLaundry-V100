@@ -991,6 +991,12 @@ export function PayrollPage(){
       const cashHistory=cashAdvances.filter(item=>item.employee_id===detailEmployee.id)
       return <Modal title={`Detail Gaji & Komisi — ${detailEmployee.full_name}`} onClose={()=>setDetailEmployee(null)}>
         <div className="payroll-detail-summary">
+          <div><span>Uang Kehadiran ({row?.presentDays||0} hari)</span><b>{formatRupiah(row?.attendancePay||0)}</b></div>
+          <div><span>Tunjangan</span><b>{formatRupiah(row?.allowance||0)}</b></div>
+          <div><span>Bonus</span><b>{formatRupiah(row?.bonus||0)}</b>
+            {Number(row?.bonus||0)!==Number(adjustmentMap.get(detailEmployee.id)?.bonus||0)&&<small role="status">Belum disimpan. Tutup detail, lalu klik Simpan Bonus di Daftar Gaji.</small>}
+          </div>
+          <div><span>Bagi Hasil Kategori</span><b>{formatRupiah(row?.revenueShare||0)}</b></div>
           <div><span>Total Komisi Order</span><b>{formatRupiah(row?.orderCommission||0)}</b></div>
           <div><span>Produksi</span><b>{formatRupiah(row?.productionCommission||0)}</b></div>
           <div><span>Kurir</span><b>{formatRupiah(row?.courierCommission||0)}</b></div>
