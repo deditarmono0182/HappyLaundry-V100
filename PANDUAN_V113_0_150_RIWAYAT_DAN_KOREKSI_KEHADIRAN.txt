@@ -1,0 +1,24 @@
+HappyLaundry V113.0.150 — Cari tanggal lupa absen dan koreksi sesuai tanggal
+Dasar source V113.0.149. Tidak ada SQL baru.
+Deploy V113.0.150 lalu muat ulang aplikasi.
+
+Owner > Absensi & Gaji > Daftar Hadir atau Daftar Gaji > Riwayat Hadir
+pada baris karyawan. Pilih Bulan Riwayat. Centang Hanya Belum Absen untuk menemukan
+tanggal yang tidak memiliki catatan. Hari mendatang tidak dianggap belum absen.
+Status Izin, Sakit dan Alpa dibedakan dari Belum Absen.
+Belum Absen dapat berarti libur, belum bekerja, atau memang lupa absen; cocokkan dengan
+keterangan karyawan/WhatsApp/riwayat pekerjaan sebelum memberi Hadir.
+
+Pada tanggal yang sudah dipastikan: pilih status Hadir > Koreksi > isi alasan
+Karyawan hadir, tetapi lupa absen > Simpan Absensi Manual.
+Koreksi memakai tanggal baris yang dipilih, termasuk bulan sebelumnya.
+Jumlah hadir dan uang hadir mengikuti tanggal absensi. Bonus tidak dipakai untuk koreksi ini.
+Karena bonus percobaan sebelumnya belum disimpan, jangan tambahkan bonus yang sama.
+Bila ada bonus tersimpan sebagai pengganti hari hadir, periksa dulu agar tidak dobel.
+
+Riwayat Koreksi Manual Owner menampilkan tanggal absensi, waktu perubahan dan alasan
+yang sudah disimpan oleh fungsi koreksi lama (SQL 028). Jam koreksi manual tidak ditampilkan
+sebagai jam masuk kerja. Riwayat kehadiran dapat diekspor XLS/PDF per karyawan.
+Jika riwayat gagal dimuat, tampil error; tidak menganggap seluruh tanggal Belum Absen.
+Tidak ada penambahan jumlah hari tanpa tanggal atau perubahan aturan gaji/komisi/kasbon.
+Login dan absensi GPS tetap memakai source sebelumnya.

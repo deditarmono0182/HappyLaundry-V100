@@ -12910,3 +12910,12 @@ html[data-density="ultra"] .main-content *{
 /* Address is visible without opening order details. */
 .customer-list-address{display:block;white-space:pre-line;overflow-wrap:anywhere;max-width:280px;line-height:1.45;margin-top:5px}
 .order-mobile-card-head .customer-list-address{max-width:100%;min-width:0}
+
+.attendance-history-modal{width:min(1120px,96vw)!important;max-width:1120px!important}
+.attendance-history-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.attendance-history-counts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.attendance-history-counts>div{padding:10px;border:1px solid #dbe8ee;border-radius:10px;display:grid;gap:4px}
+.attendance-history-scroll{max-height:400px;overflow:auto}
+.attendance-history-scroll thead th{position:sticky;top:0;z-index:1;background:#edf7f5}
+.attendance-history-note{white-space:pre-wrap;min-width:160px;max-width:340px;overflow-wrap:anywhere}
+@media(max-width:600px){.attendance-history-counts{grid-template-columns:repeat(2,minmax(0,1fr))}}

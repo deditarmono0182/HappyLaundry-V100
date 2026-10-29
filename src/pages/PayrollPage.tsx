@@ -1,12 +1,13 @@
 import {buildPayrollExport} from '../lib/payrollExport'
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
 import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CalendarCheck2, CheckCircle2, FileSpreadsheet, FileText, Gift,
   HandCoins, Pencil, Plus, ReceiptText, Save, Search, Settings2, Trash2, UsersRound, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
+import {AttendanceHistoryModal} from '../components/AttendanceHistoryModal'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { downloadXls, printPdf } from '../lib/exportData'
@@ -171,6 +172,7 @@ export function PayrollPage(){
   const[busy,setBusy]=useState(false)
   const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
   const[detailEmployee,setDetailEmployee]=useState<Employee|null>(null)
+  const[attendanceHistoryEmployee,setAttendanceHistoryEmployee]=useState<Employee|null>(null)
   const[paymentEmployee,setPaymentEmployee]=useState<Employee|null>(null)
   const[cashAdvanceEmployee,setCashAdvanceEmployee]=useState<Employee|null>(null)
   const[cashAdvanceForm,setCashAdvanceForm]=useState({amount:'0',note:''})
@@ -189,8 +191,9 @@ export function PayrollPage(){
   })
   const[shareDraft,setShareDraft]=useState<Array<{category:string;share_percent:string}>>([])
   const[bonusDraft,setBonusDraft]=useState<Record<string,string>>({})
-  const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus}|null>(null)
+  const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus;date:string}|null>(null)
   const[overrideReason,setOverrideReason]=useState('')
+  const attendanceOverridePending=useRef(false)
 
   const cashAdvanceLimit=useCashAdvanceLimit(cashAdvanceEmployee?.id||'',!!cashAdvanceEmployee)
 
@@ -398,9 +401,9 @@ export function PayrollPage(){
     return payrollRows.filter(r=>ids.has(r.employee.id))
   },[payrollRows,filteredEmployees])
 
-  const setAttendanceStatus=(employee:Employee,status:AttendanceStatus)=>{
-    const existing=attendanceMap.get(`${employee.id}|${attendanceDate}`)
-    setOverrideTarget({employee,status})
+  const setAttendanceStatus=(employee:Employee,status:AttendanceStatus,date=attendanceDate)=>{
+    const existing=attendanceMap.get(`${employee.id}|${date}`)
+    setOverrideTarget({employee,status,date})
     setOverrideReason(
       status==='present' && !existing
         ? 'Kendala koneksi / GPS / QR'
@@ -412,7 +415,7 @@ export function PayrollPage(){
 
   const saveAttendanceOverride=async(event:FormEvent)=>{
     event.preventDefault()
-    if(!overrideTarget)return
+    if(!overrideTarget||attendanceOverridePending.current)return
 
     const reason=overrideReason.trim()
     if(!reason){
@@ -420,13 +423,15 @@ export function PayrollPage(){
       return
     }
 
+    attendanceOverridePending.current=true
     setBusy(true)
     setMessage('')
     setSuccess('')
 
+    try{
     const{data,error}=await supabase.rpc('v111_owner_override_attendance',{
       p_employee_id:overrideTarget.employee.id,
-      p_attendance_date:attendanceDate,
+      p_attendance_date:overrideTarget.date,
       p_status:overrideTarget.status,
       p_reason:reason
     })
@@ -442,7 +447,8 @@ export function PayrollPage(){
     setOverrideReason('')
     setSuccess(result?.message||`${overrideTarget.employee.full_name}: ${statusLabels[overrideTarget.status]} berhasil disimpan.`)
     await load()
-    setBusy(false)
+    }catch(error){setMessage(error instanceof Error?error.message:'Koreksi absensi gagal disimpan. Coba lagi.')}
+    finally{attendanceOverridePending.current=false;setBusy(false)}
   }
 
   const openSettings=(employee:Employee)=>{
@@ -903,6 +909,7 @@ export function PayrollPage(){
                         onClick={()=>setAttendanceStatus(employee,status)}
                       >{statusLabels[status]}</button>
                     )}
+                    <button type="button" className="secondary-button" disabled={busy} onClick={()=>setAttendanceHistoryEmployee(employee)}>Riwayat Hadir</button>
                   </div></td>
                 </tr>
               })}
@@ -971,6 +978,7 @@ export function PayrollPage(){
                 <td>
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
+                    <button className="finance-row-action" onClick={()=>setAttendanceHistoryEmployee(r.employee)}><CalendarCheck2 size={15}/>Riwayat Hadir</button>
                     <button className="finance-row-action cash-advance-button" onClick={()=>openCashAdvance(r.employee)}><HandCoins size={15}/>Kas Bon</button>
                     {r.cashAdvanceOutstanding>0&&<button className="finance-row-action cash-advance-deduct-button" onClick={()=>openCashAdvanceDeduction(r.employee)}><HandCoins size={15}/>Potong Kas Bon</button>}
                     {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
@@ -984,6 +992,15 @@ export function PayrollPage(){
         </div>
       </section>
     </>}
+
+    {attendanceHistoryEmployee&&!overrideTarget&&<AttendanceHistoryModal
+      employee={attendanceHistoryEmployee} initialMonth={month}
+      onClose={()=>setAttendanceHistoryEmployee(null)}
+      onCorrect={(date,status)=>{
+        setMonth(date.slice(0,7));setAttendanceDate(date)
+        setAttendanceStatus(attendanceHistoryEmployee,status,date)
+      }}
+    />}
 
     {detailEmployee&&(()=>{
       const row=payrollRows.find(item=>item.employee.id===detailEmployee.id)
@@ -1231,7 +1248,7 @@ export function PayrollPage(){
           <CalendarCheck2 size={22}/>
           <div>
             <b>Status: {statusLabels[overrideTarget.status]}</b>
-            <span>{new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(`${attendanceDate}T12:00:00+07:00`))}</span>
+            <span>{new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(`${overrideTarget.date}T12:00:00+07:00`))}</span>
           </div>
         </div>
 
