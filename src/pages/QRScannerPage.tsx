@@ -9,6 +9,7 @@ import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { paymentLabels, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {loadOrderCustomerAddresses} from '../lib/orderCustomerAddress'
 import {openOrderReceiptWhatsApp,loadOrderReceipt,receiptItemsHtml,escapeReceiptHtml} from '../lib/orderReceipt'
 import type { OrderRow } from '../types/order'
 
@@ -237,7 +238,7 @@ export function QRScannerPage(){
     if(!w)return
     w.document.body.textContent='Menyiapkan rincian nota...'
     try{
-    const {items,charges}=await loadOrderReceipt(order.id)
+    const [{items,charges},customerAddresses]=await Promise.all([loadOrderReceipt(order.id),loadOrderCustomerAddresses([order.customer_id])])
     w.document.open()
     w.document.write(`<!doctype html>
 <html><head><meta charset="utf-8"><title>${order.order_no}</title>
@@ -250,6 +251,7 @@ h2,p{margin:0 0 5px;text-align:center}.line{border-top:1px dashed #111;margin:8p
 <h2>HappyLaundry</h2><p class="small">Babakan, Cirebon</p><div class="line"></div>
 <div class="row"><span>No. Order</span><b>${order.order_no}</b></div>
 <div class="row"><span>Pelanggan</span><b>${order.customer_name}</b></div>
+<div class="row"><span>Alamat</span><b style="max-width:72%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:right">${escapeReceiptHtml(customerAddresses[0]?.address?.trim()||'Belum diisi')}</b></div>
 <div class="row"><span>Status</span><span>${statusLabels[order.status]}</span></div>
 <div class="line"></div>
 ${receiptItemsHtml(items)}

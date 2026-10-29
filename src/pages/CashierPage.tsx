@@ -10,7 +10,7 @@ import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import {zeroCommissionWarnings,confirmZeroCommission} from '../lib/commissionWarnings'
 import { openWhatsApp } from '../lib/whatsapp'
-import {composeReceiptWhatsApp} from '../lib/orderReceipt'
+import {composeReceiptWhatsApp,escapeReceiptHtml} from '../lib/orderReceipt'
 import { defaultReceiptPrintSettings, type ReceiptPrintSettings } from '../lib/receiptSettings'
 import { businessDayStart, businessDateTimeLabel, businessParts, BUSINESS_UTC_OFFSET } from '../lib/businessTime'
 import { useAuth } from '../lib/auth'
@@ -53,6 +53,7 @@ type SuccessData = {
   paid: number
   customer: string
   phone: string
+  address: string
   due: string
   method: PayMethod
   notes: string
@@ -474,6 +475,7 @@ export function CashierPage() {
           <tr><td>No. Order</td><td>${data.orderNo}</td></tr>
           <tr><td>Tanggal</td><td>${businessDateTimeLabel()}</td></tr>
           <tr><td>Pelanggan</td><td>${data.customer}</td></tr>
+          <tr><td>Alamat</td><td style="white-space:pre-wrap;overflow-wrap:anywhere">${escapeReceiptHtml(data.address||'Belum diisi')}</td></tr>
           <tr><td>Kasir / Dibuat oleh</td><td>${data.cashierName||'-'}</td></tr>
           ${printSettings.show_customer_phone?`<tr><td>WhatsApp</td><td>${data.phone}</td></tr>`:''}
           ${printSettings.show_due_at?`<tr><td>Estimasi</td><td>${data.due||'-'}</td></tr>`:''}
@@ -553,12 +555,14 @@ export function CashierPage() {
       let selectedCustomer=customerId
       let selectedName=customers.find(c=>c.id===customerId)?.name||''
       let selectedPhone=customers.find(c=>c.id===customerId)?.phone||''
+      let selectedAddress=customers.find(c=>c.id===customerId)?.address?.trim()||''
       if(newCustomer){
         const {data,error}=await supabase.from('v100_customers')
           .insert({name:customerName.trim(),phone:customerPhone.trim(),address:customerAddress.trim()||null})
           .select().single()
         if(error)throw error
         selectedCustomer=data.id; selectedName=data.name; selectedPhone=data.phone
+        selectedAddress=data.address?.trim()||customerAddress.trim()
         setCustomers(current=>{
           const next=current.filter(row=>row.id!==data.id)
           return [...next,data as Customer].sort((a,b)=>a.name.localeCompare(b.name,'id'))
@@ -607,7 +611,7 @@ export function CashierPage() {
       }
       const saved:SuccessData={
         orderId:result.order_id,orderNo:result.order_no,total,subtotal,discount,paid,
-        customer:selectedName,phone:selectedPhone,
+        customer:selectedName,phone:selectedPhone,address:selectedAddress,
         due:dueIso?businessDateTimeLabel(dueIso):'-',
         method,notes:notes.trim(),items:[...items],
         workerName:workerTeamIds.map(id=>commissionEmployees.find(employee=>employee.id===id)?.full_name).filter(Boolean).join(' + ')||'-',

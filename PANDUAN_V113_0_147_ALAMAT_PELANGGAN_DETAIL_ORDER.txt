@@ -1,0 +1,17 @@
+HappyLaundry V113.0.147 — Alamat Pelanggan di Detail Order
+Dasar source V113.0.146. Tidak ada SQL baru.
+Deploy source V113.0.147 lalu muat ulang aplikasi.
+
+Buka Daftar Order > Detail. Alamat tampil di bawah nomor WhatsApp.
+Alamat juga tampil pada Konfirmasi Kurir untuk memudahkan pengiriman.
+Nota Kasir (58 mm, 80 mm, A4), cetak ulang Daftar Order dan cetak QR Center
+juga memuat alamat pelanggan. Harga dan pembagian komisi tetap seperti sebelumnya.
+Alamat panjang dan beberapa baris dapat membungkus pada layar HP/laptop.
+Jika alamat kosong, tampil Belum diisi. Lengkapi pada data Pelanggan > Edit.
+Alamat dibaca dari data pelanggan yang terhubung ke order, sesuai alamat
+pelanggan yang disimpan melalui Kasir; bukan snapshot alamat pada waktu order.
+Data pelanggan lama tetap dicari langsung berdasarkan ID pelanggan setiap order,
+sehingga tidak bergantung pada batas daftar pelanggan awal.
+
+Rincian nota/WhatsApp dan seluruh tim kurir/produksi tetap tersedia.
+Tidak ada perubahan data order, gaji, komisi, kasbon, login atau GPS.

@@ -27,6 +27,7 @@ import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
 import { paymentLabels, paymentStatus, statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {loadOrderCustomerAddresses,type OrderCustomerAddress} from '../lib/orderCustomerAddress'
 import {loadOrderReceipt,receiptItemsHtml,openOrderReceiptWhatsApp,escapeReceiptHtml} from '../lib/orderReceipt'
 import {loadReceiptPrintSettings} from '../lib/receiptSettings'
 import {fetchOrderSearch,fetchOrderRelated} from '../lib/orderSearch'
@@ -121,6 +122,7 @@ export function OrdersPage() {
   const {profile}=useAuth()
   const [rows, setRows] = useState<OrderRow[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [orderCustomerAddresses,setOrderCustomerAddresses]=useState<OrderCustomerAddress[]>([])
   const [services, setServices] = useState<Service[]>([])
   const [orderServiceItems, setOrderServiceItems] = useState<OrderServiceItem[]>([])
   const [query, setQuery] = useState('')
@@ -186,7 +188,7 @@ export function OrdersPage() {
       const fetched=await fetchOrderSearch(serverQuery,orderLimit+1,serverDateStart,serverDateEnd)
       if(sequence!==loadSequence.current)return
       const visible=fetched.slice(0,orderLimit),ids=visible.map(row=>row.id)
-      const [customersResult,servicesResult,orderItems,delivery,assignments,team,employeesResult,history,charges,ratesResult]=await Promise.all([
+      const [customersResult,servicesResult,orderItems,delivery,assignments,team,employeesResult,history,charges,ratesResult,customerAddresses]=await Promise.all([
         supabase.from('v100_customers').select('id, store_id, name, phone, address, notes, created_at').order('name'),
         supabase.from('v100_services').select('id, store_id, name, category, unit, price, duration_hours, is_active, created_at').eq('is_active',true).order('name'),
         fetchOrderRelated<OrderServiceItem>('v100_order_items','order_id,service_name,unit,quantity,price,subtotal',ids,'created_at'),
@@ -196,7 +198,8 @@ export function OrdersPage() {
         supabase.from('v109_users').select('id,full_name,login_id'),
         fetchOrderRelated<AssignmentCorrectionHistory>('v113_order_assignment_corrections','id,order_id,old_worker_id,new_worker_id,old_courier_id,new_courier_id,reason,changed_by,changed_at',ids,'changed_at'),
         fetchOrderRelated<OrderExtraCharge>('v113099_order_extra_charges','id,order_id,charge_name,amount,reason,created_at',ids,'created_at'),
-        supabase.from('v113_employee_commission_settings').select('employee_id,production_percent,courier_percent')
+        supabase.from('v113_employee_commission_settings').select('employee_id,production_percent,courier_percent'),
+        loadOrderCustomerAddresses(visible.map(row=>row.customer_id))
       ])
       if(sequence!==loadSequence.current)return
       const error=customersResult.error||servicesResult.error||employeesResult.error||ratesResult.error
@@ -204,6 +207,7 @@ export function OrdersPage() {
       setMayHaveMore(fetched.length>orderLimit)
       setRows(visible)
       setCustomers((customersResult.data as Customer[])||[])
+      setOrderCustomerAddresses(customerAddresses)
       setServices((servicesResult.data as Service[])||[])
       setOrderServiceItems(orderItems);setDeliveryProofs(delivery)
       setCommissionAssignments(assignments);setCommissionTeamMembers(team)
@@ -262,6 +266,8 @@ export function OrdersPage() {
       setQuery(customerParam)
     }
   },[searchParams,rows])
+
+  const customerAddressById=useMemo(()=>new Map(orderCustomerAddresses.map(customer=>[customer.id,customer.address?.trim()||'Belum diisi'])),[orderCustomerAddresses])
 
   const serviceItemsByOrder=useMemo(()=>{
     const map=new Map<string,OrderServiceItem[]>()
@@ -1028,6 +1034,7 @@ export function OrdersPage() {
         <div class="row"><span>Pelanggan</span><b>${row.customer_name}</b></div>
         <div class="row"><span>Kasir / Dibuat oleh</span><b>${row.created_by_name||row.created_by_login_id||'Data lama'}</b></div>
         <div class="row"><span>WhatsApp</span><span>${row.customer_phone}</span></div>
+        <div class="row"><span>Alamat</span><b style="max-width:72%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:right">${escapeReceiptHtml(customerAddressById.get(row.customer_id)||'Belum diisi')}</b></div>
         <div class="row"><span>Status Cucian</span><b>${statusLabels[row.status]}</b></div>
         <div class="row"><span>Pembayaran</span><b>${paymentLabels[row.payment_status]}</b></div>
         <div class="row"><span>Dikerjakan oleh</span><b>${escapeReceiptHtml(workerName)}</b></div>
@@ -1528,6 +1535,7 @@ export function OrdersPage() {
               <div><span>Nomor Order</span><b>{deliveryOrder.order_no}</b></div>
               <div><span>Pelanggan</span><b>{deliveryOrder.customer_name}</b></div>
               <div><span>WhatsApp</span><b>{deliveryOrder.customer_phone}</b></div>
+              <div className="order-address-row"><span>Alamat</span><b className="order-customer-address">{customerAddressById.get(deliveryOrder.customer_id)||'Belum diisi'}</b></div>
             </div>
 
             <label className="delivery-photo-upload">
@@ -1735,6 +1743,7 @@ export function OrdersPage() {
             <div><span>Pelanggan</span><b>{detail.customer_name}</b></div>
             <div><span>Kasir / Dibuat oleh</span><b>{detail.created_by_name||detail.created_by_login_id||'Data lama'}</b></div>
             <div><span>WhatsApp</span><b>{detail.customer_phone}</b></div>
+            <div className="order-address-row"><span>Alamat</span><b className="order-customer-address">{customerAddressById.get(detail.customer_id)||'Belum diisi'}</b></div>
             <div className="order-detail-services">
               <span>Layanan</span>
               <div>

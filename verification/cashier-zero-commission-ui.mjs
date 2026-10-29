@@ -7,7 +7,7 @@ globalThis.window=dom.window;globalThis.document=dom.window.document;globalThis.
 const uid='00000000-0000-0000-0000-000000000001'
 const employee={id:uid,full_name:'Haris',login_id:'haris'}
 globalThis.__mutations=[];globalThis.__rateFailure=false
-const rows={v100_customers:[{id:'c1',name:'Mamah Alghi',phone:'0812'}],v100_services:[{id:'s1',name:'Karpet',category:'Satuan',unit:'item',price:64000,duration_hours:24,is_active:true}],v113_employee_commission_settings:[{employee_id:uid,production_percent:0,courier_percent:0}]}
+const rows={v100_customers:[{id:'c1',name:'Mamah Alghi',phone:'0812',address:'Jl. Babakan No. 12\nRT 01/RW 02'}],v100_services:[{id:'s1',name:'Karpet',category:'Satuan',unit:'item',price:64000,duration_hours:24,is_active:true}],v113_employee_commission_settings:[{employee_id:uid,production_percent:0,courier_percent:0}]}
 globalThis.__mock={
  async rpc(name,args){
   if(name==='v113_list_commission_employees')return {data:[employee],error:null}
@@ -35,6 +35,10 @@ globalThis.__rateFailure=false;window.confirm=()=>{prompts++;return true}
 await click('Simpan Transaksi')
 assert.equal(globalThis.__mutations.filter(([name])=>name==='v100_create_order').length,1,'explicit zero commission allowed')
 assert.equal(globalThis.__mutations.filter(([name])=>name==='v113097_set_order_commission_team').length,1)
+for(const label of ['58 mm','80 mm','A4 / PDF']){
+ const paper=new JSDOM('<body></body>');window.open=()=>paper.window
+ await click(label);assert.match(paper.window.document.body.textContent,/Jl\. Babakan No\. 12/);assert.match(paper.window.document.body.textContent,/RT 01\/RW 02/)
+}
 let waUrl='';window.open=url=>{waUrl=url;return null};await click('WhatsApp')
 const draftText=new URL(waUrl).searchParams.get('text');assert.match(draftText,/Karpet/);assert.match(draftText.replace(/[\s\u00a0]/g,''),/1item×Rp64\.000=Rp64\.000/)
 await act(async()=>root.unmount());await unlink(file)
