@@ -1,0 +1,15 @@
+HappyLaundry V113.0.148 — Alamat langsung di daftar Order dan Piutang
+Dasar source: V113.0.147. Tidak ada SQL baru.
+Deploy V113.0.148 lalu muat ulang aplikasi.
+
+Alamat tampil di bawah nama dan nomor HP pada:
+- Tabel Daftar Order di laptop.
+- Kartu Daftar Order di HP.
+- Tabel Daftar Piutang.
+Alamat panjang dapat membungkus beberapa baris sehingga dapat dibaca tanpa klik detail.
+Alamat kosong ditandai Belum diisi. Jika data alamat belum tersedia/gagal dimuat,
+Daftar Piutang tetap menampilkan order dan jumlah piutang beserta pesan kesalahan.
+Alamat dibaca dari data pelanggan terkait; edit di menu Pelanggan bila perlu diperbarui.
+
+Alamat pada detail, konfirmasi kurir, nota Kasir dan cetak ulang dari V147 tetap ada.
+Tidak ada perubahan transaksi, perhitungan piutang, komisi, gaji, login atau absensi GPS.

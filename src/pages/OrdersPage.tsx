@@ -1231,6 +1231,7 @@ export function OrdersPage() {
                     <strong>{row.order_no}</strong>
                     <span>{row.customer_name}</span>
                     <small>{row.customer_phone||'-'}</small>
+                    <small className="customer-list-address">Alamat: {customerAddressById.get(row.customer_id)||'Belum diisi'}</small>
                   </div>
                   {canAdvance
                     ? <button
@@ -1337,7 +1338,7 @@ export function OrdersPage() {
                       </div>
                     })()}
                   </td>
-                  <td><b>{row.customer_name}</b><small>{row.customer_phone}</small></td>
+                  <td><b>{row.customer_name}</b><small>{row.customer_phone}</small><small className="customer-list-address">Alamat: {customerAddressById.get(row.customer_id)||'Belum diisi'}</small></td>
                   <td className="order-service-cell">
                     {(serviceItemsByOrder.get(row.id)||[]).length
                       ? <div className="order-service-list">

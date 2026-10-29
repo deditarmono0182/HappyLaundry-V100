@@ -12906,3 +12906,7 @@ html[data-density="ultra"] .main-content *{
 .order-address-row{gap:14px;align-items:flex-start}
 .order-address-row>span{flex-shrink:0}
 .order-customer-address{min-width:0;max-width:72%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:right}
+
+/* Address is visible without opening order details. */
+.customer-list-address{display:block;white-space:pre-line;overflow-wrap:anywhere;max-width:280px;line-height:1.45;margin-top:5px}
+.order-mobile-card-head .customer-list-address{max-width:100%;min-width:0}

@@ -6,16 +6,16 @@ const dom=new JSDOM('<div id="root"></div>',{url:'https://example.test/orders'})
 globalThis.window=dom.window;globalThis.document=dom.window.document;globalThis.IS_REACT_ACT_ENVIRONMENT=true
 const oid='old-order',items=[{order_id:oid,service_name:'Cuci <Setrika>',quantity:2.5,unit:'kg',price:8000,subtotal:20000},{order_id:oid,service_name:'Bedcover',quantity:1,unit:'pcs',price:30000,subtotal:30000}],charges=[{order_id:oid,charge_name:'Deep cleaning',amount:5000}]
 const row={id:oid,customer_id:'c1',order_no:'HL-261006-00141',customer_name:'Mamah Alghi',customer_phone:'08123456789',created_at:'2026-10-06T06:00:00Z',status:'ready',payment_status:'partial',subtotal:55000,discount:5000,total:50000,paid_amount:20000,due_at:null}
-let dbFailure=false,showPrice=true,blocked=false,popup
+let dbFailure=false,addressFailure=false,showPrice=true,blocked=false,popup
 const dataset={v100_order_items:items,v113099_order_extra_charges:charges,v100_services:[{id:'s1',name:'Cuci <Setrika>',category:'Kiloan',price:99000,is_active:true}],v109_users:[],v113_order_commissions:[],v113097_order_commission_members:[],v100_customers:[{id:'c1',name:'Mamah Alghi',phone:'08123456789',address:'Jl. Babakan No. 12 & Gang <Melati>\nRT 01/RW 02, Cirebon'}],v113_employee_commission_settings:[]}
-globalThis.__mock={rpc:async()=>({data:[row],error:null}),from(table){let offset=0,end=99;const q={select(){return q},eq(){return q},in(){return q},order(){return q},range(a,b){offset=a;end=b;return q},maybeSingle(){return q},then(ok){return Promise.resolve({data:table==='v110_receipt_print_settings'?{show_item_price:showPrice}:(dataset[table]||[]).slice(offset,end+1),error:dbFailure&&table==='v100_order_items'?{message:'Rincian gagal dibaca'}:null}).then(ok)}};return q}}
+globalThis.__mock={rpc:async()=>({data:[row],error:null}),from(table){let offset=0,end=99;const q={select(){return q},eq(){return q},in(){return q},order(){return q},range(a,b){offset=a;end=b;return q},maybeSingle(){return q},then(ok){return Promise.resolve({data:table==='v110_receipt_print_settings'?{show_item_price:showPrice}:(dataset[table]||[]).slice(offset,end+1),error:dbFailure&&table==='v100_order_items'?{message:'Rincian gagal dibaca'}:addressFailure&&table==='v100_customers'?{message:'Alamat offline'}:null}).then(ok)}};return q}}
 window.open=()=>{
  if(blocked)return null
  const d=new JSDOM('<body></body>')
  popup={document:d.window.document,opener:window,closed:false,url:null,location:{replace(url){popup.url=url}},close(){popup.closed=true}}
  return popup
 }
-const result=await build({stdin:{contents:`export * from './src/lib/orderReceipt';export {OrdersPage} from './src/pages/OrdersPage'`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,write:false,platform:'node',format:'esm',packages:'external',jsx:'automatic',plugins:[{name:'mocks',setup(b){b.onResolve({filter:/lib\/(auth|supabase)$|\.\/supabase$/},a=>({path:a.path,namespace:'mock'}));b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path.endsWith('auth')?`export const useAuth=()=>({profile:{id:'owner',role:'owner',full_name:'Owner'}})`:`export const supabase=globalThis.__mock`}))}}]})
+const result=await build({stdin:{contents:`export * from './src/lib/orderReceipt';export {OrdersPage} from './src/pages/OrdersPage';export {ReceivablesPage} from './src/pages/ReceivablesPage'`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,write:false,platform:'node',format:'esm',packages:'external',jsx:'automatic',plugins:[{name:'mocks',setup(b){b.onResolve({filter:/lib\/(auth|supabase)$|\.\/supabase$/},a=>({path:a.path,namespace:'mock'}));b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path.endsWith('auth')?`export const useAuth=()=>({profile:{id:'owner',role:'owner',full_name:'Owner'}})`:`export const supabase=globalThis.__mock`}))}}]})
 const file='verification/.receipt-prices-test.mjs';await writeFile(file,result.outputFiles[0].text)
 const mod=await import('./.receipt-prices-test.mjs')
 const values={pelanggan:'Mamah Alghi',order:row.order_no,total:'Rp50.000',usaha:'HappyLaundry'}
@@ -44,6 +44,8 @@ await act(async()=>root.render(React.createElement(MemoryRouter,null,React.creat
 await act(async()=>{await new Promise(r=>setTimeout(r,350))})
 const print=()=>document.querySelector('button.order-reprint-button')
 assert.ok(print())
+assert.match(document.querySelector('td .customer-list-address').textContent,/Jl\. Babakan No\. 12/,'desktop order list shows address without opening detail')
+assert.match(document.querySelector('.order-mobile-card .customer-list-address').textContent,/Jl\. Babakan No\. 12/,'mobile card shows address directly')
 await act(async()=>print().click());assert.ok(compact(popup.document.body.textContent).includes('2,5kg×Rp8.000'));assert.match(popup.document.body.textContent,/Deep cleaning/);assert.doesNotMatch(popup.document.body.textContent,/99\.000/)
 assert.match(popup.document.body.textContent,/Jl\. Babakan No\. 12 & Gang <Melati>/);assert.equal(popup.document.querySelector('Melati'),null,'address escaped in print HTML')
 showPrice=false;await act(async()=>print().click());assert.doesNotMatch(compact(popup.document.body.textContent),/Rp8\.000/);assert.match(compact(popup.document.body.textContent),/Rp20\.000/)
@@ -71,7 +73,24 @@ dataset.v100_customers[0].address=''
 await mountAgain();await openDetail();assert.equal(detailValue('Alamat'),'Belum diisi');assert.equal(detailValue('Kurir'),'CECE ADI R');assert.equal(detailValue('Dikerjakan oleh'),'SANTOS')
 dataset.v113_order_commissions=[]
 await mountAgain();await openDetail();assert.equal(detailValue('Kurir'),'-');assert.equal(detailValue('Dikerjakan oleh'),'-')
+dataset.v100_orders_view=[row]
+dataset.v100_customers[0].address='Jl. Babakan No. 12, Gang Melati, RT 01/RW 02, Cirebon'
+const mountReceivables=async()=>{
+ await act(async()=>root.render(React.createElement(MemoryRouter,{key:++revision},React.createElement(mod.ReceivablesPage))))
+}
+await mountReceivables()
+assert.match(document.querySelector('tbody .customer-list-address').textContent,/Jl\. Babakan No\. 12/,'receivables list shows address directly')
+assert.match(compact(document.querySelector('.receivable-amount').textContent),/Rp30\.000/,'remaining debt unchanged')
+dataset.v100_customers[0].address=null;await mountReceivables()
+assert.equal(document.querySelector('tbody .customer-list-address').textContent,'Alamat: Belum diisi')
+addressFailure=true;await mountReceivables()
+assert.match(document.body.textContent,/Alamat offline/)
+assert.match(document.querySelector('tbody').textContent,/Mamah Alghi/,'failed address lookup retains receivable row')
+assert.match(compact(document.querySelector('.receivable-amount').textContent),/Rp30\.000/,'failed address lookup retains debt amount')
+assert.doesNotMatch(document.body.textContent,/Semua order sudah lunas/)
+addressFailure=false
 await act(async()=>root.unmount());await unlink(file)
+console.log('PASS V148: address visible directly in desktop/mobile order lists and receivables; blank address placeholder; address read failure retains order and debt totals.')
 console.log('PASS V147: stored customer address appears in actual order detail and reprint; multi-line/HTML-safe address; empty address placeholder.')
 console.log('PASS V146: both full courier and production teams match between actual detail and printed note; legacy single-person fallback; unassigned order.')
 console.log('PASS V145: saved prices vs changed master; decimal quantities; discounts/extra charges/partial payment; zero price; HTML escaping; old/new templates without duplicated details; WA draft/phone/tracking; blocked/error recovery; actual OrdersPage reprint and price visibility setting.')

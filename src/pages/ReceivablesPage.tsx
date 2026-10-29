@@ -7,6 +7,7 @@ import { formatIDR } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {loadOrderCustomerAddresses,type OrderCustomerAddress} from '../lib/orderCustomerAddress'
 import {openOrderReceiptWhatsApp} from '../lib/orderReceipt'
 import type { OrderRow } from '../types/order'
 
@@ -14,26 +15,29 @@ export function ReceivablesPage(){
   const navigate=useNavigate()
   const [rows,setRows]=useState<OrderRow[]>([])
   const [query,setQuery]=useState('')
+  const [customerAddresses,setCustomerAddresses]=useState<OrderCustomerAddress[]>([])
+  const customerAddressById=useMemo(()=>new Map(customerAddresses.map(c=>[c.id,c.address?.trim()||'Belum diisi'])),[customerAddresses])
   const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
 
   const load=useCallback(async()=>{
-    setLoading(true);setMessage('')
-    const {data,error}=await supabase
-      .from('v100_orders_view')
-      .select('*')
-      .order('created_at',{ascending:false})
-
-    if(error){
-      setMessage(error.message)
-      setRows([])
-    }else{
-      setRows(((data as OrderRow[])||[]).filter(r=>
-        r.status!=='cancelled' &&
-        Math.max(0,Number(r.total||0)-Number(r.paid_amount||0))>0
-      ))
-    }
-    setLoading(false)
+    setLoading(true);setMessage('');setCustomerAddresses([])
+    try{
+      const {data,error}=await supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false})
+      if(error)throw new Error(error.message)
+      const outstanding=((data as OrderRow[])||[]).filter(row=>
+        row.status!=='cancelled'&&Math.max(0,Number(row.total||0)-Number(row.paid_amount||0))>0
+      )
+      setRows(outstanding)
+      try{
+        setCustomerAddresses(await loadOrderCustomerAddresses(outstanding.map(row=>row.customer_id)))
+      }catch(error){
+        // Address lookup must not hide outstanding orders or alter financial totals.
+        setMessage(error instanceof Error?error.message:'Alamat pelanggan gagal dimuat.')
+      }
+    }catch(error){
+      setMessage(error instanceof Error?error.message:'Daftar piutang gagal dimuat.');setRows([])
+    }finally{setLoading(false)}
   },[])
 
   useEffect(()=>{void load()},[load])
@@ -128,12 +132,12 @@ export function ReceivablesPage(){
           </thead>
           <tbody>
             {loading&&<tr><td colSpan={8} className="table-empty">Memuat daftar piutang...</td></tr>}
-            {!loading&&filtered.length===0&&<tr><td colSpan={8} className="table-empty">Tidak ada piutang. Semua order sudah lunas.</td></tr>}
+            {!loading&&!message&&filtered.length===0&&<tr><td colSpan={8} className="table-empty">Tidak ada piutang. Semua order sudah lunas.</td></tr>}
             {filtered.map(row=>{
               const remaining=Math.max(0,Number(row.total)-Number(row.paid_amount))
               return <tr key={row.id}>
                 <td><b>{row.order_no}</b></td>
-                <td><b>{row.customer_name}</b><small>{row.customer_phone||'-'}</small></td>
+                <td><b>{row.customer_name}</b><small>{row.customer_phone||'-'}</small><small className="customer-list-address">Alamat: {customerAddressById.get(row.customer_id)||(loading?'Memuat...':'Belum tersedia')}</small></td>
                 <td>{formatIDR(Number(row.total))}</td>
                 <td>{formatIDR(Number(row.paid_amount))}</td>
                 <td><b className="receivable-amount">{formatIDR(remaining)}</b></td>
