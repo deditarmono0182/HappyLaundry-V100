@@ -58,9 +58,9 @@ export function PayrollDeductionHistory({employee,month,allInitially=false,onRea
  const total=deductions.reduce((s,r)=>s+Number(r.amount),0)
  const status=(r:(typeof rows)[number])=>r.current===0?(r.reason?'Dibatalkan melalui koreksi':'Tidak aktif'):r.current!==r.amount?'Dikoreksi':'Terpotong'
  const time=(v:string)=>new Date(v).toLocaleString('id-ID',{timeZone:BUSINESS_TIME_ZONE})
- const options=()=>({title:`Riwayat Potongan Kasbon — ${employee.full_name}`,filename:`potongan-kasbon-${employee.id}-${all?'semua':month}`,subtitle:`${all?'Seluruh bulan':`Bulan gaji ${month}`} • Waktu WIB • Nominal aktif sudah memperhitungkan koreksi.`,headers:['Tanggal Potong (WIB)','Bulan Gaji','Nominal Awal Tercatat','Potongan Aktif','Status','Alasan Koreksi Terakhir'],rows:rows.map(r=>[time(r.created_at),r.payroll_month.slice(0,7),Number(r.amount),r.current,status(r),r.reason||'-']),summary:[['Total Potongan Aktif',total],['Jumlah Transaksi',rows.length]] as Array<[string,string|number]>})
- return <section className="deduction-history-section">
-  <div className="section-title"><b>Riwayat Potongan Kasbon — {employee.full_name}</b></div>
+ const options=()=>({title:`Riwayat Potongan Gaji — ${employee.full_name}`,filename:`potongan-kasbon-${employee.id}-${all?'semua':month}`,subtitle:`${all?'Seluruh bulan':`Bulan gaji ${month}`} • Waktu WIB • Nominal aktif sudah memperhitungkan koreksi.`,headers:['Tanggal Potong (WIB)','Bulan Gaji','Nominal Awal Tercatat','Potongan Aktif','Status','Keterangan Terakhir'],rows:rows.map(r=>[time(r.created_at),r.payroll_month.slice(0,7),Number(r.amount),r.current,status(r),r.reason||'-']),summary:[['Total Potongan Aktif',total],['Jumlah Transaksi',rows.length]] as Array<[string,string|number]>})
+ return <section className="deduction-history-section payroll-deduction-history">
+  <div className="section-title"><b>Riwayat Potongan Gaji — {employee.full_name}</b></div>
   <div className="deduction-history-toolbar">
    <label><input type="checkbox" checked={all} onChange={e=>setAll(e.target.checked)}/> Tampilkan seluruh bulan</label>
    <button className="secondary-button" onClick={()=>setRevision(r=>r+1)} disabled={loading}>Muat Ulang Riwayat</button>
@@ -72,12 +72,12 @@ export function PayrollDeductionHistory({employee,month,allInitially=false,onRea
   {deductionError&&<div className="error-box">{deductionError}</div>}
   {correctionError&&<div className="error-box">{correctionError}</div>}
   {!loading&&!deductionError&&<div className="table-wrap deduction-correction-history"><table>
-   <thead><tr><th>Tanggal Potong (WIB)</th><th>Bulan Gaji</th><th>Nominal Awal Tercatat</th><th>Potongan Aktif</th><th>Status</th><th>Alasan Koreksi Terakhir</th></tr></thead>
+   <thead><tr><th>Tanggal Potong (WIB)</th><th>Bulan Gaji</th><th>Nominal Awal Tercatat</th><th>Potongan Aktif</th><th>Status</th><th>Keterangan Terakhir</th></tr></thead>
    <tbody>{rows.map(r=><tr key={r.id}><td>{time(r.created_at)}</td><td>{r.payroll_month.slice(0,7)}</td><td>{formatRupiah(r.amount)}</td><td>{formatRupiah(r.current)}</td><td>{status(r)}</td><td>{r.reason||'-'}</td></tr>)}
     {!rows.length&&<tr><td colSpan={6}>Belum ada transaksi potongan pada periode ini.</td></tr>}
    </tbody>
   </table></div>}
-  <div className="section-title"><b>Riwayat Koreksi Potongan</b></div>
+  <div className="section-title"><b>Riwayat Perubahan Potongan</b></div>
   {!loading&&!correctionError&&<div className="table-wrap deduction-correction-history"><table>
    <thead><tr><th>Waktu Koreksi (WIB)</th><th>Bulan Gaji</th><th>Potongan Lama</th><th>Potongan Baru</th><th>Sisa Utang Setelah</th><th>Alasan</th></tr></thead>
    <tbody>{corrections.map(c=><tr key={c.id}><td>{time(c.created_at)}</td><td>{c.payroll_month.slice(0,7)}</td><td>{formatRupiah(Number(c.old_amount))}</td><td>{formatRupiah(Number(c.new_amount))}</td><td>{formatRupiah(Number(c.new_remaining))}</td><td>{c.reason}</td></tr>)}

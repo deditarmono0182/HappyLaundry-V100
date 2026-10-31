@@ -1,0 +1,68 @@
+HappyLaundry V113.0.153 — Potongan Kasbon dalam Satu Menu
+Dasar: V113.0.152.
+
+PEMASANGAN
+Jalankan SQL_082_BAYAR_KASBON_TUNAI_TRANSFER.sql di Supabase setelah SQL 081.
+SQL 080/081 yang sudah sukses tidak perlu diulang. Lalu build dan deploy source ini.
+Tidak ada data keuangan lama yang diubah otomatis oleh versi ini.
+
+SATU MENU UNTUK SEMUA KARYAWAN
+Absensi & Gaji > pilih bulan > Daftar Gaji > Potongan Kasbon.
+Tombol ini selalu tersedia di setiap baris, termasuk karyawan dengan saldo utang Rp0.
+Detail Gaji juga menyediakan tombol Potongan Kasbon yang membuka menu yang sama.
+Tombol Potong Kas Bon / Riwayat Potongan / Koreksi Potongan yang terpisah di luar
+sudah diganti satu tombol, supaya kolom Aksi lebih ringkas.
+
+DI DALAM POTONGAN KASBON
+- Pilihan pelunasan: Potong Gaji, Bayar Tunai, atau Transfer, dalam satu menu.
+- Bayar Tunai / Transfer: isi nominal pembayaran, metode, dan keterangan. Transfer
+  memerlukan referensi minimal 3 karakter. Catat hanya setelah dana diterima.
+  Saldo utang berkurang, potongan gaji dan sisa gaji tidak berubah. Penerimaan
+  tercatat pada Kas Harian, bukan omzet laundry/laba/bagi hasil pengelola.
+  Pembayaran ini tetap dapat dicatat ketika gaji sudah dibayarkan.
+- Tanggal pembayaran adalah waktu pencatatan WIB, terpisah dari bulan potong gaji.
+  Riwayat tunai/transfer menampilkan seluruh tanggal, metode, referensi dan status;
+  tersedia XLS/Print. Riwayat potongan gaji tetap dapat difilter per bulan.
+- Bila pembayaran tunai/transfer salah dicatat, Batalkan Pembayaran dan isi alasan.
+  Saldo utang dikembalikan, Kas Harian diberi transaksi pembalik metode yang sama.
+  Riwayat tidak dihapus. Setelah itu catat ulang pembayaran yang benar bila perlu.
+  Pembatalan tidak mentransfer uang dari bank secara otomatis.
+- Pinjaman yang memiliki pembayaran tunai/transfer aktif tidak bisa dibatalkan
+  sebelum pembayaran terkait dibatalkan. Transaksi Kas Harian yang terhubung
+  tidak boleh diubah/dihapus langsung; gunakan pembatalan di menu kasbon.
+- Karyawan dapat melihat pembayaran tunai/transfer miliknya pada Gaji Saya.
+  Laporan Kasbon Keuangan juga menampilkan transaksi pembayaran dan pembatalan.
+- Ringkasan bulan pilihan, potongan tercatat, sisa utang, dan gaji kotor.
+- Tambah Potongan: isi NOMINAL TAMBAHAN dan keterangan. Kolom dimulai kosong,
+  tidak memilih otomatis seluruh gaji. Pratinjau menampilkan total setelah tambahan.
+- Koreksi Potongan: isi TOTAL POTONGAN YANG BENAR, bukan selisih pengurangannya.
+  Isi alasan, periksa pratinjau, kemudian simpan.
+- Riwayat transaksi dan perubahan berada di menu yang sama, per bulan atau seluruh
+  bulan, termasuk XLS dan Print/PDF. Nominal aktif tidak menghitung ulang nominal
+  lama yang sudah dikoreksi. Potongan yang dibatalkan tetap tercatat dari audit.
+- Bila sisa utang nol, tambahan potongan tidak dapat dilakukan; alasannya dijelaskan.
+  Bila gaji habis terpotong, periksa riwayat dan koreksi jika nominalnya salah.
+- Bila gaji sudah memiliki pembayaran, riwayat tetap dapat dibuka tetapi tambahan
+  dan koreksi POTONGAN GAJI dinonaktifkan. Tunai/transfer tetap dapat dicatat. Server juga memeriksa kondisi ini.
+
+PINJAMAN BARU TIDAK MEMOTONG GAJI OTOMATIS
+Kas Bon > Simpan Kas Bon sekarang hanya mencatat pinjaman/saldo utang.
+Setelah tersimpan, Owner membuka Potongan Kasbon > Tambah Potongan, lalu menentukan
+nominal sesuai kesepakatan. Peringatan kasbon melebihi gaji tetap berlaku.
+Penambahan potongan memakai validasi dan audit SQL 081: batas gaji tersimpan,
+sisa utang, perubahan dari perangkat lain, gaji belum dibayar, dan satu transaksi.
+Gagal jaringan tidak menandai tindakan berhasil; klik ganda tidak mengirim dua kali.
+
+CONTOH CECE (BUKAN KOREKSI OTOMATIS)
+Pilih bulan yang sesuai > Potongan Kasbon > Koreksi Potongan Bulan ...
+Isi TOTAL baru 300000 dan alasan. Berdasarkan screenshot sebelumnya:
+potongan Rp2.062.200 -> Rp300.000, sisa utang Rp2.737.800 -> Rp4.500.000,
+sisa gaji Rp0 -> Rp1.762.200. Angka aktual mengikuti data gaji terbaru.
+Pinjaman asli tidak diubah. Potongan lama tidak dibatalkan otomatis saat deploy.
+
+CATATAN
+Koreksi Pinjaman di Riwayat Kas Bon mengubah nilai PINJAMAN. Untuk potongan dari
+gaji, gunakan Potongan Kasbon > Koreksi Potongan. Kedua tindakan ini berbeda.
+Login, GPS/absensi, komisi, bagi hasil pengelola, perhitungan XLS, dan SQL lama
+tetap dipertahankan. Mengubah potongan gaji tidak membuat transaksi kas baru.
+Tunai/transfer membuat kas masuk, bukan pembayaran gaji atau omzet laundry.

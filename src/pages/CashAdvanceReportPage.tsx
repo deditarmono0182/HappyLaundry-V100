@@ -1,3 +1,4 @@
+import {loadCashAdvanceRepayments,type CashAdvanceRepayment} from '../lib/cashAdvanceRepayments'
 import {canAccess} from '../lib/permissions'
 import {type CashAdvanceLimit} from '../lib/cashAdvanceLimit'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -25,6 +26,7 @@ export function CashAdvanceReportPage(){
   const {profile}=useAuth()
   const allowed=canAccess(profile,'finance')
   const [data,setData]=useState<Report|null>(null)
+  const [repayments,setRepayments]=useState<CashAdvanceRepayment[]>([])
   const [limits,setLimits]=useState<CashAdvanceLimit[]>([])
   const [loading,setLoading]=useState(true)
   const [error,setError]=useState('')
@@ -41,6 +43,7 @@ export function CashAdvanceReportPage(){
       if(limitResponse.error)throw limitResponse.error
       if(!Array.isArray(limitResponse.data))throw new Error('Format batas kasbon tidak valid')
       setLimits(limitResponse.data as CashAdvanceLimit[])
+      setRepayments(await loadCashAdvanceRepayments())
       setData(response as Report)
     }catch(cause){setError(cause instanceof Error?cause.message:String((cause as {message?:string})?.message||cause));setData(null)}
     finally{setLoading(false)}
@@ -71,8 +74,12 @@ export function CashAdvanceReportPage(){
     })
     const deductions=data.deductions.filter(d=>d.employee_id===effectiveSelected&&advances.some(a=>a.id===d.cash_advance_id)).map(d=>({id:'d'+d.id,date:d.created_at,kind:'Potongan gaji',amount:-number(d.amount),details:'Periode gaji '+d.payroll_month}))
     const corrections=data.corrections.filter(c=>c.employee_id===effectiveSelected&&advances.some(a=>a.id===c.cash_advance_id)).map(c=>({id:'c'+c.id,date:c.corrected_at,kind:'Koreksi nominal',amount:number(c.new_amount)-number(c.old_amount),details:`${c.reason} • ${formatRupiah(number(c.old_amount))} → ${formatRupiah(number(c.new_amount))}`}))
-    return [...issue,...deductions,...corrections].sort((a,b)=>b.date.localeCompare(a.date))
-  },[data,effectiveSelected,advances])
+    const payments=repayments.filter(p=>p.employee_id===effectiveSelected).flatMap(p=>[
+      {id:'pay'+p.id,date:p.created_at,kind:p.method==='cash'?'Bayar kasbon tunai':'Bayar kasbon transfer',amount:-Number(p.amount),details:[p.reference,p.note].filter(Boolean).join(' • ')||'—'},
+      ...(p.cancelled_at?[{id:'void'+p.id,date:p.cancelled_at,kind:'Pembatalan pembayaran kasbon',amount:Number(p.amount),details:p.cancel_reason||'—'}]:[])
+    ])
+    return [...issue,...deductions,...corrections,...payments].sort((a,b)=>b.date.localeCompare(a.date))
+  },[data,effectiveSelected,advances,repayments])
   const limitFor=(id:string)=>limits.find(l=>l.employee_id===id)
   const overLimit=limits.filter(l=>Number(l.excess)>0)
   const exportOptions=(detail=false)=>{
@@ -99,7 +106,7 @@ export function CashAdvanceReportPage(){
         <button className="secondary-button" disabled={!data||loading} onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>Excel</button>
         <button className="secondary-button" disabled={!data||loading} onClick={()=>printPdf(exportOptions())}><Printer size={16}/>Print / PDF</button>
       </div>
-      {error&&<div className="error-box">Gagal mengambil laporan: {error}. Pastikan SQL 071, 072, dan 073 sudah dijalankan.</div>}
+      {error&&<div className="error-box">Gagal mengambil laporan: {error}. Pastikan SQL 071, 072, 073, dan 082 sudah dijalankan.</div>}
       {loading&&<p>Memuat seluruh kasbon...</p>}
       {data&&<>
         <div className="cash-report-stats">

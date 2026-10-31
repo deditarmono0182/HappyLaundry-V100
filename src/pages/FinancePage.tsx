@@ -586,7 +586,7 @@ export function FinancePage(){
         <div className="cash-report-actions"><button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button><button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
       </div>
       {cashAdvanceSummaryLoading?<p role="status">Memuat total kasbon per karyawan...</p>:cashAdvanceSummaryError?<div className="error-box">Gagal mengambil ringkasan kasbon: {cashAdvanceSummaryError}. Pastikan SQL 074 sudah dijalankan. <button type="button" className="secondary-button" onClick={()=>void loadCashAdvances()}>Coba Lagi</button></div>:<FinanceCashAdvanceSummary rows={financeCashAdvances} onSelect={id=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(id)}`)}/>}
-      <div className="finance-cash-advance-footnote">Pembayaran melalui potong gaji dilakukan Owner dari menu Absensi & Gaji. Potongan gaji mengurangi saldo kas bon tanpa mencatat kas masuk baru.</div>
+      <div className="finance-cash-advance-footnote">Pembayaran dicatat Owner melalui Absensi & Gaji → Potongan Kasbon: potong gaji, tunai, atau transfer. Tunai/transfer tercatat di Kas Harian dan tidak menjadi omzet laundry.</div>
     </section>
 
     <section className="panel finance-filter">

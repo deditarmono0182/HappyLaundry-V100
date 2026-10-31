@@ -186,8 +186,6 @@ export function PayrollPage(){
   const[cancelCashAdvanceReason,setCancelCashAdvanceReason]=useState('')
   const[correctCashAdvance,setCorrectCashAdvance]=useState<CashAdvance|null>(null)
   const[correctCashAdvanceForm,setCorrectCashAdvanceForm]=useState({amount:'0',note:'',reason:''})
-  const[deductCashAdvanceEmployee,setDeductCashAdvanceEmployee]=useState<Employee|null>(null)
-  const[cashAdvanceDeductionAmount,setCashAdvanceDeductionAmount]=useState('')
   const[paymentForm,setPaymentForm]=useState({amount:'0',payment_method:'Transfer',note:''})
   const[settingForm,setSettingForm]=useState({
     attendance_rate:'0',
@@ -200,6 +198,7 @@ export function PayrollPage(){
   const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus;date:string}|null>(null)
   const[overrideReason,setOverrideReason]=useState('')
   const attendanceOverridePending=useRef(false)
+  const loanSavePending=useRef(false)
   const loadSequence=useRef(0)
 
   const cashAdvanceLimit=useCashAdvanceLimit(cashAdvanceEmployee?.id||'',!!cashAdvanceEmployee)
@@ -606,37 +605,23 @@ export function PayrollPage(){
 
   const saveCashAdvance=async(event:FormEvent)=>{
     event.preventDefault()
-    if(!cashAdvanceEmployee)return
-    const amount=Math.max(0,Number(cashAdvanceForm.amount)||0)
-    if(amount<=0){setMessage('Nominal kas bon harus lebih dari Rp 0.');return}
+    if(!cashAdvanceEmployee||loanSavePending.current)return
+    const amount=Number(cashAdvanceForm.amount)
+    if(!Number.isFinite(amount)||amount<=0){setMessage('Nominal kas bon harus lebih dari Rp 0.');return}
     if(cashAdvanceBlocked(cashAdvanceLimit,amount,true,cashAdvanceOverride)){setMessage('Periksa batas kasbon dan isi alasan persetujuan Owner.');return}
-    setBusy(true);setMessage('');setSuccess('')
-    const add=await supabase.rpc('v113137_add_cash_advance',{
-      p_employee_id:cashAdvanceEmployee.id,
-      p_amount:amount,
-      p_note:cashAdvanceForm.note.trim()||null,
-      p_payroll_entry:true,p_override_reason:cashAdvanceOverride.trim()||null
-    })
-    if(add.error){setMessage(add.error.message);setBusy(false);cashAdvanceLimit.refresh();return}
-
-    const row=payrollRows.find(item=>item.employee.id===cashAdvanceEmployee.id)
-    const available=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0)-Number(row?.paidAmount||0))
-    const deduction=Math.min(amount,available)
-    if(deduction>0){
-      const apply=await supabase.rpc('v113072_apply_cash_advance_deduction',{
-        p_employee_id:cashAdvanceEmployee.id,
-        p_payroll_month:monthRange(month).start,
-        p_amount:deduction
+    loanSavePending.current=true;setBusy(true);setMessage('');setSuccess('')
+    try{
+      const add=await supabase.rpc('v113137_add_cash_advance',{
+        p_employee_id:cashAdvanceEmployee.id,p_amount:amount,
+        p_note:cashAdvanceForm.note.trim()||null,p_payroll_entry:true,p_override_reason:cashAdvanceOverride.trim()||null
       })
-      if(apply.error){setMessage(`Kas bon tersimpan, tetapi potongan gaji gagal: ${apply.error.message}`);setBusy(false);await load();return}
-    }
-
-    const employeeName=cashAdvanceEmployee.full_name
-    setCashAdvanceEmployee(null)
-    setCashAdvanceForm({amount:'0',note:''})
-    setSuccess(`Kas bon ${employeeName} sebesar ${formatRupiah(amount)} berhasil dicatat${deduction>0?` dan ${formatRupiah(deduction)} langsung dipotong dari gaji periode ini.`:'.'}`)
-    await load()
-    setBusy(false)
+      if(add.error)throw add.error
+      const name=cashAdvanceEmployee.full_name
+      setCashAdvanceEmployee(null);setCashAdvanceForm({amount:'0',note:''})
+      await load()
+      setSuccess(`Kas bon ${name} sebesar ${formatRupiah(amount)} dicatat tanpa memotong gaji. Tentukan nominal melalui menu Potongan Kasbon.`)
+    }catch(e){setMessage(String((e as {message?:string})?.message||e));cashAdvanceLimit.refresh()}
+    finally{loanSavePending.current=false;setBusy(false)}
   }
 
   const openDeductionCorrection=(employee:Employee,historyOnly=false)=>{
@@ -645,45 +630,6 @@ export function PayrollPage(){
     if(!row)return
     setDetailEmployee(null)
     setDeductionCorrection({employee,month,deduction:row.cashAdvanceApplied,remaining:row.cashAdvanceOutstanding,gross:row.grossTotal,paid:row.paidAmount,historyOnly})
-  }
-
-  const openCashAdvanceDeduction=(employee:Employee)=>{
-    const row=payrollRows.find(item=>item.employee.id===employee.id)
-    const availableSalary=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
-    const outstandingCashAdvance=Math.max(0,Number(row?.cashAdvanceOutstanding||0))
-    setDeductCashAdvanceEmployee(employee)
-    setCashAdvanceDeductionAmount(String(Math.floor(Math.min(availableSalary,outstandingCashAdvance))))
-    setMessage('');setSuccess('')
-  }
-
-  const saveCashAdvanceDeduction=async(event:FormEvent)=>{
-    event.preventDefault()
-    if(!deductCashAdvanceEmployee)return
-    const row=payrollRows.find(item=>item.employee.id===deductCashAdvanceEmployee.id)
-    const availableSalary=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
-    const outstandingCashAdvance=Math.max(0,Number(row?.cashAdvanceOutstanding||0))
-    const amount=Math.max(0,Number(cashAdvanceDeductionAmount)||0)
-    const maxAmount=Math.min(availableSalary,outstandingCashAdvance)
-    if(amount<=0){setMessage('Nominal potongan harus lebih dari Rp 0.');return}
-    if(amount>maxAmount+0.01){setMessage(`Potongan maksimal ${formatRupiah(maxAmount)}.`);return}
-
-    setBusy(true);setMessage('');setSuccess('')
-    const result=await supabase.rpc('v113072_apply_cash_advance_deduction',{
-      p_employee_id:deductCashAdvanceEmployee.id,
-      p_payroll_month:monthRange(month).start,
-      p_amount:amount
-    })
-    if(result.error){
-      setMessage(result.error.message)
-      setBusy(false)
-      return
-    }
-    const employeeName=deductCashAdvanceEmployee.full_name
-    setDeductCashAdvanceEmployee(null)
-    setCashAdvanceDeductionAmount('')
-    setSuccess(`Kas bon ${employeeName} berhasil dipotong dari gaji sebesar ${formatRupiah(Number(result.data||amount))}.`)
-    await load()
-    setBusy(false)
   }
 
   const openCorrectCashAdvance=(item:CashAdvance)=>{
@@ -1015,10 +961,8 @@ export function PayrollPage(){
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
                     <button className="finance-row-action" onClick={()=>setAttendanceHistoryEmployee(r.employee)}><CalendarCheck2 size={15}/>Riwayat Hadir</button>
                     <button className="finance-row-action cash-advance-button" onClick={()=>openCashAdvance(r.employee)}><HandCoins size={15}/>Kas Bon</button>
-                    {r.cashAdvanceOutstanding>0&&<button className="finance-row-action cash-advance-deduct-button" onClick={()=>openCashAdvanceDeduction(r.employee)}><HandCoins size={15}/>Potong Kas Bon</button>}
                     {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
-                    <button className="finance-row-action" onClick={()=>openDeductionCorrection(r.employee,true)}><ReceiptText size={15}/>Riwayat Potongan</button>
-                    <button className="finance-row-action" onClick={()=>openDeductionCorrection(r.employee)}><Pencil size={15}/>Koreksi Potongan</button>
+                    <button className="finance-row-action" onClick={()=>openDeductionCorrection(r.employee,true)}><ReceiptText size={15}/>Potongan Kasbon</button>
                     <button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button>
                   </div>
                 </td>
@@ -1037,7 +981,7 @@ export function PayrollPage(){
         const name=deductionCorrection.employee.full_name
         setDeductionCorrection(null)
         await load()
-        setSuccess(`Koreksi potongan kasbon ${name} tersimpan. Sisa utang dan sisa gaji diperbarui.`)
+        setSuccess(`Transaksi kasbon ${name} tersimpan. Sisa utang dan sisa gaji diperbarui.`)
       }}
     />}
 
@@ -1108,7 +1052,7 @@ export function PayrollPage(){
                 <td><span className={`cash-advance-status ${item.cancelled_at?'cancelled':'active'}`}>{item.cancelled_at?'Dibatalkan':'Aktif'}</span></td>
                 <td>{item.cancelled_at?`Batal: ${item.cancel_reason||'-'}`:(item.note||'-')}</td>
                 <td>{!item.cancelled_at&&<div className="cash-advance-history-actions">
-                  <button className="finance-row-action" onClick={()=>openCorrectCashAdvance(item)}><Pencil size={14}/>Koreksi</button>
+                  <button className="finance-row-action" onClick={()=>openCorrectCashAdvance(item)}><Pencil size={14}/>Koreksi Pinjaman</button>
                   <button className="finance-row-action danger-soft" onClick={()=>{setCancelCashAdvance(item);setCancelCashAdvanceReason('')}}><Trash2 size={14}/>Batalkan</button>
                 </div>}</td>
               </tr>)}
@@ -1135,38 +1079,12 @@ export function PayrollPage(){
           </table>
         </div>
         <div className="modal-actions">
-          <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee,true)}><ReceiptText size={16}/>Riwayat Potongan Kasbon</button>
-          <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee)}><Pencil size={16}/>Koreksi Potongan Kasbon</button>
+          <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee,true)}><ReceiptText size={16}/>Potongan Kasbon</button>
           {(row?.outstanding||0)>0&&<button className="primary-button" onClick={()=>{setDetailEmployee(null);openPayrollPayment(detailEmployee)}}><HandCoins size={16}/>Catat Pembayaran</button>}
           <button className="secondary-button" onClick={()=>downloadXls(commissionDetailExport(detailEmployee))}><FileSpreadsheet size={16}/>Export XLS</button>
           <button className="secondary-button" onClick={()=>printPdf(commissionDetailExport(detailEmployee))}><FileText size={16}/>Cetak / PDF</button>
           <button className="secondary-button" onClick={()=>setDetailEmployee(null)}>Tutup</button>
         </div>
-      </Modal>
-    })()}
-
-    {deductCashAdvanceEmployee&&(()=>{
-      const row=payrollRows.find(item=>item.employee.id===deductCashAdvanceEmployee.id)
-      const availableSalary=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
-      const outstandingCashAdvance=Math.max(0,Number(row?.cashAdvanceOutstanding||0))
-      const maxAmount=Math.min(availableSalary,outstandingCashAdvance)
-      return <Modal title={`Potong Kas Bon dari Gaji — ${deductCashAdvanceEmployee.full_name}`} onClose={()=>!busy&&setDeductCashAdvanceEmployee(null)}>
-        <form className="modal-form" onSubmit={saveCashAdvanceDeduction}>
-          <div className="payroll-payment-card">
-            <div><span>Sisa Kas Bon</span><b>{formatRupiah(outstandingCashAdvance)}</b></div>
-            <div><span>Gaji Tersedia untuk Potongan</span><b>{formatRupiah(availableSalary)}</b></div>
-            <div><span>Maksimal Potongan</span><b>{formatRupiah(maxAmount)}</b></div>
-          </div>
-          <label>Nominal Potongan
-            <input type="number" min="1" max={Math.max(0,Math.floor(maxAmount))} value={cashAdvanceDeductionAmount} onChange={e=>setCashAdvanceDeductionAmount(e.target.value)} required/>
-          </label>
-          <div className="info-box">Potongan gaji mengurangi saldo kas bon. Tidak dibuat transaksi Kas Masuk karena tidak ada uang baru yang diterima perusahaan.</div>
-          {message&&<div className="error-box">{message}</div>}
-          <div className="form-actions">
-            <button type="button" className="secondary-button" onClick={()=>setDeductCashAdvanceEmployee(null)} disabled={busy}>Batal</button>
-            <button className="primary-button" disabled={busy||Number(cashAdvanceDeductionAmount)<=0||maxAmount<=0}><HandCoins size={16}/>{busy?'Memproses...':'Potong dari Gaji'}</button>
-          </div>
-        </form>
       </Modal>
     })()}
 
@@ -1178,7 +1096,7 @@ export function PayrollPage(){
         <form className="modal-form" onSubmit={saveCorrectCashAdvance}>
           <div className="payroll-payment-card">
             <div><span>Nominal Sebelumnya</span><b>{formatRupiah(Number(correctCashAdvance.amount||0))}</b></div>
-            <div><span>Sudah Dipotong dari Gaji</span><b>{formatRupiah(alreadyDeducted)}</b></div>
+            <div><span>Sudah Dilunasi (Gaji / Pembayaran)</span><b>{formatRupiah(alreadyDeducted)}</b></div>
             <div><span>Sisa Setelah Koreksi</span><b>{formatRupiah(newRemaining)}</b></div>
           </div>
           <label>Nominal Kas Bon yang Benar
@@ -1209,7 +1127,7 @@ export function PayrollPage(){
             />
           </label>
           <div className="info-box">
-            Nominal tidak boleh lebih kecil dari kas bon yang sudah pernah dipotong dari gaji. Perubahan nominal akan tercatat di audit dan penyesuaian kas.
+            Nominal tidak boleh lebih kecil dari kasbon yang sudah dilunasi melalui potongan gaji atau pembayaran. Perubahan nominal akan tercatat di audit dan penyesuaian kas.
           </div>
           {message&&<div className="error-box">{message}</div>}
           <div className="form-actions">
@@ -1251,7 +1169,7 @@ export function PayrollPage(){
             <textarea rows={3} value={cashAdvanceForm.note} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,note:e.target.value})} placeholder="Contoh: Kas bon kebutuhan keluarga"/>
           </label>
           <CashAdvanceWarning state={cashAdvanceLimit} amount={Number(cashAdvanceForm.amount)} owner={true} reason={cashAdvanceOverride} onReason={setCashAdvanceOverride} onRefresh={cashAdvanceLimit.refresh}/>
-          <div className="info-box">Kas bon akan langsung dipotong dari gaji periode ini sebesar hak gaji yang tersedia. Jika kas bon lebih besar dari gaji, sisanya otomatis dibawa ke periode berikutnya.</div>
+          <div className="info-box">Simpan Kas Bon hanya mencatat pinjaman dan saldo utang, tanpa memotong gaji. Setelah tersimpan, gunakan Potongan Kasbon → Tambah Potongan untuk menentukan nominal yang disepakati.</div>
           {message&&<div className="error-box">{message}</div>}
           <div className="form-actions">
             <button type="button" className="secondary-button" onClick={()=>setCashAdvanceEmployee(null)} disabled={busy}>Batal</button>

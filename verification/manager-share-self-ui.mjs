@@ -6,7 +6,7 @@ const dom=new JSDOM('<div id="root"></div>',{url:'http://localhost/my-payroll'})
 globalThis.window=dom.window;globalThis.document=dom.window.document;globalThis.IS_REACT_ACT_ENVIRONMENT=true
 let fail=false,hold=null
 const calls=[]
-globalThis.__mock={async rpc(name,args){calls.push({name,args});if(hold)await hold;
+globalThis.__mock={from(){const q={select(){return q},eq(){return q},order(){return q},range(){return q},then(ok){return Promise.resolve({data:[],error:null}).then(ok)}};return q},async rpc(name,args){calls.push({name,args});if(hold)await hold;
  if(name==='v113072_my_payroll_base')return {data:{employee:{id:'a',full_name:'Pengelola',login_id:'A'},present_days:1,attendance_rate:10000,allowance:20000,bonus:5000,cash_advance_applied:5000,cash_advance_outstanding:20000,paid_amount:10000},error:null}
  if(name==='v113072_my_commissions')return {data:[{order_id:'o',order_no:'HL1',commission_type:'production',amount:15000,percent:20,base_amount:75000,earned_at:'2026-10-03T00:00:00Z'}],error:null}
  if(name==='v113072_my_revenue_share')return {data:10000,error:null}

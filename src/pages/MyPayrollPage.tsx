@@ -1,3 +1,4 @@
+import {loadCashAdvanceRepayments,type CashAdvanceRepayment} from '../lib/cashAdvanceRepayments'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CalendarRange, CheckCircle2, CreditCard, HandCoins, ReceiptText, WalletCards } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
@@ -26,6 +27,8 @@ type MyPayroll={
 export function MyPayrollPage(){
   const {profile}=useAuth()
   const loadSequence=useRef(0)
+  const [cashRepayments,setCashRepayments]=useState<CashAdvanceRepayment[]>([])
+  const [repaymentError,setRepaymentError]=useState('')
   const [month,setMonth]=useState(businessMonthKey())
   const [data,setData]=useState<MyPayroll|null>(null)
   const [loading,setLoading]=useState(true)
@@ -33,7 +36,7 @@ export function MyPayrollPage(){
 
   const load=useCallback(async()=>{
     const sequence=++loadSequence.current
-    setLoading(true);setMessage('');setData(null)
+    setLoading(true);setMessage('');setData(null);setCashRepayments([]);setRepaymentError('')
     try{
     const period=`${month}-01`
     const [base,commissions,revenueShare,managerShare]=await Promise.all([
@@ -73,6 +76,10 @@ export function MyPayrollPage(){
         net_total:net,payroll_balance:payrollBalance,paid_amount:paid,remaining_pay:Math.max(0,net-paid),commission_details:details,
         cash_advance_history:(b.cash_advance_history||[]) as CashAdvanceHistory[],payment_history:(b.payment_history||[]) as PaymentHistory[]
       } as MyPayroll)
+      if(b.employee?.id){
+        try{const payments=await loadCashAdvanceRepayments(b.employee.id);if(sequence===loadSequence.current)setCashRepayments(payments)}
+        catch(e){if(sequence===loadSequence.current)setRepaymentError(e instanceof Error?e.message:String(e))}
+      }
     }
     }catch(e){if(sequence===loadSequence.current){setMessage(e instanceof Error?e.message:String(e));setData(null)}}
     finally{if(sequence===loadSequence.current)setLoading(false)}
@@ -153,6 +160,16 @@ export function MyPayrollPage(){
             {(!data.cash_advance_history||data.cash_advance_history.length===0)&&<tr><td colSpan={4} className="table-empty">Belum ada kas bon.</td></tr>}
           </tbody>
         </table></div>
+      </section>
+
+      <section className="panel data-panel">
+        <div className="section-title"><b>Pembayaran Kasbon Tunai / Transfer — Seluruh Tanggal</b></div>
+        {repaymentError&&<div className="error-box">{repaymentError}</div>}
+        <p>Pembayaran utang ini mengurangi sisa kasbon, tanpa mengurangi gaji.</p>
+        <div className="table-wrap"><table><thead><tr><th>Tanggal</th><th>Metode</th><th>Nominal</th><th>Referensi</th><th>Status</th></tr></thead><tbody>
+          {cashRepayments.map(r=><tr key={r.id}><td>{new Date(r.created_at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'})}</td><td>{r.method==='cash'?'Tunai':'Transfer'}</td><td>{formatRupiah(Number(r.amount))}</td><td>{r.reference||'-'}</td><td>{r.cancelled_at?'Dibatalkan':'Tercatat'}</td></tr>)}
+          {!cashRepayments.length&&!repaymentError&&<tr><td colSpan={5}>Belum ada pembayaran tunai / transfer.</td></tr>}
+        </tbody></table></div>
       </section>
 
       <section className="panel data-panel">
