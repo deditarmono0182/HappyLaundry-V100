@@ -1,3 +1,5 @@
+import {dashboardRange, monthNames, type DashboardPeriod} from '../lib/dashboardPeriod'
+import {readDashboardPages} from '../lib/dashboardPages'
 import {loadCommissionLedger} from '../lib/commissionLedger'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -12,7 +14,7 @@ import { fetchFinancialSummary, type FinancialSummary } from '../lib/financialSu
 import { useAuth } from '../lib/auth'
 import { downloadXls } from '../lib/exportData'
 import type { OrderRow } from '../types/order'
-import { addBusinessDays, businessDateKey, businessDateLabel, businessMonthKey, businessParts, businessPeriodStart } from '../lib/businessTime'
+import { addBusinessDays, businessDateKey, businessDateLabel, businessMonthKey, businessParts } from '../lib/businessTime'
 
 interface DashboardOrderItem{
   order_id:string
@@ -61,7 +63,8 @@ export function DashboardPage() {
   const [attentionOpen,setAttentionOpen]=useState(false)
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
-  const [revenuePeriod,setRevenuePeriod]=useState<'today'|'7d'|'month'|'3m'|'6m'|'12m'>('7d')
+  const [revenuePeriod,setRevenuePeriod]=useState<DashboardPeriod>('7d')
+  const [selectedMonth,setSelectedMonth]=useState(()=>businessMonthKey())
   const [selectedCategory,setSelectedCategory]=useState<string|null>(null)
   const [businessClock,setBusinessClock]=useState(()=>Date.now())
   const [density,setDensity]=useState<'comfort'|'compact'|'ultra'>(()=>
@@ -70,10 +73,10 @@ export function DashboardPage() {
 
   const load=useCallback(async()=>{
     const [o,c,pay,i,s,commissionRes,assignmentRes]=await Promise.all([
-      supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
-      supabase.from('v100_cash_entries').select('amount,direction,created_at').order('created_at',{ascending:false}),
-      supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
-      supabase.from('v100_order_items').select('order_id,service_id,service_name,unit,quantity,subtotal'),
+      readDashboardPages(()=>supabase.from('v100_orders_view').select('*').order('id',{ascending:true})),
+      readDashboardPages(()=>supabase.from('v100_cash_entries').select('amount,direction,created_at').order('id',{ascending:true})),
+      readDashboardPages(()=>supabase.from('v100_payments').select('amount,method,created_at').order('id',{ascending:true})),
+      readDashboardPages(()=>supabase.from('v100_order_items').select('order_id,service_id,service_name,unit,quantity,subtotal').order('id',{ascending:true})),
       supabase.from('v100_services').select('id,category'),
       loadCommissionLedger(),
       supabase.from('v113_order_commissions').select('order_id,worker_id,courier_id')
@@ -93,12 +96,13 @@ export function DashboardPage() {
             .from('v11306_delete_requests')
             .select('id',{count:'exact',head:true})
             .eq('status','pending'),
-          supabase
+          readDashboardPages(()=>supabase
             .from('v113063_order_progress_history')
             .select('order_id,new_status,created_at')
             .eq('new_status','completed')
-            .order('created_at',{ascending:false})
+            .order('id',{ascending:true}))
         ])
+        if(historyRes.error)setMessage(historyRes.error.message)
         setPendingDeletes(count||0)
         setProgressEvents((historyRes.data as DashboardProgressEvent[])||[])
       }else{
@@ -172,22 +176,25 @@ export function DashboardPage() {
       issueCount:overdueRows.length+unpaidRows.length+readyLongRows.length+missingWorkerRows.length+missingCourierRows.length+noDueRows.length+(pendingDeletes||0)
     }
   },[orders,assignmentMap,businessClock,pendingDeletes])
-  const selectedPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
+  const periodRange=useMemo(()=>dashboardRange(revenuePeriod,selectedMonth,new Date(businessClock)),[revenuePeriod,selectedMonth,businessClock])
+  const selectedPeriodStart=periodRange.start
+  const selectedPeriodEnd=periodRange.end
+  const inPeriod=(value:string)=>new Date(value)>=selectedPeriodStart&&new Date(value)<selectedPeriodEnd
   const selectedPeriodCompleted=useMemo(()=>{
     const completedIds=new Set(progressEvents
-      .filter(event=>new Date(event.created_at)>=selectedPeriodStart)
+      .filter(event=>inPeriod(event.created_at))
       .map(event=>event.order_id))
 
     // Fallback untuk order selesai lama yang dibuat sebelum riwayat progres tersedia.
     for(const order of orders){
       if(order.status!=='completed'||completedIds.has(order.id))continue
       const completedAt=order.progress_last_at||order.created_at
-      if(new Date(completedAt)>=selectedPeriodStart)completedIds.add(order.id)
+      if(inPeriod(completedAt))completedIds.add(order.id)
     }
     return completedIds.size
-  },[progressEvents,orders,selectedPeriodStart])
+  },[progressEvents,orders,selectedPeriodStart,selectedPeriodEnd])
 
-  const selectedPeriodLabel=revenuePeriod==='today'?'Hari Ini'
+  const selectedPeriodLabel=revenuePeriod==='selected-month'?periodRange.label:revenuePeriod==='today'?'Hari Ini'
     :revenuePeriod==='7d'?'7 Hari'
     :revenuePeriod==='month'?'Bulan Ini'
     :revenuePeriod==='3m'?'3 Bulan'
@@ -208,13 +215,15 @@ export function DashboardPage() {
         const key=addBusinessDays(todayKey,-(6-i))
         return {label:businessDateLabel(`${key}T12:00:00+07:00`,{weekday:'short'}),match:(value:string)=>businessDateKey(value)===key}
       })
-    }else if(revenuePeriod==='month'){
-      const currentMonth=businessMonthKey(now)
-      buckets=Array.from({length:5},(_,i)=>{
+    }else if(revenuePeriod==='month'||revenuePeriod==='selected-month'){
+      const currentMonth=revenuePeriod==='selected-month'?selectedMonth:businessMonthKey(now)
+      const [year,month]=currentMonth.split('-').map(Number)
+      const days=new Date(Date.UTC(year,month,0)).getUTCDate()
+      buckets=Array.from({length:Math.ceil(days/7)},(_,i)=>{
         const startDay=i*7+1
-        const endDay=i===4?31:startDay+6
+        const endDay=Math.min(days,startDay+6)
         return {
-          label:`M${i+1}`,
+          label:`${startDay}–${endDay}`,
           match:(value:string)=>{
             if(businessMonthKey(value)!==currentMonth)return false
             const day=businessParts(value).day
@@ -247,7 +256,7 @@ export function DashboardPage() {
         orders:bucketOrders.length
       }
     })
-  },[orders,payments,cash,commissions,revenuePeriod,businessClock])
+  },[orders,payments,cash,commissions,revenuePeriod,selectedMonth,businessClock])
 
   const maxMoney=Math.max(1,...chart.flatMap(x=>[x.omzet,x.cashIn]))
   const maxOrders=Math.max(1,...chart.map(x=>x.orders))
@@ -271,22 +280,12 @@ export function DashboardPage() {
     return{width,height,padX,padY,innerH,groupW,barW,moneyY,orderPoints,orderLine:orderPoints.map(p=>`${p.x},${p.y}`).join(' ')}
   },[chart,maxMoney,maxOrders])
 
-  const periodTitle=revenuePeriod==='today'
-    ?'Omzet / Barang Masuk Hari Ini'
-    :revenuePeriod==='7d'
-    ?'Omzet / Barang Masuk 7 Hari'
-    :revenuePeriod==='month'
-      ?'Omzet / Barang Masuk Bulan Ini'
-      :revenuePeriod==='3m'
-        ?'Omzet / Barang Masuk 3 Bulan'
-        :revenuePeriod==='6m'
-          ?'Omzet / Barang Masuk 6 Bulan'
-          :'Omzet / Barang Masuk 12 Bulan'
+  const periodTitle=`Omzet / Barang Masuk ${selectedPeriodLabel}`
 
   const categoryRevenue=useMemo(()=>{
-    const periodStart=businessPeriodStart(revenuePeriod,new Date(businessClock))
 
-    const relevantOrders=orders.filter(o=>new Date(o.created_at)>=periodStart&&o.status!=='cancelled')
+
+    const relevantOrders=orders.filter(o=>inPeriod(o.created_at)&&o.status!=='cancelled')
     const orderMap=new Map(relevantOrders.map(o=>[o.id,o]))
     const serviceCategory=new Map(services.map(s=>[s.id,s.category||'Reguler']))
     const grouped:Record<string,{amount:number;orders:Set<string>;items:number}>={}
@@ -318,12 +317,12 @@ export function DashboardPage() {
         percentage:total>0?(data.amount/total)*100:0
       }))
       .sort((a,b)=>b.amount-a.amount)
-  },[orders,orderItems,services,revenuePeriod,businessClock])
+  },[orders,orderItems,services,selectedPeriodStart,selectedPeriodEnd])
 
   const categoryDetails=useMemo(()=>{
     if(!selectedCategory)return []
-    const periodStart=businessPeriodStart(revenuePeriod,new Date(businessClock))
-    const relevantOrders=orders.filter(o=>new Date(o.created_at)>=periodStart&&o.status!=='cancelled')
+
+    const relevantOrders=orders.filter(o=>inPeriod(o.created_at)&&o.status!=='cancelled')
     const orderMap=new Map(relevantOrders.map(o=>[o.id,o]))
     const serviceCategory=new Map(services.map(s=>[s.id,s.category||'Reguler']))
 
@@ -346,7 +345,7 @@ export function DashboardPage() {
         date:order.created_at
       }]
     }).sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime())
-  },[selectedCategory,orders,orderItems,services,revenuePeriod,businessClock])
+  },[selectedCategory,orders,orderItems,services,selectedPeriodStart,selectedPeriodEnd])
 
   const selectedCategorySummary=useMemo(()=>({
     total:categoryDetails.reduce((sum,row)=>sum+row.amount,0),
@@ -355,13 +354,14 @@ export function DashboardPage() {
   }),[categoryDetails])
 
 
-  const ownerPeriodStart=useMemo(()=>businessPeriodStart(revenuePeriod,new Date(businessClock)),[revenuePeriod,businessClock])
+  const ownerPeriodStart=selectedPeriodStart
 
   useEffect(()=>{
     if(!isOwner)return
     let alive=true
     const fromKey=businessDateKey(ownerPeriodStart)
-    const toKey=businessDateKey(new Date(businessClock))
+    const toKey=periodRange.toKey
+    setOwnerFinancial(null)
     const run=async()=>{
       try{
         const result=await fetchFinancialSummary(fromKey,toKey)
@@ -372,15 +372,15 @@ export function DashboardPage() {
     }
     void run()
     return()=>{alive=false}
-  },[isOwner,ownerPeriodStart,businessClock])
+  },[isOwner,ownerPeriodStart,periodRange.toKey])
 
-  const ownerPeriodOrders=useMemo(()=>orders.filter(r=>new Date(r.created_at)>=ownerPeriodStart&&r.status!=='cancelled'),[orders,ownerPeriodStart])
-  const ownerPeriodCash=useMemo(()=>cash.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[cash,ownerPeriodStart])
+  const ownerPeriodOrders=useMemo(()=>orders.filter(r=>inPeriod(r.created_at)&&r.status!=='cancelled'),[orders,ownerPeriodStart,selectedPeriodEnd])
+  const ownerPeriodCash=useMemo(()=>cash.filter(r=>inPeriod(r.created_at)),[cash,ownerPeriodStart,selectedPeriodEnd])
   const ownerExpense=ownerFinancial?.operating??0
-  const ownerPeriodPayments=useMemo(()=>payments.filter(r=>new Date(r.created_at)>=ownerPeriodStart),[payments,ownerPeriodStart])
+  const ownerPeriodPayments=useMemo(()=>payments.filter(r=>inPeriod(r.created_at)),[payments,ownerPeriodStart,selectedPeriodEnd])
   const ownerCashIn=ownerPeriodPayments.reduce((s,r)=>s+Number(r.amount||0),0)
   const ownerOrderValue=ownerPeriodOrders.reduce((s,r)=>s+Number(r.total||0),0)
-  const ownerPeriodCommissions=useMemo(()=>commissions.filter(r=>new Date(r.earned_at)>=ownerPeriodStart),[commissions,ownerPeriodStart])
+  const ownerPeriodCommissions=useMemo(()=>commissions.filter(r=>inPeriod(r.earned_at)),[commissions,ownerPeriodStart,selectedPeriodEnd])
   const ownerProductionCommission=ownerPeriodCommissions.filter(r=>r.commission_type==='production').reduce((s,r)=>s+Number(r.amount||0),0)
   const ownerCourierCommission=ownerPeriodCommissions.filter(r=>r.commission_type==='courier').reduce((s,r)=>s+Number(r.amount||0),0)
   const ownerCommission=ownerProductionCommission+ownerCourierCommission
@@ -576,7 +576,17 @@ export function DashboardPage() {
             <button className={revenuePeriod==='3m'?'active':''} onClick={()=>setRevenuePeriod('3m')}>3 Bulan</button>
             <button className={revenuePeriod==='6m'?'active':''} onClick={()=>setRevenuePeriod('6m')}>6 Bulan</button>
             <button className={revenuePeriod==='12m'?'active':''} onClick={()=>setRevenuePeriod('12m')}>12 Bulan</button>
+            <button className={revenuePeriod==='selected-month'?'active':''} onClick={()=>setRevenuePeriod('selected-month')}>Pilih Bulan</button>
           </div>
+        </div>
+        <div className="dashboard-month-picker">
+          <label>Bulan<select aria-label="Nama bulan" value={selectedMonth.slice(5)} onChange={e=>{setSelectedMonth(`${selectedMonth.slice(0,4)}-${e.target.value}`);setRevenuePeriod('selected-month')}}>
+            {monthNames.map((name,index)=><option key={name} value={String(index+1).padStart(2,'0')}>{name}</option>)}
+          </select></label>
+          <label>Tahun<select aria-label="Tahun laporan" value={selectedMonth.slice(0,4)} onChange={e=>{setSelectedMonth(`${e.target.value}-${selectedMonth.slice(5)}`);setRevenuePeriod('selected-month')}}>
+            {Array.from({length:21},(_,i)=>businessParts(businessClock).year-i).map(year=><option key={year} value={year}>{year}</option>)}
+          </select></label>
+          <span>Periode aktif: {selectedPeriodLabel} (WIB)</span>
         </div>
         <div className="owner-combined-chart">
           <div className="owner-chart-legend">

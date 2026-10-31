@@ -12942,3 +12942,9 @@ html[data-density="ultra"] .main-content *{
 /* V113.0.155: pisahkan simulasi utang dari hak gaji */
 .my-payroll-simulation{margin-top:16px;padding:12px;border:1px solid #d8e5e7;border-radius:12px;font-size:13px;line-height:1.5}
 .my-payroll-simulation summary{cursor:pointer;font-weight:600}
+
+/* Named dashboard month/year controls, including narrow phones. */
+.dashboard-month-picker{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:0 0 18px}
+.dashboard-month-picker label{display:flex;flex-direction:column;gap:6px;font-weight:700;min-width:120px;flex:1}
+.dashboard-month-picker select{width:100%;min-height:44px;padding:10px;border:1px solid #b7d5df;border-radius:12px;background:white;color:#194c5a;font:inherit}
+.dashboard-month-picker>span{flex-basis:100%;font-size:.9rem;color:#587984}

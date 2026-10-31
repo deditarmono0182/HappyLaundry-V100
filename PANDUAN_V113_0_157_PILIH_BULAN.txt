@@ -1,0 +1,11 @@
+HappyLaundry V113.0.157 — Pilih Bulan Dashboard
+
+Dasar: source V113.0.156. Tidak perlu SQL baru.
+1. Salin isi source ke folder repository yang sama, pertahankan .env.
+2. Commit dan Push origin, tunggu deployment berhasil.
+3. Dashboard: pilih nama bulan (Januari–Desember) dan tahun di bawah tombol periode grafik. Pilihan langsung aktif; tombol Pilih Bulan mengaktifkan kembali pilihan terakhir.
+4. Grafik, kategori dan rinciannya, status selesai periode, ringkasan owner dan XLS mengikuti bulan kalender yang sama, pukul 00.00 WIB sampai sebelum tanggal 1 bulan berikutnya.
+5. Tombol Hari Ini, 7 Hari, Bulan Ini, 3/6/12 Bulan tetap tersedia. Label mingguan grafik sekarang rentang tanggal (1–7, 8–14, dst), sesuai jumlah hari bulan.
+6. Data operasional aktif tetap menunjukkan kondisi saat ini. Data dashboard historis dimuat berhalaman agar tidak terpotong batas respons server.
+
+Uji dengan data simulasi dan build lokal; data Supabase produksi tidak diubah. Login, absensi GPS, gaji dan transaksi kasbon tidak diubah.
