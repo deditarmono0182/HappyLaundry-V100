@@ -1,0 +1,68 @@
+HappyLaundry V113.0.152 — Koreksi Potongan Kasbon
+Source dasar: V113.0.151.
+
+PEMASANGAN
+1. Setelah SQL 080, jalankan seluruh SQL_081_KOREKSI_POTONGAN_KASBON.sql di
+   Supabase SQL Editor. Salinan identik tersedia di folder supabase/081_....sql.
+   SQL 080 yang sudah sukses tidak perlu diulang.
+2. Build dan deploy source ini seperti biasa. Jika lewat GitHub Desktop,
+   isi Summary, Commit, lalu Push origin dan tunggu deploy Netlify sukses.
+3. Muat ulang aplikasi. SQL 081 hanya menambah fasilitas dan tabel audit;
+   TIDAK otomatis mengoreksi Cece atau karyawan lain.
+
+CARA KOREKSI — KHUSUS OWNER
+Absensi & Gaji > pilih bulan gaji > Daftar Gaji.
+Klik Koreksi Potongan di baris karyawan. Atau Detail > Koreksi Potongan Kasbon.
+Periksa nama dan bulan, lalu isi TOTAL potongan baru yang benar, bukan selisihnya.
+Isi alasan minimal 5 karakter, periksa pratinjau saldo, dan Simpan Koreksi Potongan.
+RIWAYAT POTONGAN KASBON
+Di baris karyawan klik Riwayat Potongan, atau Detail > Riwayat Potongan Kasbon.
+Riwayat mencakup tanggal transaksi WIB, bulan gaji, nominal awal tercatat,
+potongan yang masih aktif, status, dan alasan koreksi terakhir.
+Gunakan Tampilkan seluruh bulan untuk melihat seluruh periode atau matikan
+untuk hanya bulan gaji yang dipilih. Klik XLS Riwayat atau Print / PDF Riwayat.
+Total aktif tidak menjumlahkan kembali nominal lama yang sudah dikoreksi.
+Potongan yang menjadi nol setelah koreksi tetap terlihat dari snapshot audit.
+Di bawahnya tersedia seluruh riwayat koreksi lama/baru beserta alasannya.
+Tombol Koreksi Potongan Bulan ... membuka pengubahan hanya untuk bulan tersebut.
+Jika ingin mengoreksi bulan lain, tutup dialog lalu pilih bulan itu di halaman gaji.
+
+Jika gaji sudah memiliki pembayaran, riwayat tetap terlihat tetapi koreksi ditolak.
+
+CONTOH CECE (ANGKA DARI SCREENSHOT)
+Gaji kotor Rp2.062.200; sudah dibayar Rp0.
+Potongan tercatat Rp2.062.200; sisa utang Rp2.737.800.
+Isi Total Potongan Baru: 300000.
+Hasil: potongan Rp300.000; sisa utang Rp4.500.000; sisa gaji Rp1.762.200.
+Perhitungan gaji aktual mengikuti data order, gaji dan pembayaran terbaru.
+Koreksi ini tidak mengubah jumlah pinjaman asli atau komisi Cece.
+
+ATURAN
+- Mengurangi potongan mengembalikan selisih ke saldo utang kasbon.
+- Menambah potongan mengurangi saldo utang; server membatasi kenaikan berdasarkan
+  gaji kotor tersimpan dan sisa utang yang tersedia, termasuk hak pengelola.
+- Nilai 0 membatalkan semua potongan pada bulan yang dipilih, tanpa membatalkan
+  pinjaman kasbon. Riwayat perubahan tetap disimpan.
+- Koreksi hanya untuk gaji belum dibayar. Jika sudah ada pembayaran, jangan
+  mengubah pinjaman/bonus untuk mengakali angka potongan.
+- Nominal pinjaman tidak berubah; tidak ada kas masuk/keluar baru, tidak mengubah
+  biaya usaha, komisi, atau dasar laba pengelola.
+- Semua perubahan satu transaksi: perubahan saldo dan potongan harus sama;
+  jika ada validasi gagal, semuanya dibatalkan.
+- Data berubah dari perangkat lain: tutup dialog, muat ulang, periksa ulang angka.
+- Simpan Bonus dulu sebelum mengoreksi agar gaji memakai data yang tersimpan.
+- Kasbon baru masih mengikuti perilaku V151; fasilitas ini mengoreksi total
+  potongan yang sudah tercatat pada bulan pilihan.
+
+AUDIT
+Riwayat berisi potongan lama/baru, saldo utang lama/baru, alasan, waktu WIB,
+identitas akun Owner, serta snapshot sebelum/sesudah untuk pemeriksaan.
+Data audit tidak dapat diubah/dihapus lewat aplikasi karyawan maupun Owner.
+Baris potongan yang menjadi nol disalin ke audit sebelum dibatalkan.
+Riwayat hanya dapat dibaca Owner; karyawan tetap melihat gaji miliknya lewat Gaji Saya.
+
+PERBAIKAN LABEL
+Kartu Omzet di Absensi & Gaji diperjelas menjadi Penerimaan Pelanggan Bulan Ini,
+karena nilainya memang pembayaran yang diterima, bukan nilai semua order masuk.
+Dasar bagi hasil pengelola tetap mengikuti nilai order masuk, tanpa cadangan.
+Login/GPS, seluruh SQL lama, formula komisi dan fitur V151 tetap dipertahankan.

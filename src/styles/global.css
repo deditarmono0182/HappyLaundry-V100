@@ -12927,3 +12927,14 @@ html[data-density="ultra"] .main-content *{
 .manager-share-form{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin:16px 0}
 .manager-share-form label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px}
 @media(max-width:700px){.manager-share-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.manager-share-form button{width:100%}}
+
+/* V113.0.152 */
+.payroll-deduction-correction-modal{max-width:1000px;width:96vw}
+.deduction-correction-history{max-height:300px;overflow:auto;margin-top:12px}
+.deduction-correction-history td:last-child{min-width:180px;white-space:normal;overflow-wrap:anywhere}
+
+.deduction-history-section{margin-top:22px}
+.deduction-history-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.deduction-history-toolbar label{display:flex;align-items:center;gap:8px;font-size:13px}
+.deduction-history-toolbar input[type=checkbox]{width:auto}
+.deduction-history-section p{font-size:13px;line-height:1.5}

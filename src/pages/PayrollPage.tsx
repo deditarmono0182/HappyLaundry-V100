@@ -1,3 +1,4 @@
+import {PayrollDeductionCorrectionModal,type DeductionCorrectionTarget} from '../components/PayrollDeductionCorrectionModal'
 import {ManagerShareSettings} from '../components/ManagerShareSettings'
 import {loadManagerReport,type ManagerReport} from '../lib/managerShare'
 import {buildPayrollExport} from '../lib/payrollExport'
@@ -149,6 +150,7 @@ const monthRange=(month:string)=>{
 }
 
 export function PayrollPage(){
+  const[deductionCorrection,setDeductionCorrection]=useState<DeductionCorrectionTarget|null>(null)
   const[cashAdvanceOverride,setCashAdvanceOverride]=useState('')
   const[managerReport,setManagerReport]=useState<ManagerReport|null>(null)
   const[managerError,setManagerError]=useState('')
@@ -637,6 +639,14 @@ export function PayrollPage(){
     setBusy(false)
   }
 
+  const openDeductionCorrection=(employee:Employee,historyOnly=false)=>{
+    if(loading||managerError||!managerReport)return
+    const row=payrollRows.find(r=>r.employee.id===employee.id)
+    if(!row)return
+    setDetailEmployee(null)
+    setDeductionCorrection({employee,month,deduction:row.cashAdvanceApplied,remaining:row.cashAdvanceOutstanding,gross:row.grossTotal,paid:row.paidAmount,historyOnly})
+  }
+
   const openCashAdvanceDeduction=(employee:Employee)=>{
     const row=payrollRows.find(item=>item.employee.id===employee.id)
     const availableSalary=Math.max(0,Number(row?.grossTotal||0)-Number(row?.cashAdvanceApplied||0))
@@ -878,7 +888,7 @@ export function PayrollPage(){
       <section className="stats-grid payroll-stats">
         <StatCard icon={UsersRound} label="Karyawan Aktif" value={String(employees.length)} caption="Karyawan yang dapat diabsen"/>
         <StatCard icon={CalendarCheck2} label="Total Hadir Bulan Ini" value={String(totalPresent)} caption="Akumulasi hari hadir"/>
-        <StatCard icon={HandCoins} label="Omzet Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Bagi hasil dari nilai barang / order masuk"/>
+        <StatCard icon={HandCoins} label="Penerimaan Pelanggan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
       </section>
 
       <section className="panel data-panel">
@@ -943,7 +953,7 @@ export function PayrollPage(){
       {managerReport&&<ManagerShareSettings key={month} month={month} employees={employees} report={managerReport} onSaved={load}/>}
       {!managerError&&<>
       <section className="stats-grid payroll-stats">
-        <StatCard icon={HandCoins} label="Omzet Bulan" value={formatRupiah(monthlyRevenue)} caption="Pembayaran aktual"/>
+        <StatCard icon={HandCoins} label="Penerimaan Pelanggan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
         <StatCard icon={WalletCards} label="Gaji Bersih" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
         <StatCard icon={HandCoins} label="Kas Bon Dipotong" value={formatRupiah(totalCashAdvanceApplied)} caption={`Sisa kas bon ${formatRupiah(totalCashAdvanceOutstanding)}`}/>
         <StatCard icon={Gift} label="Komisi Order" value={formatRupiah(totalOrderCommission)} caption="Produksi + kurir yang sudah menjadi hak"/>
@@ -1007,6 +1017,8 @@ export function PayrollPage(){
                     <button className="finance-row-action cash-advance-button" onClick={()=>openCashAdvance(r.employee)}><HandCoins size={15}/>Kas Bon</button>
                     {r.cashAdvanceOutstanding>0&&<button className="finance-row-action cash-advance-deduct-button" onClick={()=>openCashAdvanceDeduction(r.employee)}><HandCoins size={15}/>Potong Kas Bon</button>}
                     {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
+                    <button className="finance-row-action" onClick={()=>openDeductionCorrection(r.employee,true)}><ReceiptText size={15}/>Riwayat Potongan</button>
+                    <button className="finance-row-action" onClick={()=>openDeductionCorrection(r.employee)}><Pencil size={15}/>Koreksi Potongan</button>
                     <button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button>
                   </div>
                 </td>
@@ -1018,6 +1030,16 @@ export function PayrollPage(){
       </section>
       </>}
     </>}
+
+    {deductionCorrection&&<PayrollDeductionCorrectionModal target={deductionCorrection}
+      onClose={()=>setDeductionCorrection(null)}
+      onSaved={async()=>{
+        const name=deductionCorrection.employee.full_name
+        setDeductionCorrection(null)
+        await load()
+        setSuccess(`Koreksi potongan kasbon ${name} tersimpan. Sisa utang dan sisa gaji diperbarui.`)
+      }}
+    />}
 
     {attendanceHistoryEmployee&&!overrideTarget&&<AttendanceHistoryModal
       employee={attendanceHistoryEmployee} initialMonth={month}
@@ -1113,6 +1135,8 @@ export function PayrollPage(){
           </table>
         </div>
         <div className="modal-actions">
+          <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee,true)}><ReceiptText size={16}/>Riwayat Potongan Kasbon</button>
+          <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee)}><Pencil size={16}/>Koreksi Potongan Kasbon</button>
           {(row?.outstanding||0)>0&&<button className="primary-button" onClick={()=>{setDetailEmployee(null);openPayrollPayment(detailEmployee)}}><HandCoins size={16}/>Catat Pembayaran</button>}
           <button className="secondary-button" onClick={()=>downloadXls(commissionDetailExport(detailEmployee))}><FileSpreadsheet size={16}/>Export XLS</button>
           <button className="secondary-button" onClick={()=>printPdf(commissionDetailExport(detailEmployee))}><FileText size={16}/>Cetak / PDF</button>
