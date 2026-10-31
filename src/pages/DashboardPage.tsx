@@ -403,6 +403,7 @@ export function DashboardPage() {
         ['Kas Masuk (Terbayar)',ownerCashIn],
         ['Pengeluaran',ownerExpense],
         ['Biaya Karyawan',ownerEmployeeCost],
+        ['Bagi Hasil Pengelola (Termasuk Biaya Karyawan)',ownerFinancial?.managerShare||0],
         ['Komisi Produksi',ownerProductionCommission],
         ['Komisi Kurir',ownerCourierCommission],
         ['Laba Bersih Operasional',ownerProfit],
@@ -417,7 +418,8 @@ export function DashboardPage() {
         ['Sedang Diproses',processing],
         ['Siap Diambil',ready]
       ],
-      summary:[['Omzet Barang Masuk',ownerOrderValue],['Kas Masuk',ownerCashIn],['Biaya Operasional',ownerExpense],['Biaya Karyawan',ownerEmployeeCost],['Laba Bersih Operasional',ownerProfit],['Laba Setelah Cadangan',ownerAfterReserve],['Surplus Kas Operasional',ownerCashOperatingSurplus]]
+      summary:[['Omzet Barang Masuk',ownerOrderValue],['Kas Masuk',ownerCashIn],['Biaya Operasional',ownerExpense],['Biaya Karyawan',ownerEmployeeCost],
+        ['Bagi Hasil Pengelola (Termasuk Biaya Karyawan)',ownerFinancial?.managerShare||0],['Laba Bersih Operasional',ownerProfit],['Laba Setelah Cadangan',ownerAfterReserve],['Surplus Kas Operasional',ownerCashOperatingSurplus]]
     })
   }
 
@@ -545,6 +547,7 @@ export function DashboardPage() {
         <div><span>Kas Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerCashIn)}</strong></div>
         <div><span>Biaya Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerExpense)}</strong></div>
         <div><span>Biaya Karyawan</span><strong className="dashboard-money-value">{formatIDR(ownerEmployeeCost)}</strong></div>
+        <div><span>Bagi Hasil Pengelola</span><strong className="dashboard-money-value">{formatIDR(ownerFinancial?.managerShare||0)}</strong></div>
         <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerProfit)}</strong></div>
         <div className={ownerCashOperatingSurplus>=0?'profit-positive':'profit-negative'}><span>Surplus Kas Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerCashOperatingSurplus)}</strong></div>
         <div><span>Piutang Aktif</span><strong className="dashboard-money-value">{formatIDR(receivable)}</strong></div>

@@ -1,3 +1,4 @@
+import {managerSharesForRange,type ManagerShareRow} from '../lib/managerShare'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   AlertTriangle, CalendarDays, CircleDollarSign, Crosshair, Eye, Landmark,
@@ -81,6 +82,7 @@ interface PayrollRow{
   allowance:number
   bonus:number
   revenueShare:number
+  managerShare:number
   total:number
 }
 
@@ -117,6 +119,7 @@ export function ProfitTargetDashboardPage(){
   const [targetOpen,setTargetOpen]=useState(false)
   const [detailType,setDetailType]=useState<DetailType|null>(null)
   const [targetDraft,setTargetDraft]=useState({revenue_target:'',profit_target:'',order_target:'',note:''})
+  const [managerMonths,setManagerMonths]=useState<{month:string;report:{rows:ManagerShareRow[]}}[]>([])
   const [message,setMessage]=useState('')
   const [success,setSuccess]=useState('')
   const [busy,setBusy]=useState(false)
@@ -183,6 +186,8 @@ export function ProfitTargetDashboardPage(){
     setPayrollAdjustments((adj.data as PayrollAdjustment[])||[])
     setServices((sv.data as Service[])||[])
     setTarget((t.data as TargetRow|null)||null)
+    try{setManagerMonths(await managerSharesForRange(startDate,`${currentMonthStart.slice(0,7)}-${new Date(now.getFullYear(),now.getMonth()+1,0).getDate()}`))}
+    catch(e){setMessage(e instanceof Error?e.message:String(e))}
   },[currentMonthStart])
 
   useEffect(()=>{void load()},[load])
@@ -251,12 +256,12 @@ export function ProfitTargetDashboardPage(){
         sum+(Number(categoryRevenue[share.category]||0)*(Number(share.share_percent||0)/100)),0
       )
       return{
-        employee,presentDays,attendancePay,allowance,bonus,revenueShare,
-        total:attendancePay+allowance+bonus+revenueShare
+        employee,presentDays,attendancePay,allowance,bonus,revenueShare,managerShare:Number(managerMonths.find(m=>m.month===monthKey(month).slice(0,7))?.report.rows.find(r=>r.employee_id===employee.id)?.amount||0),
+        total:attendancePay+allowance+bonus+revenueShare+Number(managerMonths.find(m=>m.month===monthKey(month).slice(0,7))?.report.rows.find(r=>r.employee_id===employee.id)?.amount||0)
       }
     })
     return{rows,total:rows.reduce((sum,row)=>sum+row.total,0)}
-  },[orders,itemsByOrder,serviceCategory,payrollAdjustments,employees,settingMap,attendance,sharesByEmployee])
+  },[orders,itemsByOrder,serviceCategory,payrollAdjustments,employees,settingMap,attendance,sharesByEmployee,managerMonths])
 
   const currentPayroll=useMemo(()=>payrollForMonth(currentMonth),[payrollForMonth])
   const previousPayroll=useMemo(()=>payrollForMonth(previousMonth),[payrollForMonth])
@@ -511,8 +516,8 @@ export function ProfitTargetDashboardPage(){
         {detailType==='expense'&&<>
           <div className="v113-profit-equation expense"><div><span>Pengeluaran Operasional</span><b>{formatRupiah(current.operationalExpense)}</b></div><div><span>Gaji Karyawan</span><b>{formatRupiah(current.payroll)}</b></div><strong>Total Pengeluaran {formatRupiah(current.expense)}</strong></div>
           <h4>Rincian Gaji Otomatis</h4>
-          <div className="table-wrap"><table><thead><tr><th>Karyawan</th><th>Hadir</th><th>Uang Hadir</th><th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil</th><th>Total</th></tr></thead><tbody>
-            {currentPayroll.rows.map(row=><tr key={row.employee.id}><td><b>{row.employee.full_name}</b></td><td>{row.presentDays}</td><td>{formatRupiah(row.attendancePay)}</td><td>{formatRupiah(row.allowance)}</td><td>{formatRupiah(row.bonus)}</td><td>{formatRupiah(row.revenueShare)}</td><td><b>{formatRupiah(row.total)}</b></td></tr>)}
+          <div className="table-wrap"><table><thead><tr><th>Karyawan</th><th>Hadir</th><th>Uang Hadir</th><th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil</th><th>Bagi Hasil Pengelola</th><th>Total</th></tr></thead><tbody>
+            {currentPayroll.rows.map(row=><tr key={row.employee.id}><td><b>{row.employee.full_name}</b></td><td>{row.presentDays}</td><td>{formatRupiah(row.attendancePay)}</td><td>{formatRupiah(row.allowance)}</td><td>{formatRupiah(row.bonus)}</td><td>{formatRupiah(row.revenueShare)}</td><td>{formatRupiah(row.managerShare)}</td><td><b>{formatRupiah(row.total)}</b></td></tr>)}
           </tbody></table></div>
           <h4>Pengeluaran Operasional</h4>
           <div className="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Nominal</th></tr></thead><tbody>
@@ -524,7 +529,7 @@ export function ProfitTargetDashboardPage(){
         {detailType==='profit'&&<>
           <div className="v113-profit-detail-hero"><CircleDollarSign size={30}/><span>Laba Bersih {monthLabel(currentMonth)}</span><strong>{formatRupiah(current.profit)}</strong></div>
           <div className="v113-profit-equation"><div><span>Omzet Masuk</span><b>+ {formatRupiah(current.revenue)}</b></div><div><span>Pengeluaran Operasional</span><b>− {formatRupiah(current.operationalExpense)}</b></div><div><span>Gaji Karyawan</span><b>− {formatRupiah(current.payroll)}</b></div><strong>= {formatRupiah(current.profit)}</strong></div>
-          <p className="v113-detail-note">Gaji dihitung otomatis dengan rumus yang sama seperti menu Absensi & Gaji: uang hadir + tunjangan + bonus + bagi hasil kategori layanan.</p>
+          <p className="v113-detail-note">Gaji dihitung otomatis dengan rumus yang sama seperti menu Absensi & Gaji: uang hadir + tunjangan + bonus + bagi hasil kategori layanan + bagi hasil pengelola.</p>
         </>}
 
         {detailType==='receivable'&&<>

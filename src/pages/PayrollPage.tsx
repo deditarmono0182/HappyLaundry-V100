@@ -1,3 +1,5 @@
+import {ManagerShareSettings} from '../components/ManagerShareSettings'
+import {loadManagerReport,type ManagerReport} from '../lib/managerShare'
 import {buildPayrollExport} from '../lib/payrollExport'
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
 import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
@@ -148,6 +150,8 @@ const monthRange=(month:string)=>{
 
 export function PayrollPage(){
   const[cashAdvanceOverride,setCashAdvanceOverride]=useState('')
+  const[managerReport,setManagerReport]=useState<ManagerReport|null>(null)
+  const[managerError,setManagerError]=useState('')
   const[employees,setEmployees]=useState<Employee[]>([])
   const[attendance,setAttendance]=useState<Attendance[]>([])
   const[settings,setSettings]=useState<PayrollSetting[]>([])
@@ -194,14 +198,19 @@ export function PayrollPage(){
   const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus;date:string}|null>(null)
   const[overrideReason,setOverrideReason]=useState('')
   const attendanceOverridePending=useRef(false)
+  const loadSequence=useRef(0)
 
   const cashAdvanceLimit=useCashAdvanceLimit(cashAdvanceEmployee?.id||'',!!cashAdvanceEmployee)
 
   const correctionLimit=useCashAdvanceLimit(correctCashAdvance?.employee_id||'',!!correctCashAdvance)
 
   const load=useCallback(async()=>{
-    setLoading(true);setMessage('')
+    const sequence=++loadSequence.current
+    setLoading(true);setMessage('');setManagerReport(null);setManagerError('')
+    try{
     const range=monthRange(month)
+    let manager:ManagerReport|null=null,managerFailure=''
+    try{manager=await loadManagerReport(month)}catch(e){managerFailure=e instanceof Error?e.message:String(e)}
     const [e,a,s,shr,adj,payrollPay,ca,cd,ecs,ledger,p,o,oi,sv]=await Promise.all([
       supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
       supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
@@ -218,8 +227,10 @@ export function PayrollPage(){
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
       supabase.from('v100_services').select('id,category')
     ])
+    if(sequence!==loadSequence.current)return
+    setManagerReport(manager);setManagerError(managerFailure)
     const error=e.error||a.error||s.error||shr.error||adj.error||payrollPay.error||ca.error||cd.error||ecs.error||ledger.error||p.error||o.error||oi.error||sv.error
-    if(error)setMessage(error.message)
+    if(error){setMessage(error.message);setManagerError('Data gaji belum lengkap. Muat ulang sebelum membayar atau mengekspor.')}
     else{
       setEmployees((e.data as Employee[])||[])
       setAttendance((a.data as Attendance[])||[])
@@ -239,7 +250,8 @@ export function PayrollPage(){
       for(const row of (adj.data as PayrollAdjustment[])||[])drafts[row.employee_id]=String(Number(row.bonus||0))
       setBonusDraft(drafts)
     }
-    setLoading(false)
+    }catch(e){if(sequence===loadSequence.current){setMessage(e instanceof Error?e.message:String(e));setManagerError('Data gaji belum lengkap. Muat ulang sebelum membayar atau mengekspor.')}}
+    finally{if(sequence===loadSequence.current)setLoading(false)}
   },[month])
 
   useEffect(()=>{void load()},[load])
@@ -365,7 +377,11 @@ export function PayrollPage(){
     const orderCommission=productionCommission+courierCommission
 
     const bonus=Number(bonusDraft[employee.id]??adjustmentMap.get(employee.id)?.bonus??0)
-    const grossTotal=attendancePay+allowance+bonus+revenueShare+orderCommission
+    const manager=managerReport?.rows.find(r=>r.employee_id===employee.id)
+    const managerShare=Number(manager?.amount||0)
+    const managerPercent=Number(manager?.percent||0)
+    const managerBase=Number(managerReport?.profit_base||0)
+    const grossTotal=attendancePay+allowance+bonus+revenueShare+orderCommission+managerShare
     const cashAdvanceApplied=cashAdvanceDeductions
       .filter(item=>item.employee_id===employee.id)
       .reduce((sum,item)=>sum+Number(item.amount||0),0)
@@ -386,9 +402,9 @@ export function PayrollPage(){
       commissionOrderCount:new Set(employeeLedger.map(item=>item.order_id)).size,
       courierOrderCount:new Set(employeeLedger.filter(item=>item.commission_type==='courier').map(item=>item.order_id)).size,
       commissionDetails:[...employeeLedger].sort((a,b)=>new Date(b.earned_at).getTime()-new Date(a.earned_at).getTime()),
-      bonus,grossTotal,cashAdvanceApplied,cashAdvanceOutstanding,total,payrollBalance,paymentHistory,paidAmount,outstanding,paymentStatus
+      bonus,managerShare,managerPercent,managerBase,grossTotal,cashAdvanceApplied,cashAdvanceOutstanding,total,payrollBalance,paymentHistory,paidAmount,outstanding,paymentStatus
     }
-  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap,payrollPayments,cashAdvances,cashAdvanceDeductions])
+  }),[employees,settingMap,sharesByEmployee,attendance,categoryRevenue,commissionLedger,bonusDraft,adjustmentMap,payrollPayments,cashAdvances,cashAdvanceDeductions,managerReport])
 
   const filteredEmployees=useMemo(()=>{
     const key=query.toLowerCase().trim()
@@ -570,6 +586,7 @@ export function PayrollPage(){
   }
 
   const openPayrollPayment=(employee:Employee)=>{
+    if(managerError||!managerReport||loading)return
     const row=payrollRows.find(item=>item.employee.id===employee.id)
     const outstanding=Math.max(0,Number(row?.outstanding||0))
     setPaymentEmployee(employee)
@@ -728,6 +745,7 @@ export function PayrollPage(){
 
   const savePayrollPayment=async(event:FormEvent)=>{
     event.preventDefault()
+    if(managerError||!managerReport||loading)return
     if(!paymentEmployee)return
     const row=payrollRows.find(item=>item.employee.id===paymentEmployee.id)
     const outstanding=Math.max(0,Number(row?.outstanding||0))
@@ -791,6 +809,9 @@ export function PayrollPage(){
         ['Tunjangan',Math.round(row?.allowance||0)],
         ['Bonus',Math.round(row?.bonus||0)],
         ['Bagi Hasil Kategori',Math.round(row?.revenueShare||0)],
+        ['Bagi Hasil Pengelola',Math.round(row?.managerShare||0)],
+        ['Persentase Pengelola',`${row?.managerPercent||0}%`],
+        ['Dasar Laba Sebelum Pengelola',Math.round(row?.managerBase||0)],
         ['Komisi Produksi',Math.round(row?.productionCommission||0)],
         ['Komisi Kurir',Math.round(row?.courierCommission||0)],
         ['Total Komisi Order',Math.round(row?.orderCommission||0)],
@@ -827,8 +848,8 @@ export function PayrollPage(){
       title="Absensi & Penggajian"
       description="Kelola kehadiran dan hitung gaji dari uang hadir, tunjangan, bonus, bagi hasil kategori, serta komisi per order."
       action={<div className="payroll-page-actions">
-        <button className="secondary-button" onClick={()=>downloadXls(tab==='attendance'?attendanceExport():payrollExport())}><FileSpreadsheet size={16}/>XLS</button>
-        <button className="secondary-button" onClick={()=>printPdf(tab==='attendance'?attendanceExport():payrollExport())}><FileText size={16}/>PDF</button>
+        <button className="secondary-button" disabled={loading||(tab==='payroll'&&!!managerError)} onClick={()=>downloadXls(tab==='attendance'?attendanceExport():payrollExport())}><FileSpreadsheet size={16}/>XLS</button>
+        <button className="secondary-button" disabled={loading||(tab==='payroll'&&!!managerError)} onClick={()=>printPdf(tab==='attendance'?attendanceExport():payrollExport())}><FileText size={16}/>PDF</button>
       </div>}
     />
 
@@ -918,6 +939,9 @@ export function PayrollPage(){
         </div>
       </section>
     </>:<>
+      {managerError&&<div className="error-box">{managerError} Daftar dan pembayaran gaji ditahan sampai data pengelola berhasil dimuat. <button className="secondary-button" onClick={()=>void load()}>Muat Ulang</button></div>}
+      {managerReport&&<ManagerShareSettings key={month} month={month} employees={employees} report={managerReport} onSaved={load}/>}
+      {!managerError&&<>
       <section className="stats-grid payroll-stats">
         <StatCard icon={HandCoins} label="Omzet Bulan" value={formatRupiah(monthlyRevenue)} caption="Pembayaran aktual"/>
         <StatCard icon={WalletCards} label="Gaji Bersih" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
@@ -941,7 +965,7 @@ export function PayrollPage(){
           <table className="payroll-table">
             <thead><tr>
               <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>
-              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Gaji Kotor</th><th>Kas Bon</th><th>Saldo Setelah Kasbon (Simulasi)</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
+              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Bagi Hasil Pengelola</th><th>Gaji Kotor</th><th>Kas Bon</th><th>Saldo Setelah Kasbon (Simulasi)</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
             </tr></thead>
             <tbody>
               {filteredPayroll.map(r=><tr key={r.employee.id}>
@@ -969,6 +993,7 @@ export function PayrollPage(){
                     <small>{r.courierOrderCount} nota kurir • {r.commissionOrderCount} nota komisi total</small>
                   </div>
                 </td>
+                <td><b>{formatRupiah(r.managerShare)}</b><small>{r.managerPercent}% × {formatRupiah(Math.max(0,r.managerBase))}</small></td>
                 <td><b>{formatRupiah(r.grossTotal)}</b></td>
                 <td><b className="payroll-deduction">Potongan: − {formatRupiah(r.cashAdvanceApplied)}</b><small>Sisa kasbon: {formatRupiah(r.cashAdvanceOutstanding)}</small></td>
                 <td><b className={`payroll-total ${r.payrollBalance<0?'negative':''}`}>{formatRupiah(r.payrollBalance)}</b></td>
@@ -986,11 +1011,12 @@ export function PayrollPage(){
                   </div>
                 </td>
               </tr>)}
-              {filteredPayroll.length===0&&<tr><td colSpan={15} className="table-empty">Belum ada karyawan aktif.</td></tr>}
+              {filteredPayroll.length===0&&<tr><td colSpan={16} className="table-empty">Belum ada karyawan aktif.</td></tr>}
             </tbody>
           </table>
         </div>
       </section>
+      </>}
     </>}
 
     {attendanceHistoryEmployee&&!overrideTarget&&<AttendanceHistoryModal
@@ -1002,7 +1028,7 @@ export function PayrollPage(){
       }}
     />}
 
-    {detailEmployee&&(()=>{
+    {detailEmployee&&!managerError&&!loading&&(()=>{
       const row=payrollRows.find(item=>item.employee.id===detailEmployee.id)
       const details=row?.commissionDetails||[]
       const cashHistory=cashAdvances.filter(item=>item.employee_id===detailEmployee.id)
@@ -1017,6 +1043,7 @@ export function PayrollPage(){
           <div><span>Total Komisi Order</span><b>{formatRupiah(row?.orderCommission||0)}</b></div>
           <div><span>Produksi</span><b>{formatRupiah(row?.productionCommission||0)}</b></div>
           <div><span>Kurir</span><b>{formatRupiah(row?.courierCommission||0)}</b></div>
+          <div><span>Bagi Hasil Pengelola</span><b>{formatRupiah(row?.managerShare||0)}</b><small>{row?.managerPercent||0}% × dasar laba {formatRupiah(Math.max(0,row?.managerBase||0))}</small></div>
           <div><span>Gaji Kotor</span><b>{formatRupiah(row?.grossTotal||0)}</b></div>
           <div><span>Potongan Kas Bon</span><b>− {formatRupiah(row?.cashAdvanceApplied||0)}</b></div>
           <div><span>Sisa Kas Bon</span><b>{formatRupiah(row?.cashAdvanceOutstanding||0)}</b></div>
@@ -1210,7 +1237,7 @@ export function PayrollPage(){
       </Modal>
     })()}
 
-    {paymentEmployee&&(()=>{
+    {paymentEmployee&&!managerError&&!loading&&(()=>{
       const row=payrollRows.find(item=>item.employee.id===paymentEmployee.id)
       return <Modal title={`Pembayaran Gaji — ${paymentEmployee.full_name}`} onClose={()=>!busy&&setPaymentEmployee(null)}>
         <form className="modal-form" onSubmit={savePayrollPayment}>

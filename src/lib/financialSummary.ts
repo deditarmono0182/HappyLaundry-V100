@@ -1,3 +1,4 @@
+import {managerSharesForRange} from './managerShare'
 import { supabase } from './supabase'
 import { businessDateTimeIso } from './businessTime'
 
@@ -35,6 +36,8 @@ export type FinancialSummary={
   revenueShare:number
   productionCommission:number
   courierCommission:number
+  managerShare:number
+  profitBeforeManager:number
   employeeCost:number
   operatingNet:number
   reserveTotal:number
@@ -67,7 +70,7 @@ export async function fetchFinancialSummary(from:string,to:string):Promise<Finan
   const firstMonth=`${from.slice(0,7)}-01`
   const lastMonth=`${to.slice(0,7)}-01`
 
-  const [o,p,e,a,ps,adj,shr,com,it,sv,res]=await Promise.all([
+  const [o,p,e,a,ps,adj,shr,com,it,sv,res,managerMonths]=await Promise.all([
     supabase.from('v100_orders_view')
       .select('id,total,paid_amount,status,created_at')
       .gte('created_at',fromISO).lte('created_at',toISO),
@@ -93,7 +96,8 @@ export async function fetchFinancialSummary(from:string,to:string):Promise<Finan
     supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
     supabase.from('v100_services').select('id,category'),
     supabase.from('v113095_reserve_settings')
-      .select('reserve_type,method,monthly_amount,revenue_percent,is_active')
+      .select('reserve_type,method,monthly_amount,revenue_percent,is_active'),
+    managerSharesForRange(from,to)
   ])
 
   const error=o.error||p.error||e.error||a.error||ps.error||adj.error||shr.error||com.error||it.error||sv.error||res.error
@@ -182,7 +186,10 @@ export async function fetchFinancialSummary(from:string,to:string):Promise<Finan
     .filter(row=>row.commission_type==='courier')
     .reduce((sum,row)=>sum+Number(row.amount||0),0)
 
-  const employeeCost=attendancePay+allowance+bonus+revenueShare+productionCommission+courierCommission
+  const managerShare=managerMonths.reduce((sum,m)=>sum+m.report.rows.reduce((s,r)=>s+Number(r.amount),0)*m.ratio,0)
+  const baseEmployeeCost=attendancePay+allowance+bonus+revenueShare+productionCommission+courierCommission
+  const profitBeforeManager=revenue-operating-baseEmployeeCost
+  const employeeCost=baseEmployeeCost+managerShare
   const operatingNet=revenue-operating-employeeCost
 
   let reserveTotal=0
@@ -202,7 +209,7 @@ export async function fetchFinancialSummary(from:string,to:string):Promise<Finan
   return{
     revenue,cashIn,receivable,operating,
     attendancePay,allowance,bonus,revenueShare,productionCommission,courierCommission,
-    employeeCost,operatingNet,reserveTotal,netAfterReserve:operatingNet-reserveTotal,
+    managerShare,profitBeforeManager,employeeCost,operatingNet,reserveTotal,netAfterReserve:operatingNet-reserveTotal,
     cashOperatingSurplus
   }
 }

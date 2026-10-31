@@ -1,3 +1,4 @@
+import {managerSharesForRange} from './managerShare'
 import { supabase } from './supabase'
 
 export interface PayrollExpenseRow{
@@ -22,6 +23,7 @@ export interface PayrollExpenseRow{
   production_commission:number
   courier_commission:number
   order_commission:number
+  manager_share:number
   gross_payroll:number
 }
 
@@ -71,7 +73,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
   const lastDay=new Date(last.getFullYear(),last.getMonth()+1,0)
   const lastDate=dateKey(lastDay)
 
-  const [emp,a,ps,shr,adj,p,o,oi,sv,cl]=await Promise.all([
+  const [emp,a,ps,shr,adj,p,o,oi,sv,cl,managerMonths]=await Promise.all([
     supabase.from('v109_users').select('id,full_name').eq('is_active',true).order('full_name'),
     supabase.from('v111_attendance').select('employee_id,attendance_date,status').gte('attendance_date',firstMonth).lte('attendance_date',lastDate),
     supabase.from('v111_employee_payroll_settings').select('employee_id,attendance_rate,monthly_allowance'),
@@ -84,7 +86,8 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
     supabase.from('v113_commission_ledger')
       .select('employee_id,commission_type,amount,earned_at')
       .gte('earned_at',`${firstMonth}T00:00:00`)
-      .lte('earned_at',`${lastDate}T23:59:59.999`)
+      .lte('earned_at',`${lastDate}T23:59:59.999`),
+    managerSharesForRange(firstMonth,lastDate)
   ])
 
   const error=emp.error||a.error||ps.error||shr.error||adj.error||p.error||o.error||oi.error||sv.error||cl.error
@@ -146,7 +149,9 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
       adjustments.filter(row=>row.payroll_month===mStart).map(row=>[row.employee_id,row])
     )
 
-    for(const employee of employees){
+    const managerRows=managerMonths.find(r=>r.month===mStart.slice(0,7))?.report.rows||[]
+    const monthEmployees=[...employees,...managerRows.filter(r=>!employees.some(e=>e.id===r.employee_id)).map(r=>({id:r.employee_id,full_name:r.full_name}))]
+    for(const employee of monthEmployees){
       const setting=settingMap.get(employee.id)
       const presentDays=attendance.filter(row=>
         row.employee_id===employee.id&&row.status==='present'&&inMonth(`${row.attendance_date}T12:00:00`,month)
@@ -171,7 +176,8 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
 
       // Kas bon tidak dihitung sebagai biaya usaha baru. Kas bon adalah uang muka/piutang
       // karyawan dan hanya mengurangi jumlah yang dibayar ke karyawan, bukan hak gajinya.
-      const amount=attendancePay+allowance+bonus+revenueShare+orderCommission
+      const managerShare=Number(managerRows.find(r=>r.employee_id===employee.id)?.amount||0)
+      const amount=attendancePay+allowance+bonus+revenueShare+orderCommission+managerShare
       if(amount<=0)continue
 
       result.push({
@@ -182,7 +188,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
         group_name:'SDM / Payroll',
         amount,
         payment_method:'payroll',
-        description:`${employee.full_name} • Hadir ${presentDays} hari • Uang hadir ${attendancePay.toLocaleString('id-ID')} • Tunjangan ${allowance.toLocaleString('id-ID')} • Bonus ${bonus.toLocaleString('id-ID')} • Bagi hasil ${Math.round(revenueShare).toLocaleString('id-ID')} • Komisi produksi ${Math.round(productionCommission).toLocaleString('id-ID')} • Komisi kurir ${Math.round(courierCommission).toLocaleString('id-ID')}`,
+        description:`${employee.full_name} • Hadir ${presentDays} hari • Uang hadir ${attendancePay.toLocaleString('id-ID')} • Tunjangan ${allowance.toLocaleString('id-ID')} • Bonus ${bonus.toLocaleString('id-ID')} • Bagi hasil ${Math.round(revenueShare).toLocaleString('id-ID')} • Bagi hasil pengelola ${Math.round(managerShare).toLocaleString('id-ID')} • Komisi produksi ${Math.round(productionCommission).toLocaleString('id-ID')} • Komisi kurir ${Math.round(courierCommission).toLocaleString('id-ID')}`,
         reference:`PAYROLL-${mStart.slice(0,7)}-${employee.id.slice(0,8)}`,
         created_at:`${mStart}T12:00:00`,
         payroll_month:mStart,
@@ -196,6 +202,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
         production_commission:productionCommission,
         courier_commission:courierCommission,
         order_commission:orderCommission,
+        manager_share:managerShare,
         gross_payroll:amount
       })
     }

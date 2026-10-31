@@ -1,0 +1,52 @@
+HappyLaundry V113.0.151 — Bagi Hasil Pengelola
+Dasar source: V113.0.150. Tidak mengubah login, izin GPS, SQL absensi, atau komisi order.
+
+PEMASANGAN
+1. Supabase SQL Editor: jalankan seluruh isi SQL_080_BAGI_HASIL_PENGELOLA.sql.
+   File ini sama dengan supabase/080_v113_0_151_manager_profit_share.sql.
+   Gunakan database yang sudah menggunakan SQL sebelumnya sampai 079.
+2. Build/deploy source ini seperti biasa (npm install, npm run build, deploy dist).
+   SQL 080 belum dijalankan ke database produksi oleh pembuat file ini.
+
+CARA PAKAI
+Owner > Absensi & Gaji > pilih bulan > Daftar Gaji.
+Di Bagi Hasil Pengelola, pilih nama karyawan. Default persentase 40%, dapat diubah 0–100.
+Klik Simpan Bagi Hasil Pengelola. Hanya nama yang dipilih yang menerima bagian ini.
+Pengaturan disimpan PER BULAN. Bulan berikutnya perlu dipilih/diatur kembali;
+perubahan di bulan berikutnya tidak menimpa persentase bulan sebelumnya.
+Jika lebih dari satu penerima, total persentase seluruh pengelola maksimal 100%.
+Gunakan 0% untuk menonaktifkan bagian pengelola pada bulan tersebut.
+Perubahan dicatat di audit Owner.
+
+RUMUS BULANAN (WIB)
+Nilai order masuk yang tidak dibatalkan
+- biaya operasional (pengeluaran kategori payroll tidak dihitung ulang)
+- uang kehadiran, tunjangan, bonus tersimpan, bagi hasil kategori, komisi produksi dan kurir
+= dasar laba sebelum bagian pengelola.
+Bagian pengelola = max(0, dasar laba) x persentase.
+Cadangan dari pengaturan cadangan serta pengeluaran berkategori/kelompok Cadangan
+TIDAK mengurangi dasar ini. Kasbon, potongan kasbon, dan pembayaran gaji juga bukan
+biaya baru. Gaji/komisi biasa pengelola tetap menjadi biaya; bagian pengelola sendiri
+tidak dikurangkan untuk menghitung bagian pengelola, sehingga tidak terjadi putaran.
+Agregasi server menggunakan seluruh data, tidak dibatasi 1.000 baris API.
+
+CONTOH
+Order masuk 20 juta, operasional 5 juta, seluruh gaji/komisi biasa 5 juta:
+dasar laba 10 juta; bagian 40% = 4 juta. Cadangan tidak dipotong dari dasar 10 juta.
+Piutang pelanggan termasuk nilai order. Hak pengelola dan pembayaran gaji terpisah.
+Hak berubah jika data biaya/order/gaji atau persentase bulan tersebut dikoreksi.
+Simpan Bonus dahulu jika mengubah bonus, agar dasar laba menggunakan nilai tersimpan.
+Pembayaran lama tetap tercatat saat nominal hak berubah.
+
+HASIL
+Daftar Gaji, Detail Gaji, Print/PDF, dan XLS menampilkan komponen Pengelola.
+Gaji Saya hanya menampilkan nominal/persen milik karyawan tersebut, bukan laba usaha.
+Kasbon: batas gaji berjalan ikut menghitung hak pengelola; saldo lama tidak diubah.
+Keuangan/Pengeluaran, Laba Rugi, dan Dashboard memasukkan bagian pengelola ke biaya
+karyawan. Laba sesudah pengelola berbeda dengan dasar laba sebelum pengelola.
+Di ringkasan rentang tanggal, bagian pengelola bulanan dialokasikan menurut proporsi
+hari, mengikuti alokasi tunjangan; nominal di daftar gaji tetap hak bulanan penuh.
+Bagian pengelola belum otomatis dicatat sebagai pembayaran kas: gunakan Bayar Gaji.
+
+Jika SQL 080 belum ada atau pembacaan gagal, gaji tidak diekspor/dibayar dengan
+angka bagian pengelola nol yang keliru. Absensi tetap dapat dibuka.

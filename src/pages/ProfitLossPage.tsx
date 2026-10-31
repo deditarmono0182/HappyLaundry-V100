@@ -1,3 +1,4 @@
+import {managerSharesForRange} from '../lib/managerShare'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Banknote, CalendarDays, FileSpreadsheet, FileText, PiggyBank, ReceiptText, Settings2,
@@ -126,6 +127,7 @@ export function ProfitLossPage(){
   const [appliedFrom,setAppliedFrom]=useState(businessMonthStartKey())
   const [appliedTo,setAppliedTo]=useState(today)
 
+  const [managerShare,setManagerShare]=useState(0)
   const [orders,setOrders]=useState<OrderRow[]>([])
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [expenses,setExpenses]=useState<ExpenseRow[]>([])
@@ -148,13 +150,14 @@ export function ProfitLossPage(){
   const load=useCallback(async()=>{
     setLoading(true)
     setMessage('')
+    try{
     const fromISO=businessDateTimeIso(appliedFrom)
     const toISO=businessDateTimeIso(appliedTo,'23:59:59.999')
 
     const firstMonth=`${appliedFrom.slice(0,7)}-01`
     const lastMonth=`${appliedTo.slice(0,7)}-01`
 
-    const [o,p,e,a,ps,adj,shr,com,it,sv,emp,res]=await Promise.all([
+    const [o,p,e,a,ps,adj,shr,com,it,sv,emp,res,managerMonths]=await Promise.all([
       supabase.from('v100_orders_view')
         .select('id,order_no,total,paid_amount,status,created_at')
         .gte('created_at',fromISO).lte('created_at',toISO),
@@ -188,13 +191,15 @@ export function ProfitLossPage(){
         .order('full_name'),
       supabase.from('v113095_reserve_settings')
         .select('reserve_type,label,method,monthly_amount,revenue_percent,is_active,note')
-        .order('reserve_type')
+        .order('reserve_type'),
+      managerSharesForRange(appliedFrom,appliedTo)
     ])
 
     const error=o.error||p.error||e.error||a.error||ps.error||adj.error||shr.error||com.error||it.error||sv.error||emp.error||res.error
     if(error){
       setMessage(error.message)
     }else{
+      setManagerShare(managerMonths.reduce((sum,m)=>sum+m.report.rows.reduce((s,r)=>s+Number(r.amount),0)*m.ratio,0))
       setOrders((o.data as OrderRow[])||[])
       setPayments((p.data as PaymentRow[])||[])
       setExpenses((e.data as ExpenseRow[])||[])
@@ -208,7 +213,8 @@ export function ProfitLossPage(){
       setEmployees((emp.data as EmployeeRow[])||[])
       setReserveSettings((res.data as ReserveSetting[])||[])
     }
-    setLoading(false)
+    }catch(e){setMessage(e instanceof Error?e.message:String(e))}
+    finally{setLoading(false)}
   },[appliedFrom,appliedTo])
 
   useEffect(()=>{void load()},[load])
@@ -314,7 +320,7 @@ export function ProfitLossPage(){
     const productionCommission=productionDetail.reduce((sum,row)=>sum+Number(row.amount||0),0)
     const courierCommission=courierDetail.reduce((sum,row)=>sum+Number(row.amount||0),0)
 
-    const payroll=attendancePay+allowance+bonus+revenueShare+productionCommission+courierCommission
+    const payroll=attendancePay+allowance+bonus+revenueShare+productionCommission+courierCommission+managerShare
     const totalCost=operating+payroll
     const operatingNet=revenue-totalCost
     const operatingMargin=revenue>0?(operatingNet/revenue)*100:0
@@ -347,11 +353,11 @@ export function ProfitLossPage(){
       validOrders,revenue,cashIn,receivable,operatingRows,excludedPayrollLike,operating,
       attendanceDetail,attendancePay,allowanceDetail,allowance,bonusDetail,bonus,
       shareDetail,revenueShare,productionDetail,courierDetail,productionCommission,courierCommission,
-      payroll,totalCost,operatingNet,operatingMargin,cashOperatingSurplus,
+      managerShare,payroll,totalCost,operatingNet,operatingMargin,cashOperatingSurplus,
       reserveDetail,reserveTotal,netAfterReserve,marginAfterReserve,
       operatingByCategory,employeeMap
     }
-  },[orders,payments,expenses,attendance,settings,adjustments,shares,commissions,items,services,employees,reserveSettings,appliedFrom,appliedTo])
+  },[orders,payments,expenses,attendance,settings,adjustments,shares,commissions,items,services,employees,reserveSettings,appliedFrom,appliedTo,managerShare])
 
   const setQuick=(next:Exclude<PeriodPreset,'custom'>)=>{
     const current=businessDateKey()
@@ -405,7 +411,7 @@ export function ProfitLossPage(){
   const exportOptions=()=>({
     title:'Laporan Laba Rugi',
     filename:`laba-rugi-${appliedFrom}-${appliedTo}`,
-    subtitle:`Periode ${appliedFrom} s/d ${appliedTo}`,
+    subtitle:`Periode ${appliedFrom} s/d ${appliedTo} • Hak pengelola bulanan dialokasikan menurut proporsi hari periode, bukan pembayaran kas`,
     businessName:'HappyLaundry Babakan',
     summary:[
       ['Pendapatan / Omzet',Math.round(report.revenue)],
@@ -436,7 +442,8 @@ export function ProfitLossPage(){
           ['Bonus',Math.round(report.bonus)],
           ['Bagi Hasil',Math.round(report.revenueShare)],
           ['Komisi Produksi',Math.round(report.productionCommission)],
-          ['Komisi Kurir',Math.round(report.courierCommission)]
+          ['Komisi Kurir',Math.round(report.courierCommission)],
+          ['Bagi Hasil Pengelola',Math.round(report.managerShare)]
         ] as Array<[string,string|number]>,
         total:['Subtotal Biaya Karyawan',Math.round(report.payroll)] as [string,number]
       },
@@ -551,6 +558,7 @@ export function ProfitLossPage(){
       <div><span>Bagi Hasil</span><b>{formatRupiah(report.revenueShare)}</b></div>
       <div><span>Komisi Produksi</span><b>{formatRupiah(report.productionCommission)}</b></div>
       <div><span>Komisi Kurir</span><b>{formatRupiah(report.courierCommission)}</b></div>
+      <div><span>Bagi Hasil Pengelola</span><b>{formatRupiah(report.managerShare)}</b></div>
       <div className="is-total"><span>Total Biaya Karyawan</span><b>{formatRupiah(report.payroll)}</b></div>
     </div>
 
@@ -638,6 +646,7 @@ export function ProfitLossPage(){
         <button className="pl-row" onClick={()=>setDetail('share')}><span>Bagi Hasil</span><b>{formatRupiah(report.revenueShare)}</b></button>
         <button className="pl-row" onClick={()=>setDetail('production')}><span>Komisi Produksi</span><b>{formatRupiah(report.productionCommission)}</b></button>
         <button className="pl-row" onClick={()=>setDetail('courier')}><span>Komisi Kurir</span><b>{formatRupiah(report.courierCommission)}</b></button>
+        <button className="pl-row" onClick={()=>setDetail('payroll')}><span>Bagi Hasil Pengelola</span><b>{formatRupiah(report.managerShare)}</b></button>
         <button className="pl-row pl-total-row" onClick={()=>setDetail('payroll')}><span>Total Biaya Karyawan</span><b>{formatRupiah(report.payroll)}</b></button>
       </article>
 
