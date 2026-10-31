@@ -1,3 +1,4 @@
+import {loadCommissionLedger} from '../lib/commissionLedger'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, CalendarDays, CreditCard, FileSpreadsheet, FileText, Printer, ReceiptText, TrendingUp, Users, WalletCards } from 'lucide-react'
@@ -110,9 +111,7 @@ export function ReportsPage(){
         .select('*'),
       supabase.from('v100_customers')
         .select('id,name'),
-      supabase.from('v113_commission_ledger')
-        .select('commission_type,amount,earned_at')
-        .gte('earned_at',fromISO).lte('earned_at',toISO)
+      loadCommissionLedger(appliedFrom,appliedTo)
     ])
 
     const error=orderRes.error||paymentRes.error||cashRes.error||itemRes.error||customerRes.error||commissionRes.error

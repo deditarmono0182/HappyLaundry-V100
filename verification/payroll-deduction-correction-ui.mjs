@@ -14,7 +14,7 @@ const dataset={
  v113152_deduction_corrections:[],v113_payroll_payments:[]
 }
 let mutationCount=0,fail=false,pending=null,readFailure=false;const saved=[]
-globalThis.__mock={from(table){let lo=0,hi=999;const filters=[];const q={select(){return q},eq(k,v){filters.push([k,'eq',v]);return q},gte(k,v){filters.push([k,'gte',v]);return q},lte(k,v){filters.push([k,'lte',v]);return q},order(){return q},range(a,b){lo=a;hi=b;return q},then(ok){return Promise.resolve({data:(dataset[table]||[]).filter(r=>filters.every(([k,op,v])=>op==='eq'?r[k]===v:op==='gte'?r[k]>=v:r[k]<=v)).slice(lo,hi+1),error:readFailure&&table==='v113152_deduction_corrections'?{message:'SQL081 missing'}:null}).then(ok)}};return q},async rpc(name,args){
+globalThis.__mock={from(table){let lo=0,hi=999;const filters=[];const q={select(){return q},eq(k,v){filters.push([k,'eq',v]);return q},gte(k,v){filters.push([k,'gte',v]);return q},lt(k,v){filters.push([k,'lt',v]);return q},lte(k,v){filters.push([k,'lte',v]);return q},order(){return q},range(a,b){lo=a;hi=b;return q},then(ok){return Promise.resolve({data:(dataset[table]||[]).filter(r=>filters.every(([k,op,v])=>op==='eq'?r[k]===v:op==='gte'?r[k]>=v:op==='lt'?r[k]<v:r[k]<=v)).slice(lo,hi+1),error:readFailure&&table==='v113152_deduction_corrections'?{message:'SQL081 missing'}:null}).then(ok)}};return q},async rpc(name,args){
  if(name==='v113151_manager_report')return {data:{rows:[],profit_base:7260585},error:null}
  assert.equal(name,'v113152_correct_payroll_deduction');mutationCount++;saved.push(args);if(pending)await pending;if(fail)throw Error('Jaringan terputus')
  const beforeDeductions=structuredClone(dataset.v113072_cash_advance_deductions)

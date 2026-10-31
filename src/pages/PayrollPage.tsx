@@ -1,3 +1,4 @@
+import {loadCommissionLedger} from '../lib/commissionLedger'
 import {PayrollDeductionCorrectionModal,type DeductionCorrectionTarget} from '../components/PayrollDeductionCorrectionModal'
 import {ManagerShareSettings} from '../components/ManagerShareSettings'
 import {loadManagerReport,type ManagerReport} from '../lib/managerShare'
@@ -16,7 +17,7 @@ import { StatCard } from '../components/StatCard'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { formatRupiah } from '../lib/format'
 import { supabase } from '../lib/supabase'
-import { BUSINESS_TIME_ZONE, businessDateKey, businessMonthKey, businessDateTimeIso } from '../lib/businessTime'
+import { BUSINESS_TIME_ZONE, businessDateKey, businessMonthKey } from '../lib/businessTime'
 
 type AttendanceStatus='present'|'permission'|'sick'|'absent'
 
@@ -222,7 +223,7 @@ export function PayrollPage(){
       supabase.from('v113072_employee_cash_advances').select('id,employee_id,amount,remaining_amount,note,issued_at,cancelled_at,cancel_reason').order('issued_at',{ascending:false}),
       supabase.from('v113072_cash_advance_deductions').select('id,cash_advance_id,employee_id,payroll_month,amount,created_at').eq('payroll_month',range.start),
       supabase.from('v113_employee_commission_settings').select('*'),
-      supabase.from('v113_commission_ledger').select('*').gte('earned_at',businessDateTimeIso(range.start)).lte('earned_at',businessDateTimeIso(range.end,'23:59:59.999')),
+      loadCommissionLedger(range.start,range.end),
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_orders_view').select('id,subtotal,total,status,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),

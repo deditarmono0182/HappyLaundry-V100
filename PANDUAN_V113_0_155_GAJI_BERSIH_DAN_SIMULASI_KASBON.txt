@@ -1,0 +1,17 @@
+HappyLaundry V113.0.155 — Gaji Saya: gaji bersih dan simulasi kasbon dipisahkan
+Dasar: V113.0.154. Tidak ada SQL baru; SQL 082 yang sudah sukses tidak perlu diulang.
+
+Gaji Bersih = Gaji Kotor - Potongan Kasbon Tercatat (minimal Rp0 sesuai rumus lama).
+Sisa Gaji Belum Dibayar = Gaji Bersih - Pembayaran Gaji Tercatat (minimal Rp0).
+Sisa utang kasbon bukan otomatis potongan tambahan untuk periode gaji tersebut.
+
+Contoh screenshot Santos:
+Gaji kotor Rp2.292.175 - potongan Rp1.700.000 = gaji bersih Rp592.175.
+Sudah dibayar Rp0, sehingga sisa gaji belum dibayar Rp592.175.
+Sisa utang kasbon Rp2.400.000 ditampilkan terpisah.
+Rp592.175 - Rp2.400.000 = -Rp1.807.825 hanya simulasi jika seluruh sisa utang dilunasi.
+Simulasi disimpan dalam panel lipat dan tidak lagi menjadi angka utama/Status Saldo Minus.
+Status pembayaran mengikuti sisa gaji dan pembayaran, bukan besarnya seluruh sisa utang.
+
+Perubahan tampilan ini tidak mengubah pinjaman, potongan, pembayaran, gaji,
+komisi, hak pengelola, SQL, login atau GPS. Cukup deploy source ini lalu muat ulang.

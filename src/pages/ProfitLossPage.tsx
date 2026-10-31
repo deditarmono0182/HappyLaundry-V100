@@ -1,3 +1,4 @@
+import {loadCommissionLedger} from '../lib/commissionLedger'
 import {managerSharesForRange} from '../lib/managerShare'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
@@ -178,9 +179,7 @@ export function ProfitLossPage(){
         .gte('payroll_month',firstMonth).lte('payroll_month',lastMonth),
       supabase.from('v111_employee_revenue_shares')
         .select('employee_id,category,share_percent'),
-      supabase.from('v113_commission_ledger')
-        .select('employee_id,commission_type,amount,earned_at')
-        .gte('earned_at',fromISO).lte('earned_at',toISO),
+      loadCommissionLedger(appliedFrom,appliedTo),
       supabase.from('v100_order_items')
         .select('order_id,service_id,subtotal'),
       supabase.from('v100_services')

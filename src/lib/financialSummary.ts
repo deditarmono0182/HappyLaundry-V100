@@ -1,3 +1,4 @@
+import {loadCommissionLedger} from './commissionLedger'
 import {managerSharesForRange} from './managerShare'
 import { supabase } from './supabase'
 import { businessDateTimeIso } from './businessTime'
@@ -90,9 +91,7 @@ export async function fetchFinancialSummary(from:string,to:string):Promise<Finan
       .gte('payroll_month',firstMonth).lte('payroll_month',lastMonth),
     supabase.from('v111_employee_revenue_shares')
       .select('employee_id,category,share_percent'),
-    supabase.from('v113_commission_ledger')
-      .select('employee_id,commission_type,amount,earned_at')
-      .gte('earned_at',fromISO).lte('earned_at',toISO),
+    loadCommissionLedger(from,to),
     supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
     supabase.from('v100_services').select('id,category'),
     supabase.from('v113095_reserve_settings')

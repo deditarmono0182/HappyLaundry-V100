@@ -1,0 +1,35 @@
+HappyLaundry V113.0.156 — Komisi Owner dan Gaji Saya memakai data lengkap
+Dasar: V113.0.155. Tidak ada SQL baru. Build/deploy, lalu muat ulang aplikasi.
+
+MASALAH
+Daftar Gaji Owner sebelumnya mengambil seluruh hak komisi semua karyawan dalam
+satu permintaan API. Batas jumlah baris Supabase dapat memotong hasil tersebut.
+Akibatnya komisi produksi/kurir sebagian karyawan bisa lebih kecil atau tampak
+Rp0 walaupun haknya ada. Gaji Saya menggunakan permintaan khusus karyawan,
+sehingga perbedaan ini dapat terlihat walaupun periode dan databasenya sama.
+
+PERBAIKAN
+Komisi kini dibaca bertahap 100 baris hingga selesai, bukan berhenti pada hasil
+permintaan pertama. Urutan memakai waktu, order, karyawan, dan jenis komisi agar
+hak tim pada waktu yang sama tidak melompat atau dihitung ganda.
+Batas tanggal WIB: mulai tanggal awal pukul00:00 sampai sebelum hari sesudah
+tanggal akhir pukul00:00, sama seperti rentang bulan pada Gaji Saya.
+Pembacaan komisi yang sama digunakan Daftar Gaji, pengeluaran payroll, ringkasan
+keuangan, Laba Rugi, Dashboard dan Laporan, agar pemotongan hasil API tidak terulang.
+Jika satu halaman gagal/terdeteksi hak ganda, data parsial tidak dipakai sebagai
+angka gaji. Pada Daftar Gaji, pembayaran/ekspor ditahan sampai data berhasil dimuat.
+
+PENGECEKAN SETELAH DEPLOY
+1. Owner > Absensi & Gaji > Oktober2026 > Daftar Gaji > SANTOS > Detail.
+2. Akun Santos > Gaji Saya > Oktober2026 > Muat Ulang.
+3. Bandingkan komisi produksi, kurir, gaji kotor, potongan kasbon, dan sisa gaji.
+   Gunakan bulan yang sama dan data yang sudah disimpan; simpan Bonus jika diubah.
+Angka pada dua screenshot sebelumnya berselisih Rp443.000:
+produksi Rp1.889.675 vs Rp1.559.175 (Rp330.500), kurir Rp112.500 vs Rp0.
+Contoh dengan data Gaji Saya pada screenshot: gaji kotor Rp2.292.175,
+potongan Rp1.700.000, sudah dibayar Rp0, sisa gaji Rp592.175.
+Angka aktual mengikuti hak komisi dan koreksi terbaru di database.
+
+Perbaikan ini hanya memuat hak komisi yang sudah ada. Tidak mengubah tarif,
+penugasan order, nominal komisi, tanggal pengakuan, pinjaman/potongan/pembayaran,
+SQL, login atau GPS. Bagi hasil pengelola tetap memakai rumus yang disepakati.

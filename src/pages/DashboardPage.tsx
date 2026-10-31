@@ -1,3 +1,4 @@
+import {loadCommissionLedger} from '../lib/commissionLedger'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Banknote, BellRing, CheckCircle2, Clock3, Crown, FileSpreadsheet, Landmark, MonitorCog, PackageCheck, ShieldAlert, ShoppingBag, Smartphone, TrendingUp, UserRoundX, Users, WalletCards, WashingMachine } from 'lucide-react'
@@ -74,7 +75,7 @@ export function DashboardPage() {
       supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
       supabase.from('v100_order_items').select('order_id,service_id,service_name,unit,quantity,subtotal'),
       supabase.from('v100_services').select('id,category'),
-      supabase.from('v113_commission_ledger').select('commission_type,amount,earned_at'),
+      loadCommissionLedger(),
       supabase.from('v113_order_commissions').select('order_id,worker_id,courier_id')
     ])
     if(o.error||c.error||pay.error||i.error||s.error||commissionRes.error||assignmentRes.error)setMessage((o.error||c.error||pay.error||i.error||s.error||commissionRes.error||assignmentRes.error)?.message||'Gagal memuat data')

@@ -89,7 +89,6 @@ export function MyPayrollPage(){
 
   const status=useMemo(()=>{
     if(!data)return '-'
-    if(data.payroll_balance<0)return 'Saldo Minus'
     if(data.gross_total>0&&data.net_total<=0&&data.cash_advance_applied>0)return 'Terpotong Kas Bon'
     if(data.net_total<=0&&data.paid_amount<=0)return 'Nihil'
     if(data.remaining_pay<=0)return 'Lunas'
@@ -116,7 +115,7 @@ export function MyPayrollPage(){
       <section className="stats-grid my-payroll-stats">
         <StatCard icon={WalletCards} label="Gaji Kotor" value={formatRupiah(Number(data.gross_total||0))} caption={`${data.present_days||0} hari hadir`}/>
         <StatCard icon={HandCoins} label="Potongan Kas Bon" value={formatRupiah(Number(data.cash_advance_applied||0))} caption={`Sisa kas bon ${formatRupiah(Number(data.cash_advance_outstanding||0))}`}/>
-        <StatCard icon={CreditCard} label="Saldo Gaji" value={formatRupiah(Number(data.payroll_balance||0))} caption={`Status: ${status}`}/>
+        <StatCard icon={CreditCard} label="Gaji Bersih" value={formatRupiah(Number(data.net_total||0))} caption={`Status: ${status}`}/>
         <StatCard icon={CheckCircle2} label="Sudah Dibayar" value={formatRupiah(Number(data.paid_amount||0))} caption={`Sisa ${formatRupiah(Number(data.remaining_pay||0))}`}/>
       </section>
 
@@ -132,8 +131,15 @@ export function MyPayrollPage(){
           <div><span>Bagi Hasil Pengelola ({data.manager_percent}%)</span><b>{formatRupiah(data.manager_share)}</b></div>
           <div className="emphasis"><span>Gaji Kotor</span><b>{formatRupiah(Number(data.gross_total||0))}</b></div>
           <div className="deduction"><span>Kas Bon Dipotong</span><b>− {formatRupiah(Number(data.cash_advance_applied||0))}</b></div>
-          <div className={`emphasis ${data.payroll_balance<0?'negative':''}`}><span>Saldo Gaji Setelah Kas Bon</span><b>{formatRupiah(Number(data.payroll_balance||0))}</b><small>{data.payroll_balance<0?'Kas bon lebih besar dari hak gaji periode ini':''}</small></div>
+          <div className="emphasis"><span>Gaji Bersih (Potongan Tercatat)</span><b>{formatRupiah(Number(data.net_total||0))}</b><small>Gaji kotor dikurangi potongan kasbon yang sudah tercatat.</small></div>
+          <div className="emphasis"><span>Sisa Gaji Belum Dibayar</span><b>{formatRupiah(Number(data.remaining_pay||0))}</b></div>
+          <div><span>Sisa Utang Kasbon (Belum Dipotong)</span><b>{formatRupiah(Number(data.cash_advance_outstanding||0))}</b><small>Utang ini belum menjadi potongan tambahan gaji bulan ini.</small></div>
         </div>
+        <details className="my-payroll-simulation">
+          <summary>Simulasi jika seluruh sisa kasbon dilunasi</summary>
+          <p>Gaji bersih {formatRupiah(data.net_total)} − sisa utang kasbon {formatRupiah(data.cash_advance_outstanding)} = <b>{formatRupiah(data.payroll_balance)}</b>.</p>
+          <p>Ini hanya simulasi pelunasan seluruh utang. Sisa kasbon tidak otomatis dipotong lagi dan tidak mengubah sisa gaji yang harus dibayarkan.</p>
+        </details>
       </section>
 
       <section className="panel data-panel">

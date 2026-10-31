@@ -7,7 +7,7 @@ globalThis.window=dom.window;globalThis.document=dom.window.document;globalThis.
 const dataset={v109_users:[{id:'a',full_name:'Pengelola',login_id:'A',is_active:true},{id:'b',full_name:'Pekerja',login_id:'B',is_active:true}],v111_employee_payroll_settings:[{employee_id:'a',attendance_rate:0,monthly_allowance:20000},{employee_id:'b',attendance_rate:0,monthly_allowance:30000}],v113_payroll_payments:[{id:'pay1',employee_id:'a',amount:10000,paid_at:'2026-10-03T00:00:00Z'}],v113072_cash_advance_deductions:[{id:'ded1',employee_id:'a',amount:5000}]}
 const shares=new Map();let failed=false,saveFailed=false,mutations=0
 const report=month=>({payroll_month:month,revenue:200000,operating:50000,employee_cost:50000,profit_base:100000,rows:shares.has(month)?[{employee_id:'a',full_name:'Pengelola',percent:shares.get(month),amount:100000*shares.get(month)/100,updated_at:''}]:[]})
-globalThis.__mock={from(table){const q={select(){return q},eq(){return q},gte(){return q},lte(){return q},order(){return q},then(ok){return Promise.resolve({data:dataset[table]||[],error:null}).then(ok)}};return q},async rpc(name,args){
+globalThis.__mock={from(table){const q={select(){return q},eq(){return q},gte(){return q},lt(){return q},lte(){return q},order(){return q},range(){return q},then(ok){return Promise.resolve({data:dataset[table]||[],error:null}).then(ok)}};return q},async rpc(name,args){
  if(name==='v113151_manager_report')return {data:failed?null:report(args.p_month),error:failed?{message:'function missing'}:null}
  if(name==='v113151_save_manager_share'){mutations++;if(saveFailed)return {error:{message:'Simpan gagal'}};assert.equal(args.p_employee,'a');shares.set(args.p_month,args.p_percent);return {error:null}}
  throw new Error('unexpected RPC '+name)

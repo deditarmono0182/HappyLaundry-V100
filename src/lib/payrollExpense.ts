@@ -1,3 +1,5 @@
+import {businessMonthKey} from './businessTime'
+import {loadCommissionLedger} from './commissionLedger'
 import {managerSharesForRange} from './managerShare'
 import { supabase } from './supabase'
 
@@ -47,10 +49,7 @@ interface CommissionLedgerRow{
 const pad=(n:number)=>String(n).padStart(2,'0')
 const monthStartKey=(d:Date)=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-01`
 const dateKey=(d:Date)=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
-const inMonth=(value:string,d:Date)=>{
-  const x=new Date(value)
-  return x.getFullYear()===d.getFullYear()&&x.getMonth()===d.getMonth()
-}
+const inMonth=(value:string,d:Date)=>businessMonthKey(value)===monthStartKey(d).slice(0,7)
 const monthList=(from:string,to:string)=>{
   const a=new Date(`${from}T12:00:00`)
   const b=new Date(`${to}T12:00:00`)
@@ -83,10 +82,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
     supabase.from('v100_orders_view').select('id,subtotal,total,status,created_at').gte('created_at',`${firstMonth}T00:00:00`).lte('created_at',`${lastDate}T23:59:59.999`),
     supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
     supabase.from('v100_services').select('id,category'),
-    supabase.from('v113_commission_ledger')
-      .select('employee_id,commission_type,amount,earned_at')
-      .gte('earned_at',`${firstMonth}T00:00:00`)
-      .lte('earned_at',`${lastDate}T23:59:59.999`),
+    loadCommissionLedger(firstMonth,lastDate),
     managerSharesForRange(firstMonth,lastDate)
   ])
 
@@ -154,7 +150,7 @@ export async function loadPayrollExpenseRows(from:string,to:string):Promise<Payr
     for(const employee of monthEmployees){
       const setting=settingMap.get(employee.id)
       const presentDays=attendance.filter(row=>
-        row.employee_id===employee.id&&row.status==='present'&&inMonth(`${row.attendance_date}T12:00:00`,month)
+        row.employee_id===employee.id&&row.status==='present'&&row.attendance_date.slice(0,7)===mStart.slice(0,7)
       ).length
       const attendancePay=presentDays*Number(setting?.attendance_rate||0)
       const allowance=Number(setting?.monthly_allowance||0)
