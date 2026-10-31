@@ -1,0 +1,8 @@
+HappyLaundry V113.0.154 — Aksi Daftar Gaji lebih ringkas
+Dasar source: V113.0.153. Tidak ada SQL baru.
+Tombol Riwayat Hadir di baris Daftar Gaji dihapus karena sudah tersedia di Daftar Hadir.
+Untuk melihat/mengoreksi kehadiran: Absensi & Gaji > Daftar Hadir > Riwayat Hadir.
+Aksi gaji tetap: Detail, Kas Bon, Bayar (jika ada sisa gaji), Potongan Kasbon, Atur.
+Potongan gaji, tunai/transfer, riwayat dan koreksi kasbon tetap dalam satu menu Potongan Kasbon.
+Deploy source ini seperti biasa; SQL 082 yang sudah sukses tidak perlu diulang.
+Tidak mengubah data gaji, komisi, kasbon, pembayaran, login, atau GPS.

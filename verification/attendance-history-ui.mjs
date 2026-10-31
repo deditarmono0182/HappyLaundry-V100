@@ -45,7 +45,7 @@ assert.match(document.querySelector('.attendance-history-modal').textContent,/Ka
 assert.ok(calls.some(([table,filters])=>table==='v109_audit_log'&&filters.some(([k,op,v])=>k==='entity_id'&&op==='gte'&&v==='2026-09-01')),'history filters attendance date, not modification date')
 await act(async()=>document.querySelector('.attendance-history-modal button[aria-label="Tutup"]').click());await click('Daftar Gaji');await click('Detail')
 assert.match(document.querySelector('.payroll-detail-summary').textContent,/Uang Kehadiran \(2 hari\)/);assert.match(document.querySelector('.payroll-detail-summary').textContent.replace(/[\s\u00a0]/g,''),/Rp20\.000/)
-await act(async()=>document.querySelector('.modal-backdrop button[aria-label="Tutup"]').click());await click('Riwayat Hadir')
+await act(async()=>document.querySelector('.modal-backdrop button[aria-label="Tutup"]').click());await click('Daftar Hadir');await click('Riwayat Hadir')
 failDaily=true;await click('Muat Ulang');assert.match(document.querySelector('.attendance-history-modal').textContent,/Koneksi absensi gagal/);assert.equal(document.querySelectorAll('tr[data-attendance-date]').length,0,'failed read does not mark all days missing')
 failDaily=false;await click('Muat Ulang');assert.ok(tableRow('2026-09-29'))
 await act(async()=>root.unmount());await unlink(file)

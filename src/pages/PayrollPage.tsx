@@ -959,7 +959,6 @@ export function PayrollPage(){
                 <td>
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
-                    <button className="finance-row-action" onClick={()=>setAttendanceHistoryEmployee(r.employee)}><CalendarCheck2 size={15}/>Riwayat Hadir</button>
                     <button className="finance-row-action cash-advance-button" onClick={()=>openCashAdvance(r.employee)}><HandCoins size={15}/>Kas Bon</button>
                     {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
                     <button className="finance-row-action" onClick={()=>openDeductionCorrection(r.employee,true)}><ReceiptText size={15}/>Potongan Kasbon</button>
