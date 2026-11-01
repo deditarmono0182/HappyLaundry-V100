@@ -1,0 +1,13 @@
+HappyLaundry V113.0.160 — Kartu Laptop & Angka Kecil
+
+Dasar source V113.0.159. Pembaruan ini hanya mengubah tampilan. Tidak perlu SQL baru.
+
+- Laptop: kartu ringkasan Keuangan & Laporan kembali dalam grid, sejenis susunan halaman Laba Rugi. Tiga kolom pada layar menengah dan empat kolom pada laptop lebar.
+- HP: kartu tetap memanjang dan tersusun ke bawah seperti pilihan sebelumnya.
+- Angka kartu Dashboard dan Keuangan & Laporan seragam 14px, sama skala dengan keterangannya, tanpa bold.
+- Filter periode, pilihan nama bulan, perbaikan header HP dan tombol Kembali ke Aplikasi pada PDF dari V159 tetap tersedia.
+- Penambahan hak akses Stok Barang ditunda sesuai permintaan. Tidak ada perubahan pada pengaturan karyawan, akses menu, database, login, atau GPS dalam versi ini.
+
+Pemasangan: ekstrak ZIP, salin isi source ke repository yang sama, pertahankan .env. Isi Summary di GitHub Desktop, Commit lalu Push origin. Tunggu deployment selesai, muat ulang aplikasi dan periksa versi V113.0.160.
+
+Pemeriksaan lokal: browser pada lebar 320/390/430/768/1366px, grid laptop dan kartu HP, angka 14px tanpa bold, filter bulan/tahun dan navigasi. Perbaikan PDF diuji ulang. Build produksi dan regresi pembayaran gaji serta absensi.

@@ -31,8 +31,8 @@ for(const width of [320,390,430,768,1366]){
   for(const b of result.buttons)assert.ok(b.rect.x>=-1&&b.rect.right<=width+1,name+' '+width+' hidden button '+b.text)
   if(width<=700){assert.ok(result.copy.width>width*.65,name+' title squeezed');assert.ok(result.actions.y>=result.copy.bottom-1,name+' actions overlap title')}
   if(['dashboard','finance'].includes(name))assert.ok(result.weights.every(w=>w==='400'),name+' bold fonts '+[...new Set(result.weights)])
-  if(name==='dashboard')assert.equal(new Set(result.sizes).size,1,'count and money same size')
-  if(name==='finance'){assert.equal(result.rows.length,7);for(let i=1;i<7;i++)assert.ok(result.rows[i].y>=result.rows[i-1].bottom,'cards stacked');if(width===390||width===1366)await page.screenshot({path:dir+'/finance-'+width+'.png',fullPage:true})}
+  if(name==='dashboard'){assert.equal(new Set(result.sizes).size,1,'count and money same size');assert.ok(result.sizes.every(s=>s==='14px'),'all values small 14px')}
+  if(name==='finance'){assert.equal(result.rows.length,7);if(width<=700){for(let i=1;i<7;i++)assert.ok(result.rows[i].y>=result.rows[i-1].bottom,'phone cards stacked')}else{assert.equal(result.rows[0].y,result.rows[1].y,'desktop cards are a grid');assert.ok(result.rows[1].x>result.rows[0].x)};if(width===390||width===1366)await page.screenshot({path:dir+'/finance-'+width+'.png',fullPage:true})}
   if(name==='inventory'&&width===390)await page.screenshot({path:dir+'/inventory-'+width+'.png',fullPage:true})
  }
 }
@@ -45,5 +45,5 @@ for(const fn of ['__printPdf','__financialPdf']){
 const pp=page.waitForEvent('popup');await page.evaluate(()=>window.__printPdf({title:'Fallback',filename:'x',headers:[],rows:[]}));const popup=await pp;await popup.waitForLoadState();await popup.evaluate(()=>window.opener=null);await popup.locator('#report-return').click();await popup.waitForURL(origin+'/?page=finance');assert.ok(await popup.locator('.finance-reports-hub').isVisible());await popup.close()
 const original=page.url();page.once('dialog',dialog=>dialog.dismiss());await page.evaluate(()=>{const old=window.open;window.open=()=>null;window.__printPdf({title:'Blocked',filename:'x',headers:[],rows:[]});window.open=old});assert.equal(page.url(),original)
 assert.deepEqual(failures,[])
-console.log('PASS V159 real Chromium: 320/390/430/768/1366px Dashboard, Finance, Inventory and shared multi-action headers; no overflow/title overlap, no bold, uniform values, seven stacked cards, named months/leap-year bounds, navigation; both PDF previews return/close, print hides tools, detached opener fallback, blocked popup preserves app.')
+console.log('PASS V160 real Chromium: 320/390/430/768/1366px Dashboard, Finance, Inventory and shared multi-action headers; no overflow/title overlap, no bold, uniform values, desktop grid/mobile rows and small14px values, named months/leap-year bounds, navigation; both PDF previews return/close, print hides tools, detached opener fallback, blocked popup preserves app.')
 }finally{await browser.close();server.close()}

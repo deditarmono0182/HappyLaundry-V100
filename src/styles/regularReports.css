@@ -9,7 +9,7 @@ html body .main-content .regular-report-page[data-typography="regular"] .stat-ca
 html body .main-content .regular-report-page[data-typography="regular"] .dashboard-money-value,
 html body .main-content .regular-report-page[data-typography="regular"] .owner-business-kpis strong,
 html body .main-content .regular-report-page[data-typography="regular"] .finance-live-kpi b{
-  font-size:20px!important;
+  font-size:14px!important;
   line-height:1.4!important;
   letter-spacing:0!important;
 }
@@ -107,7 +107,7 @@ html body .main-content .regular-report-page .finance-hub-current-period{
   html body .main-content .regular-report-page[data-typography="regular"] .stat-card strong,
   html body .main-content .regular-report-page[data-typography="regular"] .dashboard-money-value,
   html body .main-content .regular-report-page[data-typography="regular"] .owner-business-kpis strong,
-  html body .main-content .regular-report-page[data-typography="regular"] .finance-live-kpi b{font-size:17px!important}
+  html body .main-content .regular-report-page[data-typography="regular"] .finance-live-kpi b{font-size:14px!important}
   html body .main-content .regular-report-page .finance-hub-period-title{flex-basis:100%}
   html body .main-content .regular-report-page .finance-hub-quick-periods{
     display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;
@@ -117,4 +117,16 @@ html body .main-content .regular-report-page .finance-hub-current-period{
   html body .main-content .regular-report-page .finance-live-kpi{padding:12px;gap:10px;grid-template-columns:32px minmax(0,1fr)}
   html body .main-content .regular-report-page .finance-kpi-icon{width:32px;height:32px;border-radius:10px}
   html body .main-content .regular-report-page .finance-kpi-content{column-gap:10px}
+}
+
+/* V160: desktop finance cards return to a compact grid; phones retain the approved rows. */
+@media(min-width:701px){
+  html body .main-content .regular-report-page .finance-live-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  html body .main-content .regular-report-page .finance-live-kpi{min-height:108px;padding:14px;gap:10px;align-items:start;grid-template-columns:32px minmax(0,1fr)}
+  html body .main-content .regular-report-page .finance-kpi-icon{width:32px;height:32px}
+  html body .main-content .regular-report-page .finance-kpi-content{grid-template-columns:minmax(0,1fr);grid-template-areas:"label" "value" "caption";gap:5px}
+  html body .main-content .regular-report-page .finance-kpi-content b{text-align:left;white-space:normal;overflow-wrap:anywhere}
+}
+@media(min-width:1101px){
+  html body .main-content .regular-report-page .finance-live-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
