@@ -1,0 +1,23 @@
+HappyLaundry V113.0.158 — Pembayaran Gaji Tanpa Selisih Pembulatan Rp1
+
+Dasar source: V113.0.157. Tidak perlu SQL baru.
+
+Penyebab: nominal awal memakai pembulatan terdekat, batas kolom memakai pembulatan ke bawah. Pecahan hasil perhitungan persentase dan bilangan komputer membuat nominal tampil Rp513.100 tetapi maksimal hanya Rp513.099.
+
+Perbaikan untuk seluruh karyawan:
+- Gaji bersih akhir dibulatkan ke rupiah terdekat, setelah potongan kasbon tercatat.
+- Sisa yang dapat dibayar memakai rumus yang sama di owner dan akun karyawan.
+- Angka awal, batas maksimal, pemeriksaan simpan, status lunas dan XLS mengikuti sisa yang sama.
+- Pembayaran sebagian tetap bisa; pembayaran melebihi sisa dan pecahan rupiah ditolak.
+- Kotak pembayaran menampilkan Gaji Bersih (Potongan Tercatat), bukan simulasi jika seluruh utang dibayar.
+- Pengiriman ganda saat tombol ditekan berulang dicegah selama proses simpan di halaman yang sama.
+- Nominal komisi asli, pinjaman, potongan kasbon, serta riwayat pembayaran lama tidak diubah.
+
+Pemasangan:
+1. Ekstrak ZIP, salin isi source ke folder repository yang sama, pertahankan .env.
+2. GitHub Desktop: isi Summary, Commit, Push origin, tunggu deployment selesai.
+3. Muat ulang aplikasi, buka Absensi & Gaji > Daftar Gaji > pilih bulan > Bayar.
+4. Untuk Robet, jika belum ada pembayaran dan hak gaji Rp513.100, nominal itu sekarang dapat dibayar penuh.
+5. Jika sebelumnya benar-benar baru dibayar Rp513.099, sisa Rp1 tetap merupakan kekurangan pembayaran. Catat Rp1 setelah benar-benar dibayarkan. Tidak ada pembayaran yang dibuat otomatis oleh pembaruan.
+
+Build dan uji data simulasi lokal berhasil. Pengujian meliputi contoh Robet, pembulatan naik/turun, pembayaran sebagian/lunas, sisa Rp1 nyata, penolakan nominal berlebih, simpan gagal, serta konsistensi owner/karyawan. Tidak menjalankan transaksi di Supabase produksi.

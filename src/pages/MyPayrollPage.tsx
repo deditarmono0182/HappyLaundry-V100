@@ -1,3 +1,4 @@
+import {payrollSettlement} from '../lib/payrollSettlement'
 import {loadCashAdvanceRepayments,type CashAdvanceRepayment} from '../lib/cashAdvanceRepayments'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CalendarRange, CheckCircle2, CreditCard, HandCoins, ReceiptText, WalletCards } from 'lucide-react'
@@ -63,17 +64,17 @@ export function MyPayrollPage(){
       const managerAmount=Number(managerShare.data?.amount||0)
       const gross=managerAmount+attendancePay+Number(b.allowance||0)+Number(b.bonus||0)+share+production+courier
       const applied=Number(b.cash_advance_applied||0)
-      const net=Math.max(0,gross-applied)
+      const paid=Number(b.paid_amount||0)
+      const {net,remaining}=payrollSettlement(gross,applied,paid)
       const outstandingCashAdvance=Number(b.cash_advance_outstanding||0)
       const payrollBalance=net-outstandingCashAdvance
-      const paid=Number(b.paid_amount||0)
       setData({
         ...b,
         present_days:present,permission_days:Number(b.permission_days||0),sick_days:Number(b.sick_days||0),absent_days:Number(b.absent_days||0),
         attendance_rate:attendanceRate,attendance_pay:attendancePay,allowance:Number(b.allowance||0),bonus:Number(b.bonus||0),
         revenue_share:share,production_commission:production,courier_commission:courier,manager_share:managerAmount,manager_percent:Number(managerShare.data?.percent||0),gross_total:gross,
         cash_advance_applied:applied,cash_advance_outstanding:outstandingCashAdvance,
-        net_total:net,payroll_balance:payrollBalance,paid_amount:paid,remaining_pay:Math.max(0,net-paid),commission_details:details,
+        net_total:net,payroll_balance:payrollBalance,paid_amount:paid,remaining_pay:remaining,commission_details:details,
         cash_advance_history:(b.cash_advance_history||[]) as CashAdvanceHistory[],payment_history:(b.payment_history||[]) as PaymentHistory[]
       } as MyPayroll)
       if(b.employee?.id){

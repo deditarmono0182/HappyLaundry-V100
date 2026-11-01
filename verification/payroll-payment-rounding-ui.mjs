@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict'
+import {build} from 'esbuild'
+import {writeFile,unlink} from 'node:fs/promises'
+import {JSDOM} from 'jsdom'
+const dom=new JSDOM('<div id="root"></div>',{url:'http://localhost/payroll'});Object.assign(globalThis,{window:dom.window,document:dom.window.document,IS_REACT_ACT_ENVIRONMENT:true,__role:'owner'})
+const raw=[513099.99999999994,200000.6,1000.49]
+const employees=raw.map((_,i)=>({id:'e'+i,full_name:i?'KARYAWAN '+i:'HAJI ROBET',login_id:'e'+i,is_active:true}))
+const ledger=raw.map((amount,i)=>({employee_id:'e'+i,order_id:'o'+i,commission_type:'production',amount,earned_at:'2026-10-10T00:00:00Z'}))
+const payments=[];const writes=[];let fail=false
+const dataset={v109_users:employees,v113_commission_ledger:ledger,v113_payroll_payments:payments}
+globalThis.__mock={from(table){let payload,filters=[],lo=0,hi=999;const q={select(){return q},eq(k,v){filters.push([k,v]);return q},gte(){return q},lte(){return q},lt(){return q},order(){return q},range(a,b){lo=a;hi=b;return q},insert(p){payload=p;return q},then(ok){if(payload){writes.push({...payload});if(!fail)payments.push({...payload,id:'p'+payments.length});return Promise.resolve({error:fail?{message:'Layanan pembayaran gagal'}:null}).then(ok)}return Promise.resolve({data:(dataset[table]||[]).filter(r=>filters.every(([k,v])=>r[k]===v)).slice(lo,hi+1),error:null}).then(ok)}};return q},async rpc(name){if(name==='v113151_manager_report')return {data:{rows:[],profit_base:0},error:null};if(name==='v113072_my_payroll_base')return {data:{employee:employees[0],paid_amount:payments.filter(p=>p.employee_id==='e0').reduce((s,p)=>s+p.amount,0)},error:null};if(name==='v113072_my_commissions')return {data:ledger.filter(p=>p.employee_id==='e0'),error:null};if(name==='v113072_my_revenue_share')return {data:0,error:null};if(name==='v113151_my_manager_share')return {data:{amount:0,percent:0},error:null};throw Error(name)}}
+const bundle=await build({stdin:{contents:`export {PayrollPage} from './src/pages/PayrollPage';export {MyPayrollPage} from './src/pages/MyPayrollPage';export {payrollSettlement} from './src/lib/payrollSettlement'`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,write:false,platform:'node',format:'esm',packages:'external',jsx:'automatic',plugins:[{name:'mock',setup(b){b.onResolve({filter:/lib\/supabase$|\.\/supabase$/},a=>({path:a.path,namespace:'db'}));b.onLoad({filter:/.*/,namespace:'db'},()=>({contents:'export const supabase=globalThis.__mock'}));b.onResolve({filter:/lib\/auth$/},a=>({path:a.path,namespace:'auth'}));b.onLoad({filter:/.*/,namespace:'auth'},()=>({contents:'export const useAuth=()=>({profile:{role:globalThis.__role}})'}))}}]})
+const file='verification/.rounding-payment-ui.mjs';await writeFile(file,bundle.outputFiles[0].text);const {PayrollPage,MyPayrollPage,payrollSettlement}=await import('./.rounding-payment-ui.mjs');const React=await import('react');const {act}=React;const {createRoot}=await import('react-dom/client');const {MemoryRouter}=await import('react-router-dom');const root=createRoot(document.getElementById('root'));let revision=0
+const mount=page=>act(async()=>root.render(React.createElement(MemoryRouter,{key:++revision},React.createElement(page))))
+const click=label=>act(async()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent===label);assert.ok(b,label);b.click()})
+const input=async(selector,value)=>act(async()=>{const el=document.querySelector(selector);Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set.call(el,value);el.dispatchEvent(new window.Event('input',{bubbles:true}));el.dispatchEvent(new window.Event('change',{bubbles:true}))})
+const row=i=>[...document.querySelectorAll('.payroll-table tbody tr')].find(r=>r.textContent.includes(employees[i].full_name))
+const pay=async i=>act(async()=>{const b=[...row(i).querySelectorAll('button')].find(b=>b.textContent==='Bayar');assert.ok(b);b.click()})
+const field=()=>document.querySelector('.modal-form input[type=number]')
+const submit=()=>act(async()=>document.querySelector('.modal-form').dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true})))
+await mount(PayrollPage);await input('input[type=month]','2026-10');await click('Daftar Gaji');await pay(0)
+assert.equal(field().value,'513100');assert.equal(field().max,'513100');assert.equal(field().checkValidity(),true,'displayed full payment passes native browser max/step')
+await input('.modal-form input[type=number]','513101');assert.equal(field().checkValidity(),false);await submit();assert.equal(writes.length,0,'handler also rejects amounts above cap')
+await input('.modal-form input[type=number]','513099.5');await submit();assert.equal(writes.length,0,'whole rupiah payment required')
+await input('.modal-form input[type=number]','513099');await submit();assert.equal(writes.at(-1).amount,513099);await pay(0);assert.equal(field().value,'1');assert.equal(field().max,'1','actual Rp1 short payment is preserved')
+await submit();assert.equal(writes.at(-1).amount,1);assert.match(row(0).textContent,/Lunas/);assert.ok(![...row(0).querySelectorAll('button')].some(b=>b.textContent==='Bayar'))
+await pay(1);assert.equal(field().value,'200001');assert.equal(field().checkValidity(),true);fail=true;await submit();assert.match(document.body.textContent,/Layanan pembayaran gagal/);assert.ok(field());assert.ok(![...document.querySelectorAll('button')].find(b=>b.textContent==='Catat Pembayaran').disabled);fail=false;await submit();assert.match(row(1).textContent,/Lunas/)
+await pay(2);assert.equal(field().value,'1000');assert.equal(field().max,'1000');await submit();assert.match(row(2).textContent,/Lunas/)
+globalThis.__role='employee';await mount(MyPayrollPage);await input('input[type=month]','2026-10');assert.match(document.querySelector('.my-payroll-stats').textContent,/Lunas/);assert.doesNotMatch(document.querySelector('.my-payroll-stats').textContent,/Sebagian/)
+assert.deepEqual(payrollSettlement(513099.99,0,513100),{net:513100,remaining:0});assert.deepEqual(payrollSettlement(1000.4,100,400),{net:900,remaining:500});assert.deepEqual(payrollSettlement(100,200,0),{net:0,remaining:0})
+assert.equal(ledger[0].amount,raw[0],'original commissions unchanged');assert.ok(writes.every(w=>w.payroll_month==='2026-10-01'))
+await act(async()=>root.unmount());await unlink(file)
+console.log('PASS V158: Robet Rp513100 passes native max and submit, genuine Rp1 remainder payable, all employee rounding, partial/full payments and Lunas after refresh, overpayment/fraction guards, failed save retry, employee-owner parity, immutable source commissions.')

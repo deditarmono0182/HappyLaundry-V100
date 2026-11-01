@@ -1,3 +1,4 @@
+import {payrollSettlement} from '../lib/payrollSettlement'
 import {loadCommissionLedger} from '../lib/commissionLedger'
 import {PayrollDeductionCorrectionModal,type DeductionCorrectionTarget} from '../components/PayrollDeductionCorrectionModal'
 import {ManagerShareSettings} from '../components/ManagerShareSettings'
@@ -200,6 +201,7 @@ export function PayrollPage(){
   const[overrideReason,setOverrideReason]=useState('')
   const attendanceOverridePending=useRef(false)
   const loanSavePending=useRef(false)
+  const salaryPaymentPending=useRef(false)
   const loadSequence=useRef(0)
 
   const cashAdvanceLimit=useCashAdvanceLimit(cashAdvanceEmployee?.id||'',!!cashAdvanceEmployee)
@@ -390,11 +392,10 @@ export function PayrollPage(){
     const cashAdvanceOutstanding=cashAdvances
       .filter(item=>item.employee_id===employee.id&&!item.cancelled_at)
       .reduce((sum,item)=>sum+Number(item.remaining_amount||0),0)
-    const total=Math.max(0,grossTotal-cashAdvanceApplied)
-    const payrollBalance=total-cashAdvanceOutstanding
     const paymentHistory=payrollPayments.filter(item=>item.employee_id===employee.id)
     const paidAmount=paymentHistory.reduce((sum,item)=>sum+Number(item.amount||0),0)
-    const outstanding=Math.max(0,total-paidAmount)
+    const {net:total,remaining:outstanding}=payrollSettlement(grossTotal,cashAdvanceApplied,paidAmount)
+    const payrollBalance=total-cashAdvanceOutstanding
     const paymentStatus=grossTotal>0&&total<=0&&cashAdvanceApplied>0?'cashbon':total<=0&&paidAmount<=0?'nil':paidAmount<=0?'unpaid':outstanding>0?'partial':'paid'
 
     return{
@@ -702,14 +703,17 @@ export function PayrollPage(){
 
   const savePayrollPayment=async(event:FormEvent)=>{
     event.preventDefault()
-    if(managerError||!managerReport||loading)return
+    if(managerError||!managerReport||loading||salaryPaymentPending.current)return
     if(!paymentEmployee)return
     const row=payrollRows.find(item=>item.employee.id===paymentEmployee.id)
     const outstanding=Math.max(0,Number(row?.outstanding||0))
-    const amount=Math.max(0,Number(paymentForm.amount)||0)
+    const amount=Number(paymentForm.amount)
+    if(!Number.isSafeInteger(amount)){setMessage('Nominal pembayaran harus berupa rupiah bulat.');return}
     if(amount<=0){setMessage('Nominal pembayaran harus lebih dari Rp 0.');return}
-    if(amount>outstanding+0.01){setMessage(`Nominal melebihi sisa gaji ${formatRupiah(outstanding)}.`);return}
+    if(amount>outstanding){setMessage(`Nominal melebihi sisa gaji ${formatRupiah(outstanding)}.`);return}
+    salaryPaymentPending.current=true
     setBusy(true);setMessage('');setSuccess('')
+    try{
     const range=monthRange(month)
     const{error}=await supabase.from('v113_payroll_payments').insert({
       employee_id:paymentEmployee.id,
@@ -719,13 +723,14 @@ export function PayrollPage(){
       note:paymentForm.note.trim()||null,
       paid_at:new Date().toISOString()
     })
-    if(error){setMessage(error.message);setBusy(false);return}
+    if(error){setMessage(error.message);return}
     const employeeName=paymentEmployee.full_name
     setPaymentEmployee(null)
     setPaymentForm({amount:'0',payment_method:'Transfer',note:''})
     setSuccess(`Pembayaran gaji ${employeeName} sebesar ${formatRupiah(amount)} berhasil dicatat.`)
     await load()
-    setBusy(false)
+    }catch(error){setMessage(error instanceof Error?error.message:'Pembayaran belum dapat dikonfirmasi. Muat ulang riwayat sebelum mencoba lagi.')}
+    finally{salaryPaymentPending.current=false;setBusy(false)}
   }
 
   const attendanceExport=()=>({
@@ -1013,7 +1018,7 @@ export function PayrollPage(){
           <div><span>Gaji Kotor</span><b>{formatRupiah(row?.grossTotal||0)}</b></div>
           <div><span>Potongan Kas Bon</span><b>− {formatRupiah(row?.cashAdvanceApplied||0)}</b></div>
           <div><span>Sisa Kas Bon</span><b>{formatRupiah(row?.cashAdvanceOutstanding||0)}</b></div>
-          <div><span>Saldo Setelah Sisa Kasbon (Simulasi)</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
+          <div><span>Gaji Bersih (Potongan Tercatat)</span><b>{formatRupiah(row?.total||0)}</b></div>
           <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
           <div><span>Sisa Gaji</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
         </div>
@@ -1184,12 +1189,12 @@ export function PayrollPage(){
       return <Modal title={`Pembayaran Gaji — ${paymentEmployee.full_name}`} onClose={()=>!busy&&setPaymentEmployee(null)}>
         <form className="modal-form" onSubmit={savePayrollPayment}>
           <div className="payroll-payment-card">
-            <div><span>Saldo Setelah Sisa Kasbon (Simulasi)</span><b className={(row?.payrollBalance||0)<0?'payroll-negative':''}>{formatRupiah(row?.payrollBalance||0)}</b></div>
+            <div><span>Gaji Bersih (Potongan Tercatat)</span><b>{formatRupiah(row?.total||0)}</b></div>
             <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
             <div><span>Sisa</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
           </div>
           <label>Nominal Pembayaran
-            <input type="number" min="1" max={Math.max(0,Math.floor(Number(row?.outstanding||0)))} value={paymentForm.amount} onChange={e=>setPaymentForm({...paymentForm,amount:e.target.value})}/>
+            <input type="number" min="1" step="1" max={row?.outstanding||0} value={paymentForm.amount} onChange={e=>setPaymentForm({...paymentForm,amount:e.target.value})}/>
           </label>
           <label>Metode Pembayaran
             <select value={paymentForm.payment_method} onChange={e=>setPaymentForm({...paymentForm,payment_method:e.target.value})}>
