@@ -1,3 +1,4 @@
+import {openReportWindow,showReportPreview} from './reportPreview'
 export type ExportCell=string|number|null|undefined
 export type ExportRow=ExportCell[]
 
@@ -118,7 +119,7 @@ export function downloadXls(options:ExportTableOptions){
 }
 
 export function printPdf(options:ExportTableOptions){
-  const w=window.open('','_blank','width=1000,height=760')
+  const w=openReportWindow()
   if(!w)return
 
   const summary=(options.summary||[])
@@ -166,14 +167,11 @@ export function printPdf(options:ExportTableOptions){
       <tbody>${options.rows.map(row=>`<tr>${row.map(cell=>`<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
     </table>
     <footer>HappyLaundry Babakan • ${options.rows.length} baris data</footer>
-    <div class="no-print"><button onclick="window.print()">Simpan / Cetak PDF</button></div>
+    
   </body>
   </html>`
 
-  w.document.write(html)
-  w.document.close()
-  w.focus()
-  window.setTimeout(()=>w.print(),250)
+  showReportPreview(w,html)
 }
 
 
@@ -304,7 +302,7 @@ export function downloadFinancialStatementXls(options:FinancialStatementExportOp
 }
 
 export function printFinancialStatementPdf(options:FinancialStatementExportOptions){
-  const w=window.open('','_blank','width=900,height=760')
+  const w=openReportWindow()
   if(!w)return
   const brand=options.businessName||'HappyLaundry Babakan'
   const summary=options.summary.map(([label,value])=>
@@ -327,6 +325,6 @@ export function printFinancialStatementPdf(options:FinancialStatementExportOptio
   .summary{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:12px}.kpi{border:1px solid #d8e7ef;border-radius:7px;padding:8px;background:#f7fbfd;display:flex;justify-content:space-between;gap:10px}.kpi span{color:#647f90}.kpi b{font-size:11px;color:#164f73}
   section{break-inside:avoid;margin:0 0 10px}section h2{margin:0;padding:6px 8px;background:#2c7fb8;color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.3px}table{width:100%;border-collapse:collapse}td{padding:5px 8px;border-bottom:1px solid #e5edf2}td:last-child{text-align:right;font-variant-numeric:tabular-nums}.subtotal td{font-weight:bold;background:#eef6fb;border-top:1px solid #bcd8e8}
   .results{margin-top:10px;border:1px solid #d8e7ef}.result{display:flex;justify-content:space-between;padding:7px 9px;border-bottom:1px solid #e7eef2;font-weight:bold}.result.grand{background:#e8f7ef;color:#086d4b;font-size:12px;border-top:2px solid #90cdb1}.note{font-size:8.5px;color:#718691;margin:4px 0}.no-print{display:flex;justify-content:flex-end;margin-top:12px}.no-print button{border:0;border-radius:8px;background:#1e88e5;color:#fff;padding:9px 13px;font-weight:bold}@media print{.no-print{display:none}}
-  </style></head><body><header><div><h1>${escapeHtml(options.title)}</h1><p>${escapeHtml(options.subtitle)}</p></div><div class="brand"><b>${escapeHtml(brand)}</b><br>Laporan Owner</div></header><div class="summary">${summary}</div>${sections}<div class="results">${results}</div>${notes}<div class="no-print"><button onclick="window.print()">Simpan / Cetak PDF</button></div></body></html>`
-  w.document.write(html);w.document.close();w.focus();window.setTimeout(()=>w.print(),250)
+  </style></head><body><header><div><h1>${escapeHtml(options.title)}</h1><p>${escapeHtml(options.subtitle)}</p></div><div class="brand"><b>${escapeHtml(brand)}</b><br>Laporan Owner</div></header><div class="summary">${summary}</div>${sections}<div class="results">${results}</div>${notes}</body></html>`
+  showReportPreview(w,html)
 }

@@ -5,6 +5,7 @@ import App from'./App'
 import{AuthProvider}from'./lib/auth'
 import{AppErrorBoundary}from'./components/AppErrorBoundary'
 import'./styles/global.css'
+import'./styles/regularReports.css'
 
 const savedDensity=localStorage.getItem('happylaundry-density')||'compact'
 document.documentElement.dataset.density=savedDensity

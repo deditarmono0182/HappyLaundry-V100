@@ -463,7 +463,7 @@ export function DashboardPage() {
   },[orders])
 
 
-  return <>
+  return <div className="owner-dashboard-page regular-report-page" data-typography="regular">
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, keuangan, pembayaran, order, proses cucian, dan piutang." hideBack
       action={isOwner?<button type="button" className="secondary-button" onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:undefined}
     />
@@ -799,5 +799,5 @@ export function DashboardPage() {
       </div>
       <div className="category-detail-actions"><button type="button" className="secondary-button" onClick={()=>setSelectedCategory(null)}>Tutup</button></div>
     </Modal>}
-  </>
+  </div>
 }

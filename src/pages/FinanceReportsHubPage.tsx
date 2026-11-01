@@ -1,3 +1,5 @@
+import {readDashboardPages} from '../lib/dashboardPages'
+import {dashboardRange,monthNames} from '../lib/dashboardPeriod'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -9,7 +11,7 @@ import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
 import { fetchFinancialSummary, type FinancialSummary } from '../lib/financialSummary'
-import { addBusinessDays, businessDateKey, businessDateLabel } from '../lib/businessTime'
+import { addBusinessDays, businessDateKey, businessDateLabel, businessMonthKey, businessParts } from '../lib/businessTime'
 import type { OrderRow } from '../types/order'
 
 type PaymentRow={
@@ -26,7 +28,7 @@ type ExpenseRow={
   description:string|null
 }
 
-type PeriodPreset='today'|'7d'|'month'|'custom'
+type PeriodPreset='today'|'7d'|'month'|'custom'|'selected-month'
 
 const sections=[
   {
@@ -60,6 +62,7 @@ export function FinanceReportsHubPage(){
   const navigate=useNavigate()
   const todayKey=businessDateKey(new Date())
   const [preset,setPreset]=useState<PeriodPreset>('7d')
+  const [selectedMonth,setSelectedMonth]=useState(()=>businessMonthKey())
   const [from,setFrom]=useState(addBusinessDays(todayKey,-6))
   const [to,setTo]=useState(todayKey)
   const [orders,setOrders]=useState<OrderRow[]>([])
@@ -72,9 +75,9 @@ export function FinanceReportsHubPage(){
     let alive=true
     const load=async()=>{
       const [orderRes,paymentRes,expenseRes]=await Promise.all([
-        supabase.from('v100_orders_view').select('*').order('created_at',{ascending:false}),
-        supabase.from('v100_payments').select('amount,method,created_at').order('created_at',{ascending:false}),
-        supabase.from('v106_expenses_view').select('id,expense_date,amount,category_name,description').order('expense_date',{ascending:false})
+        readDashboardPages(()=>supabase.from('v100_orders_view').select('*').order('id',{ascending:true})),
+        readDashboardPages(()=>supabase.from('v100_payments').select('amount,method,created_at').order('id',{ascending:true})),
+        readDashboardPages(()=>supabase.from('v106_expenses_view').select('id,expense_date,amount,category_name,description').order('id',{ascending:true}))
       ])
       if(!alive)return
       const error=orderRes.error||paymentRes.error||expenseRes.error
@@ -107,14 +110,19 @@ export function FinanceReportsHubPage(){
     return()=>{alive=false}
   },[from,to])
 
-  const setQuickPeriod=(value:Exclude<PeriodPreset,'custom'>)=>{
+  const setQuickPeriod=(value:Exclude<PeriodPreset,'custom'|'selected-month'>)=>{
     const today=businessDateKey(new Date())
     setPreset(value)
     if(value==='today'){setFrom(today);setTo(today)}
     if(value==='7d'){setFrom(addBusinessDays(today,-6));setTo(today)}
     if(value==='month'){setFrom(`${today.slice(0,7)}-01`);setTo(today)}
   }
-  const periodLabel=preset==='today'?'Hari Ini':preset==='7d'?'7 Hari':preset==='month'?'Bulan Ini':`${from} s/d ${to}`
+  const chooseMonth=(month:string)=>{
+    const range=dashboardRange('selected-month',month)
+    setSelectedMonth(month);setPreset('selected-month')
+    setFrom(businessDateKey(range.start));setTo(range.toKey)
+  }
+  const periodLabel=preset==='selected-month'?dashboardRange('selected-month',selectedMonth).label:preset==='today'?'Hari Ini':preset==='7d'?'7 Hari':preset==='month'?'Bulan Ini':`${from} s/d ${to}`
   const periodOrders=useMemo(()=>orders.filter(row=>{const key=businessDateKey(row.created_at);return row.status!=='cancelled'&&key>=from&&key<=to}),[orders,from,to])
   const periodPayments=useMemo(()=>payments.filter(row=>{const key=businessDateKey(row.created_at);return key>=from&&key<=to}),[payments,from,to])
   const periodExpenses=useMemo(()=>expenses.filter(row=>row.expense_date>=from&&row.expense_date<=to),[expenses,from,to])
@@ -209,7 +217,7 @@ export function FinanceReportsHubPage(){
     y:padY+innerH-(row.orders/maxOrders)*innerH
   }))
 
-  return <div className="finance-reports-hub colorful-finance-hub">
+  return <div className="finance-reports-hub colorful-finance-hub regular-report-page" data-typography="regular">
     <PageHeader
       eyebrow="KONTROL OWNER"
       title="Keuangan & Laporan"
@@ -219,15 +227,25 @@ export function FinanceReportsHubPage(){
     <section className="panel finance-hub-period-panel">
       <div className="finance-hub-period-title"><CalendarDays size={14}/><b>Periode</b></div>
       <div className="finance-hub-quick-periods">
-        <button type="button" className={preset==='today'?'is-active':''} onClick={()=>setQuickPeriod('today')}>Hari Ini</button>
-        <button type="button" className={preset==='7d'?'is-active':''} onClick={()=>setQuickPeriod('7d')}>7 Hari</button>
-        <button type="button" className={preset==='month'?'is-active':''} onClick={()=>setQuickPeriod('month')}>Bulan Ini</button>
+        <button type="button" aria-pressed={preset==='today'} className={preset==='today'?'is-active':''} onClick={()=>setQuickPeriod('today')}>Hari Ini</button>
+        <button type="button" aria-pressed={preset==='7d'} className={preset==='7d'?'is-active':''} onClick={()=>setQuickPeriod('7d')}>7 Hari</button>
+        <button type="button" aria-pressed={preset==='month'} className={preset==='month'?'is-active':''} onClick={()=>setQuickPeriod('month')}>Bulan Ini</button>
+        <button type="button" aria-pressed={preset==='selected-month'} className={preset==='selected-month'?'is-active':''} onClick={()=>chooseMonth(selectedMonth)}>Pilih Bulan</button>
       </div>
       <div className="finance-hub-custom-period">
         <label><span>Dari</span><input type="date" value={from} onChange={e=>{setFrom(e.target.value);setPreset('custom')}}/></label>
         <label><span>Sampai</span><input type="date" value={to} onChange={e=>{setTo(e.target.value);setPreset('custom')}}/></label>
       </div>
       <span className="finance-hub-current-period">{periodLabel}</span>
+      {preset==='selected-month'&&<div className="finance-hub-month-selects">
+        <label>Bulan<select aria-label="Bulan laporan keuangan" value={selectedMonth.slice(5)} onChange={e=>chooseMonth(`${selectedMonth.slice(0,4)}-${e.target.value}`)}>
+          {monthNames.map((name,i)=><option key={name} value={String(i+1).padStart(2,'0')}>{name}</option>)}
+        </select></label>
+        <label>Tahun<select aria-label="Tahun laporan keuangan" value={selectedMonth.slice(0,4)} onChange={e=>chooseMonth(`${e.target.value}-${selectedMonth.slice(5)}`)}>
+          {Array.from({length:21},(_,i)=>businessParts().year-i).map(year=><option key={year} value={year}>{year}</option>)}
+        </select></label>
+      </div>}
+
     </section>
 
     {message&&<div className="error-box">{message}</div>}
@@ -235,31 +253,31 @@ export function FinanceReportsHubPage(){
     <section className="finance-live-kpis">
       <button type="button" className="finance-live-kpi tone-blue" onClick={()=>navigate('/finance')}>
         <span className="finance-kpi-icon"><BarChart3 size={22}/></span>
-        <span><small>Omzet / Barang Masuk</small><b>{formatIDR(omzetToday)}</b><em>{periodOrders.length} order • {periodLabel}</em></span>
+        <span className="finance-kpi-content"><small>Omzet / Barang Masuk</small><b>{formatIDR(omzetToday)}</b><em>{periodOrders.length} order • {periodLabel}</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-green" onClick={()=>navigate('/finance/income')}>
         <span className="finance-kpi-icon"><WalletCards size={22}/></span>
-        <span><small>Kas Masuk</small><b>{formatIDR(cashInToday)}</b><em>Pembayaran diterima • {periodLabel}</em></span>
+        <span className="finance-kpi-content"><small>Kas Masuk</small><b>{formatIDR(cashInToday)}</b><em>Pembayaran diterima • {periodLabel}</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-red" onClick={()=>navigate('/finance/expenses')}>
         <span className="finance-kpi-icon"><ReceiptText size={22}/></span>
-        <span><small>Pengeluaran</small><b>{formatIDR(operatingExpensePeriod)}</b><em>Biaya operasional • {periodLabel}</em></span>
+        <span className="finance-kpi-content"><small>Pengeluaran</small><b>{formatIDR(operatingExpensePeriod)}</b><em>Biaya operasional • {periodLabel}</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-cyan" onClick={()=>navigate('/payroll')}>
         <span className="finance-kpi-icon"><FileText size={22}/></span>
-        <span><small>Biaya Karyawan</small><b>{formatIDR(employeeCostPeriod)}</b><em>Gaji, tunjangan, bonus, bagi hasil & komisi</em></span>
+        <span className="finance-kpi-content"><small>Biaya Karyawan</small><b>{formatIDR(employeeCostPeriod)}</b><em>Gaji, bonus, bagi hasil & komisi</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-purple" onClick={()=>navigate('/profit-loss')}>
         <span className="finance-kpi-icon"><TrendingUp size={22}/></span>
-        <span><small>Laba Bersih Operasional</small><b>{formatIDR(profitToday)}</b><em>Omzet - biaya operasional - biaya karyawan</em></span>
+        <span className="finance-kpi-content"><small>Laba Bersih Operasional</small><b>{formatIDR(profitToday)}</b><em>Sebelum cadangan</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-amber" onClick={()=>navigate('/receivables')}>
         <span className="finance-kpi-icon"><Clock3 size={22}/></span>
-        <span><small>Piutang Aktif</small><b>{formatIDR(receivable)}</b><em>Klik untuk lihat tagihan</em></span>
+        <span className="finance-kpi-content"><small>Piutang Aktif</small><b>{formatIDR(receivable)}</b><em>Seluruh tagihan belum lunas</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-green" onClick={()=>navigate('/profit-loss')}>
         <span className="finance-kpi-icon"><Banknote size={22}/></span>
-        <span><small>Surplus Kas Operasional</small><b>{formatIDR(cashOperatingSurplus)}</b><em>Kas masuk - biaya operasional - biaya karyawan</em></span>
+        <span className="finance-kpi-content"><small>Surplus Kas Operasional</small><b>{formatIDR(cashOperatingSurplus)}</b><em>Kas masuk dikurangi biaya</em></span>
       </button>
     </section>
 

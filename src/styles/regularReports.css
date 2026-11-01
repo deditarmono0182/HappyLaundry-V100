@@ -1,0 +1,120 @@
+/* V159: scoped to Dashboard and the finance hub; other pages keep their styles. */
+html body .main-content .regular-report-page[data-typography="regular"],
+html body .main-content .regular-report-page[data-typography="regular"] *{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-weight:400!important;
+  font-variant-numeric:tabular-nums;
+}
+html body .main-content .regular-report-page[data-typography="regular"] .stat-card strong,
+html body .main-content .regular-report-page[data-typography="regular"] .dashboard-money-value,
+html body .main-content .regular-report-page[data-typography="regular"] .owner-business-kpis strong,
+html body .main-content .regular-report-page[data-typography="regular"] .finance-live-kpi b{
+  font-size:20px!important;
+  line-height:1.4!important;
+  letter-spacing:0!important;
+}
+html body .main-content .regular-report-page .stat-card{min-width:0}
+html body .main-content .regular-report-page .stat-card>div:last-child{min-width:0}
+html body .main-content .regular-report-page .stat-card strong{overflow-wrap:anywhere}
+
+/* The finance summary is a single stack on desktop and phones. */
+html body .main-content .regular-report-page .finance-live-kpis{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:10px!important;
+}
+html body .main-content .regular-report-page .finance-live-kpi{
+  width:100%;min-height:86px;padding:14px 18px;gap:14px;
+  grid-template-columns:42px minmax(0,1fr);border-radius:15px;
+}
+html body .main-content .regular-report-page .finance-kpi-content{
+  display:grid;grid-template-columns:minmax(0,1fr) max-content;
+  grid-template-areas:"label value" "caption value";
+  column-gap:18px;row-gap:3px;align-items:center;min-width:0;
+}
+html body .main-content .regular-report-page .finance-kpi-content small{grid-area:label;white-space:normal;color:#234f60}
+html body .main-content .regular-report-page .finance-kpi-content b{grid-area:value;text-align:right;white-space:nowrap}
+html body .main-content .regular-report-page .finance-kpi-content em{grid-area:caption;white-space:normal;font-style:normal;color:#607c8c}
+html body .main-content .regular-report-page .finance-live-kpi:hover{filter:brightness(.985)}
+html body .main-content .regular-report-page button:focus-visible,
+html body .main-content .regular-report-page select:focus-visible,
+html body .main-content .regular-report-page input:focus-visible{outline:2px solid #1688e9;outline-offset:3px}
+
+/* Responsive filter: no horizontal scroll, buttons are always touch-sized. */
+html body .main-content .regular-report-page .finance-hub-period-panel{
+  width:100%!important;display:flex!important;flex-flow:row wrap!important;
+  align-items:center!important;gap:14px!important;padding:16px!important;
+  overflow:visible!important;border-radius:16px!important;
+}
+html body .main-content .regular-report-page .finance-hub-quick-periods{
+  display:flex!important;flex-wrap:wrap!important;gap:8px!important;
+}
+html body .main-content .regular-report-page .finance-hub-quick-periods button{
+  height:auto!important;min-height:44px!important;padding:10px 16px!important;
+  border:1px solid #c8e2fb;border-radius:12px!important;background:#edf6ff;
+  color:#1861a0;cursor:pointer;transition:background .15s;
+}
+html body .main-content .regular-report-page .finance-hub-quick-periods button.is-active{
+  color:white;background:#1687e9;border-color:#1687e9;box-shadow:0 3px 10px #1687e922;
+}
+html body .main-content .regular-report-page .finance-hub-custom-period,
+html body .main-content .regular-report-page .finance-hub-month-selects{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important;min-width:0;
+}
+html body .main-content .regular-report-page .finance-hub-custom-period{flex:1 1 290px}
+html body .main-content .regular-report-page .finance-hub-month-selects{flex-basis:100%}
+html body .main-content .regular-report-page .finance-hub-custom-period label,
+html body .main-content .regular-report-page .finance-hub-month-selects label{
+  display:grid!important;gap:5px!important;min-width:0;
+}
+html body .main-content .regular-report-page .finance-hub-custom-period input,
+html body .main-content .regular-report-page .finance-hub-month-selects select{
+  width:100%!important;min-width:0!important;max-width:100%;height:44px!important;
+  padding:8px!important;border:1px solid #c8e2fb;border-radius:10px!important;background:#fff;color:#234f60;
+}
+html body .main-content .regular-report-page .finance-hub-current-period{
+  height:auto!important;min-height:36px!important;padding:8px 12px!important;
+  white-space:normal;border-radius:10px;background:#eaf5ff;color:#216da9;
+}
+@media(max-width:700px){
+  /* Shared page heading: action groups must never squeeze the title on phones. */
+  html body .main-content .page-heading{
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    gap:12px!important;min-width:0;max-width:100%;
+  }
+  html body .main-content .page-heading-copy{
+    width:100%!important;max-width:100%!important;min-width:0!important;flex:0 1 auto!important;
+  }
+  html body .main-content .page-heading-copy p{max-width:100%;white-space:normal;overflow-wrap:break-word}
+  html body .main-content .page-heading-right{
+    position:static!important;inset:auto!important;z-index:auto!important;
+    width:100%!important;max-width:100%;min-width:0;flex-wrap:wrap;align-items:start;gap:10px;
+  }
+  html body .main-content .page-heading-action{flex:1 1 0;min-width:0;max-width:100%}
+  html body .main-content .page-heading-action>div{
+    width:100%;min-width:0;max-width:100%;display:flex;flex-wrap:wrap;gap:8px;
+  }
+  html body .main-content .page-heading-action button,
+  html body .main-content .page-heading-action a{
+    max-width:100%;min-width:0;white-space:normal;overflow-wrap:break-word;
+  }
+  html body .main-content .inventory-header-actions{
+    width:100%;display:flex;flex-wrap:wrap;gap:8px;
+  }
+  html body .main-content .inventory-header-actions button{
+    flex:1 1 110px;min-width:0;max-width:100%;white-space:normal;justify-content:center;
+  }
+  html body .main-content .regular-report-page[data-typography="regular"] .stat-card strong,
+  html body .main-content .regular-report-page[data-typography="regular"] .dashboard-money-value,
+  html body .main-content .regular-report-page[data-typography="regular"] .owner-business-kpis strong,
+  html body .main-content .regular-report-page[data-typography="regular"] .finance-live-kpi b{font-size:17px!important}
+  html body .main-content .regular-report-page .finance-hub-period-title{flex-basis:100%}
+  html body .main-content .regular-report-page .finance-hub-quick-periods{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;
+  }
+  html body .main-content .regular-report-page .finance-hub-custom-period{flex-basis:100%}
+  html body .main-content .regular-report-page .finance-hub-current-period{width:100%;justify-content:center}
+  html body .main-content .regular-report-page .finance-live-kpi{padding:12px;gap:10px;grid-template-columns:32px minmax(0,1fr)}
+  html body .main-content .regular-report-page .finance-kpi-icon{width:32px;height:32px;border-radius:10px}
+  html body .main-content .regular-report-page .finance-kpi-content{column-gap:10px}
+}

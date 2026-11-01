@@ -1,0 +1,25 @@
+HappyLaundry V113.0.159 — Keuangan Rapi, Angka Seragam, Header HP & Kembali dari PDF
+Dasar source: V113.0.158. Tidak perlu SQL baru.
+
+Perubahan:
+1. Keuangan & Laporan: tujuh kartu horizontal memanjang dan tersusun ke bawah pada laptop maupun HP. Ikon di kiri, keterangan di tengah, nominal sejajar kanan.
+2. Tulisan/angka Dashboard dan Keuangan & Laporan memakai huruf biasa tanpa bold. Nilai utama kartu seragam, baik jumlah order maupun rupiah. Halaman lain mempertahankan jenis tampilannya.
+3. Tombol periode berwarna biru muda, pilihan aktif biru. Di HP tombol tersusun 2 kolom. Hari Ini, 7 Hari, Bulan Ini, tanggal Dari/Sampai tetap tersedia.
+4. Pilih Bulan membuka pilihan nama Januari–Desember dan tahun. Semua data periode mengikuti batas kalender WIB. Data historis Keuangan dimuat berhalaman supaya tidak terpotong batas respons API.
+5. Perbaikan header HP berlaku untuk semua halaman yang memakai komponen PageHeader: judul/deskripsi lebar penuh, tombol aksi turun ke bawah dan membungkus saat sempit. Tombol Kembali tetap tersedia. Contoh: Stok Bahan, Order, Gaji, Laporan, Pelanggan, Karyawan, Layanan, Supplier, Produksi, dan Keuangan.
+6. PDF laporan tabel dan laporan laba rugi: buka pratinjau terpisah dengan tombol Kembali ke Aplikasi di atas. Pilih Simpan / Cetak PDF untuk membuka dialog cetak; sesudah selesai/batal, pilih Kembali ke Aplikasi. Tab aplikasi asal dipertahankan. Jika HP memutus hubungan dengan tab asal, tautan kembali membuka alamat aplikasi yang sama. Popup yang diblokir menampilkan petunjuk, tidak mengganti halaman aplikasi.
+7. Nota kasir/order mempertahankan tombol tutup pratinjau yang sudah tersedia.
+
+Pemasangan:
+- Ekstrak ZIP, salin isi source ke folder repository yang sama. Pertahankan konfigurasi .env.
+- GitHub Desktop: isi Summary, Commit, lalu Push origin.
+- Tunggu deployment selesai, lalu muat ulang aplikasi.
+- Cek versi V113.0.159, Keuangan & Laporan, Dashboard, Stok Bahan di HP, serta PDF > Kembali ke Aplikasi.
+
+Pemeriksaan lokal dengan data simulasi:
+- Browser Chromium pada lebar 320/390/430/768/1366px: judul/tombol tidak bertumpuk, tidak ada halaman melebar, tujuh kartu tersusun, huruf biasa dan nilai seragam.
+- Navigasi kartu piutang dan filter bulan/tahun, termasuk Februari tahun kabisat.
+- Pratinjau PDF tabel/laporan keuangan: tombol cetak, toolbar disembunyikan dari hasil print, kembali ke tab asal, fallback tanpa opener, dan popup diblokir.
+- Regresi pilihan bulan Dashboard dan pembayaran gaji V158; build produksi.
+
+Login, absensi GPS, rumus gaji/komisi, kasbon dan riwayat pembayaran tidak diubah. Tidak melakukan transaksi atau migrasi pada Supabase produksi. Perilaku dialog cetak asli iPhone tetap perlu dicoba pada perangkat sesudah deployment.
