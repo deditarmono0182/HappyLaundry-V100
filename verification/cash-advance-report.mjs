@@ -18,7 +18,7 @@ const click=async(label)=>{const button=[...document.querySelectorAll('button')]
 await mount('/finance/cash-advances')
 await click('Robet')
 assert.match(document.body.textContent,/Riwayat Kasbon — Robet/);assert.match(document.body.textContent,/Kasbon melebihi gaji sebesar/)
-assert.equal(document.querySelectorAll('section')[1].querySelectorAll('table')[0].querySelectorAll('tbody tr').length,2)
+assert.equal(document.querySelector('.cash-report-employee-detail').querySelectorAll('table')[0].querySelectorAll('tbody tr').length,2)
 await click('Excel Karyawan');await click('Print Karyawan')
 assert.equal(globalThis.__exports.length,2)
 const report=globalThis.__exports[0]

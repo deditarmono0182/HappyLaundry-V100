@@ -1,3 +1,4 @@
+import {CashAdvanceCorrectionRequests} from '../components/CashAdvanceCorrectionRequests'
 import {loadCashAdvanceRepayments,type CashAdvanceRepayment} from '../lib/cashAdvanceRepayments'
 import {canAccess} from '../lib/permissions'
 import {type CashAdvanceLimit} from '../lib/cashAdvanceLimit'
@@ -97,7 +98,7 @@ export function CashAdvanceReportPage(){
   const current=currentSelection
   if(!allowed)return <div className="error-box">Laporan kasbon memerlukan akses Keuangan.</div>
   return <>
-    <PageHeader eyebrow="KEUANGAN • KASBON" title="Laporan Kasbon Karyawan" description="Ringkasan seluruh karyawan dan riwayat rinci. Data langsung dari Supabase; laporan hanya baca." action={<button className="secondary-button" onClick={()=>navigate('/finance')}><ChevronLeft size={16}/>Keuangan</button>}/>
+    <PageHeader eyebrow="KEUANGAN • KASBON" title="Laporan Kasbon Karyawan" description="Ringkasan seluruh karyawan dan riwayat rinci. Rincian kasbon dan pengajuan koreksi dengan persetujuan Owner." action={<button className="secondary-button" onClick={()=>navigate('/finance')}><ChevronLeft size={16}/>Keuangan</button>}/>
     <section className="panel" style={{padding:16}}>
       <div className="cash-report-toolbar">
         <input aria-label="Cari karyawan" placeholder="Cari nama / ID karyawan..." value={query} onChange={e=>setQuery(e.target.value)}/>
@@ -122,8 +123,9 @@ export function CashAdvanceReportPage(){
         <p className="cash-report-note">Nilai terbayar/selisih dihitung dari nominal kasbon dikurangi saldo tersisa. Termasuk potongan gaji dan penyesuaian saldo; bukan otomatis berarti uang kas masuk.</p>
       </>}
     </section>
+    {data&&<CashAdvanceCorrectionRequests loans={data.advances} employees={data.employees} employeeId={selectedParam} isOwner={profile?.role==='owner'} onChanged={load}/>}
     {data&&!loading&&selectedParam&&!current&&<div className="error-box">Karyawan ini tidak memiliki kasbon aktif atau lunas yang dapat ditampilkan.</div>}
-    {current&&<section ref={detailsRef} className="panel" style={{padding:16,scrollMarginTop:90}}>
+    {current&&<section ref={detailsRef} className="panel cash-report-employee-detail" style={{padding:16,scrollMarginTop:90}}>
       <div className="cash-report-detail-heading"><div><h3>Riwayat Kasbon — {current.employee.name}</h3><p>Total kasbon {formatRupiah(current.total)} • Terbayar / selisih saldo {formatRupiah(current.paid)} • Sisa {formatRupiah(current.remaining)}</p></div><div className="cash-report-actions"><button className="secondary-button" disabled={loading} onClick={()=>downloadXls(exportOptions(true))}><FileSpreadsheet size={16}/>Excel Karyawan</button><button className="secondary-button" disabled={loading} onClick={()=>printPdf(exportOptions(true))}><Printer size={16}/>Print Karyawan</button><button className="secondary-button" onClick={()=>{setSearchParams({})}}>Tutup Rincian</button></div></div>
       {limitFor(current.employee.id)&&<div className={Number(limitFor(current.employee.id)?.excess)>0?'error-box':'info-box'} role="status">Gaji tersedia bulan {limitFor(current.employee.id)?.payroll_month.slice(0,7)}: <b>{formatRupiah(Number(limitFor(current.employee.id)?.salary_available))}</b>. {Number(limitFor(current.employee.id)?.excess)>0?`⚠ Kasbon melebihi gaji sebesar ${formatRupiah(Number(limitFor(current.employee.id)?.excess))}.`:'Saldo kasbon masih dalam batas gaji tersedia.'} Gaji dihitung dari data tercatat, setelah potongan kasbon dan pembayaran gaji.</div>}
       <h4>Seluruh Kasbon Karyawan</h4>

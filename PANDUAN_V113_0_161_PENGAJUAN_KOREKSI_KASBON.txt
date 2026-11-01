@@ -1,0 +1,36 @@
+HappyLaundry V113.0.161 — Pengajuan Koreksi Kasbon & Huruf Kartu Seragam
+Dasar source: V113.0.160. Akses Stok Barang tetap ditunda.
+
+SEBELUM DEPLOY:
+Jalankan SQL_083_PENGAJUAN_KOREKSI_KASBON.sql di Supabase SQL Editor. SQL ini untuk pengajuan koreksi kasbon, bukan akses stok. Memerlukan fungsi kasbon lama SQL 067, 072, 073, 081 dan 082. Tidak mengubah saldo lama saat migrasi dijalankan.
+
+CARA KARYAWAN KEUANGAN MENGAJUKAN:
+1. Keuangan > Laporan Seluruh Karyawan.
+2. Buka rincian nama karyawan bila ingin membatasi pilihan kasbon.
+3. Pada bagian Pengajuan Koreksi Kasbon, pilih catatan kasbon yang salah > Ajukan Koreksi Kasbon.
+4. Isi nominal pinjaman yang benar, keterangan dan alasan minimal 5 karakter > Kirim ke Owner.
+5. Status Menunggu Owner. Saldo, kas dan gaji belum berubah.
+
+CARA OWNER MEMUTUSKAN:
+1. Buka laporan kasbon yang sama, bagian Pengajuan Koreksi Kasbon.
+2. Tinjau Pengajuan: periksa nominal lama, nominal baru, sisa setelah koreksi, alasan dan penyesuaian Kas Harian.
+3. Isi catatan keputusan > Setujui Koreksi atau Tolak Pengajuan.
+4. Persetujuan memakai mekanisme koreksi Owner yang sudah ada: memperbarui pinjaman/sisa dan menyesuaikan Kas Harian sebesar selisih. Penyesuaian ini tercatat sebagai koreksi, bukan pelunasan tunai/transfer baru. Potongan dan pembayaran gaji tidak diubah.
+5. Centang Tampilkan riwayat keputusan untuk melihat nama pengaju, keputusan, pemeriksa, waktu dan alasan. Koreksi yang disetujui juga muncul di riwayat nominal kasbon.
+
+PENGAMAN:
+- Hanya karyawan aktif berakses Keuangan dan Owner yang dapat mengajukan/melihat pengajuan. Hanya Owner dapat menyetujui/menolak.
+- Satu pengajuan menunggu per catatan kasbon. ID pengajuan tetap dipakai saat mencoba ulang respons yang terputus. Keputusan yang sama dicoba ulang tidak menggandakan perubahan saldo/kas.
+- Data kasbon yang berubah setelah diajukan akan ditandai perlu diajukan ulang; Owner tidak menerapkan angka lama ke saldo baru.
+- Pinjaman tidak boleh dikurangi di bawah total yang sudah dipotong/dibayar. Kasbon dibatalkan tidak dapat dikoreksi melalui pengajuan.
+- Kasbon yang terkait potongan gaji yang sudah dibayarkan memerlukan pemeriksaan khusus Owner dan tidak dapat diubah melalui alur pengajuan biasa ini.
+- Jika SQL 083 belum dipasang, laporan lama tetap tersedia, bagian pengajuan menampilkan petunjuk migrasi.
+
+TAMPILAN:
+Judul kartu (contoh Omzet / Barang Masuk), angka dan keterangan bawah dibuat seragam 14px tanpa bold pada Dashboard dan Keuangan & Laporan. Grid laptop dan kartu HP dari V160 tetap dipertahankan.
+
+PEMASANGAN SOURCE:
+Ekstrak ZIP, salin isi source ke repository yang sama, pertahankan .env. GitHub Desktop: isi Summary, Commit, Push origin. Tunggu deployment, muat ulang aplikasi dan periksa versi V113.0.161.
+
+VERIFIKASI LOKAL:
+Migrasi dijalankan ulang dalam PostgreSQL terisolasi. Pengujian mencakup pengajuan tanpa perubahan saldo, persetujuan/penolakan, retry satu kali, perubahan saldo, gaji sudah dibayar, RLS, riwayat; UI pengaju/Owner dan respons jaringan terputus; ukuran kartu laptop/HP, huruf judul/keterangan 14px, ekspor PDF kembali; regresi laporan kasbon, gaji dan GPS; build produksi. Data produksi tidak diubah oleh pengujian.

@@ -130,3 +130,18 @@ html body .main-content .regular-report-page .finance-hub-current-period{
 @media(min-width:1101px){
   html body .main-content .regular-report-page .finance-live-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
+
+/* V161: labels and captions use the same small type scale as the values. */
+html body .main-content .regular-report-page[data-typography="regular"] .stat-card span,
+html body .main-content .regular-report-page[data-typography="regular"] .stat-card small,
+html body .main-content .regular-report-page[data-typography="regular"] .finance-kpi-content small,
+html body .main-content .regular-report-page[data-typography="regular"] .finance-kpi-content em,
+html body .main-content .regular-report-page[data-typography="regular"] .owner-business-kpis span{
+  font-size:14px!important;line-height:1.4!important;font-weight:400!important;
+}
+.cash-correction-request-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+.cash-correction-request-tools select{flex:1;min-width:160px;max-width:100%}
+.cash-correction-request-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.cash-correction-request-summary>div{display:grid;gap:5px;padding:12px;border:1px solid #d9e6ee;border-radius:10px}
+.cash-correction-request-reason{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:600px){.cash-correction-request-summary{grid-template-columns:1fr}.cash-correction-request-tools select{width:100%;flex-basis:100%}}
