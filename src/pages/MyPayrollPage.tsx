@@ -1,3 +1,4 @@
+import {PayrollPaymentCancellation} from '../components/PayrollPaymentCancellation'
 import {payrollSettlement} from '../lib/payrollSettlement'
 import {loadCashAdvanceRepayments,type CashAdvanceRepayment} from '../lib/cashAdvanceRepayments'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -188,6 +189,7 @@ export function MyPayrollPage(){
             {(!data.payment_history||data.payment_history.length===0)&&<tr><td colSpan={4} className="table-empty">Belum ada pembayaran gaji pada periode ini.</td></tr>}
           </tbody>
         </table></div>
+        <PayrollPaymentCancellation employee={data.employee} month={month} payments={[]} isOwner={false} onChanged={load}/>
       </section>
     </>}
   </div>

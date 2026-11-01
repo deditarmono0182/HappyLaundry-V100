@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict'
+import {readFile} from 'node:fs/promises'
+import {PGlite} from '@electric-sql/pglite'
+const db=new PGlite();const emp='00000000-0000-0000-0000-000000000001',other='00000000-0000-0000-0000-000000000002',actor='00000000-0000-0000-0000-000000000099'
+await db.exec(`create role anon;create role authenticated;create schema auth;create function auth.uid() returns uuid language sql as $$select '${actor}'::uuid$$;create function v109_is_owner() returns boolean language sql as $$select current_setting('test.actor',true)='owner'$$;create table v109_users(id uuid primary key,full_name text);insert into v109_users values('${emp}','CECE ADI R'),('${other}','SANTOS');create function v109_current_employee() returns setof v109_users language sql security definer as $$select * from v109_users where id='${emp}'$$;create table v113072_employee_cash_advances(id uuid,employee_id uuid,amount numeric,remaining_amount numeric);create table v113072_cash_advance_deductions(id uuid,employee_id uuid,payroll_month date,amount numeric);insert into v113072_employee_cash_advances values(gen_random_uuid(),'${emp}',2700000,2700000);set test.actor='owner';`)
+await db.exec(`create table profiles(id uuid,role text);insert into profiles values('${actor}','owner');grant select on profiles to authenticated;`)
+await db.exec(await readFile('supabase/051_v113_0_45_payroll_payment_history.sql','utf8'))
+const sql=await readFile('SQL_084_BATALKAN_PEMBAYARAN_GAJI.sql','utf8');await db.exec(sql);await db.exec(sql)
+await db.exec(`insert into v113_payroll_payments(employee_id,payroll_month,amount,payment_method) values('${emp}','2026-10-01',2372785,'Tunai'),('${emp}','2026-10-01',1,'Tunai'),('${emp}','2026-11-01',100,'Transfer'),('${other}','2026-10-01',200,'Tunai')`)
+const ids=(await db.query(`select id from v113_payroll_payments where employee_id='${emp}' and payroll_month='2026-10-01' order by id`)).rows.map(r=>r.id)
+const rid=crypto.randomUUID();const args=[rid,emp,'2026-10-01',2372786,ids,'Salah perhitungan gaji Oktober']
+const cancel=a=>db.query('select v113162_cancel_payroll_payments($1,$2,$3,$4,$5,$6) r',a)
+const snapshot=async()=>({loans:(await db.query('select * from v113072_employee_cash_advances')).rows,deductions:(await db.query('select * from v113072_cash_advance_deductions')).rows})
+const original=await snapshot()
+await db.exec("set test.actor='finance';set role authenticated");await assert.rejects(cancel(args),/Hanya Owner/);await db.exec("set test.actor='owner'");await assert.rejects(cancel([...args.slice(0,3),2372785,...args.slice(4)]),/berubah/);await assert.rejects(cancel([...args.slice(0,4),[ids[0]],args[5]]),/berubah/)
+const r=(await cancel(args)).rows[0].r;assert.equal(Number(r.total_amount),2372786);assert.equal(r.payments.length,2);assert.deepEqual(r.payments.map(p=>Number(p.amount)).sort((a,b)=>a-b),[1,2372785])
+await cancel(args);await assert.rejects(cancel([...args.slice(0,5),'Alasan berbeda']),/data berbeda/)
+await db.exec('reset role');assert.equal(Number((await db.query(`select sum(amount) n from v113_payroll_payments where employee_id='${emp}' and payroll_month='2026-10-01'`)).rows[0].n||0),0);assert.equal(Number((await db.query('select count(*) n from v113_payroll_payments')).rows[0].n),2);assert.equal(Number((await db.query('select count(*) n from v113162_payroll_payment_cancellations')).rows[0].n),1);assert.deepEqual(await snapshot(),original)
+await db.exec("set role authenticated");await assert.rejects(db.exec('delete from v113162_payroll_payment_cancellations'),/permission denied/)
+await db.exec("set test.actor='employee'");assert.equal(Number((await db.query('select count(*) n from v113162_payroll_payment_cancellations')).rows[0].n),1,'own employee can read cancellation audit')
+await db.exec('reset role');await db.exec(`create or replace function v109_current_employee() returns setof v109_users language sql security definer as $$select * from v109_users where id='${other}'$$;set role authenticated`);assert.equal(Number((await db.query('select count(*) n from v113162_payroll_payment_cancellations')).rows[0].n),0,'other employee cannot read salary audit')
+await db.close();console.log('PASS SQL084: Cece October Rp2372785+Rp1 archived atomically, active paid sum becomes0, duplicate retry once, stale total/IDs denied, owner-only action, original JSON/audit immutable, employee own-only read, other month/employee and loans/deductions unchanged.')

@@ -1,0 +1,29 @@
+HappyLaundry V113.0.162 — Pembatalan Pembayaran Gaji dengan Arsip Riwayat
+Dasar source V113.0.161. Akses stok tetap ditunda.
+
+SEBELUM DEPLOY:
+Jalankan SQL_084_BATALKAN_PEMBAYARAN_GAJI.sql di Supabase SQL Editor. Migrasi ini hanya menambahkan fasilitas; tidak membatalkan pembayaran karyawan mana pun secara otomatis.
+Setelah itu salin source ZIP ke repository yang sama (pertahankan .env), Commit dan Push origin. Tunggu deployment selesai dan muat ulang aplikasi.
+
+UNTUK CECE, OKTOBER 2026:
+1. Login Owner > Absensi & Gaji > pilih Oktober 2026 > Daftar Gaji.
+2. Pada baris CECE ADI R, klik Detail.
+3. Gulir ke Riwayat Pembayaran Gaji. Klik Batalkan Pembayaran Gaji Periode Ini.
+4. Periksa nama Cece, periode 2026-10, dua catatan pembayaran Tunai Rp2.372.785 dan Rp1, total Rp2.372.786. Jika data berbeda dari yang ingin dibatalkan, klik Kembali.
+5. Isi alasan (contoh: Salah perhitungan gaji Oktober, akan dikoreksi) lalu Konfirmasi Pembatalan Pembayaran.
+6. Sudah Dibayar periode tersebut menjadi Rp0; bila hak gaji bersih masih positif, status kembali Belum Dibayar dan sisa gaji muncul kembali.
+7. Perbaiki perhitungan gaji yang salah sebelum mencatat pembayaran ulang yang benar-benar dilakukan.
+
+ATURAN DAN RIWAYAT:
+- Khusus Owner. Dialog mencantumkan seluruh pembayaran aktif untuk karyawan dan periode yang dipilih. Versi ini membatalkan seluruh pembayaran aktif periode itu, bukan pilihan satu transaksi.
+- Seluruh catatan asli (ID, waktu, metode, nominal, catatan, pembuat) dipindahkan secara atomik ke arsip pembatalan, beserta nama karyawan, periode, total, alasan, Owner dan waktu pembatalan. Tidak menghapus bukti riwayat.
+- Total dan ID pembayaran diperiksa ulang saat menyimpan. Jika berubah, pembatalan ditolak dan harus muat ulang.
+- Respons terputus dapat dicoba ulang dengan ID pembatalan yang sama, sehingga tidak menggandakan arsip atau membatalkan pembayaran baru.
+- Kasbon, potongan kasbon, komisi, bonus dan kehadiran tidak diubah.
+- Ini pembatalan catatan aplikasi. Uang yang benar-benar sudah diserahkan/ditransfer tidak otomatis kembali dan tidak ada transfer/refund yang dijalankan.
+- Riwayat Pembatalan Pembayaran Gaji tersedia pada Detail Owner dan Gaji Saya milik karyawan tersebut. Pengguna lain tidak dapat melihat arsip gaji karyawan lain.
+- Status pembayaran (Belum Dibayar/Sebagian/Lunas) kini terpisah dari keterangan simulasi saldo kasbon minus. Utang yang lebih besar dari gaji tidak menutupi status pembayaran sebenarnya.
+- Fungsi gaji lama membaca daftar pembayaran aktif yang sama; karena itu daftar Owner, akun karyawan, kapasitas kasbon dan ekspor gaji mengikuti pembatalan secara konsisten tanpa mengganti fungsi login/absensi/gaji lama.
+
+VERIFIKASI LOKAL:
+SQL terisolasi dan UI Owner/karyawan diuji dengan contoh dua pembayaran total Rp2.372.786, pembatalan sekali/retry, penolakan data berubah, arsip asli, RLS, perlindungan karyawan/bulan lain dan pinjaman. Pengujian regresi pembulatan dan kesamaan komisi Owner/karyawan serta build produksi. Tidak melakukan pembatalan di Supabase produksi dari sini.

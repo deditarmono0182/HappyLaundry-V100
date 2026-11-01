@@ -1,3 +1,5 @@
+import {useAuth} from '../lib/auth'
+import {PayrollPaymentCancellation} from '../components/PayrollPaymentCancellation'
 import {payrollSettlement} from '../lib/payrollSettlement'
 import {loadCommissionLedger} from '../lib/commissionLedger'
 import {PayrollDeductionCorrectionModal,type DeductionCorrectionTarget} from '../components/PayrollDeductionCorrectionModal'
@@ -152,6 +154,8 @@ const monthRange=(month:string)=>{
 }
 
 export function PayrollPage(){
+  const {profile}=useAuth()
+  const isOwner=profile?.role==='owner'
   const[deductionCorrection,setDeductionCorrection]=useState<DeductionCorrectionTarget|null>(null)
   const[cashAdvanceOverride,setCashAdvanceOverride]=useState('')
   const[managerReport,setManagerReport]=useState<ManagerReport|null>(null)
@@ -961,7 +965,7 @@ export function PayrollPage(){
                 <td><b className={`payroll-total ${r.payrollBalance<0?'negative':''}`}>{formatRupiah(r.payrollBalance)}</b></td>
                 <td><b>{formatRupiah(r.paidAmount)}</b></td>
                 <td><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
-                <td><span className={`payroll-payment-status ${r.payrollBalance<0?'debt':r.paymentStatus}`}>{r.payrollBalance<0?'Saldo Minus':r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
+                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span>{r.payrollBalance<0&&<small className="payroll-negative">Simulasi saldo setelah seluruh kasbon: minus</small>}</td>
                 <td>
                   <div className="payroll-row-actions">
                     <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
@@ -1083,6 +1087,7 @@ export function PayrollPage(){
             </tbody>
           </table>
         </div>
+        <PayrollPaymentCancellation employee={detailEmployee} month={month} payments={row?.paymentHistory||[]} isOwner={isOwner} onChanged={load}/>
         <div className="modal-actions">
           <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee,true)}><ReceiptText size={16}/>Potongan Kasbon</button>
           {(row?.outstanding||0)>0&&<button className="primary-button" onClick={()=>{setDetailEmployee(null);openPayrollPayment(detailEmployee)}}><HandCoins size={16}/>Catat Pembayaran</button>}
