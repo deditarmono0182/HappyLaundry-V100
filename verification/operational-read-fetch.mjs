@@ -1,0 +1,21 @@
+import {build} from 'esbuild'
+import {writeFile,unlink} from 'node:fs/promises'
+import assert from 'node:assert/strict'
+globalThis.window={location:{origin:'http://localhost'},addEventListener(){},dispatchEvent(){},BroadcastChannel:class{constructor(){throw new Error('Blocked in private context')}}}
+const b=await build({entryPoints:['src/lib/operationalReadFetch.ts'],bundle:true,write:false,platform:'node',format:'esm'});const file='verification/.operational-fetch.mjs';await writeFile(file,b.outputFiles[0].text);const {createOperationalReadFetch,clearOperationalReads}=await import('./.operational-fetch.mjs')
+let calls=0,hold=null,error=false
+const fake=async(input,init)=>{calls++;if(hold)await hold;const h=new Headers(init?.headers);return new Response(JSON.stringify({call:calls,account:h.get('authorization')}),{status:error?500:200,headers:{'Content-Type':'application/json'}})}
+const fast=createOperationalReadFetch(fake),url='https://example.supabase.co/rest/v1/',a={headers:{authorization:'test-account-A'}},bAccount={headers:{authorization:'test-account-B'}}
+await Promise.all([fast(url+'v100_store_settings?select=*',a),fast(url+'v100_store_settings?select=*',a)]);assert.equal(calls,1);await fast(url+'v100_store_settings?select=*',a);assert.equal(calls,1)
+assert.equal((await (await fast(url+'v100_store_settings?select=*',bAccount)).json()).account,'test-account-B');assert.equal(calls,2)
+await fast(url+'v100_store_settings?select=*',{headers:{authorization:'test-account-A',range:'100-199'}});assert.equal(calls,3)
+const before=calls;await fast(url+'v113_payroll_payments?select=*',a);await fast(url+'v113_payroll_payments?select=*',a);assert.equal(calls,before+2,'salary/payment rows never use TTL cache')
+const fresh=calls;await fast(url+'v111_employee_payroll_settings?select=*',a);await fast(url+'v111_employee_payroll_settings?select=*',a);await fast(url+'v100_services?select=*',a);await fast(url+'v100_services?select=*',a);assert.equal(calls,fresh+4,'salary settings and service prices stay fresh')
+const attendance=calls;await Promise.all([fast(url+'rpc/v11322_current_attendance_state',{...a,method:'POST',body:'{}'}),fast(url+'rpc/v11322_current_attendance_state',{...a,method:'POST',body:'{}'})]);assert.equal(calls,attendance+2,'attendance checks are never cached or shared')
+const rpc={...a,method:'POST',body:JSON.stringify({p_from:'2026-10-01',p_to:'2026-10-31'})};const initial=calls;await Promise.all([fast(url+'rpc/v113165_financial_summary',rpc),fast(url+'rpc/v113165_financial_summary',rpc)]);assert.equal(calls,initial+1);await fast(url+'rpc/v113165_financial_summary',rpc);assert.equal(calls,initial+2,'totals are only coalesced while in flight')
+await fast(url+'rpc/v113163_review_additional_cash_advance',{...a,method:'POST',body:'{}'});const afterWrite=calls;await fast(url+'v100_store_settings?select=*',a);assert.equal(calls,afterWrite+1,'mutation invalidates references')
+const now=Date.now;let clock=now();Date.now=()=>clock;clock+=30001;const beforeTTL=calls;await fast(url+'v100_store_settings?select=*',a);assert.equal(calls,beforeTTL+1);Date.now=now
+clearOperationalReads();error=true;let n=calls;await fast(url+'v100_store_settings?select=*',a);await fast(url+'v100_store_settings?select=*',a);assert.equal(calls,n+2,'errors are not cached');error=false
+clearOperationalReads();let release;hold=new Promise(r=>release=r);n=calls;const p=fast(url+'v100_store_settings?select=*',a);clearOperationalReads();release();hold=null;await p;await fast(url+'v100_store_settings?select=*',a);assert.equal(calls,n+2,'response from before invalidation cannot refill cache')
+clearOperationalReads();hold=new Promise(r=>release=r);n=calls;const x=fast(url+'v100_store_settings?select=*',{...a,signal:new AbortController().signal}),y=fast(url+'v100_store_settings?select=*',{...a,signal:new AbortController().signal});release();hold=null;await Promise.all([x,y]);assert.equal(calls,n+2,'independent cancellation lifecycles are not coupled')
+await unlink(file);console.log('PASS operational transport: account/range isolation, in-flight deduplication, 30s reference-only cache, fresh salary/transaction/financial totals, expiry, error rejection, mutation invalidation, stale-response prevention, independent abort signals; no persistent storage.')

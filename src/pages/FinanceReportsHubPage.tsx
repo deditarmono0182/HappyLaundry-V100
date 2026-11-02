@@ -10,7 +10,8 @@ import {
 import { PageHeader } from '../components/PageHeader'
 import { formatIDR } from '../lib/format'
 import { supabase } from '../lib/supabase'
-import { fetchFinancialSummary, type FinancialSummary } from '../lib/financialSummary'
+import {useFinancialPeriod} from '../lib/useFinancialPeriod'
+import {useAuth} from '../lib/auth'
 import { addBusinessDays, businessDateKey, businessDateLabel, businessMonthKey, businessParts } from '../lib/businessTime'
 import type { OrderRow } from '../types/order'
 
@@ -69,7 +70,8 @@ export function FinanceReportsHubPage(){
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [expenses,setExpenses]=useState<ExpenseRow[]>([])
   const [message,setMessage]=useState('')
-  const [financial,setFinancial]=useState<FinancialSummary|null>(null)
+  const {profile}=useAuth()
+  const {financial,loading:summaryLoading,error:summaryError}=useFinancialPeriod(from,to,true,JSON.stringify([profile?.id,profile?.role,profile?.permissions]))
 
   useEffect(()=>{
     let alive=true
@@ -96,19 +98,6 @@ export function FinanceReportsHubPage(){
     return()=>{alive=false;window.removeEventListener('focus',onFocus)}
   },[])
 
-  useEffect(()=>{
-    let alive=true
-    const loadSummary=async()=>{
-      try{
-        const result=await fetchFinancialSummary(from,to)
-        if(alive)setFinancial(result)
-      }catch(error){
-        if(alive)setMessage(error instanceof Error?error.message:'Gagal memuat ringkasan laba.')
-      }
-    }
-    void loadSummary()
-    return()=>{alive=false}
-  },[from,to])
 
   const setQuickPeriod=(value:Exclude<PeriodPreset,'custom'|'selected-month'>)=>{
     const today=businessDateKey(new Date())
@@ -248,7 +237,8 @@ export function FinanceReportsHubPage(){
 
     </section>
 
-    {message&&<div className="error-box">{message}</div>}
+    {(message||summaryError)&&<div className="error-box">{message||summaryError}</div>}
+    {summaryLoading&&<p role="status">Memuat ringkasan periode...</p>}
 
     <section className="finance-live-kpis">
       <button type="button" className="finance-live-kpi tone-blue" onClick={()=>navigate('/finance')}>
@@ -261,15 +251,15 @@ export function FinanceReportsHubPage(){
       </button>
       <button type="button" className="finance-live-kpi tone-red" onClick={()=>navigate('/finance/expenses')}>
         <span className="finance-kpi-icon"><ReceiptText size={22}/></span>
-        <span className="finance-kpi-content"><small>Pengeluaran</small><b>{formatIDR(operatingExpensePeriod)}</b><em>Biaya operasional • {periodLabel}</em></span>
+        <span className="finance-kpi-content"><small>Pengeluaran</small><b>{financial?formatIDR(operatingExpensePeriod):'—'}</b><em>Biaya operasional • {periodLabel}</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-cyan" onClick={()=>navigate('/payroll')}>
         <span className="finance-kpi-icon"><FileText size={22}/></span>
-        <span className="finance-kpi-content"><small>Biaya Karyawan</small><b>{formatIDR(employeeCostPeriod)}</b><em>Gaji, bonus, bagi hasil & komisi</em></span>
+        <span className="finance-kpi-content"><small>Biaya Karyawan</small><b>{financial?formatIDR(employeeCostPeriod):'—'}</b><em>Gaji, bonus, bagi hasil & komisi</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-purple" onClick={()=>navigate('/profit-loss')}>
         <span className="finance-kpi-icon"><TrendingUp size={22}/></span>
-        <span className="finance-kpi-content"><small>Laba Bersih Operasional</small><b>{formatIDR(profitToday)}</b><em>Sebelum cadangan</em></span>
+        <span className="finance-kpi-content"><small>Laba Bersih Operasional</small><b>{financial?formatIDR(profitToday):'—'}</b><em>Sebelum cadangan</em></span>
       </button>
       <button type="button" className="finance-live-kpi tone-amber" onClick={()=>navigate('/receivables')}>
         <span className="finance-kpi-icon"><Clock3 size={22}/></span>
@@ -277,7 +267,7 @@ export function FinanceReportsHubPage(){
       </button>
       <button type="button" className="finance-live-kpi tone-green" onClick={()=>navigate('/profit-loss')}>
         <span className="finance-kpi-icon"><Banknote size={22}/></span>
-        <span className="finance-kpi-content"><small>Surplus Kas Operasional</small><b>{formatIDR(cashOperatingSurplus)}</b><em>Kas masuk dikurangi biaya</em></span>
+        <span className="finance-kpi-content"><small>Surplus Kas Operasional</small><b>{financial?formatIDR(cashOperatingSurplus):'—'}</b><em>Kas masuk dikurangi biaya</em></span>
       </button>
     </section>
 

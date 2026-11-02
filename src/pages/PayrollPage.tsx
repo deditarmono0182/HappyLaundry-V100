@@ -217,9 +217,8 @@ export function PayrollPage(){
     setLoading(true);setMessage('');setManagerReport(null);setManagerError('')
     try{
     const range=monthRange(month)
-    let manager:ManagerReport|null=null,managerFailure=''
-    try{manager=await loadManagerReport(month)}catch(e){managerFailure=e instanceof Error?e.message:String(e)}
-    const [e,a,s,shr,adj,payrollPay,ca,cd,ecs,ledger,p,o,oi,sv]=await Promise.all([
+    const managerTask=loadManagerReport(month).then(report=>({report,error:''})).catch(e=>({report:null,error:e instanceof Error?e.message:String(e)}))
+    const [e,a,s,shr,adj,payrollPay,ca,cd,ecs,ledger,p,o,oi,sv,managerResult]=await Promise.all([
       supabase.from('v109_users').select('id,full_name,login_id,phone,is_active').eq('is_active',true).order('full_name'),
       supabase.from('v111_attendance').select('*').gte('attendance_date',range.start).lte('attendance_date',range.end),
       supabase.from('v111_employee_payroll_settings').select('*'),
@@ -233,10 +232,11 @@ export function PayrollPage(){
       supabase.from('v100_payments').select('order_id,amount,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_orders_view').select('id,subtotal,total,status,created_at').gte('created_at',`${range.start}T00:00:00`).lte('created_at',`${range.end}T23:59:59.999`),
       supabase.from('v100_order_items').select('order_id,service_id,subtotal'),
-      supabase.from('v100_services').select('id,category')
+      supabase.from('v100_services').select('id,category'),
+      managerTask
     ])
     if(sequence!==loadSequence.current)return
-    setManagerReport(manager);setManagerError(managerFailure)
+    setManagerReport(managerResult.report);setManagerError(managerResult.error)
     const error=e.error||a.error||s.error||shr.error||adj.error||payrollPay.error||ca.error||cd.error||ecs.error||ledger.error||p.error||o.error||oi.error||sv.error
     if(error){setMessage(error.message);setManagerError('Data gaji belum lengkap. Muat ulang sebelum membayar atau mengekspor.')}
     else{

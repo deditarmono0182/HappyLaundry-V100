@@ -1,0 +1,50 @@
+HappyLaundry V113.0.165 — Percepatan Data Periode
+Dasar: source lengkap V113.0.164. Desain baku tetap dipertahankan.
+
+PASANG
+1. Jalankan SQL_086_PERCEPAT_RINGKASAN_PERIODE.sql di Supabase SQL Editor.
+2. Ekstrak ZIP V165, salin isi source ke repository, Commit dan Push seperti biasa.
+3. Tunggu deploy berhasil, muat ulang aplikasi, periksa versi V113.0.165.
+SQL 086 menambahkan index dan satu fungsi baca ringkasan. Tidak mengubah transaksi, gaji, saldo, login atau absensi.
+Aplikasi masih memiliki jalur kompatibilitas jika SQL 086 belum dipasang, tetapi percepatan ringkasan memerlukan SQL tersebut.
+
+YANG DIPERCEPAT
+- Dashboard dan Ringkasan Keuangan: perhitungan periode menjadi satu permintaan database,
+  menggantikan belasan pembacaan data terpisah dan pengunduhan seluruh rincian untuk menghitung angka ringkasan.
+- Bulan yang baru dibuka di halaman tersebut dapat langsung ditampilkan lagi selama maksimal 30 detik,
+  khusus akun dan halaman yang sama. Tidak disimpan permanen di HP/browser.
+- Data sementara dibersihkan saat halaman kembali mendapat fokus dan setelah perubahan transaksi di aplikasi.
+  Ringkasan juga diperiksa ulang berkala saat halaman tetap terbuka.
+- Pembacaan halaman data/komisi menjadi paralel, maksimal tiga halaman per gelombang.
+  Semua halaman yang diperlukan tetap dibaca; kegagalan tidak dianggap sebagai total lengkap.
+- Laporan pengelola beberapa bulan dibaca maksimal tiga bulan bersamaan.
+- Absensi & Gaji: laporan pengelola berjalan bersamaan dengan data gaji, bukan menghalangi permulaan pembacaan data lain.
+- Permintaan baca yang identik dan sedang berjalan dibagikan, agar tidak mengunduh data sama berulang bersamaan.
+- Metadata toko, kategori biaya, dan pengaturan nota disimpan singkat. Mutasi, pergantian sesi dan fokus halaman membersihkannya.
+
+KETEPATAN DAN KEAMANAN
+- Harga layanan, pengaturan gaji/komisi, daftar transaksi, pembayaran, serta status GPS tidak memakai cache waktu.
+- Pemeriksaan absensi tidak berbagi permintaan dan tidak disimpan di cache.
+- Kunci permintaan memisahkan akun dan rentang halaman; data akun lain tidak boleh dipakai.
+- Respons ringkasan bulan lama tidak dapat menimpa bulan baru yang dipilih.
+- Ringkasan yang belum siap ditandai memuat; angka biaya/laba lama tidak ditampilkan seolah-olah periode baru.
+- Ekspor ringkasan Owner dan Laba Rugi ditahan saat data terkait belum siap.
+- Rumus pendapatan, komisi, gaji, pengelola, THR/cadangan, dan kasbon tidak diubah.
+- SQL 086 menghitung seluruh baris pada server, termasuk ketika data melebihi batas baris API.
+
+PENGECEKAN SETELAH PASANG
+Buka bulan sekarang, pilih bulan sebelumnya, lalu kembali ke bulan pertama.
+Coba juga beberapa bulan dengan cepat pada Dashboard, Keuangan, dan Absensi & Gaji.
+Perhatikan bahwa periode aktif dan angka akhirnya sesuai, tidak tertimpa respons bulan lain.
+Pemanggilan pertama bulan baru tetap memerlukan jaringan dan waktu database; kecepatannya bergantung koneksi dan beban Supabase.
+
+VERIFIKASI PENGEMBANGAN
+- SQL baru dibandingkan dengan rumus source V164 untuk semua 17 angka ringkasan pada data 1205+ order.
+- Diperiksa bulan penuh, rentang sebagian/lintas bulan, Februari kabisat, batas tengah malam WIB,
+  komisi, bonus/tunjangan prorata, pengelola, cadangan, hak akses, dan migrasi yang dijalankan ulang.
+- Pengujian UI memeriksa satu permintaan ringkasan, bulan ulang tanpa permintaan baru dalam masa simpan,
+  pergantian cepat, pemisahan akun, pembersihan data sementara, dan kegagalan akses.
+- Pengujian paralel memeriksa urutan lengkap, maksimal tiga permintaan, dan penolakan total parsial.
+- Regresi gaji Owner/karyawan, selisih Rp1, pembatalan gaji, kasbon, dan absensi GPS diperiksa.
+- Tampilan 35 halaman pada empat ukuran layar tetap diperiksa.
+Pengujian memakai data simulasi; tidak menjalankan transaksi atau migrasi di database produksi Anda.

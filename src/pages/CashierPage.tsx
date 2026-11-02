@@ -842,14 +842,14 @@ export function CashierPage() {
 
         <div className="cashier-summary-scroll">
           <section className="panel cashier-shortcuts">
-            <header><b>Shortcut Kasir</b><span>V102 Stable</span></header>
+            <header><b>Pintasan Keyboard</b></header>
             <div><kbd>F2</kbd><span>Cari pelanggan</span></div>
             <div><kbd>F4</kbd><span>Tambah layanan</span></div>
             <div><kbd>Ctrl + Enter</kbd><span>Simpan transaksi</span></div>
             <div><kbd>Esc</kbd><span>Bersihkan form</span></div>
           </section>
           <section className="panel cashier-pro-features">
-            <header><QrCode size={20}/><b>Nota Enterprise</b></header>
+            <header><QrCode size={20}/><b>Pilihan Nota</b></header>
             <p>Setelah transaksi tersimpan, tersedia:</p>
             <ul><li>Thermal 58 mm</li><li>Thermal 80 mm</li><li>A4 / Simpan PDF</li><li>QR status order</li><li>Barcode invoice</li></ul>
           </section>

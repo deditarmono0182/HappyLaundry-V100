@@ -17,8 +17,13 @@ export async function managerSharesForRange(from:string,to:string){
   const days=new Date(Date.UTC(y,m+1,0)).getUTCDate()
   const lo=month===from.slice(0,7)?Number(from.slice(8)):1
   const hi=month===to.slice(0,7)?Number(to.slice(8)):days
-  result.push({month,report:await loadManagerReport(month),ratio:(hi-lo+1)/days})
+  result.push({month,report:null as unknown as ManagerReport,ratio:(hi-lo+1)/days})
   cursor.setUTCMonth(m+1)
+ }
+ for(let offset=0;offset<result.length;offset+=3){
+  const batch=result.slice(offset,offset+3)
+  const reports=await Promise.all(batch.map(row=>loadManagerReport(row.month)))
+  batch.forEach((row,i)=>{row.report=reports[i]})
  }
  return result
 }

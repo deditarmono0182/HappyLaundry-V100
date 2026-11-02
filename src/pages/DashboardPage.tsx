@@ -10,7 +10,7 @@ import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
-import { fetchFinancialSummary, type FinancialSummary } from '../lib/financialSummary'
+import {useFinancialPeriod} from '../lib/useFinancialPeriod'
 import { useAuth } from '../lib/auth'
 import { downloadXls } from '../lib/exportData'
 import type { OrderRow } from '../types/order'
@@ -59,7 +59,6 @@ export function DashboardPage() {
   const [commissions,setCommissions]=useState<DashboardCommission[]>([])
   const [progressEvents,setProgressEvents]=useState<DashboardProgressEvent[]>([])
   const [assignments,setAssignments]=useState<DashboardAssignment[]>([])
-  const [ownerFinancial,setOwnerFinancial]=useState<FinancialSummary|null>(null)
   const [attentionOpen,setAttentionOpen]=useState(false)
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
@@ -356,23 +355,7 @@ export function DashboardPage() {
 
   const ownerPeriodStart=selectedPeriodStart
 
-  useEffect(()=>{
-    if(!isOwner)return
-    let alive=true
-    const fromKey=businessDateKey(ownerPeriodStart)
-    const toKey=periodRange.toKey
-    setOwnerFinancial(null)
-    const run=async()=>{
-      try{
-        const result=await fetchFinancialSummary(fromKey,toKey)
-        if(alive)setOwnerFinancial(result)
-      }catch{
-        if(alive)setOwnerFinancial(null)
-      }
-    }
-    void run()
-    return()=>{alive=false}
-  },[isOwner,ownerPeriodStart,periodRange.toKey])
+  const {financial:ownerFinancial,loading:financialLoading,error:financialError}=useFinancialPeriod(businessDateKey(ownerPeriodStart),periodRange.toKey,isOwner,JSON.stringify([profile?.id,profile?.role,profile?.permissions]))
 
   const ownerPeriodOrders=useMemo(()=>orders.filter(r=>inPeriod(r.created_at)&&r.status!=='cancelled'),[orders,ownerPeriodStart,selectedPeriodEnd])
   const ownerPeriodCash=useMemo(()=>cash.filter(r=>inPeriod(r.created_at)),[cash,ownerPeriodStart,selectedPeriodEnd])
@@ -394,6 +377,7 @@ export function DashboardPage() {
   const ownerAverage=ownerPeriodOrders.length?ownerPeriodOrders.reduce((s,r)=>s+Number(r.total||0),0)/ownerPeriodOrders.length:0
 
   const exportOwnerReport=()=>{
+    if(!ownerFinancial||financialLoading)return
     downloadXls({
       title:'Laporan Owner HappyLaundry',
       filename:`laporan-owner-${businessDateKey()}`,
@@ -465,7 +449,7 @@ export function DashboardPage() {
 
   return <div className="owner-dashboard-page regular-report-page" data-typography="regular">
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, keuangan, pembayaran, order, proses cucian, dan piutang." hideBack
-      action={isOwner?<button type="button" className="secondary-button" onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:undefined}
+      action={isOwner?<button type="button" className="secondary-button" disabled={financialLoading||!ownerFinancial} onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:undefined}
     />
     {message&&<div className="error-box inline-message">{message}</div>}
 
@@ -543,14 +527,15 @@ export function DashboardPage() {
       <div className="panel-heading">
         <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Piutang tidak mengurangi laba; Surplus Kas Operasional menunjukkan kas masuk setelah biaya periode.</p></div>
       </div>
+      <>{financialLoading&&<p role="status">Memuat ringkasan periode...</p>}{financialError&&<div className="error-box">{financialError}</div>}</>
       <div className="owner-business-kpis owner-business-kpis-six">
         <div><span>Omzet / Barang Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerOrderValue)}</strong></div>
         <div><span>Kas Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerCashIn)}</strong></div>
-        <div><span>Biaya Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerExpense)}</strong></div>
-        <div><span>Biaya Karyawan</span><strong className="dashboard-money-value">{formatIDR(ownerEmployeeCost)}</strong></div>
-        <div><span>Bagi Hasil Pengelola</span><strong className="dashboard-money-value">{formatIDR(ownerFinancial?.managerShare||0)}</strong></div>
-        <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerProfit)}</strong></div>
-        <div className={ownerCashOperatingSurplus>=0?'profit-positive':'profit-negative'}><span>Surplus Kas Operasional</span><strong className="dashboard-money-value">{formatIDR(ownerCashOperatingSurplus)}</strong></div>
+        <div><span>Biaya Operasional</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerExpense):'—'}</strong></div>
+        <div><span>Biaya Karyawan</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerEmployeeCost):'—'}</strong></div>
+        <div><span>Bagi Hasil Pengelola</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerFinancial.managerShare):'—'}</strong></div>
+        <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih Operasional</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerProfit):'—'}</strong></div>
+        <div className={ownerCashOperatingSurplus>=0?'profit-positive':'profit-negative'}><span>Surplus Kas Operasional</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerCashOperatingSurplus):'—'}</strong></div>
         <div><span>Piutang Aktif</span><strong className="dashboard-money-value">{formatIDR(receivable)}</strong></div>
       </div>
       <div className="owner-payment-breakdown">

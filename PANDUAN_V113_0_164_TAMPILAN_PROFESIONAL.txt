@@ -1,0 +1,57 @@
+HappyLaundry V113.0.164 — Tampilan Profesional dan Pengajuan Kasbon
+
+DESAIN BAKU APLIKASI
+- Satu sistem tulisan, ukuran angka, warna, tombol, formulir, kartu, tabel, navigasi, dan dialog.
+- Judul memiliki hierarki yang jelas; judul bagian/kartu medium, angka nominal dan jumlah normal 14 px.
+- Keterangan 12 px, tetap jelas dibaca. Input HP 16 px untuk mencegah zoom otomatis Safari iPhone.
+- Kartu laptop tersusun dalam grid; HP memakai baris lebar yang disusun vertikal.
+- Tombol tidak menutupi judul; tabel lebar digulir di dalam wadah, bukan memperlebar halaman.
+- Header modal dan tombol tutup dapat dijangkau; isi panjang tetap dapat digulir.
+- Mode Comfort/Compact/Ultra tetap mengatur ruang dengan batas sentuh HP yang nyaman.
+- Login dan pelacakan pelanggan juga mengikuti bahasa desain yang sama.
+- Standar tertulis ada di DESAIN_ANTARMUKA_HAPPYLAUNDRY.md.
+- Fitur berikutnya mengikuti aturan bersama ini; fokus pengembangan dapat beralih ke data dan operasional.
+
+Dasar: source lengkap V113.0.163.
+
+PEMASANGAN
+Ekstrak ZIP V164, salin isi source ke folder repository HappyLaundry, Commit lalu Push seperti biasa.
+Tunggu deployment berhasil dan muat ulang aplikasi hingga tampil V113.0.164.
+Tidak ada SQL baru untuk V164. SQL 083 (pengajuan koreksi) dan SQL 085 (pengajuan tambahan)
+yang sudah dipasang tetap digunakan. Seluruh SQL lama, termasuk SQL 084 pembatalan gaji, tetap disertakan.
+
+KARYAWAN DENGAN AKSES KEUANGAN
+Buka Keuangan → bagian Kas Bon / Piutang Karyawan.
+Dua tombol berdampingan:
+- Ajukan Tambahan Kasbon: langsung membuka formulir pinjaman baru, termasuk kasbon melebihi gaji.
+- Ajukan Koreksi Kasbon: langsung membuka pilihan catatan pinjaman lama tanpa pindah halaman.
+  Pilih catatan kasbon, lalu klik Ajukan Koreksi Kasbon di dalam jendela tersebut.
+  Muncul nama karyawan, nominal pinjaman lama, sisa, nominal yang benar, keterangan, dan alasan koreksi.
+  Isi data yang benar dan alasan minimal 5 karakter, lalu Kirim ke Owner.
+
+Kedua pengajuan menunggu keputusan Owner sebelum mengubah saldo.
+Koreksi tetap memakai pengajuan lama SQL 083; tidak membuat pinjaman tambahan.
+Tidak bisa membuat dua pengajuan koreksi aktif pada catatan kasbon yang sama.
+Nominal baru tidak boleh lebih kecil dari jumlah yang sudah dipotong/dibayar.
+Kasbon dibatalkan tidak ditampilkan dalam pilihan koreksi.
+Jika koneksi terputus saat pengajuan, coba lagi dengan isian sama pada formulir yang masih terbuka
+agar memeriksa ID pengajuan yang sama. Periksa riwayat dahulu sebelum membuka pengajuan baru.
+
+RIWAYAT DAN OWNER
+Riwayat/status dan keputusan Owner tetap di:
+Keuangan → Laporan Seluruh Karyawan → Pengajuan Tambahan Kasbon atau Pengajuan Koreksi Kasbon.
+Pengajuan dari tombol baru masuk ke daftar yang sama seperti pengajuan melalui halaman laporan.
+Owner tetap menyetujui/menolak dengan alur lama. Tidak ada perubahan perhitungan atau transaksi kas.
+
+VERIFIKASI
+Build aplikasi dan uji alur Keuangan, pemilihan kasbon, rincian, batas nominal, retry dengan ID sama,
+pengajuan ganda yang menunggu, pemulihan kegagalan memuat, serta tombol tutup.
+Regresi pengajuan tambahan, koreksi melalui halaman laporan, dan laporan kasbon tetap diperiksa.
+Tidak mengubah login, absensi GPS, SQL keuangan, pembayaran gaji, atau hak akses stok.
+
+HASIL PEMERIKSAAN TAMPILAN
+35 halaman diuji dengan data simulasi pada lebar 320, 390, 768, dan 1366 px.
+Diperiksa hierarki judul, angka normal 14 px, keterangan 12 px, ruang tombol, dan gulir tabel.
+Modal, ukuran isian HP, fokus keyboard, checkbox, drawer, dan tiga mode kepadatan turut diperiksa.
+Pengajuan kasbon diuji dari halaman Keuangan; percobaan ulang memakai ID sama dan tidak mengubah saldo sebelum persetujuan.
+Regresi alur koreksi, pembatalan gaji, dan absensi GPS dijalankan terpisah dengan data simulasi.

@@ -6,6 +6,9 @@ import{AuthProvider}from'./lib/auth'
 import{AppErrorBoundary}from'./components/AppErrorBoundary'
 import'./styles/global.css'
 import'./styles/regularReports.css'
+import'./styles/professional.css'
+
+document.documentElement.dataset.ui='professional'
 
 const savedDensity=localStorage.getItem('happylaundry-density')||'compact'
 document.documentElement.dataset.density=savedDensity

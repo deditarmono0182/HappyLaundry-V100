@@ -65,7 +65,20 @@ function isPayrollLikeExpense(row:ExpenseRow){
   return /(gaji|payroll|komisi|tunjangan|bonus|bagi hasil|sdm)/.test(key)
 }
 
+// One server aggregation avoids transferring every order/item/attendance row for each period.
+// Older deployments keep working until SQL 086 is installed; permission/network failures never fall back.
 export async function fetchFinancialSummary(from:string,to:string):Promise<FinancialSummary>{
+  const {data,error}=await supabase.rpc('v113165_financial_summary',{p_from:from,p_to:to})
+  if(!error){
+    const keys=['revenue','cashIn','receivable','operating','attendancePay','allowance','bonus','revenueShare','productionCommission','courierCommission','managerShare','profitBeforeManager','employeeCost','operatingNet','reserveTotal','netAfterReserve','cashOperatingSurplus'] as const
+    if(!data||keys.some(key=>data[key]===null||data[key]===undefined||!Number.isFinite(Number(data[key]))))throw new Error('Ringkasan periode tidak valid. Muat ulang sebelum memakai laporan.')
+    return Object.fromEntries(keys.map(key=>[key,Number(data[key])])) as FinancialSummary
+  }
+  if(error.code!=='PGRST202'&&error.code!=='42883')throw error
+  return fetchFinancialSummaryLegacy(from,to)
+}
+
+async function fetchFinancialSummaryLegacy(from:string,to:string):Promise<FinancialSummary>{
   const fromISO=businessDateTimeIso(from)
   const toISO=businessDateTimeIso(to,'23:59:59.999')
   const firstMonth=`${from.slice(0,7)}-01`

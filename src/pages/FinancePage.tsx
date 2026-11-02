@@ -1,7 +1,9 @@
+import {FinanceCashAdvanceCorrectionModal} from '../components/FinanceCashAdvanceCorrectionModal'
+import {CashAdvanceAdditionRequestModal,type AdditionDraft} from '../components/CashAdvanceAdditionRequests'
 import {FinanceCashAdvanceSummary,type FinanceCashAdvanceSummaryRow} from '../components/FinanceCashAdvanceSummary'
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
 import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle, CalendarDays, Eye, FileSpreadsheet, FileText, HandCoins, ImageUp, Percent, Plus,
@@ -83,6 +85,7 @@ const today=()=>businessDateKey()
 const monthStart=()=>businessMonthStartKey()
 
 export function FinancePage(){
+  const loadSequence=useRef(0)
   const navigate=useNavigate()
   const{profile}=useAuth()
   const isOwner=profile?.role==='owner'
@@ -122,6 +125,10 @@ export function FinancePage(){
   const [financeCashAdvances,setFinanceCashAdvances]=useState<FinanceCashAdvanceSummaryRow[]>([])
   const [cashAdvanceSummaryLoading,setCashAdvanceSummaryLoading]=useState(true)
   const [cashAdvanceSummaryError,setCashAdvanceSummaryError]=useState('')
+  const [correctionOpen,setCorrectionOpen]=useState(false)
+  const [correctionNotice,setCorrectionNotice]=useState('')
+  const [additionDraft,setAdditionDraft]=useState<AdditionDraft|null>(null)
+  const [additionNotice,setAdditionNotice]=useState('')
   const [cashAdvanceOpen,setCashAdvanceOpen]=useState(false)
   const [cashAdvanceBusy,setCashAdvanceBusy]=useState(false)
   const [cashAdvanceOverride,setCashAdvanceOverride]=useState('')
@@ -137,6 +144,7 @@ export function FinancePage(){
   })
 
   const load=useCallback(async()=>{
+    const sequence=++loadSequence.current
     setMessage('')
     const [c,e,p,o,i,s,rs]=await Promise.all([
       supabase.from('v106_expense_categories').select('*').eq('is_active',true).order('group_name').order('name'),
@@ -150,6 +158,7 @@ export function FinancePage(){
         : Promise.resolve({data:[] as RevenueShareSetting[],error:null})
     ])
 
+    if(sequence!==loadSequence.current)return
     const error=c.error||e.error||p.error||o.error||i.error||s.error||rs.error
     if(error)setMessage(error.message)
     else{
@@ -161,8 +170,10 @@ export function FinancePage(){
       setServices((s.data as ServiceRow[])||[])
       setShareSettings((rs.data as RevenueShareSetting[])||[])
       try{
-        setPayrollExpenses(await loadPayrollExpenseRows(from,to))
+        const payroll=await loadPayrollExpenseRows(from,to)
+        if(sequence===loadSequence.current)setPayrollExpenses(payroll)
       }catch(payrollError){
+        if(sequence!==loadSequence.current)return
         setPayrollExpenses([])
         setMessage(`Data operasional berhasil dimuat, tetapi gaji belum dapat dihitung: ${payrollError instanceof Error?payrollError.message:String(payrollError)}`)
       }
@@ -583,8 +594,10 @@ export function FinancePage(){
           <h3>Kas Bon / Piutang Karyawan</h3>
           <p>Saat kas bon diberikan, Kas Harian berkurang. Saldo kas bon tetap menjadi piutang karyawan dan tidak masuk biaya operasional.</p>
         </div>
-        <div className="cash-report-actions"><button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button><button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
+        <div className="cash-report-actions"><button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button>{!isOwner&&<button type="button" className="secondary-button" onClick={()=>setAdditionDraft({employee_id:'',amount:'',payment_method:'cash',note:''})}>Ajukan Tambahan Kasbon</button>}{!isOwner&&<button type="button" className="secondary-button" onClick={()=>setCorrectionOpen(true)}>Ajukan Koreksi Kasbon</button>}<button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
       </div>
+      {correctionNotice&&<div className="success-box" role="status">{correctionNotice}</div>}
+      {additionNotice&&<div className="success-box" role="status">{additionNotice} Lihat statusnya melalui Laporan Seluruh Karyawan → Pengajuan Tambahan Kasbon.</div>}
       {cashAdvanceSummaryLoading?<p role="status">Memuat total kasbon per karyawan...</p>:cashAdvanceSummaryError?<div className="error-box">Gagal mengambil ringkasan kasbon: {cashAdvanceSummaryError}. Pastikan SQL 074 sudah dijalankan. <button type="button" className="secondary-button" onClick={()=>void loadCashAdvances()}>Coba Lagi</button></div>:<FinanceCashAdvanceSummary rows={financeCashAdvances} onSelect={id=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(id)}`)}/>}
       <div className="finance-cash-advance-footnote">Pembayaran dicatat Owner melalui Absensi & Gaji → Potongan Kasbon: potong gaji, tunai, atau transfer. Tunai/transfer tercatat di Kas Harian dan tidak menjadi omzet laundry.</div>
     </section>
@@ -835,6 +848,9 @@ export function FinancePage(){
       </form>
     </Modal>}
 
+    {correctionOpen&&<FinanceCashAdvanceCorrectionModal onClose={()=>setCorrectionOpen(false)} onSubmitted={()=>{setCorrectionOpen(false);setCorrectionNotice('Pengajuan koreksi terkirim dan menunggu Owner. Saldo kasbon belum berubah. Lihat status melalui Laporan Seluruh Karyawan → Pengajuan Koreksi Kasbon.')}}/>}
+    {additionDraft&&<CashAdvanceAdditionRequestModal initial={additionDraft} onClose={()=>setAdditionDraft(null)} onSent={async()=>{setAdditionNotice('Pengajuan terkirim dan menunggu Owner. Saldo kasbon dan Kas Harian belum berubah.')}}/>}
+
     {cashAdvanceOpen&&<Modal title="Input Kas Bon Karyawan" onClose={()=>!cashAdvanceBusy&&setCashAdvanceOpen(false)}>
       <form className="modal-form" onSubmit={saveFinanceCashAdvance}>
         <div className="info-box">Kas bon akan tercatat sebagai <b>Kas Keluar</b> di Kas Harian dan sebagai <b>Piutang Karyawan</b>. Kas bon tidak dihitung sebagai biaya operasional/laba rugi.</div>
@@ -847,7 +863,7 @@ export function FinancePage(){
         <label>Nominal Kas Bon
           <input type="number" min="1" value={cashAdvanceForm.amount} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,amount:e.target.value})} placeholder="Contoh: 500000" required/>
         </label>
-        <CashAdvanceWarning state={cashAdvanceLimit} amount={Number(cashAdvanceForm.amount)} owner={isOwner} reason={cashAdvanceOverride} onReason={setCashAdvanceOverride} onRefresh={cashAdvanceLimit.refresh}/>
+        <CashAdvanceWarning state={cashAdvanceLimit} amount={Number(cashAdvanceForm.amount)} owner={isOwner} reason={cashAdvanceOverride} onReason={setCashAdvanceOverride} onRefresh={cashAdvanceLimit.refresh} requestAllowed/>
         <label>Uang Diberikan Melalui
           <select value={cashAdvanceForm.payment_method} onChange={e=>setCashAdvanceForm({...cashAdvanceForm,payment_method:e.target.value})}>
             <option value="cash">Tunai</option>
@@ -862,6 +878,7 @@ export function FinancePage(){
         {message&&<div className="error-box">{message}</div>}
         <div className="form-actions">
           <button type="button" className="secondary-button" onClick={()=>setCashAdvanceOpen(false)} disabled={cashAdvanceBusy}>Batal</button>
+          {!isOwner&&<button type="button" className="secondary-button" disabled={cashAdvanceBusy} onClick={()=>{setCashAdvanceOpen(false);setAdditionDraft({...cashAdvanceForm})}}>Ajukan Tambahan Kasbon</button>}
           <button className="primary-button" disabled={cashAdvanceBusy||!cashAdvanceForm.employee_id||Number(cashAdvanceForm.amount)<=0||cashAdvanceBlocked(cashAdvanceLimit,Number(cashAdvanceForm.amount),isOwner,cashAdvanceOverride)}><HandCoins size={16}/>{cashAdvanceBusy?'Menyimpan...':'Simpan Kas Bon'}</button>
         </div>
       </form>

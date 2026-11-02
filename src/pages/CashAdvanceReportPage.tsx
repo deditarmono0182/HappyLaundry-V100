@@ -1,3 +1,4 @@
+import {CashAdvanceAdditionRequests} from '../components/CashAdvanceAdditionRequests'
 import {CashAdvanceCorrectionRequests} from '../components/CashAdvanceCorrectionRequests'
 import {loadCashAdvanceRepayments,type CashAdvanceRepayment} from '../lib/cashAdvanceRepayments'
 import {canAccess} from '../lib/permissions'
@@ -98,7 +99,7 @@ export function CashAdvanceReportPage(){
   const current=currentSelection
   if(!allowed)return <div className="error-box">Laporan kasbon memerlukan akses Keuangan.</div>
   return <>
-    <PageHeader eyebrow="KEUANGAN • KASBON" title="Laporan Kasbon Karyawan" description="Ringkasan seluruh karyawan dan riwayat rinci. Rincian kasbon dan pengajuan koreksi dengan persetujuan Owner." action={<button className="secondary-button" onClick={()=>navigate('/finance')}><ChevronLeft size={16}/>Keuangan</button>}/>
+    <PageHeader eyebrow="KEUANGAN • KASBON" title="Laporan Kasbon Karyawan" description="Ringkasan seluruh karyawan dan riwayat rinci. Rincian kasbon, pengajuan tambahan, dan koreksi dengan persetujuan Owner." action={<button className="secondary-button" onClick={()=>navigate('/finance')}><ChevronLeft size={16}/>Keuangan</button>}/>
     <section className="panel" style={{padding:16}}>
       <div className="cash-report-toolbar">
         <input aria-label="Cari karyawan" placeholder="Cari nama / ID karyawan..." value={query} onChange={e=>setQuery(e.target.value)}/>
@@ -123,6 +124,7 @@ export function CashAdvanceReportPage(){
         <p className="cash-report-note">Nilai terbayar/selisih dihitung dari nominal kasbon dikurangi saldo tersisa. Termasuk potongan gaji dan penyesuaian saldo; bukan otomatis berarti uang kas masuk.</p>
       </>}
     </section>
+    {data&&<CashAdvanceAdditionRequests employeeId={selectedParam} isOwner={profile?.role==='owner'} onChanged={load}/>}
     {data&&<CashAdvanceCorrectionRequests loans={data.advances} employees={data.employees} employeeId={selectedParam} isOwner={profile?.role==='owner'} onChanged={load}/>}
     {data&&!loading&&selectedParam&&!current&&<div className="error-box">Karyawan ini tidak memiliki kasbon aktif atau lunas yang dapat ditampilkan.</div>}
     {current&&<section ref={detailsRef} className="panel cash-report-employee-detail" style={{padding:16,scrollMarginTop:90}}>

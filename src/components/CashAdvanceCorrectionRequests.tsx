@@ -8,7 +8,8 @@ type Loan={id:string;employee_id:string;amount:number;remaining_amount:number;no
 type Employee={id:string;name:string}
 type Request={id:string;cash_advance_id:string;employee_id:string;employee_name:string;old_amount:number;old_remaining:number;old_note:string|null;new_amount:number;new_note:string|null;reason:string;status:'pending'|'approved'|'rejected'|'stale';requester_name:string;requested_at:string;reviewer_name:string|null;reviewed_at:string|null;review_note:string|null}
 const labels={pending:'Menunggu Owner',approved:'Disetujui',rejected:'Ditolak',stale:'Perlu diajukan ulang'}
-export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwner,onChanged}:{loans:Loan[];employees:Employee[];employeeId:string|null;isOwner:boolean;onChanged:()=>Promise<void>}){
+export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwner,onChanged,composerOnClose,onSubmitted}:{loans:Loan[];employees:Employee[];employeeId:string|null;isOwner:boolean;onChanged:()=>Promise<void>;composerOnClose?:()=>void;onSubmitted?:()=>void}){
+ const composer=!!composerOnClose
  const [requests,setRequests]=useState<Request[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[success,setSuccess]=useState('')
  const [selected,setSelected]=useState(''),[all,setAll]=useState(false),[target,setTarget]=useState<Loan|null>(null),[review,setReview]=useState<Request|null>(null)
  const [form,setForm]=useState({amount:'',note:'',reason:''}),[decision,setDecision]=useState(''),[busy,setBusy]=useState(false)
@@ -43,6 +44,7 @@ export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwne
   try{
    const r=await supabase.rpc('v113161_request_cash_advance_correction',{...args,p_request_id:retry.current.id})
    if(r.error)throw new Error(r.error.message)
+   if(onSubmitted){onSubmitted();return}
    setTarget(null);setSuccess('Pengajuan tersimpan. Saldo kasbon belum berubah; menunggu keputusan Owner.');await load()
   }catch(e){setError(e instanceof Error?e.message:'Pengajuan belum dapat dikonfirmasi. Muat ulang riwayat sebelum mencoba lagi.')}
   finally{pending.current=false;setBusy(false)}
@@ -60,8 +62,8 @@ export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwne
   }catch(e){setError(e instanceof Error?e.message:'Keputusan belum dapat dikonfirmasi. Muat ulang riwayat sebelum mencoba lagi.')}
   finally{pending.current=false;setBusy(false)}
  }
- return <section className="panel" id="correction-requests" style={{padding:16,marginTop:16}}>
-  <h3>Pengajuan Koreksi Kasbon</h3>
+ const panel=<section className={composer?'cash-correction-composer':'panel'} id="correction-requests" style={{padding:composer?0:16,marginTop:composer?0:16}}>
+  {!composer&&<h3>Pengajuan Koreksi Kasbon</h3>}
   <p>Koreksi nominal pinjaman harus disetujui Owner. Pengajuan tidak memotong gaji atau mengubah saldo.</p>
   <div className="cash-correction-request-tools">
    <select aria-label="Pilih kasbon yang dikoreksi" value={loan?selected:''} onChange={e=>setSelected(e.target.value)} disabled={loading||!!error||busy}>
@@ -70,20 +72,23 @@ export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwne
    </select>
    <button className="secondary-button" disabled={!loan||loading||!!error||busy||requests.some(r=>r.cash_advance_id===loan.id&&r.status==='pending')} onClick={open}>Ajukan Koreksi Kasbon</button>
    <button className="secondary-button" disabled={busy||loading} onClick={()=>void load()}>Muat Ulang Pengajuan</button>
-   <label><input type="checkbox" checked={all} onChange={e=>setAll(e.target.checked)}/> Tampilkan riwayat keputusan</label>
+   {!composer&&<label><input type="checkbox" checked={all} onChange={e=>setAll(e.target.checked)}/> Tampilkan riwayat keputusan</label>}
   </div>
   {loading&&<p role="status">Memuat pengajuan...</p>}{error&&<div className="error-box" role="alert">{error}</div>}{success&&<div className="success-box" role="status">{success}</div>}
-  <div className="table-wrap"><table><thead><tr><th>Tanggal / Pengaju</th><th>Karyawan</th><th>Nominal Lama → Baru</th><th>Alasan</th><th>Status / Keputusan</th>{isOwner&&<th>Aksi</th>}</tr></thead><tbody>
+  {composer&&loan&&requests.some(r=>r.cash_advance_id===loan.id&&r.status==='pending')&&<div className="info-box">Kasbon ini sudah memiliki pengajuan koreksi yang menunggu Owner. Periksa statusnya melalui Laporan Seluruh Karyawan.</div>}
+  {!composer&&<div className="table-wrap"><table><thead><tr><th>Tanggal / Pengaju</th><th>Karyawan</th><th>Nominal Lama → Baru</th><th>Alasan</th><th>Status / Keputusan</th>{isOwner&&<th>Aksi</th>}</tr></thead><tbody>
    {shown.map(r=><tr key={r.id}><td>{businessDateTimeLabel(r.requested_at)}<small style={{display:'block'}}>{r.requester_name}</small></td><td>{r.employee_name}</td><td>{formatRupiah(Number(r.old_amount))} → {formatRupiah(Number(r.new_amount))}</td><td className="cash-correction-request-reason">{r.reason}</td><td>{labels[r.status]}{r.reviewed_at&&<small style={{display:'block'}}>{r.reviewer_name} • {businessDateTimeLabel(r.reviewed_at)} • {r.review_note}</small>}</td>{isOwner&&<td>{r.status==='pending'&&<button className="secondary-button" disabled={busy||loading} onClick={()=>{setReview(r);setDecision('');setError('')}}>Tinjau Pengajuan</button>}</td>}</tr>)}
    {!loading&&!shown.length&&<tr><td colSpan={isOwner?6:5}>Tidak ada pengajuan pada pilihan ini.</td></tr>}
-  </tbody></table></div>
-  {target&&<Modal title="Ajukan Koreksi Pinjaman Kasbon" onClose={()=>!busy&&setTarget(null)}><form className="modal-form" onSubmit={send}>
+  </tbody></table></div>}
+ </section>
+ return <>{composer?(!target&&<Modal title="Ajukan Koreksi Kasbon" onClose={()=>composerOnClose?.()}>{panel}</Modal>):panel}
+  {target&&<Modal title="Ajukan Koreksi Pinjaman Kasbon" onClose={()=>{if(!busy){if(composer)composerOnClose?.();else setTarget(null)}}}><form className="modal-form" onSubmit={send}>
    <p>{employees.find(e=>e.id===target.employee_id)?.name} • Pinjaman {formatRupiah(Number(target.amount))} • Sisa {formatRupiah(Number(target.remaining_amount))}</p>
    <label>Nominal Pinjaman yang Benar<input type="number" min="0.01" step="0.01" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} required disabled={busy}/></label>
    <label>Keterangan Pinjaman<textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} disabled={busy}/></label>
    <label>Alasan Koreksi<textarea value={form.reason} onChange={e=>setForm({...form,reason:e.target.value})} minLength={5} required disabled={busy}/></label>
    <div className="info-box">Nominal lama → baru: {formatRupiah(Number(target.amount))} → {formatRupiah(Number(form.amount)||0)}. Saldo berubah setelah disetujui Owner. Ini bukan koreksi potongan gaji.</div>
-   {error&&<div className="error-box">{error}</div>}<div className="form-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>setTarget(null)}>Batal</button><button className="primary-button" disabled={busy}>{busy?'Mengirim...':'Kirim ke Owner'}</button></div>
+   {error&&<div className="error-box">{error}</div>}<div className="form-actions"><button type="button" className="secondary-button" disabled={busy} onClick={()=>{if(composer)composerOnClose?.();else setTarget(null)}}>Batal</button><button className="primary-button" disabled={busy}>{busy?'Mengirim...':'Kirim ke Owner'}</button></div>
   </form></Modal>}
   {review&&<Modal title={`Tinjau Koreksi — ${review.employee_name}`} onClose={()=>!busy&&setReview(null)}><div className="modal-form">
    <div className="cash-correction-request-summary"><div><span>Pinjaman Lama</span>{formatRupiah(Number(review.old_amount))}</div><div><span>Pinjaman Baru</span>{formatRupiah(Number(review.new_amount))}</div><div><span>Sisa Setelah Koreksi</span>{formatRupiah(Number(review.old_remaining)+Number(review.new_amount)-Number(review.old_amount))}</div></div>
@@ -92,5 +97,5 @@ export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwne
    <label>Catatan Keputusan Owner<textarea value={decision} onChange={e=>setDecision(e.target.value)} minLength={5} disabled={busy}/></label>
    {error&&<div className="error-box">{error}</div>}<div className="form-actions"><button className="secondary-button" disabled={busy} onClick={()=>setReview(null)}>Batal</button><button className="secondary-button" disabled={busy} onClick={()=>void decide(false)}>Tolak Pengajuan</button><button className="primary-button" disabled={busy} onClick={()=>void decide(true)}>Setujui Koreksi</button></div>
   </div></Modal>}
- </section>
+ </>
 }

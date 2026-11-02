@@ -1,6 +1,6 @@
 import {loadCommissionLedger} from '../lib/commissionLedger'
 import {managerSharesForRange} from '../lib/managerShare'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Banknote, CalendarDays, FileSpreadsheet, FileText, PiggyBank, ReceiptText, Settings2,
   TrendingDown, TrendingUp, Users, WalletCards
@@ -121,6 +121,7 @@ function isPayrollLikeExpense(row:ExpenseRow){
 }
 
 export function ProfitLossPage(){
+  const loadSequence=useRef(0)
   const today=businessDateKey()
   const [preset,setPreset]=useState<PeriodPreset>('month')
   const [from,setFrom]=useState(businessMonthStartKey())
@@ -149,6 +150,7 @@ export function ProfitLossPage(){
   const [detail,setDetail]=useState<DetailKey>(null)
 
   const load=useCallback(async()=>{
+    const sequence=++loadSequence.current
     setLoading(true)
     setMessage('')
     try{
@@ -194,6 +196,7 @@ export function ProfitLossPage(){
       managerSharesForRange(appliedFrom,appliedTo)
     ])
 
+    if(sequence!==loadSequence.current)return
     const error=o.error||p.error||e.error||a.error||ps.error||adj.error||shr.error||com.error||it.error||sv.error||emp.error||res.error
     if(error){
       setMessage(error.message)
@@ -212,8 +215,8 @@ export function ProfitLossPage(){
       setEmployees((emp.data as EmployeeRow[])||[])
       setReserveSettings((res.data as ReserveSetting[])||[])
     }
-    }catch(e){setMessage(e instanceof Error?e.message:String(e))}
-    finally{setLoading(false)}
+    }catch(e){if(sequence===loadSequence.current)setMessage(e instanceof Error?e.message:String(e))}
+    finally{if(sequence===loadSequence.current)setLoading(false)}
   },[appliedFrom,appliedTo])
 
   useEffect(()=>{void load()},[load])
@@ -593,8 +596,8 @@ export function ProfitLossPage(){
       description="Pisahkan laba operasional dari laba setelah penyusutan, THR, kesehatan, dan cadangan tak terduga."
       action={<div className="report-actions">
         <button className="secondary-button" onClick={openReserveSettings}><Settings2 size={17}/>Atur Cadangan</button>
-        <button className="secondary-button" onClick={()=>downloadFinancialStatementXls(exportOptions())}><FileSpreadsheet size={17}/>XLS</button>
-        <button className="secondary-button" onClick={()=>printFinancialStatementPdf(exportOptions())}><FileText size={17}/>PDF</button>
+        <button className="secondary-button" disabled={loading||!!message} onClick={()=>downloadFinancialStatementXls(exportOptions())}><FileSpreadsheet size={17}/>XLS</button>
+        <button className="secondary-button" disabled={loading||!!message} onClick={()=>printFinancialStatementPdf(exportOptions())}><FileText size={17}/>PDF</button>
       </div>}
     />
 
@@ -615,12 +618,12 @@ export function ProfitLossPage(){
     {message&&<div className="error-box inline-message">{message}</div>}
 
     <section className="stats-grid pl-stats">
-      <button className="pl-stat-button" onClick={()=>setDetail('revenue')}><StatCard icon={TrendingUp} label="Pendapatan" value={formatRupiah(report.revenue)} caption={`${report.validOrders.length} order masuk`}/></button>
-      <button className="pl-stat-button" onClick={()=>setDetail('operating')}><StatCard icon={TrendingDown} label="Biaya Operasional" value={formatRupiah(report.operating)} caption={`${report.operatingRows.length} transaksi biaya`}/></button>
-      <button className="pl-stat-button" onClick={()=>setDetail('payroll')}><StatCard icon={Users} label="Biaya Karyawan" value={formatRupiah(report.payroll)} caption="Gaji, tunjangan, bonus & komisi"/></button>
-      <button className="pl-stat-button" onClick={()=>setDetail('operating_net')}><StatCard icon={WalletCards} label="Laba Bersih Operasional" value={formatRupiah(report.operatingNet)} caption={`Margin ${report.operatingMargin.toFixed(1)}%`}/></button>
-      <button className="pl-stat-button" onClick={()=>setDetail('net_after_reserve')}><StatCard icon={PiggyBank} label="Laba Setelah Cadangan" value={formatRupiah(report.netAfterReserve)} caption={`Total cadangan ${formatRupiah(report.reserveTotal)}`}/></button>
-      <button className="pl-stat-button" onClick={()=>setDetail('cash_surplus')}><StatCard icon={Banknote} label="Surplus Kas Operasional" value={formatRupiah(report.cashOperatingSurplus)} caption="Kas masuk - biaya operasional - biaya karyawan"/></button>
+      <button disabled={loading||!!message} className="pl-stat-button" onClick={()=>setDetail('revenue')}><StatCard icon={TrendingUp} label="Pendapatan" value={loading?'—':formatRupiah(report.revenue)} caption={`${report.validOrders.length} order masuk`}/></button>
+      <button disabled={loading||!!message} className="pl-stat-button" onClick={()=>setDetail('operating')}><StatCard icon={TrendingDown} label="Biaya Operasional" value={loading?'—':formatRupiah(report.operating)} caption={`${report.operatingRows.length} transaksi biaya`}/></button>
+      <button disabled={loading||!!message} className="pl-stat-button" onClick={()=>setDetail('payroll')}><StatCard icon={Users} label="Biaya Karyawan" value={loading?'—':formatRupiah(report.payroll)} caption="Gaji, tunjangan, bonus & komisi"/></button>
+      <button disabled={loading||!!message} className="pl-stat-button" onClick={()=>setDetail('operating_net')}><StatCard icon={WalletCards} label="Laba Bersih Operasional" value={loading?'—':formatRupiah(report.operatingNet)} caption={`Margin ${report.operatingMargin.toFixed(1)}%`}/></button>
+      <button disabled={loading||!!message} className="pl-stat-button" onClick={()=>setDetail('net_after_reserve')}><StatCard icon={PiggyBank} label="Laba Setelah Cadangan" value={loading?'—':formatRupiah(report.netAfterReserve)} caption={`Total cadangan ${formatRupiah(report.reserveTotal)}`}/></button>
+      <button disabled={loading||!!message} className="pl-stat-button" onClick={()=>setDetail('cash_surplus')}><StatCard icon={Banknote} label="Surplus Kas Operasional" value={loading?'—':formatRupiah(report.cashOperatingSurplus)} caption="Kas masuk - biaya operasional - biaya karyawan"/></button>
     </section>
 
     <section className="pl-grid">

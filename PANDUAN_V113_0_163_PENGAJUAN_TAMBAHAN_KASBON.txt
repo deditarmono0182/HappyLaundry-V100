@@ -1,0 +1,49 @@
+HappyLaundry V113.0.163 — Pengajuan Tambahan Kasbon
+Dasar: source lengkap V113.0.162, termasuk pembatalan pembayaran gaji dan pengajuan koreksi kasbon.
+
+PEMASANGAN
+1. Jalankan SQL_085_PENGAJUAN_TAMBAHAN_KASBON.sql di Supabase SQL Editor.
+   SQL sebelumnya (termasuk 072, 073, 082, 083, 084) tetap dipertahankan.
+2. Ekstrak ZIP V163. Salin isi folder source ke folder repository HappyLaundry seperti biasa.
+3. Commit dan Push melalui GitHub Desktop, tunggu deployment berhasil.
+4. Muat ulang aplikasi. Periksa versi V113.0.163 pada menu aplikasi.
+Migrasi tidak mengajukan, menyetujui, atau memberi kasbon secara otomatis.
+
+KARYAWAN DENGAN AKSES KEUANGAN
+- Buka Keuangan → bagian Kas Bon / Piutang Karyawan → Ajukan Tambahan Kasbon.
+- Atau buka Input Kas Bon. Jika nominal melebihi batas gaji, Simpan Kas Bon tetap diblokir.
+  Klik Ajukan Tambahan Kasbon untuk membawa pilihan karyawan, nominal, metode, dan keterangannya ke formulir pengajuan.
+- Pilih karyawan aktif, nominal tambahan, rencana metode pemberian, keterangan, dan alasan minimal 5 karakter.
+- Klik Kirim ke Owner. Tidak ada perubahan saldo kasbon, Kas Harian, gaji, atau potongan gaji saat menunggu.
+- Lihat status melalui Keuangan → Laporan Seluruh Karyawan → Pengajuan Tambahan Kasbon.
+- Centang Tampilkan riwayat keputusan tambahan untuk melihat pengajuan yang disetujui/ditolak serta catatan Owner.
+- Pengajuan tambahan juga tersedia di halaman laporan. Pengajuan koreksi pinjaman tetap berada di bagian terpisah di halaman laporan yang sama.
+- Karyawan tidak dapat menyetujui pengajuan sendiri meskipun mendapat akses Keuangan.
+
+OWNER
+1. Buka Keuangan → Laporan Seluruh Karyawan → Pengajuan Tambahan Kasbon.
+2. Klik Tinjau Tambahan Kasbon pada pengajuan yang menunggu.
+3. Periksa nominal, metode, alasan, keterangan, gaji tersedia saat diajukan, dan batas gaji terbaru.
+4. Isi catatan keputusan minimal 5 karakter.
+5. Tolak Pengajuan: hanya menyimpan keputusan, tidak mengubah saldo atau kas.
+6. Setujui & Catat Kasbon: lakukan saat dana diberikan melalui metode yang tertera.
+   Sistem langsung membuat SATU kasbon baru dan SATU Kas Keluar di Kas Harian.
+   Tidak ada pengiriman uang bank/QRIS otomatis.
+   Jika melebihi gaji, persetujuan kelebihan dan alasan Owner masuk audit lama seperti input Owner.
+   Karyawan yang sudah nonaktif tidak dapat menerima persetujuan baru; pengajuannya masih bisa ditolak.
+
+RETRY DAN RIWAYAT
+- Klik ulang/retry pengajuan dengan isian yang sama pada formulir yang masih terbuka memeriksa ID pengajuan yang sama.
+- Jika respons terputus, coba kembali dengan isian yang sama atau periksa riwayat terlebih dahulu.
+- Pengulangan persetujuan pada ID yang sama tidak menggandakan kasbon atau Kas Keluar.
+- Jika pencatatan kas keluar gagal, seluruh persetujuan dibatalkan oleh transaksi database dan pengajuan tetap menunggu.
+- Nominal dan metode pengajuan tidak diedit saat ditinjau. Tolak lalu ajukan ulang jika isinya salah.
+- Status dan alasan keputusan tersimpan. Pengajuan ini terpisah dari koreksi kasbon lama dan pembatalan pembayaran gaji.
+
+VERIFIKASI
+- SQL 085 dijalankan pada mesin PostgreSQL terisolasi menggunakan fungsi kasbon/guard SQL 066 dan 072 yang sebenarnya.
+- Diuji: hak akses, tanpa mutasi saat pending/ditolak, persetujuan sekali, retry setelah respons terputus,
+  audit batas gaji terbaru, rollback kegagalan kas, karyawan nonaktif, dan validasi nominal.
+- UI Keuangan dan pengajuan diuji dengan data simulasi; regresi rincian kasbon, koreksi, batas kasbon,
+  pembayaran gaji, pembatalan gaji, dan absensi GPS juga diperiksa.
+- Login dan alur absensi GPS tidak diubah. Hak akses stok tetap ditunda sesuai permintaan sebelumnya.
