@@ -16,6 +16,7 @@ const root=createRoot(document.getElementById('root'))
 const mount=async(url)=>{await act(async()=>{root.render(React.createElement(MemoryRouter,{key:url,initialEntries:[url]},React.createElement(CashAdvanceReportPage)))})}
 const click=async(label)=>{const button=[...document.querySelectorAll('button')].find(b=>b.textContent===label);assert.ok(button,label+' exists');await act(async()=>button.click())}
 await mount('/finance/cash-advances')
+assert.equal(document.querySelector('#correction-requests'),null,'request panels moved to Finance main page');assert.equal(document.querySelector('#additional-cash-advance-requests'),null)
 await click('Robet')
 assert.match(document.body.textContent,/Riwayat Kasbon — Robet/);assert.match(document.body.textContent,/Kasbon melebihi gaji sebesar/)
 assert.equal(document.querySelector('.cash-report-employee-detail').querySelectorAll('table')[0].querySelectorAll('tbody tr').length,2)

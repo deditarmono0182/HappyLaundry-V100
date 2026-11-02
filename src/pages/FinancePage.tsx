@@ -1,4 +1,4 @@
-import {FinanceCashAdvanceCorrectionModal} from '../components/FinanceCashAdvanceCorrectionModal'
+import {FinanceCashAdvanceRequestCenter,type CashAdvanceRequestTab} from '../components/FinanceCashAdvanceRequestCenter'
 import {CashAdvanceAdditionRequestModal,type AdditionDraft} from '../components/CashAdvanceAdditionRequests'
 import {FinanceCashAdvanceSummary,type FinanceCashAdvanceSummaryRow} from '../components/FinanceCashAdvanceSummary'
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
@@ -125,8 +125,8 @@ export function FinancePage(){
   const [financeCashAdvances,setFinanceCashAdvances]=useState<FinanceCashAdvanceSummaryRow[]>([])
   const [cashAdvanceSummaryLoading,setCashAdvanceSummaryLoading]=useState(true)
   const [cashAdvanceSummaryError,setCashAdvanceSummaryError]=useState('')
-  const [correctionOpen,setCorrectionOpen]=useState(false)
-  const [correctionNotice,setCorrectionNotice]=useState('')
+  const [requestTab,setRequestTab]=useState<CashAdvanceRequestTab|null>(null)
+  const [requestRevision,setRequestRevision]=useState(0)
   const [additionDraft,setAdditionDraft]=useState<AdditionDraft|null>(null)
   const [additionNotice,setAdditionNotice]=useState('')
   const [cashAdvanceOpen,setCashAdvanceOpen]=useState(false)
@@ -594,10 +594,15 @@ export function FinancePage(){
           <h3>Kas Bon / Piutang Karyawan</h3>
           <p>Saat kas bon diberikan, Kas Harian berkurang. Saldo kas bon tetap menjadi piutang karyawan dan tidak masuk biaya operasional.</p>
         </div>
-        <div className="cash-report-actions"><button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button>{!isOwner&&<button type="button" className="secondary-button" onClick={()=>setAdditionDraft({employee_id:'',amount:'',payment_method:'cash',note:''})}>Ajukan Tambahan Kasbon</button>}{!isOwner&&<button type="button" className="secondary-button" onClick={()=>setCorrectionOpen(true)}>Ajukan Koreksi Kasbon</button>}<button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button></div>
       </div>
-      {correctionNotice&&<div className="success-box" role="status">{correctionNotice}</div>}
-      {additionNotice&&<div className="success-box" role="status">{additionNotice} Lihat statusnya melalui Laporan Seluruh Karyawan → Pengajuan Tambahan Kasbon.</div>}
+      <div className="cash-report-actions" style={{marginBottom:12}}>
+          <button type="button" className="secondary-button" onClick={()=>navigate('/finance/cash-advances')}>Laporan Seluruh Karyawan</button>
+          <button type="button" className="secondary-button" aria-controls="finance-cash-advance-requests" aria-expanded={requestTab==='addition'} onClick={()=>setRequestTab('addition')}>Pengajuan Tambahan Kasbon</button>
+          <button type="button" className="secondary-button" aria-controls="finance-cash-advance-requests" aria-expanded={requestTab==='correction'} onClick={()=>setRequestTab('correction')}>Pengajuan Koreksi Kasbon</button>
+          <button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button>
+      </div>
+      {additionNotice&&<div className="success-box" role="status">{additionNotice} Lihat statusnya melalui Pengajuan Tambahan Kasbon di halaman ini.</div>}
+      {requestTab&&<FinanceCashAdvanceRequestCenter key={requestRevision} tab={requestTab} isOwner={isOwner} onClose={()=>setRequestTab(null)} onChanged={async()=>{await Promise.all([loadCashAdvances(),load()])}}/>}
       {cashAdvanceSummaryLoading?<p role="status">Memuat total kasbon per karyawan...</p>:cashAdvanceSummaryError?<div className="error-box">Gagal mengambil ringkasan kasbon: {cashAdvanceSummaryError}. Pastikan SQL 074 sudah dijalankan. <button type="button" className="secondary-button" onClick={()=>void loadCashAdvances()}>Coba Lagi</button></div>:<FinanceCashAdvanceSummary rows={financeCashAdvances} onSelect={id=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(id)}`)}/>}
       <div className="finance-cash-advance-footnote">Pembayaran dicatat Owner melalui Absensi & Gaji → Potongan Kasbon: potong gaji, tunai, atau transfer. Tunai/transfer tercatat di Kas Harian dan tidak menjadi omzet laundry.</div>
     </section>
@@ -848,8 +853,7 @@ export function FinancePage(){
       </form>
     </Modal>}
 
-    {correctionOpen&&<FinanceCashAdvanceCorrectionModal onClose={()=>setCorrectionOpen(false)} onSubmitted={()=>{setCorrectionOpen(false);setCorrectionNotice('Pengajuan koreksi terkirim dan menunggu Owner. Saldo kasbon belum berubah. Lihat status melalui Laporan Seluruh Karyawan → Pengajuan Koreksi Kasbon.')}}/>}
-    {additionDraft&&<CashAdvanceAdditionRequestModal initial={additionDraft} onClose={()=>setAdditionDraft(null)} onSent={async()=>{setAdditionNotice('Pengajuan terkirim dan menunggu Owner. Saldo kasbon dan Kas Harian belum berubah.')}}/>}
+    {additionDraft&&<CashAdvanceAdditionRequestModal initial={additionDraft} onClose={()=>setAdditionDraft(null)} onSent={async()=>{setAdditionNotice('Pengajuan terkirim dan menunggu Owner. Saldo kasbon dan Kas Harian belum berubah.');setRequestTab('addition');setRequestRevision(v=>v+1)}}/>}
 
     {cashAdvanceOpen&&<Modal title="Input Kas Bon Karyawan" onClose={()=>!cashAdvanceBusy&&setCashAdvanceOpen(false)}>
       <form className="modal-form" onSubmit={saveFinanceCashAdvance}>

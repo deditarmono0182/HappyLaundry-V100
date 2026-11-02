@@ -1,0 +1,43 @@
+HappyLaundry V113.0.166 — Menu Pengajuan Kasbon Langsung di Keuangan
+Dasar: source lengkap V113.0.165, termasuk percepatan periode dan desain baku.
+
+PERBAIKAN
+Pada V165, pintasan halaman Keuangan hanya ditampilkan untuk karyawan, sehingga Owner tidak melihatnya.
+V166 memperbaikinya dan memindahkan pusat pengajuan dari Laporan Seluruh Karyawan ke halaman utama Keuangan.
+
+MENU BARU UNTUK OWNER DAN KARYAWAN DENGAN AKSES KEUANGAN
+Buka Keuangan → bagian Kas Bon / Piutang Karyawan.
+- Pengajuan Tambahan Kasbon: klik untuk membuka daftar yang menunggu, status, riwayat keputusan,
+  tombol mengajukan pinjaman baru, serta rincian dan persetujuan khusus Owner.
+- Pengajuan Koreksi Kasbon: klik untuk membuka pilihan pinjaman lama, formulir koreksi, status,
+  riwayat keputusan, serta rincian dan persetujuan khusus Owner.
+Daftar terbuka langsung di halaman Keuangan. Tidak perlu klik Laporan Seluruh Karyawan.
+Klik Tutup Pengajuan untuk menutup daftar tersebut.
+Laporan Seluruh Karyawan tetap berisi ringkasan kasbon, rincian transaksi, Excel dan Print/PDF.
+Panel pengajuan tidak diduplikasi lagi di halaman laporan.
+
+HAK AKSES DAN DATA
+- Karyawan Keuangan dapat mengajukan tambahan/koreksi dan melihat status.
+- Hanya Owner dapat menyetujui atau menolak, memakai RPC dan pemeriksaan akses sebelumnya.
+- Mengirim pengajuan tidak mengubah saldo kasbon atau Kas Harian.
+- Riwayat lama tetap dipakai. Tidak dibuat salinan tabel atau transaksi baru akibat perpindahan menu.
+- Jika Owner menyetujui, ringkasan halaman Keuangan dimuat ulang.
+- Data rincian/pengajuan dimuat saat menunya dibuka, sehingga tidak membebani awal halaman.
+- Pengajuan dari Input Kas Bon yang melewati batas gaji juga membuka statusnya di halaman ini.
+
+PEMASANGAN
+Tidak ada SQL baru untuk V166. SQL 083, 085 dan 086 dari versi sebelumnya tetap digunakan.
+Jika belum dijalankan, pasang SQL versi sebelumnya tersebut sesuai urutannya.
+Ekstrak ZIP V166, salin isi source ke folder repository, Commit dan Push seperti biasa.
+Tunggu deploy berhasil, muat ulang aplikasi, periksa versi V113.0.166.
+Source lengkap: dapat langsung memakai V166 tanpa build versi-versi sebelumnya satu per satu.
+
+VERIFIKASI
+Diuji melalui komponen Keuangan sebenarnya dengan data simulasi:
+- Akun Owner dan karyawan sama-sama melihat kedua menu.
+- Tambahan dan koreksi membuka daftar serta rincian langsung pada halaman Keuangan.
+- Owner dapat meninjau/menyetujui/menolak; karyawan tidak mendapat tombol keputusan.
+- Pengiriman ulang setelah respons terputus memakai ID yang sama, tanpa transaksi ganda.
+- Ringkasan diperbarui setelah keputusan, riwayat tersimpan, serta tutup/retry pemuatan bekerja.
+- Tampilan HP/tablet/laptop diperiksa; laporan Excel/Print dan percepatan V165 tetap dipertahankan.
+Tidak mengubah SQL, rumus, desain baku, alur login, absensi GPS, atau hak akses stok.
