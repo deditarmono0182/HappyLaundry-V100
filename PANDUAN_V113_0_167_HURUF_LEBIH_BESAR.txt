@@ -1,0 +1,25 @@
+HappyLaundry V113.0.167 — Ukuran Tulisan Ditambah 2 px
+Dasar: source lengkap V113.0.166.
+
+PERUBAHAN
+Seluruh ukuran tulisan dalam sistem desain profesional dinaikkan 2 px:
+- Judul halaman: 23 px laptop / 21 px HP (sebelumnya 21 / 19).
+- Judul bagian: 17 px (sebelumnya 15).
+- Judul kartu, angka uang, jumlah dan isi tabel: 16 px (sebelumnya 14).
+- Keterangan/metadata: 14 px (sebelumnya 12).
+- Tombol/label formulir: 15 px (sebelumnya 13).
+- Isian: 16 px laptop / 18 px HP (sebelumnya 14 / 16).
+- Judul dialog dan branding juga bertambah 2 px.
+Ketebalan tetap sama. Angka uang dan jumlah tetap normal 400.
+Tidak mengubah penghitungan, data, menu, hak akses, login, GPS, atau percepatan V165.
+Menu pengajuan kasbon Owner/karyawan dari V166 tetap langsung di halaman Keuangan.
+Format dokumen nota dan ekspor PDF tetap memakai format cetak sebelumnya.
+
+PEMASANGAN
+Tidak ada SQL baru untuk V167. SQL versi sebelumnya yang sudah terpasang tetap dipakai.
+Ekstrak ZIP V167, salin isi source ke repository, Commit dan Push seperti biasa.
+Tunggu deploy berhasil, lalu muat ulang aplikasi hingga tampil V113.0.167.
+Jika tulisan masih lama, tutup lalu buka kembali aplikasi atau muat ulang browser.
+
+STANDAR
+DESAIN_ANTARMUKA_HAPPYLAUNDRY.md sudah diperbarui dengan ukuran terbaru.

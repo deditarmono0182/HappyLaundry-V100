@@ -1,4 +1,4 @@
-/* V164: one visual system for operational pages, account screens and dialogs.
+/* V167 (+2px typography from V166): one visual system for operational pages, account screens and dialogs.
    Business logic, access rules, print documents and transaction data are unchanged. */
 html[data-ui="professional"] {
   --hl-pro-bg:#f4f7fb; --hl-pro-surface:#fff; --hl-pro-text:#20384d;
@@ -12,19 +12,19 @@ html[data-ui="professional"][data-density="ultra"] {--hl-pro-pad:12px;--hl-pro-c
 html[data-ui="professional"] body {background:var(--hl-pro-bg);color:var(--hl-pro-text);margin:0}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) * {
   font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
-  font-size:14px!important;font-weight:400!important;line-height:1.5!important;
+  font-size:16px!important;font-weight:400!important;line-height:1.5!important;
   font-variant-numeric:tabular-nums;letter-spacing:normal;
 }
 html[data-ui="professional"] body .app-shell :is(h1,h2,h3,h4),
 html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(h1,h2,h3,h4),
 html[data-ui="professional"] body .modal-backdrop :is(h2,h3,h4) {font-weight:500!important;color:var(--hl-pro-text)}
 html[data-ui="professional"] body .app-shell :is(h3,h4),
-html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(h3,h4) {font-size:15px!important}
+html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(h3,h4) {font-size:17px!important}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) :is(small,.eyebrow) {
-  font-size:12px!important;color:var(--hl-pro-muted);
+  font-size:14px!important;color:var(--hl-pro-muted);
 }
 html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(.stat-card small,.finance-kpi-content em) {
-  font-size:12px!important;line-height:1.5!important;font-weight:400!important;
+  font-size:14px!important;line-height:1.5!important;font-weight:400!important;
 }
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) :is(input,select,textarea,button,a):focus-visible {
   outline:2px solid var(--hl-pro-blue)!important;outline-offset:3px;
@@ -44,21 +44,21 @@ html[data-ui="professional"] body .app-shell .topbar {
   box-shadow:0 2px 12px #173c6006!important;z-index:40;
 }
 html[data-ui="professional"] body .app-shell .topbar-branding {min-width:0;flex:1}
-html[data-ui="professional"] body .app-shell .topbar .topbar-branding h1 {font-size:21px!important;line-height:1.2!important;font-weight:500!important;letter-spacing:-.3px!important}
-html[data-ui="professional"] body .app-shell .topbar .topbar-branding span {font-size:12px!important;line-height:1.4!important;color:var(--hl-pro-muted)!important}
+html[data-ui="professional"] body .app-shell .topbar .topbar-branding h1 {font-size:23px!important;line-height:1.2!important;font-weight:500!important;letter-spacing:-.3px!important}
+html[data-ui="professional"] body .app-shell .topbar .topbar-branding span {font-size:14px!important;line-height:1.4!important;color:var(--hl-pro-muted)!important}
 html[data-ui="professional"] body .app-shell .topbar-actions {margin-left:auto;gap:8px;flex-shrink:0}
-html[data-ui="professional"] body .app-shell .status-chip {font-size:12px!important;padding:6px 10px!important;white-space:nowrap;background:#edf8f3;color:#17724e;box-shadow:none}
+html[data-ui="professional"] body .app-shell .status-chip {font-size:14px!important;padding:6px 10px!important;white-space:nowrap;background:#edf8f3;color:#17724e;box-shadow:none}
 html[data-ui="professional"] body .app-shell .sidebar {background:#18334d!important;width:min(88vw,288px)!important;max-width:288px!important;padding:20px 14px!important}
 html[data-ui="professional"] body .app-shell .sidebar .brand {padding:0 0 20px;gap:10px}
 html[data-ui="professional"] body .app-shell .sidebar .brand img {width:42px;height:42px;border-radius:12px}
-html[data-ui="professional"] body .app-shell .sidebar .brand strong {font-size:17px!important;font-weight:500!important;color:white}
-html[data-ui="professional"] body .app-shell .sidebar .brand span {font-size:11px!important;color:#b6cada;overflow-wrap:anywhere}
+html[data-ui="professional"] body .app-shell .sidebar .brand strong {font-size:19px!important;font-weight:500!important;color:white}
+html[data-ui="professional"] body .app-shell .sidebar .brand span {font-size:13px!important;color:#b6cada;overflow-wrap:anywhere}
 html[data-ui="professional"] body .app-shell .sidebar nav {display:flex!important;flex-direction:column;gap:4px;overflow-y:auto;min-height:0;padding-bottom:12px}
 html[data-ui="professional"] body .app-shell .sidebar nav a {min-height:42px!important;padding:10px 12px!important;border-radius:10px!important;color:#e2edf5!important;gap:10px;flex-shrink:0;text-decoration:none}
 html[data-ui="professional"] body .app-shell .sidebar nav a:hover {background:#28465f!important}
 html[data-ui="professional"] body .app-shell .sidebar nav a.active {background:#e8f2ff!important;color:#145eaf!important}
 html[data-ui="professional"] body .app-shell .sidebar :is(.sidebar-footer,.account) {color:#dbe7f0!important}
-html[data-ui="professional"] body .app-shell .sidebar .account span {color:#b6cada;font-size:12px!important}
+html[data-ui="professional"] body .app-shell .sidebar .account span {color:#b6cada;font-size:14px!important}
 
 /* Page hierarchy and action groups share one alignment at every width. */
 html[data-ui="professional"] body .app-shell .main-content .page-heading {
@@ -67,9 +67,9 @@ html[data-ui="professional"] body .app-shell .main-content .page-heading {
   border:0!important;border-bottom:1px solid var(--hl-pro-border)!important;box-shadow:none!important;min-width:0;
 }
 html[data-ui="professional"] body .app-shell .main-content .page-heading-copy {width:auto!important;min-width:0!important;max-width:100%!important}
-html[data-ui="professional"] body .app-shell .main-content .page-heading h2 {font-size:21px!important;font-weight:500!important;margin:4px 0 6px!important;line-height:1.3!important}
-html[data-ui="professional"] body .app-shell .main-content .page-heading p {font-size:13px!important;line-height:1.6!important;color:var(--hl-pro-muted)!important;white-space:normal;overflow-wrap:break-word;max-width:70ch}
-html[data-ui="professional"] body .app-shell .main-content .page-heading .eyebrow {font-size:11px!important;letter-spacing:1.2px!important;color:#27709a;font-weight:500!important}
+html[data-ui="professional"] body .app-shell .main-content .page-heading h2 {font-size:23px!important;font-weight:500!important;margin:4px 0 6px!important;line-height:1.3!important}
+html[data-ui="professional"] body .app-shell .main-content .page-heading p {font-size:15px!important;line-height:1.6!important;color:var(--hl-pro-muted)!important;white-space:normal;overflow-wrap:break-word;max-width:70ch}
+html[data-ui="professional"] body .app-shell .main-content .page-heading .eyebrow {font-size:13px!important;letter-spacing:1.2px!important;color:#27709a;font-weight:500!important}
 html[data-ui="professional"] body .app-shell .main-content .page-heading-right {position:static!important;display:flex!important;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;max-width:620px;min-width:0}
 html[data-ui="professional"] body .app-shell .main-content .page-heading-action {min-width:0;max-width:100%}
 html[data-ui="professional"] body .app-shell .main-content .page-heading-action>div {display:flex;flex-wrap:wrap;gap:8px;min-width:0}
@@ -88,30 +88,30 @@ html[data-ui="professional"] body .app-shell .stat-card>div:last-child {min-widt
 html[data-ui="professional"] body .app-shell .stat-icon {width:38px!important;height:38px!important;min-width:38px!important;border-radius:10px!important;flex-shrink:0}
 html[data-ui="professional"] body .app-shell .stat-icon svg {width:20px;height:20px}
 html[data-ui="professional"] body .app-shell .stat-card :is(span,strong),
-html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(.stat-card span,.stat-card strong,.finance-kpi-content small,.finance-kpi-content b) {font-size:14px!important;line-height:1.5!important}
+html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(.stat-card span,.stat-card strong,.finance-kpi-content small,.finance-kpi-content b) {font-size:16px!important;line-height:1.5!important}
 html[data-ui="professional"] body .app-shell .stat-card span,
 html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(.stat-card span,.finance-kpi-content small) {font-weight:500!important;color:var(--hl-pro-text)!important}
 html[data-ui="professional"] body .app-shell .stat-card strong,
 html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(.stat-card strong,.finance-kpi-content b) {font-weight:400!important;overflow-wrap:anywhere}
-html[data-ui="professional"] body .app-shell .stat-card small {font-size:12px!important;color:var(--hl-pro-muted)!important}
-html[data-ui="professional"] body .app-shell :is(.cash-report-stats,.manager-share-metrics) strong {font-size:14px!important;font-weight:400!important}
+html[data-ui="professional"] body .app-shell .stat-card small {font-size:14px!important;color:var(--hl-pro-muted)!important}
+html[data-ui="professional"] body .app-shell :is(.cash-report-stats,.manager-share-metrics) strong {font-size:16px!important;font-weight:400!important}
 
 /* Buttons, inputs and tables: consistent geometry without changing native behavior. */
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.primary-button,.secondary-button,.small-primary) {
   min-height:var(--hl-pro-control)!important;height:auto!important;border-radius:9px!important;padding:9px 14px!important;
-  font-size:13px!important;font-weight:500!important;gap:7px!important;line-height:1.4!important;
+  font-size:15px!important;font-weight:500!important;gap:7px!important;line-height:1.4!important;
   box-shadow:none!important;white-space:normal;overflow-wrap:break-word;text-decoration:none;max-width:100%;
 }
-html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(.primary-button,.secondary-button) {font-size:13px!important;font-weight:500!important}
+html[data-ui="professional"] body .app-shell .regular-report-page[data-typography="regular"] :is(.primary-button,.secondary-button) {font-size:15px!important;font-weight:500!important}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.primary-button,.small-primary) {background:var(--hl-pro-blue)!important;color:#fff!important;border:1px solid var(--hl-pro-blue)!important}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .primary-button:hover:not(:disabled) {background:#1059b6!important}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .secondary-button {background:#fff!important;color:#25587f!important;border:1px solid #cad9e8!important}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .secondary-button:hover:not(:disabled) {background:#f0f6fd!important}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) button svg {flex-shrink:0}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.form-actions,.cash-report-actions,.finance-actions,.payroll-page-actions) {display:flex;flex-wrap:wrap;gap:8px!important;min-width:0;max-width:100%}
-html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) label {font-size:13px!important;color:#334f66}
+html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) label {font-size:15px!important;color:#334f66}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) :is(input,select,textarea):where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])) {
-  font-size:14px!important;line-height:1.5!important;min-height:var(--hl-pro-control)!important;
+  font-size:16px!important;line-height:1.5!important;min-height:var(--hl-pro-control)!important;
   min-width:0;max-width:100%;border:1px solid #c9d7e6!important;border-radius:9px!important;background:#fff!important;
   color:var(--hl-pro-text)!important;padding:9px 11px!important;box-shadow:none;
 }
@@ -122,13 +122,13 @@ html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .search-box in
 html[data-ui="professional"] body .app-shell :is(.toolbar,.cash-report-toolbar,.payroll-toolbar) {display:flex;flex-wrap:wrap;gap:10px!important;align-items:center;padding:14px!important;min-width:0;max-width:100%}
 html[data-ui="professional"] body .app-shell .table-wrap {width:100%;max-width:100%;min-width:0;overflow:auto!important;overscroll-behavior-x:contain;scrollbar-width:thin}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) table {border-collapse:separate!important;border-spacing:0;width:100%}
-html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) th {background:#f0f5fa!important;font-size:12px!important;font-weight:500!important;text-transform:none!important;letter-spacing:0!important;color:#506980!important;padding:10px 14px!important;white-space:normal}
-html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) td {font-size:14px!important;line-height:1.5!important;padding:var(--hl-pro-row) 14px!important;border-color:#e8eef5!important;vertical-align:middle}
-html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) td small {font-size:12px!important;margin-top:3px;color:var(--hl-pro-muted)}
+html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) th {background:#f0f5fa!important;font-size:14px!important;font-weight:500!important;text-transform:none!important;letter-spacing:0!important;color:#506980!important;padding:10px 14px!important;white-space:normal}
+html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) td {font-size:16px!important;line-height:1.5!important;padding:var(--hl-pro-row) 14px!important;border-color:#e8eef5!important;vertical-align:middle}
+html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) td small {font-size:14px!important;margin-top:3px;color:var(--hl-pro-muted)}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) tbody tr:hover {background:#f7faff}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .table-wrap thead th {position:sticky;top:0;z-index:2}
-html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.badge,.attendance-badge,.record-count) {font-size:12px!important;font-weight:500!important;padding:5px 9px!important;border-radius:7px!important;line-height:1.4!important}
-html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.error-box,.warning-box,.info-box,.success-box) {font-size:13px!important;line-height:1.6!important;border-radius:10px!important;padding:12px 14px!important;overflow-wrap:break-word}
+html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.badge,.attendance-badge,.record-count) {font-size:14px!important;font-weight:500!important;padding:5px 9px!important;border-radius:7px!important;line-height:1.4!important}
+html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.error-box,.warning-box,.info-box,.success-box) {font-size:15px!important;line-height:1.6!important;border-radius:10px!important;padding:12px 14px!important;overflow-wrap:break-word}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .error-box {border:1px solid #f0c5ca;color:#a52b39;background:#fff3f4}
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .warning-box {border:1px solid #eed7a2;color:#805b16;background:#fff9ed}
 
@@ -136,7 +136,7 @@ html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .warning-box {
 html[data-ui="professional"] body .modal-backdrop {padding:20px!important;background:#102d4966!important;backdrop-filter:blur(3px)}
 html[data-ui="professional"] body .modal-backdrop .modal-card {max-width:100%!important;max-height:calc(100dvh - 40px)!important;border:1px solid #dae5ef;border-radius:16px!important;box-shadow:0 24px 80px #152e4933;overscroll-behavior:contain;scrollbar-width:thin}
 html[data-ui="professional"] body .modal-backdrop .modal-card>header {position:sticky;top:0;z-index:5;gap:16px;padding:14px 18px!important;background:#fff;border-bottom:1px solid var(--hl-pro-border)}
-html[data-ui="professional"] body .modal-backdrop .modal-card>header h3 {font-size:16px!important;font-weight:500!important;line-height:1.4!important;min-width:0}
+html[data-ui="professional"] body .modal-backdrop .modal-card>header h3 {font-size:18px!important;font-weight:500!important;line-height:1.4!important;min-width:0}
 html[data-ui="professional"] body :is(.modal-backdrop,.app-shell) .icon-button {width:36px;min-width:36px;height:36px;border-radius:9px;background:#f1f5fa;color:#325570;display:inline-grid;place-items:center;flex-shrink:0}
 html[data-ui="professional"] body .modal-backdrop .modal-form {padding:18px!important;gap:14px!important}
 html[data-ui="professional"] body .modal-backdrop .cash-correction-composer {padding:18px!important}
@@ -148,9 +148,9 @@ html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .form-grid-two
 html[data-ui="professional"] body .login-page {background:var(--hl-pro-bg)!important;padding:24px!important}
 html[data-ui="professional"] body .login-page .login-card {background:white!important;border:1px solid var(--hl-pro-border);border-radius:18px!important;padding:32px!important;box-shadow:0 12px 48px #173c6012!important}
 html[data-ui="professional"] body .login-page .login-logo {width:76px!important;height:76px!important;margin-bottom:16px}
-html[data-ui="professional"] body .login-page h1 {font-size:23px!important;font-weight:500!important;line-height:1.3!important}
-html[data-ui="professional"] body .login-page p {font-size:13px!important;color:var(--hl-pro-muted);margin-bottom:24px}
-html[data-ui="professional"] body .login-page button {background:var(--hl-pro-blue)!important;border-radius:9px!important;font-size:14px!important;font-weight:500!important}
+html[data-ui="professional"] body .login-page h1 {font-size:25px!important;font-weight:500!important;line-height:1.3!important}
+html[data-ui="professional"] body .login-page p {font-size:15px!important;color:var(--hl-pro-muted);margin-bottom:24px}
+html[data-ui="professional"] body .login-page button {background:var(--hl-pro-blue)!important;border-radius:9px!important;font-size:16px!important;font-weight:500!important}
 @media(max-width:900px) {
   html[data-ui="professional"] body .app-shell .main-content .page-heading {grid-template-columns:minmax(0,1fr)!important}
   html[data-ui="professional"] body .app-shell .main-content .page-heading-right {justify-content:flex-start;width:100%!important;max-width:100%}
@@ -159,10 +159,10 @@ html[data-ui="professional"] body .login-page button {background:var(--hl-pro-bl
 @media(max-width:700px) {
   html[data-ui="professional"] body .app-shell .page-container {padding:16px!important}
   html[data-ui="professional"] body .app-shell .topbar {height:64px!important;min-height:64px!important;padding:0 14px!important;gap:10px!important}
-  html[data-ui="professional"] body .app-shell .topbar .topbar-branding h1 {font-size:19px!important}
-  html[data-ui="professional"] body .app-shell .topbar .topbar-branding span {font-size:11px!important}
+  html[data-ui="professional"] body .app-shell .topbar .topbar-branding h1 {font-size:21px!important}
+  html[data-ui="professional"] body .app-shell .topbar .topbar-branding span {font-size:13px!important}
   html[data-ui="professional"] body .app-shell .main-content .page-heading {gap:14px!important;margin-bottom:16px!important;padding-bottom:16px!important}
-  html[data-ui="professional"] body .app-shell .main-content .page-heading h2 {font-size:19px!important}
+  html[data-ui="professional"] body .app-shell .main-content .page-heading h2 {font-size:21px!important}
   html[data-ui="professional"] body .app-shell .main-content .page-heading-action button {flex:1 1 120px;min-width:0}
   html[data-ui="professional"] body .app-shell .main-content .page-back-button {width:44px!important;height:44px!important;min-height:44px!important}
   html[data-ui="professional"] body .app-shell .stats-grid {grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
@@ -173,7 +173,7 @@ html[data-ui="professional"] body .login-page button {background:var(--hl-pro-bl
   html[data-ui="professional"] body .app-shell .stat-card small {grid-area:caption}
   html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.primary-button,.secondary-button,.small-primary,.icon-button) {min-height:44px!important}
   html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .icon-button {width:44px;min-width:44px;height:44px}
-  html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) :is(input,select,textarea):where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])) {font-size:16px!important;min-height:44px!important}
+  html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) :is(input,select,textarea):where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])) {font-size:18px!important;min-height:44px!important}
   html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) .search-box {height:44px!important;min-height:44px!important}
   html[data-ui="professional"] body .app-shell .finance-cash-advance-heading {flex-direction:column;align-items:stretch}
   html[data-ui="professional"] body .app-shell :is(.cash-report-actions,.finance-actions) button {flex:1 1 130px}
@@ -190,8 +190,8 @@ html[data-ui="professional"] body .login-page button {background:var(--hl-pro-bl
 /* Public customer tracking shares typography and surfaces, retaining its own workflow. */
 html[data-ui="professional"] body .tracking-page {background:var(--hl-pro-bg)!important}
 html[data-ui="professional"] body .tracking-page .tracking-card {background:#fff!important;border:1px solid var(--hl-pro-border)!important;border-radius:14px!important;box-shadow:var(--hl-pro-shadow)!important}
-html[data-ui="professional"] body .tracking-page h1 {font-size:21px!important;font-weight:500!important}
-html[data-ui="professional"] body .tracking-page .tracking-brand b {font-size:18px!important;font-weight:500!important}
+html[data-ui="professional"] body .tracking-page h1 {font-size:23px!important;font-weight:500!important}
+html[data-ui="professional"] body .tracking-page .tracking-brand b {font-size:20px!important;font-weight:500!important}
 html[data-ui="professional"] body .tracking-page .tracking-search-card button {background:var(--hl-pro-blue)!important;border-radius:9px!important;min-height:44px!important}
 html[data-ui="professional"] body .tracking-page .tracking-search-card input {min-width:0!important;box-shadow:none!important;border:0!important}
 
@@ -204,9 +204,9 @@ html[data-ui="professional"] body .app-shell .main-content :is(.page-heading-cop
 html[data-ui="professional"] body :is(.app-shell,.modal-backdrop,.login-page,.tracking-page) input::placeholder {font-weight:400!important;color:#7a8da0;opacity:1}
 html[data-ui="professional"] body .app-shell .owner-business-kpis {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
 html[data-ui="professional"] body .app-shell .owner-business-kpis>div {min-width:0;padding:12px;border-radius:10px}
-html[data-ui="professional"] body .app-shell .owner-business-kpis :is(span,strong) {font-size:14px!important}
+html[data-ui="professional"] body .app-shell .owner-business-kpis :is(span,strong) {font-size:16px!important}
 html[data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-category-tabs,.payroll-tabs) {display:flex;flex-wrap:wrap;gap:8px;min-width:0;max-width:100%}
-html[data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-category-tabs,.payroll-tabs) button {min-height:40px!important;height:auto!important;padding:8px 12px!important;font-size:13px!important;font-weight:500!important;border:1px solid #d3e0ee!important;border-radius:9px!important;color:#25587f!important;background:#fff!important;box-shadow:none!important;white-space:normal}
+html[data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-category-tabs,.payroll-tabs) button {min-height:40px!important;height:auto!important;padding:8px 12px!important;font-size:15px!important;font-weight:500!important;border:1px solid #d3e0ee!important;border-radius:9px!important;color:#25587f!important;background:#fff!important;box-shadow:none!important;white-space:normal}
 html[data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-category-tabs,.payroll-tabs) button.active {color:#fff!important;background:var(--hl-pro-blue)!important;border-color:var(--hl-pro-blue)!important}
 @media(max-width:700px){
  html[data-ui="professional"] body .app-shell .owner-business-kpis {grid-template-columns:minmax(0,1fr)!important}

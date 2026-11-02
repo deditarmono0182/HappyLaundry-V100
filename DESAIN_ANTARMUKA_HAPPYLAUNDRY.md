@@ -1,21 +1,21 @@
 # Standar tampilan HappyLaundry
 
-Desain baku mulai V113.0.164. Perubahan berikutnya mengikuti standar ini agar pekerjaan berfokus pada data, performa, dan layanan operasional.
+Desain baku mulai V113.0.164, dengan penambahan ukuran tulisan 2 px pada V113.0.167. Perubahan berikutnya mengikuti standar ini agar pekerjaan berfokus pada data, performa, dan layanan operasional.
 
 ## Hierarki tulisan
 
 | Elemen | Ukuran | Ketegasan |
 | --- | --- | --- |
-| Judul halaman | 21 px laptop / 19 px HP | Medium 500 |
-| Judul bagian | 15 px | Medium 500 |
-| Judul kartu | 14 px | Medium 500 |
-| Nominal uang dan jumlah | 14 px | Normal 400, angka tabular |
-| Isi, data tabel | 14 px | Normal 400 |
-| Keterangan dan metadata | 12 px | Normal 400 |
-| Tombol dan label formulir | 13 px | Medium 500 untuk tombol; normal untuk label |
-| Isian formulir | 14 px laptop / 16 px HP | Normal 400 |
+| Judul halaman | 23 px laptop / 21 px HP | Medium 500 |
+| Judul bagian | 17 px | Medium 500 |
+| Judul kartu | 16 px | Medium 500 |
+| Nominal uang dan jumlah | 16 px | Normal 400, angka tabular |
+| Isi, data tabel | 16 px | Normal 400 |
+| Keterangan dan metadata | 14 px | Normal 400 |
+| Tombol dan label formulir | 15 px | Medium 500 untuk tombol; normal untuk label |
+| Isian formulir | 16 px laptop / 18 px HP | Normal 400 |
 
-Isian 16 px di HP mencegah pembesaran layar otomatis pada Safari iPhone. Angka ringkasan tetap 14 px.
+Isian 18 px di HP mencegah pembesaran layar otomatis pada Safari iPhone. Angka ringkasan tetap 16 px.
 Keterangan harus lebih kecil dari judul dan tetap memiliki kontras yang cukup. Jangan gunakan angka besar sebagai dekorasi.
 
 ## Warna dan permukaan
