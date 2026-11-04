@@ -1,0 +1,44 @@
+HappyLaundry V113.0.170 — Total seluruh hasil Order dan Piutang
+Dasar: source lengkap V113.0.169 terbaru. Semua fitur kasbon/notifikasi tetap tersedia.
+
+PEMASANGAN
+1. Buka SQL_090_TOTAL_ORDER_DAN_PIUTANG_SELURUH_HASIL.sql, salin seluruh isinya ke
+   Supabase SQL Editor, Run. Memerlukan SQL 079 dan tabel penugasan yang sudah ada.
+2. Ekstrak ZIP versi 170 ke folder repository HappyLaundry yang biasa dipakai.
+   Pertahankan pengaturan lingkungan dan Netlify yang sudah ada.
+3. GitHub Desktop: Summary > Commit > Push origin, lalu tunggu Netlify selesai.
+4. Muat ulang aplikasi sampai versi 113.0.170.
+SQL 087, 088, 089 tidak perlu diulang jika sudah sukses sebelumnya.
+
+PENYEBAB SELISIH SEBELUMNYA
+Order hanya memuat 100 baris pertama tetapi kartu Piutang menjumlahkan baris tersebut.
+Daftar Piutang menghitung seluruh periode. Akibatnya total berbeda sampai semua order dimuat.
+
+PERBAIKAN
+- Kartu Jumlah Order, Siap Diambil, Terlambat dan Piutang menghitung seluruh hasil di server.
+- Jumlah Order menunjukkan seluruh hasil; keterangan menunjukkan berapa baris yang dimuat.
+- Muat 100 Order Lagi hanya menambah baris terlihat. Total tidak bergantung tombol tersebut.
+- Filter pembayaran/status/kategori/penugasan/pengingat diterapkan sebelum pembagian halaman.
+  Order belum bayar di luar 100 baris pertama tetap ditemukan tanpa memuat order lunas dahulu.
+- Status pembayaran diturunkan dari nilai order dan pembayaran terbaru, bukan label tersimpan
+  yang mungkin belum konsisten. Tidak ada status atau nilai database yang diubah oleh laporan.
+- Order dibatalkan tidak dihitung sebagai piutang dan tidak masuk filter pembayaran.
+- XLS Filter/PDF Filter mengambil SELURUH hasil filter, termasuk rincian layanan di luar halaman.
+- Export All mengambil seluruh order, tanpa batas tanggal/filter layar.
+- Jika ringkasan gagal atau SQL 090 belum dipasang, angka ditampilkan sebagai garis dan pesan
+  perbaikan ditunjukkan; tidak menampilkan total sebagian yang terlihat seperti total penuh.
+- Saat pencarian/tanggal/filter diganti, respons lama tidak menimpa pilihan terbaru.
+
+CARA MEMBANDINGKAN DENGAN DAFTAR PIUTANG
+Order: tanggal masuk 1–31 Oktober 2026 (WIB), kosongkan pencarian, semua kategori/status/
+penugasan. Kartu Piutang harus cocok dengan Daftar Piutang > Belum lunas sekarang > Oktober.
+Filter Belum Bayar hanya untuk yang belum pernah membayar; order Cicilan juga termasuk piutang.
+Untuk membandingkan SELURUH piutang, gunakan Semua Pembayaran atau sertakan Cicilan.
+Tidak perlu klik Muat 100 Order Lagi untuk mengetahui total.
+
+VERIFIKASI
+Kasus uji mereproduksi 100 baris Rp1.054.560, total Oktober Rp2.283.740 dari 33 order belum lunas.
+Setelah perbaikan, total penuh terlihat meskipun hanya 100 atau 200 baris dimuat.
+Pengujian meliputi 1.388+ order, filter identik antara ringkasan/halaman, ekspor penuh,
+status cicilan/lunas, pembatalan, batas hari WIB, hak akses/RLS, dan respons terlambat.
+SQL hanya membuat fungsi baca; tidak mengubah transaksi, login, GPS, gaji atau komisi.

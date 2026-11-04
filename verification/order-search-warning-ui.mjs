@@ -10,12 +10,12 @@ globalThis.__orders={old:order('old','Mamah Alghi'),new:order('new','Pelanggan B
 globalThis.__mock={
  rpc:async(name,args)=>{
   globalThis.__rpcCalls.push([name,args]);
-  if(name!=='v113144_search_orders')return {data:[],error:null}
+  if(!['v113144_search_orders','v113170_search_orders','v113170_order_search_summary'].includes(name))return {data:[],error:null}
   const q=args.p_query;
   if(q==='error')return {data:null,error:{message:'Koneksi pencarian terputus'}};
   if(q==='lama')await new Promise(r=>globalThis.__releaseOld=r)
   const rows=q==='lama'||q==='00141'?[globalThis.__orders.old]:q==='baru'?[globalThis.__orders.new]:[];
-  return {data:rows,error:null}
+  return name==='v113170_order_search_summary'?{data:{count:rows.length,ready:0,overdue:0,receivable:rows.reduce((s,r)=>s+Number(r.total)-Number(r.paid_amount),0),unpaid_count:rows.length},error:null}:{data:rows,error:null}
  },
  from(table){const b={select(){return b},in(){return b},order(){return b},range(){return b},eq(){return b},then(ok){return Promise.resolve({data:[],error:null}).then(ok)}};return b}
 }

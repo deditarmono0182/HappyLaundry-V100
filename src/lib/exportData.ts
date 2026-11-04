@@ -118,8 +118,8 @@ export function downloadXls(options:ExportTableOptions){
   URL.revokeObjectURL(url)
 }
 
-export function printPdf(options:ExportTableOptions){
-  const w=openReportWindow()
+export function printPdf(options:ExportTableOptions,preview?:Window|null){
+  const w=preview||openReportWindow()
   if(!w)return
 
   const summary=(options.summary||[])

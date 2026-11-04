@@ -22,6 +22,7 @@ import {
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageHeader } from '../components/PageHeader'
+import {openReportWindow,showReportPreview} from '../lib/reportPreview'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { useAuth } from '../lib/auth'
 import { formatRupiah } from '../lib/format'
@@ -30,7 +31,7 @@ import { supabase } from '../lib/supabase'
 import {loadOrderCustomerAddresses,type OrderCustomerAddress} from '../lib/orderCustomerAddress'
 import {loadOrderReceipt,receiptItemsHtml,openOrderReceiptWhatsApp,escapeReceiptHtml} from '../lib/orderReceipt'
 import {loadReceiptPrintSettings} from '../lib/receiptSettings'
-import {fetchOrderSearch,fetchOrderRelated} from '../lib/orderSearch'
+import {fetchOrderSearch,fetchOrderRelated,fetchOrderSearchSummary,type OrderFilters,type OrderSearchSummary} from '../lib/orderSearch'
 import {zeroCommissionWarnings,confirmZeroCommission,type CommissionRate} from '../lib/commissionWarnings'
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 import type { Customer, Service } from '../types/master'
@@ -139,10 +140,18 @@ export function OrdersPage() {
   const [categoryFilter,setCategoryFilter]=useState('all')
   const [assignmentFilter,setAssignmentFilter]=useState<'all'|'missing_worker'|'missing_courier'|'missing_any'|'missing_both'>('all')
   const [attentionFilter,setAttentionFilter]=useState<'all'|'ready_long'|'no_due'>('all')
+  const selectedFilters=useMemo<OrderFilters>(()=>({payment:paymentFilter,status:statusFilter,category:categoryFilter,assignment:assignmentFilter,attention:attentionFilter}),[paymentFilter,statusFilter,categoryFilter,assignmentFilter,attentionFilter])
+  const [serverFilters,setServerFilters]=useState<OrderFilters>(selectedFilters)
+  const statsKey=JSON.stringify([query.trim(),dateStart,dateEnd,selectedFilters])
+  const serverStatsKey=JSON.stringify([serverQuery,serverDateStart,serverDateEnd,serverFilters])
+  const [statsState,setStatsState]=useState<{key:string;value?:OrderSearchSummary;error:string}>({key:'',error:''})
+  const searchStats=statsState.key===statsKey?statsState.value:undefined
+  const searchStatsError=statsState.key===statsKey?statsState.error:''
   const [statusBusyId,setStatusBusyId]=useState<string|null>(null)
   const [loading, setLoading] = useState(true)
   const [orderLimit,setOrderLimit]=useState(ORDER_PAGE_SIZE)
   const [mayHaveMore,setMayHaveMore]=useState(false)
+  const [exportBusy,setExportBusy]=useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -184,8 +193,13 @@ export function OrdersPage() {
     const sequence=++loadSequence.current
     setLoading(true)
     setMessage('')
+    setStatsState({key:serverStatsKey,error:''})
     try{
-      const fetched=await fetchOrderSearch(serverQuery,orderLimit+1,serverDateStart,serverDateEnd)
+      const [fetched,summaryResult]=await Promise.all([
+        fetchOrderSearch(serverQuery,orderLimit+1,serverDateStart,serverDateEnd,serverFilters),
+        fetchOrderSearchSummary(serverQuery,serverDateStart,serverDateEnd,serverFilters).then(value=>({value,error:''}),error=>({value:undefined,error:error instanceof Error?error.message:String(error)}))
+      ])
+      if(sequence===loadSequence.current)setStatsState({key:serverStatsKey,...summaryResult})
       if(sequence!==loadSequence.current)return
       const visible=fetched.slice(0,orderLimit),ids=visible.map(row=>row.id)
       const [customersResult,servicesResult,orderItems,delivery,assignments,team,employeesResult,history,charges,ratesResult,customerAddresses]=await Promise.all([
@@ -220,18 +234,19 @@ export function OrdersPage() {
         setMessage(error instanceof Error?error.message:'Pencarian gagal. Coba muat ulang.')
       }
     }finally{if(sequence===loadSequence.current)setLoading(false)}
-  }, [orderLimit,serverQuery,serverDateStart,serverDateEnd,searchRevision])
+  }, [orderLimit,serverQuery,serverDateStart,serverDateEnd,serverFilters,serverStatsKey,searchRevision])
 
   useEffect(()=>{
     ++loadSequence.current
     setLoading(true);setRows([])
     const timer=window.setTimeout(()=>{
-      setServerQuery(query.trim());setServerDateStart(dateStart);setServerDateEnd(dateEnd);setOrderLimit(ORDER_PAGE_SIZE);setSearchRevision(v=>v+1)
+      setServerQuery(query.trim());setServerDateStart(dateStart);setServerDateEnd(dateEnd);setServerFilters(selectedFilters);setOrderLimit(ORDER_PAGE_SIZE);setSearchRevision(v=>v+1)
     },300)
     return ()=>{window.clearTimeout(timer);++loadSequence.current}
-  },[query,dateStart,dateEnd])
+  },[query,dateStart,dateEnd,selectedFilters])
 
   useEffect(() => { void load() }, [load])
+
   useEffect(()=>{
     const orderParam=searchParams.get('order')?.trim()
     const customerParam=searchParams.get('customer')?.trim()
@@ -279,8 +294,8 @@ export function OrdersPage() {
     return map
   },[orderServiceItems])
 
-  const serviceSummary=(orderId:string)=>{
-    const list=serviceItemsByOrder.get(orderId)||[]
+  const serviceSummary=(orderId:string,source?:OrderServiceItem[])=>{
+    const list=source||serviceItemsByOrder.get(orderId)||[]
     if(!list.length)return 'Belum ada layanan'
     return list.map(item=>{
       const qty=Number(item.quantity||0)
@@ -291,14 +306,6 @@ export function OrdersPage() {
     }).join(' • ')
   }
 
-  const serviceCategoryByName=useMemo(()=>{
-    const map=new Map<string,string>()
-    for(const service of services){
-      map.set(service.name.trim().toLowerCase(),service.category?.trim()||'Tanpa Kategori')
-    }
-    return map
-  },[services])
-
   const categories=useMemo(()=>{
     const values=new Set<string>()
     for(const service of services){
@@ -307,11 +314,6 @@ export function OrdersPage() {
     }
     return Array.from(values).sort((a,b)=>a.localeCompare(b,'id'))
   },[services])
-
-  const orderCategories=(orderId:string)=>{
-    const list=serviceItemsByOrder.get(orderId)||[]
-    return Array.from(new Set(list.map(item=>serviceCategoryByName.get(item.service_name.trim().toLowerCase())).filter((value):value is string=>Boolean(value))))
-  }
 
   const deliveryProofByOrder=useMemo(()=>{
     const map=new Map<string,DeliveryProof>()
@@ -569,49 +571,8 @@ export function OrdersPage() {
   },[rows,orderAssignmentMap])
 
 
-  const filtered = useMemo(() => {
-    return rows.filter(row=>{
-      if(paymentFilter!=='all'&&row.payment_status!==paymentFilter)return false
-
-      if(statusFilter==='overdue'){
-        if(!isOrderOverdue(row))return false
-      }else if(statusFilter!=='all'&&row.status!==statusFilter){
-        return false
-      }
-
-      const rowCategories=orderCategories(row.id)
-      if(categoryFilter!=='all'&&!rowCategories.some(category=>category.toLowerCase()===categoryFilter.toLowerCase()))return false
-
-      const assignment=orderAssignmentMap.get(row.id)
-      const missingWorker=!assignment?.worker_id
-      const missingCourier=!assignment?.courier_id
-
-      if(assignmentFilter==='missing_worker'&&!missingWorker)return false
-      if(assignmentFilter==='missing_courier'&&!missingCourier)return false
-      if(assignmentFilter==='missing_any'&&!(missingWorker||missingCourier))return false
-      if(assignmentFilter==='missing_both'&&!(missingWorker&&missingCourier))return false
-
-      if(attentionFilter==='ready_long'){
-        const marker=row.progress_last_at||row.due_at||row.created_at
-        if(row.status!=='ready'||Date.now()-new Date(marker).getTime()<24*60*60*1000)return false
-      }
-      if(attentionFilter==='no_due'){
-        if(['ready','completed','cancelled'].includes(row.status)||row.due_at)return false
-      }
-
-      return true // Keyword matching is performed across the database by SQL 079.
-
-    })
-  },[query,rows,serviceItemsByOrder,serviceCategoryByName,paymentFilter,statusFilter,categoryFilter,assignmentFilter,attentionFilter,orderAssignmentMap])
-
-  const overdueRows = useMemo(() => {
-    const now = Date.now()
-    return rows.filter(row => {
-      if (!row.due_at) return false
-      if (['ready','completed','cancelled'].includes(row.status)) return false
-      return new Date(row.due_at).getTime() < now
-    })
-  }, [rows])
+  // SQL 090 filters across all orders before paging; the page and global totals share the same match set.
+  const filtered=rows
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.subtotal, 0),
@@ -771,7 +732,7 @@ export function OrdersPage() {
     setStatusBusyId(null)
   }
 
-  const orderExport=(exportRows:OrderRow[],label:string)=>({
+  const orderExport=(exportRows:OrderRow[],label:string,exportItems?:Map<string,OrderServiceItem[]>)=>({
     title:'Data Order Laundry',
     filename:`order-laundry-${new Date().toISOString().slice(0,10)}-${label.toLowerCase().replace(/\s+/g,'-')}`,
     subtitle:`${label} • ${new Date().toLocaleString('id-ID')}`,
@@ -785,14 +746,14 @@ export function OrdersPage() {
       row.order_no,
       row.customer_name,
       row.customer_phone,
-      serviceSummary(row.id),
+      serviceSummary(row.id,exportItems?.get(row.id)),
       statusLabels[row.status],
       paymentLabels[row.payment_status],
       Number(row.subtotal||0),
       Number(row.discount||0),
       Number(row.total||0),
       Number(row.paid_amount||0),
-      Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),
+      (row.status==='cancelled'?0:Math.max(0,Number(row.total||0)-Number(row.paid_amount||0))),
       row.due_at?new Date(row.due_at).toLocaleString('id-ID'):'-',
       row.created_by_name||row.created_by_login_id||'Data lama',
       new Date(row.created_at).toLocaleString('id-ID')
@@ -801,7 +762,7 @@ export function OrdersPage() {
       ['Jumlah Order',exportRows.length],
       ['Total Nilai Order',Math.round(exportRows.reduce((sum,row)=>sum+Number(row.total||0),0))],
       ['Total Sudah Bayar',Math.round(exportRows.reduce((sum,row)=>sum+Number(row.paid_amount||0),0))],
-      ['Total Piutang',Math.round(exportRows.reduce((sum,row)=>sum+Math.max(0,Number(row.total||0)-Number(row.paid_amount||0)),0))]
+      ['Total Piutang',Math.round(exportRows.reduce((sum,row)=>sum+(row.status==='cancelled'?0:Math.max(0,Number(row.total||0)-Number(row.paid_amount||0))),0))]
     ] as Array<[string,string|number]>
   })
 
@@ -816,8 +777,32 @@ export function OrdersPage() {
       missing_both:'Keduanya Kosong'
     }[assignmentFilter]
     const attentionLabel=attentionFilter==='ready_long'?'Siap >24 Jam':attentionFilter==='no_due'?'Estimasi Kosong':''
-    return `Filter: ${status} • ${payment} • ${assignmentLabel}${attentionLabel?` • ${attentionLabel}`:''}${dateStart||dateEnd?` • Tanggal masuk WIB: ${dateStart||'awal'} s/d ${dateEnd||'terakhir'}`:''}${query.trim()?` • Cari: ${query.trim()}`:''}`
+    return `Filter: ${status} • ${payment} • ${assignmentLabel}${categoryFilter!=='all'?` • Kategori: ${categoryFilter}`:''}${attentionLabel?` • ${attentionLabel}`:''}${dateStart||dateEnd?` • Tanggal masuk WIB: ${dateStart||'awal'} s/d ${dateEnd||'terakhir'}`:''}${query.trim()?` • Cari: ${query.trim()}`:''}`
   }
+
+  const exportOrders=async(all:boolean,pdf:boolean)=>{
+    if(exportBusy||loading||!searchStats)return
+    const preview=pdf?openReportWindow():undefined
+    if(pdf&&!preview)return
+    if(preview){
+      showReportPreview(preview,'<!doctype html><html><head><title>Menyiapkan laporan order</title></head><body><p>Menyiapkan seluruh hasil order. Mohon tunggu...</p></body></html>')
+      const printButton=preview.document.getElementById('report-print') as HTMLButtonElement|null
+      if(printButton)printButton.disabled=true
+    }
+    const label=all?'Seluruh Order':filteredLabel()
+    const filters=all?{payment:'all',status:'all',category:'all',assignment:'all',attention:'all'}:selectedFilters
+    setExportBusy(true)
+    try{
+      const allRows=await fetchOrderSearch(all?'':query,Number.MAX_SAFE_INTEGER,all?'':dateStart,all?'':dateEnd,filters)
+      const allItems=await fetchOrderRelated<OrderServiceItem>('v100_order_items','order_id,service_name,unit,quantity,price,subtotal',allRows.map(r=>r.id),'created_at')
+      const byOrder=new Map<string,OrderServiceItem[]>()
+      for(const item of allItems){const list=byOrder.get(item.order_id)||[];list.push(item);byOrder.set(item.order_id,list)}
+      const options=orderExport(allRows,label,byOrder)
+      if(pdf)printPdf(options,preview);else downloadXls(options)
+    }catch(error){preview?.close();setMessage(error instanceof Error?error.message:'Ekspor seluruh hasil gagal. Coba lagi.')}
+    finally{setExportBusy(false)}
+  }
+
 
   const openCustomerTracking=(row:OrderRow)=>{
     navigate(`/track/${encodeURIComponent(row.order_no)}?app=1&from=${encodeURIComponent(`/orders?order=${row.order_no}`)}`)
@@ -1079,15 +1064,15 @@ export function OrdersPage() {
           <div className="order-header-actions">
             <button
               className="secondary-button"
-              onClick={()=>downloadXls(orderExport(rows,'Semua Data'))}
+              disabled={exportBusy||loading||!searchStats} onClick={()=>void exportOrders(true,false)}
               title="Export seluruh order tanpa mengikuti filter"
             >
               <FileSpreadsheet size={16}/>Export All
             </button>
             <button
               className="secondary-button"
-              onClick={()=>printPdf(orderExport(filtered,filteredLabel()))}
-              title="Export PDF sesuai filter yang sedang tampil"
+              disabled={exportBusy||loading||!searchStats} onClick={()=>void exportOrders(false,true)}
+              title="Export PDF seluruh hasil sesuai filter"
             >
               <FileText size={16}/>PDF Filter
             </button>
@@ -1099,20 +1084,21 @@ export function OrdersPage() {
       />
 
       <section className="stats-grid compact-stats order-stats-grid">
-        <article className="stat-card"><div className="stat-icon"><ShoppingBag size={22}/></div><div><span>Order Dimuat</span><strong>{rows.length}</strong><small>Hasil pencarian/periode ini</small></div></article>
-        <article className="stat-card"><div className="stat-icon"><PackageCheck size={22}/></div><div><span>Siap Diambil</span><strong>{rows.filter(r => r.status === 'ready').length}</strong><small>Menunggu pelanggan</small></div></article>
+        <article className="stat-card"><div className="stat-icon"><ShoppingBag size={22}/></div><div><span>Jumlah Order</span><strong>{searchStats?searchStats.count:'—'}</strong><small>{rows.length} order dimuat • seluruh hasil dihitung</small></div></article>
+        <article className="stat-card"><div className="stat-icon"><PackageCheck size={22}/></div><div><span>Siap Diambil</span><strong>{searchStats?searchStats.ready:'—'}</strong><small>Menunggu pelanggan</small></div></article>
         <button
           type="button"
-          className={`stat-card order-overdue-card order-overdue-shortcut ${overdueRows.length>0?'has-overdue':''}`}
+          className={`stat-card order-overdue-card order-overdue-shortcut ${searchStats&&searchStats.overdue>0?'has-overdue':''}`}
           onClick={()=>setStatusFilter('overdue')}
           title="Tampilkan hanya order yang terlambat"
         >
           <div className="stat-icon"><AlertTriangle size={22}/></div>
-          <div><span>Terlambat</span><strong>{overdueRows.length}</strong><small>Klik untuk lihat daftar</small></div>
+          <div><span>Terlambat</span><strong>{searchStats?searchStats.overdue:'—'}</strong><small>Klik untuk lihat daftar</small></div>
         </button>
-        <article className="stat-card"><div className="stat-icon"><CircleDollarSign size={22}/></div><div><span>Piutang</span><strong>{formatRupiah(rows.reduce((s,r)=>s+Math.max(0,Number(r.total)-Number(r.paid_amount)),0))}</strong><small>Sisa pembayaran</small></div></article>
+        <article className="stat-card"><div className="stat-icon"><CircleDollarSign size={22}/></div><div><span>Piutang</span><strong>{searchStats?formatRupiah(searchStats.receivable):'—'}</strong><small>{searchStats?`${searchStats.unpaid_count} order belum lunas • seluruh hasil`:'Menghitung seluruh hasil...'}</small></div></article>
       </section>
 
+      {searchStatsError&&<div role="alert" className="error-box inline-message">{searchStatsError}</div>}
       <section className="panel data-panel order-panel">
         <div className="toolbar order-filter-toolbar">
           <label className="search-box order-search-box">
@@ -1135,7 +1121,7 @@ export function OrdersPage() {
 
           <label className="order-filter-field">
             <span>Status Pembayaran</span>
-            <select value={paymentFilter} onChange={e=>setPaymentFilter(e.target.value as typeof paymentFilter)}>
+            <select aria-label="Status Pembayaran" value={paymentFilter} onChange={e=>setPaymentFilter(e.target.value as typeof paymentFilter)}>
               <option value="all">Semua Pembayaran</option>
               <option value="unpaid">Belum Bayar</option>
               <option value="partial">DP / Sebagian</option>
@@ -1145,7 +1131,7 @@ export function OrdersPage() {
 
           <label className="order-filter-field">
             <span>Status Cucian</span>
-            <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value as typeof statusFilter)}>
+            <select aria-label="Status Cucian" value={statusFilter} onChange={e=>setStatusFilter(e.target.value as typeof statusFilter)}>
               <option value="all">Semua Status</option>
               <option value="overdue">Terlambat</option>
               <option value="received">{statusLabels.received}</option>
@@ -1161,7 +1147,7 @@ export function OrdersPage() {
 
           <label className="order-filter-field">
             <span>Kategori Layanan</span>
-            <select value={categoryFilter} onChange={e=>setCategoryFilter(e.target.value)}>
+            <select aria-label="Kategori Layanan" value={categoryFilter} onChange={e=>setCategoryFilter(e.target.value)}>
               <option value="all">Semua Kategori</option>
               {categories.map(category=><option key={category} value={category}>{category}</option>)}
             </select>
@@ -1169,7 +1155,7 @@ export function OrdersPage() {
 
           <label className="order-filter-field order-assignment-filter">
             <span>Penugasan</span>
-            <select value={assignmentFilter} onChange={e=>setAssignmentFilter(e.target.value as typeof assignmentFilter)}>
+            <select aria-label="Penugasan" value={assignmentFilter} onChange={e=>setAssignmentFilter(e.target.value as typeof assignmentFilter)}>
               <option value="all">Semua Penugasan</option>
               <option value="missing_worker">Yang Mengerjakan Kosong</option>
               <option value="missing_courier">Kurir Kosong</option>
@@ -1194,12 +1180,12 @@ export function OrdersPage() {
           </button>
 
           <div className="order-toolbar-export">
-            <button className="secondary-button" onClick={()=>downloadXls(orderExport(filtered,filteredLabel()))}>
+            <button className="secondary-button" disabled={exportBusy||loading||!searchStats} onClick={()=>void exportOrders(false,false)}>
               <FileSpreadsheet size={15}/>XLS Filter
             </button>
           </div>
 
-          <span className="record-count">{loading?'Mencari...':`${filtered.length} order${mayHaveMore?' • masih ada hasil lain':''}`}</span>
+          <span className="record-count">{loading?'Mencari...':`${filtered.length} dimuat${searchStats?' dari '+searchStats.count+' hasil':''}${mayHaveMore?' • masih ada hasil lain':''}`}</span>
         </div>
 
         <div className="assignment-find-bar" aria-label="Cari order dengan penugasan kosong">
