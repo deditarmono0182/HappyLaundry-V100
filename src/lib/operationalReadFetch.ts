@@ -1,6 +1,6 @@
 // Session-memory optimization. Transaction rows and salary/payment totals have no TTL cache.
 const referenceTables=new Set(['v100_store_settings','v106_expense_categories','v110_receipt_print_settings'])
-const sharedRPCs=new Set(['v113165_financial_summary','v113151_manager_report','v113072_my_payroll_base','v113072_my_commissions','v113072_my_revenue_share','v113151_my_manager_share','v113144_search_orders'])
+const sharedRPCs=new Set(['v113168_receivables_as_of','v113165_financial_summary','v113151_manager_report','v113072_my_payroll_base','v113072_my_commissions','v113072_my_revenue_share','v113151_my_manager_share','v113144_search_orders'])
 const readRPCs=new Set([...sharedRPCs,'v109_current_employee','v11322_current_attendance_state','v113122_finance_list_employees','v113139_finance_cash_advance_summary','v113134_owner_cash_advance_report','v113137_cash_advance_limits','v113_list_commission_employees','v113037_list_safety_snapshots','v103_public_order_tracking','v1129_public_payment_options','v11324_daily_closing_summary'])
 type Saved={response:Response;expires:number;bytes:number}
 const saved=new Map<string,Saved>(),pending=new Map<string,Promise<Response>>()

@@ -1,0 +1,54 @@
+HappyLaundry V113.0.168 — Piutang per Tanggal dan Dashboard
+Dasar: source lengkap V113.0.167, dengan SQL 087 yang sudah disiapkan sebelumnya.
+
+PEMASANGAN
+1. Jika SQL 087 belum dijalankan, jalankan SQL_087_SELARASKAN_DASAR_LABA_PENGELOLA.sql.
+   Jika sudah sukses sebelumnya, tidak perlu mengulang SQL 087.
+2. Buka SQL_088_PIUTANG_PER_TANGGAL.sql, salin seluruh isinya ke Supabase SQL Editor, Run.
+   Memerlukan tabel/riwayat audit SQL 044/045 dan akses Keuangan SQL 066 yang sudah ada.
+3. Ekstrak seluruh ZIP ini ke folder repository HappyLaundry yang biasa digunakan.
+   Pertahankan konfigurasi lingkungan/Netlify yang sudah terpasang. Jangan menyalin node_modules.
+4. GitHub Desktop: isi Summary, Commit, Push origin. Tunggu build Netlify selesai.
+5. Muat ulang aplikasi. Versi menjadi V113.0.168.
+
+CARA MELIHAT PIUTANG OKTOBER
+Keuangan > Daftar Piutang > Bulan laporan: Oktober 2026.
+Tanggal otomatis menjadi 31 Oktober 2026. Bisa juga memilih tanggal secara langsung.
+Kartu Total Piutang, Order Belum Lunas, Rata-rata, tabel, XLS dan PDF mengikuti pilihan.
+Termasuk utang dari bulan-bulan sebelum Oktober yang masih belum lunas pada tanggal batas.
+Pembayaran pada November tidak mengurangi saldo per 31 Oktober.
+Pencarian pelanggan/order turut menyaring kartu total dan hasil ekspor.
+
+DASHBOARD
+Piutang di bagian Kontrol Bisnis Owner mengikuti akhir periode/bulan yang dipilih.
+Klik kartu Piutang per [tanggal] untuk membuka rincian dengan tanggal yang sama.
+Kartu operasional Piutang Aktif Saat Ini di bagian atas tetap menunjukkan tagihan berjalan saat ini.
+Laporan Owner yang diekspor juga memuat piutang pada tanggal akhir periode.
+
+STATUS PEMBAYARAN
+Contoh: order Oktober dilunasi 2 November.
+- Status order saat ini: Lunas.
+- Laporan per 31 Oktober: tetap piutang.
+- Laporan per 2 November: sudah tidak memiliki sisa piutang.
+Pilih Saat Ini untuk pembayaran dan pengingat WhatsApp berdasarkan sisa tagihan terbaru.
+Laporan historis tidak menawarkan tombol Bayar/WhatsApp agar tidak menagih saldo lama.
+Detail order dari laporan historis membuka keadaan order saat ini; order yang sudah dihapus
+hanya tampil sebagai arsip historis.
+
+RIWAYAT DAN DATA
+SQL 088 hanya membuat indeks dan fungsi baca; tidak mengubah transaksi atau pembayaran.
+Nilai/status order dan pembayaran pada tanggal batas dipulihkan dari audit yang tersedia.
+Koreksi, pembatalan, penghapusan setelah tanggal batas tidak mengubah saldo historis
+selama perubahan tersebut tercatat dalam audit. Nama/kontak/alamat pelanggan memakai data saat ini.
+Riwayat yang sudah dihapus atau perubahan lama sebelum audit aktif tidak bisa diciptakan ulang.
+Hak akses dibatasi Owner dan akun dengan akses Keuangan. Mode Saat Ini tetap tersedia
+seperti sebelumnya bagi pengguna halaman Piutang.
+Tidak ada perubahan login, GPS, komisi, kasbon, atau gaji pada build antarmuka ini.
+SQL 087 terpisah tetap menyesuaikan dasar laba pengelola sesuai perbaikan sebelumnya.
+
+VERIFIKASI
+Pengujian SQL mencakup 1205+ order, batas hari WIB, cicilan/pelunasan lintas bulan,
+piutang bulan sebelumnya, koreksi/pembatalan/penghapusan order dan pembayaran,
+hak akses, pengulangan SQL, serta pemeriksaan tidak ada transaksi berubah.
+Pengujian antarmuka mencakup tanggal/bulan, total dan ekspor yang sama, pencarian,
+respons terlambat, SQL belum terpasang, muat ulang, tautan Dashboard, dan daftar >1000 order.

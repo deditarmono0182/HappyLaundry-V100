@@ -214,3 +214,14 @@ html[data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-c
  html[data-ui="professional"] body .app-shell .owner-business-kpis strong {text-align:right}
  html[data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-category-tabs,.payroll-tabs) button {min-height:44px!important}
 }
+/* Piutang: periode dan ringkasan memakai ukuran huruf sistem yang sama. */
+.receivable-period{margin-bottom:16px;padding:18px}
+.receivable-period-controls{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.receivable-period-controls label{display:flex;flex-direction:column;gap:7px;min-width:0;flex:0 1 200px}
+.receivable-period-controls input{width:100%;min-width:0;min-height:44px;border:1px solid #cfe0eb;border-radius:10px;padding:9px 12px;background:white;color:inherit;font:inherit}
+.receivable-period-note{margin:12px 0 0;color:#617f89;font-size:14px;line-height:1.6}
+@media(max-width:700px){.receivable-period-controls label{flex:1 1 100%}.receivable-period-controls button{flex:1 1 140px;min-width:0}.receivable-period{padding:14px}}
+.owner-receivable-period{font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #d3e5ee;border-radius:12px;background:#f5fafd;min-width:0}
+.owner-receivable-period:disabled{cursor:wait}
+.owner-receivable-period small{font-size:14px;color:#617f89}
+.owner-receivable-period strong{font-weight:400;font-size:16px}

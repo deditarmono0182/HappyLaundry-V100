@@ -10,6 +10,7 @@ import { StatCard } from '../components/StatCard'
 import { formatIDR } from '../lib/format'
 import { statusLabels } from '../lib/order'
 import { supabase } from '../lib/supabase'
+import {useReceivablePeriod} from '../lib/useReceivablePeriod'
 import {useFinancialPeriod} from '../lib/useFinancialPeriod'
 import { useAuth } from '../lib/auth'
 import { downloadXls } from '../lib/exportData'
@@ -357,6 +358,10 @@ export function DashboardPage() {
 
   const {financial:ownerFinancial,loading:financialLoading,error:financialError}=useFinancialPeriod(businessDateKey(ownerPeriodStart),periodRange.toKey,isOwner,JSON.stringify([profile?.id,profile?.role,profile?.permissions]))
 
+  const piutangDate=periodRange.toKey>businessDateKey()?businessDateKey():periodRange.toKey
+  const piutangDateLabel=businessDateLabel(`${piutangDate}T12:00:00+07:00`,{day:'numeric',month:'long',year:'numeric'})
+  const periodReceivable=useReceivablePeriod(piutangDate,isOwner,JSON.stringify([profile?.id,profile?.role,profile?.permissions]))
+
   const ownerPeriodOrders=useMemo(()=>orders.filter(r=>inPeriod(r.created_at)&&r.status!=='cancelled'),[orders,ownerPeriodStart,selectedPeriodEnd])
   const ownerPeriodCash=useMemo(()=>cash.filter(r=>inPeriod(r.created_at)),[cash,ownerPeriodStart,selectedPeriodEnd])
   const ownerExpense=ownerFinancial?.operating??0
@@ -377,7 +382,7 @@ export function DashboardPage() {
   const ownerAverage=ownerPeriodOrders.length?ownerPeriodOrders.reduce((s,r)=>s+Number(r.total||0),0)/ownerPeriodOrders.length:0
 
   const exportOwnerReport=()=>{
-    if(!ownerFinancial||financialLoading)return
+    if(!ownerFinancial||financialLoading||periodReceivable.total===undefined)return
     downloadXls({
       title:'Laporan Owner HappyLaundry',
       filename:`laporan-owner-${businessDateKey()}`,
@@ -394,7 +399,7 @@ export function DashboardPage() {
         ['Laba Bersih Operasional',ownerProfit],
         ['Laba Setelah Cadangan',ownerAfterReserve],
         ['Surplus Kas Operasional',ownerCashOperatingSurplus],
-        ['Piutang Aktif',receivable],
+        [`Piutang per ${piutangDateLabel}`,periodReceivable.total],
         ['Tunai',ownerCash],
         ['QRIS',ownerQris],
         ['Transfer',ownerTransfer],
@@ -449,7 +454,7 @@ export function DashboardPage() {
 
   return <div className="owner-dashboard-page regular-report-page" data-typography="regular">
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, keuangan, pembayaran, order, proses cucian, dan piutang." hideBack
-      action={isOwner?<button type="button" className="secondary-button" disabled={financialLoading||!ownerFinancial} onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:undefined}
+      action={isOwner?<button type="button" className="secondary-button" disabled={financialLoading||!ownerFinancial||periodReceivable.total===undefined} onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:undefined}
     />
     {message&&<div className="error-box inline-message">{message}</div>}
 
@@ -519,7 +524,7 @@ export function DashboardPage() {
       <StatCard label="Siap Diambil" value={String(ready)} caption="Menunggu pelanggan" icon={PackageCheck}/>
       <StatCard label="Selesai Hari Ini" value={String(completed)} caption="Order selesai" icon={CheckCircle2}/>
       <button type="button" className="dashboard-click-stat" onClick={()=>navigate('/receivables')} title="Buka daftar piutang">
-        <StatCard label="Total Piutang" value={formatIDR(receivable)} caption="Sisa tagihan • Klik untuk lihat" icon={AlertTriangle}/>
+        <StatCard label="Piutang Aktif Saat Ini" value={formatIDR(receivable)} caption="Sisa tagihan • Klik untuk lihat" icon={AlertTriangle}/>
       </button>
       <StatCard label="Kas Masuk Hari Ini" value={formatIDR(cashIn)} caption="Pembayaran diterima hari ini" icon={WalletCards}/>
     </section>
@@ -527,7 +532,7 @@ export function DashboardPage() {
       <div className="panel-heading">
         <div><h3><TrendingUp size={18}/> Kontrol Bisnis Owner</h3><p>Omzet mengikuti nilai order/barang masuk. Piutang tidak mengurangi laba; Surplus Kas Operasional menunjukkan kas masuk setelah biaya periode.</p></div>
       </div>
-      <>{financialLoading&&<p role="status">Memuat ringkasan periode...</p>}{financialError&&<div className="error-box">{financialError}</div>}</>
+      <>{financialLoading&&<p role="status">Memuat ringkasan periode...</p>}{financialError&&<div className="error-box">{financialError}</div>}{periodReceivable.loading&&<p role="status">Memuat piutang tanggal laporan...</p>}{periodReceivable.error&&<div className="error-box">{periodReceivable.error} <button type="button" className="secondary-button" onClick={periodReceivable.refresh}>Coba Lagi Piutang</button></div>}</>
       <div className="owner-business-kpis owner-business-kpis-six">
         <div><span>Omzet / Barang Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerOrderValue)}</strong></div>
         <div><span>Kas Masuk</span><strong className="dashboard-money-value">{formatIDR(ownerCashIn)}</strong></div>
@@ -536,7 +541,7 @@ export function DashboardPage() {
         <div><span>Bagi Hasil Pengelola</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerFinancial.managerShare):'—'}</strong></div>
         <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih Operasional</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerProfit):'—'}</strong></div>
         <div className={ownerCashOperatingSurplus>=0?'profit-positive':'profit-negative'}><span>Surplus Kas Operasional</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerCashOperatingSurplus):'—'}</strong></div>
-        <div><span>Piutang Aktif</span><strong className="dashboard-money-value">{formatIDR(receivable)}</strong></div>
+        <button type="button" className="owner-receivable-period" disabled={periodReceivable.total===undefined} onClick={()=>navigate(`/receivables?as_of=${piutangDate}`)}><span>Piutang per {piutangDateLabel}</span><strong className="dashboard-money-value">{periodReceivable.total===undefined?'—':formatIDR(periodReceivable.total)}</strong><small>Lihat rincian tanggal ini</small></button>
       </div>
       <div className="owner-payment-breakdown">
         <div><Banknote size={18}/><span>Tunai</span><b className="dashboard-money-value">{formatIDR(ownerCash)}</b></div>
