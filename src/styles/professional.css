@@ -218,10 +218,30 @@ html[data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-c
 .receivable-period{margin-bottom:16px;padding:18px}
 .receivable-period-controls{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
 .receivable-period-controls label{display:flex;flex-direction:column;gap:7px;min-width:0;flex:0 1 200px}
-.receivable-period-controls input{width:100%;min-width:0;min-height:44px;border:1px solid #cfe0eb;border-radius:10px;padding:9px 12px;background:white;color:inherit;font:inherit}
+.receivable-period-controls :is(input,select){width:100%;min-width:0;min-height:44px;border:1px solid #cfe0eb;border-radius:10px;padding:9px 12px;background:white;color:inherit;font:inherit}
 .receivable-period-note{margin:12px 0 0;color:#617f89;font-size:14px;line-height:1.6}
 @media(max-width:700px){.receivable-period-controls label{flex:1 1 100%}.receivable-period-controls button{flex:1 1 140px;min-width:0}.receivable-period{padding:14px}}
 .owner-receivable-period{font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #d3e5ee;border-radius:12px;background:#f5fafd;min-width:0}
 .owner-receivable-period:disabled{cursor:wait}
 .owner-receivable-period small{font-size:14px;color:#617f89}
 .owner-receivable-period strong{font-weight:400;font-size:16px}
+
+.receivable-actions .badge{white-space:nowrap}
+
+.badge.receivable-payment-unpaid{background:#fff0f1;color:#a92d40}
+.badge.receivable-payment-partial{background:#fff4da;color:#93620b}
+
+.cash-notice-bell{position:relative;flex-shrink:0;border:1px solid #ccdfec;background:white;color:#1b628e;border-radius:10px;width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center}
+.cash-notice-count{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;border-radius:12px;background:#176ed0;color:white;display:grid;place-items:center;padding:0 4px;font-size:12px;line-height:1;font-weight:400}
+.cash-notices{display:grid;gap:12px;min-width:0;padding:8px 0}
+.cash-notice-item{display:grid;gap:8px;width:100%;min-width:0;text-align:left;border:1px solid #d0e1ef;border-radius:12px;background:#f6faff;color:#234958;padding:14px;font:inherit;cursor:pointer}
+.cash-notice-item small{font-size:14px;color:#627f8a;overflow-wrap:anywhere}
+.cash-notice-item span{overflow-wrap:anywhere}
+.cash-request-highlight td{background:#e6f3ff!important;box-shadow:inset 0 1px #aad4f6,inset 0 -1px #aad4f6}
+
+/* Keep branding within the header when notification/install controls are present. */
+html[data-ui="professional"] .topbar-branding :is(h1,span){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:480px){
+ html[data-ui="professional"] .topbar .pwa-button span{display:none}
+ html[data-ui="professional"] .topbar .pwa-button{width:44px;min-width:44px;padding:10px!important;justify-content:center}
+}

@@ -42,7 +42,7 @@ export function PWAInstallButton() {
     if(choice.outcome==='accepted')setPromptEvent(null)
   }
 
-  if(updateReady)return <button className="pwa-button" onClick={()=>window.location.reload()} title="Versi baru tersedia"><RefreshCw size={15}/>Perbarui</button>
+  if(updateReady)return <button className="pwa-button" onClick={()=>window.location.reload()} title="Versi baru tersedia" aria-label="Perbarui aplikasi"><RefreshCw size={15}/><span>Perbarui</span></button>
   if(standalone||!promptEvent)return null
-  return <button className="pwa-button" onClick={()=>void install()}><Download size={15}/>Pasang Aplikasi</button>
+  return <button className="pwa-button" aria-label="Pasang Aplikasi" title="Pasang Aplikasi" onClick={()=>void install()}><Download size={15}/><span>Pasang Aplikasi</span></button>
 }

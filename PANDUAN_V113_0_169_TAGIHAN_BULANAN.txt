@@ -1,0 +1,58 @@
+HappyLaundry V113.0.169 — Tagihan Bulanan, Status Pembayaran, dan Notifikasi Kasbon
+Dasar: source lengkap V113.0.168 terbaru.
+
+PEMASANGAN
+Jalankan SQL_089_NOTIFIKASI_PENGAJUAN_KASBON.sql di Supabase SQL Editor sebelum
+mengunggah source versi 169. SQL 089 memerlukan SQL 083 dan 085 yang sudah ada.
+Jika SQL 088 sudah dipasang pada versi 168, tidak perlu mengulangnya.
+SQL 088 tetap diperlukan khusus untuk mode saldo historis.
+Ekstrak ZIP ke repository HappyLaundry yang biasa dipakai, pertahankan pengaturan
+lingkungan yang sudah ada. GitHub Desktop: Summary > Commit > Push origin.
+Tunggu Netlify selesai, lalu muat ulang aplikasi hingga versi 113.0.169.
+
+DAFTAR TAGIHAN OKTOBER YANG MASIH BELUM LUNAS SEKARANG
+1. Buka Daftar Piutang.
+2. Tampilan: Belum lunas sekarang (pilihan utama/bawaan).
+3. Bulan order: Oktober 2026.
+Hanya order yang dibuat pada Oktober dan masih memiliki sisa tagihan sekarang yang tampil.
+Pembayaran bulan November sudah ikut diperhitungkan. Jika lunas, order otomatis hilang
+dari daftar ini dan total berkurang. Tidak perlu mencari order tersebut di November.
+Cicilan mengurangi sisa tagihan, sedangkan order dengan sisa nol tidak ditampilkan.
+Semua Bulan mengembalikan daftar semua order yang masih punya sisa tagihan saat ini.
+Pencarian, kartu total/jumlah/rata-rata, XLS dan PDF menggunakan daftar yang sama.
+
+STATUS YANG JELAS
+Status Pembayaran: Belum Bayar atau Cicilan. Order lunas tidak ada di daftar penagihan.
+Status Order: Diterima, Dicuci, Siap Diambil, dan status pengerjaan lainnya.
+Status pengerjaan tidak lagi dipakai sebagai keterangan pembayaran.
+Tombol Bayar dan WhatsApp tersedia pada daftar tagihan sekarang.
+
+PEMBARUAN DATA
+Daftar dimuat ulang saat halaman dibuka, aplikasi mendapat fokus, setelah pemberitahuan
+perubahan transaksi dari aplikasi, dan otomatis setiap 60 detik. Bisa klik Muat Ulang.
+Tidak ada perubahan data order/pembayaran yang dilakukan oleh halaman laporan ini.
+
+SALDO HISTORIS TETAP TERSEDIA
+Pilih Tampilan: Saldo historis per tanggal, kemudian pilih tanggal, misalnya 31 Oktober.
+Mode ini memang tetap menampilkan order yang belum lunas PADA TANGGAL TERSEBUT,
+meskipun sekarang sudah dilunasi. Itu untuk pemeriksaan posisi akhir periode.
+Angka historis tidak dicampur dengan sisa tagihan sekarang.
+Kartu Piutang per [tanggal] di Kontrol Bisnis Owner membuka mode historis yang sesuai
+agar nilai Dashboard dan laporan per tanggal tetap cocok. Kartu Piutang Aktif Saat Ini
+di Dashboard membuka daftar tagihan sekarang untuk semua bulan.
+
+Tidak ada perubahan login, absensi GPS, kasbon, perhitungan gaji, maupun komisi.
+
+NOTIFIKASI TAMBAHAN DAN KOREKSI KASBON
+Lonceng Notifikasi Kasbon ada di bilah atas aplikasi, untuk Owner dan akun akses Keuangan.
+- Owner: jumlah pengajuan tambahan dan koreksi yang masih menunggu keputusan.
+- Pengaju: hasil Disetujui, Ditolak, atau Perlu Diajukan Ulang untuk pengajuan miliknya.
+- Klik pemberitahuan untuk membuka tab pengajuan di Keuangan. Baris terkait ditandai.
+- Pemberitahuan hasil keputusan yang sudah dibuka ditandai dibaca di database.
+  Pengajuan pending Owner tetap tampil sampai diputuskan.
+- Pembaruan saat membuka aplikasi, kembali fokus, perubahan transaksi, atau tiap 30 detik
+  selama aplikasi terlihat. Bukan notifikasi WhatsApp atau push saat aplikasi ditutup.
+- Tidak ada persetujuan/pencairan kasbon otomatis dari notifikasi.
+- SQL 089 menyimpan identitas pengaju yang stabil agar notifikasi pengajuan baru tetap
+  dikenali setelah sesi login berganti. Pengajuan lama dipetakan jika akun pengaju masih
+  dapat dicocokkan; data yang tidak memiliki identitas cocok tidak ditebak berdasarkan nama.

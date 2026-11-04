@@ -25,18 +25,26 @@ const click=text=>act(async()=>{const b=button(text);assert.ok(b,text);assert.eq
 const change=(selector,value)=>act(async()=>{const e=document.querySelector(selector),proto=e.tagName==='SELECT'?window.HTMLSelectElement.prototype:window.HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(proto,'value').set.call(e,value);e.dispatchEvent(new window.Event(e.tagName==='SELECT'?'change':'input',{bubbles:true}))})
 const value=()=>document.querySelector('.receivable-stats .stat-card strong').textContent
 await mount();assert.match(value(),/50/);assert.equal(document.querySelectorAll('tbody tr').length,1);assert.ok(document.querySelector('[title=Bayar]'))
-await change('[type=month]','2026-10');assert.match(value(),/80/);assert.match(document.querySelector('tbody').textContent,/sudah-lunas/);assert.ok(!document.querySelector('[title=Bayar]'));assert.match(document.querySelector('output').dataset.path,/as_of=2026-10-31/)
+await change('[aria-label="Tampilan piutang"]','historical');await change('[type=month]','2026-10');assert.match(value(),/80/);assert.match(document.querySelector('tbody').textContent,/sudah-lunas/);assert.ok(!document.querySelector('[title=Bayar]'));assert.match(document.querySelector('output').dataset.path,/as_of=2026-10-31/)
 await click('XLS');await click('PDF');for(const e of exports.slice(-2)){assert.match(e.subtitle,/31 Oktober 2026/);assert.equal(e.rows[0][4],20);assert.equal(e.rows[0][5],80);assert.equal(e.summary[1][1],80)}
 await change('.search-box input','tidak ada');assert.match(value(),/0/);await click('XLS');assert.equal(exports.at(-1).rows.length,0);assert.equal(exports.at(-1).summary[1][1],0)
 await change('.search-box input','');slow=true;await change('[type=date]','2026-10-15');assert.equal(button('XLS').disabled,true);assert.equal(value(),'—');await change('[type=date]','2026-10-31');assert.match(value(),/80/);await act(async()=>resolveSlow());assert.match(value(),/80/);slow=false
 failure='PGRST202';await change('[type=date]','2026-09-30');assert.match(document.body.textContent,/SQL 088/);assert.equal(button('XLS').disabled,true);failure='';await click('Muat Ulang');assert.match(value(),/30/)
-await click('Saat Ini');assert.match(value(),/50/);assert.ok(!document.querySelector('output').dataset.path.includes('as_of'))
-await mount(mod.ReceivablesPage,'/receivables?as_of=2026-10-31');assert.match(value(),/80/)
+await click('Semua Bulan');assert.match(value(),/50/);assert.ok(!document.querySelector('output').dataset.path.includes('as_of'))
+await mount(mod.ReceivablesPage,'/receivables?as_of=2026-10-31&view=historical');assert.match(value(),/80/)
+// October order list uses TODAY'S balances: November settlement disappears, November orders excluded.
+await mount(mod.ReceivablesPage,'/receivables?as_of=2026-10-31');assert.match(value(),/0/);assert.ok(!document.querySelector('tbody .receivable-amount'))
+current.push(row('oct-cicilan',200,50),row('oct-belum',300,0))
+await click('Muat Ulang');assert.match(value(),/450/);assert.equal(document.querySelectorAll('tbody tr').length,2);assert.match(document.querySelector('tbody').textContent,/Cicilan/);assert.match(document.querySelector('tbody').textContent,/Belum Bayar/);assert.ok(!document.querySelector('tbody').textContent.includes('november'))
+await click('XLS');assert.equal(exports.at(-1).summary[1][1],450);assert.match(exports.at(-1).subtitle,/pembayaran terbaru|Pembayaran terbaru/);assert.equal(exports.at(-1).rows[0][6],'Cicilan')
+current.find(r=>r.id==='oct-cicilan').paid_amount=200;await act(async()=>window.dispatchEvent(new window.Event('focus')));assert.match(value(),/300/);assert.equal(document.querySelectorAll('tbody tr').length,1)
+current.find(r=>r.id==='oct-belum').paid_amount=300;await act(async()=>window.dispatchEvent(new window.Event('happylaundry-data-invalidated')));assert.match(value(),/0/);assert.ok(!document.querySelector('[title=Bayar]'));current.splice(2)
+
 // Active list no longer truncates above 1000 rows.
 const saved=current.slice();current.splice(0,current.length,...Array.from({length:1205},(_,i)=>row('bulk'+i,1,0)));assert.equal((await mod.loadReceivables(null)).length,1205);current.splice(0,current.length,...saved)
 assert.equal(mod.monthEndReceivable('2024-02','2026-11-04'),'2024-02-29');assert.equal(mod.monthEndReceivable('2026-11','2026-11-04'),'2026-11-04')
 await mount(mod.DashboardPage,'/');await click('Pilih Bulan');await change('[aria-label="Tahun laporan"]','2026');await change('[aria-label="Nama bulan"]','10');assert.match(document.querySelector('.owner-receivable-period').textContent,/31 Oktober 2026/);assert.match(document.querySelector('.owner-receivable-period strong').textContent,/80/)
 await change('[aria-label="Nama bulan"]','09');assert.match(document.querySelector('.owner-receivable-period strong').textContent,/30/)
-await change('[aria-label="Nama bulan"]','10');await act(async()=>document.querySelector('.owner-receivable-period').click());assert.equal(document.querySelector('output').dataset.path,'/receivables?as_of=2026-10-31')
+await change('[aria-label="Nama bulan"]','10');await act(async()=>document.querySelector('.owner-receivable-period').click());assert.equal(document.querySelector('output').dataset.path,'/receivables?as_of=2026-10-31&view=historical')
 await act(async()=>root.unmount());await unlink(file)
 console.log('PASS Receivables/Dashboard: month/date filters, exact matching totals/count/XLS/PDF, fully-paid-now historical debt, live actions retained, 1205 live rows, no stale response/export during switch, search/zero/retry/missing SQL, URL deep link, leap month and Dashboard date/amount/navigation.')

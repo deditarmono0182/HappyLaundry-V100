@@ -4,7 +4,7 @@ import {FinanceCashAdvanceSummary,type FinanceCashAdvanceSummaryRow} from '../co
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
 import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   AlertTriangle, CalendarDays, Eye, FileSpreadsheet, FileText, HandCoins, ImageUp, Percent, Plus,
   ReceiptText, Search, Settings2, Pencil, Save, Trash2, TrendingDown, TrendingUp, WalletCards
@@ -125,7 +125,10 @@ export function FinancePage(){
   const [financeCashAdvances,setFinanceCashAdvances]=useState<FinanceCashAdvanceSummaryRow[]>([])
   const [cashAdvanceSummaryLoading,setCashAdvanceSummaryLoading]=useState(true)
   const [cashAdvanceSummaryError,setCashAdvanceSummaryError]=useState('')
-  const [requestTab,setRequestTab]=useState<CashAdvanceRequestTab|null>(null)
+  const [requestParams,setRequestParams]=useSearchParams()
+  const requestedTab=requestParams.get('kasbon_requests')
+  const [requestTab,setRequestTab]=useState<CashAdvanceRequestTab|null>(()=>requestedTab==='addition'||requestedTab==='correction'?requestedTab:null)
+  useEffect(()=>{if(requestedTab==='addition'||requestedTab==='correction')setRequestTab(requestedTab)},[requestedTab,requestParams.get('request_id')])
   const [requestRevision,setRequestRevision]=useState(0)
   const [additionDraft,setAdditionDraft]=useState<AdditionDraft|null>(null)
   const [additionNotice,setAdditionNotice]=useState('')
@@ -602,7 +605,7 @@ export function FinancePage(){
           <button type="button" className="secondary-button" onClick={openCashAdvanceInput}><HandCoins size={16}/>Input Kas Bon</button>
       </div>
       {additionNotice&&<div className="success-box" role="status">{additionNotice} Lihat statusnya melalui Pengajuan Tambahan Kasbon di halaman ini.</div>}
-      {requestTab&&<FinanceCashAdvanceRequestCenter key={requestRevision} tab={requestTab} isOwner={isOwner} onClose={()=>setRequestTab(null)} onChanged={async()=>{await Promise.all([loadCashAdvances(),load()])}}/>}
+      {requestTab&&<FinanceCashAdvanceRequestCenter showHistory={requestParams.get('kasbon_history')==='1'} focusRequestId={requestParams.get('request_id')||undefined} key={`${requestRevision}:${requestParams.get('request_id')||''}:${requestParams.get('kasbon_history')||''}`} tab={requestTab} isOwner={isOwner} onClose={()=>{setRequestTab(null);setRequestParams(previous=>{const next=new URLSearchParams(previous);next.delete('kasbon_requests');next.delete('kasbon_history');next.delete('request_id');return next},{replace:true})}} onChanged={async()=>{await Promise.all([loadCashAdvances(),load()])}}/>}
       {cashAdvanceSummaryLoading?<p role="status">Memuat total kasbon per karyawan...</p>:cashAdvanceSummaryError?<div className="error-box">Gagal mengambil ringkasan kasbon: {cashAdvanceSummaryError}. Pastikan SQL 074 sudah dijalankan. <button type="button" className="secondary-button" onClick={()=>void loadCashAdvances()}>Coba Lagi</button></div>:<FinanceCashAdvanceSummary rows={financeCashAdvances} onSelect={id=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(id)}`)}/>}
       <div className="finance-cash-advance-footnote">Pembayaran dicatat Owner melalui Absensi & Gaji → Potongan Kasbon: potong gaji, tunai, atau transfer. Tunai/transfer tercatat di Kas Harian dan tidak menjadi omzet laundry.</div>
     </section>

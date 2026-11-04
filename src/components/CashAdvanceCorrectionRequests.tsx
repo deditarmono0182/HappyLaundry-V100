@@ -8,12 +8,18 @@ type Loan={id:string;employee_id:string;amount:number;remaining_amount:number;no
 type Employee={id:string;name:string}
 type Request={id:string;cash_advance_id:string;employee_id:string;employee_name:string;old_amount:number;old_remaining:number;old_note:string|null;new_amount:number;new_note:string|null;reason:string;status:'pending'|'approved'|'rejected'|'stale';requester_name:string;requested_at:string;reviewer_name:string|null;reviewed_at:string|null;review_note:string|null}
 const labels={pending:'Menunggu Owner',approved:'Disetujui',rejected:'Ditolak',stale:'Perlu diajukan ulang'}
-export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwner,onChanged,composerOnClose,onSubmitted}:{loans:Loan[];employees:Employee[];employeeId:string|null;isOwner:boolean;onChanged:()=>Promise<void>;composerOnClose?:()=>void;onSubmitted?:()=>void}){
+export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwner,onChanged,composerOnClose,onSubmitted,initialShowAll=false,focusRequestId}:{initialShowAll?:boolean;focusRequestId?:string;loans:Loan[];employees:Employee[];employeeId:string|null;isOwner:boolean;onChanged:()=>Promise<void>;composerOnClose?:()=>void;onSubmitted?:()=>void}){
  const composer=!!composerOnClose
  const [requests,setRequests]=useState<Request[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[success,setSuccess]=useState('')
- const [selected,setSelected]=useState(''),[all,setAll]=useState(false),[target,setTarget]=useState<Loan|null>(null),[review,setReview]=useState<Request|null>(null)
+ const [selected,setSelected]=useState(''),[all,setAll]=useState(initialShowAll),[target,setTarget]=useState<Loan|null>(null),[review,setReview]=useState<Request|null>(null)
  const [form,setForm]=useState({amount:'',note:'',reason:''}),[decision,setDecision]=useState(''),[busy,setBusy]=useState(false)
  const pending=useRef(false),retry=useRef<{key:string;id:string}|null>(null),sequence=useRef(0)
+ useEffect(()=>{
+  if(!loading&&focusRequestId){
+   const row=Array.from(document.querySelectorAll<HTMLElement>('[data-request-id]')).find(e=>e.dataset.requestId===focusRequestId)
+   row?.scrollIntoView?.({block:'center',inline:'nearest',behavior:'smooth'})
+  }
+ },[loading,focusRequestId])
  const load=useCallback(async()=>{
   const seq=++sequence.current;setLoading(true);setError('')
   try{
@@ -77,7 +83,7 @@ export function CashAdvanceCorrectionRequests({loans,employees,employeeId,isOwne
   {loading&&<p role="status">Memuat pengajuan...</p>}{error&&<div className="error-box" role="alert">{error}</div>}{success&&<div className="success-box" role="status">{success}</div>}
   {composer&&loan&&requests.some(r=>r.cash_advance_id===loan.id&&r.status==='pending')&&<div className="info-box">Kasbon ini sudah memiliki pengajuan koreksi yang menunggu Owner. Periksa statusnya melalui Laporan Seluruh Karyawan.</div>}
   {!composer&&<div className="table-wrap"><table><thead><tr><th>Tanggal / Pengaju</th><th>Karyawan</th><th>Nominal Lama → Baru</th><th>Alasan</th><th>Status / Keputusan</th>{isOwner&&<th>Aksi</th>}</tr></thead><tbody>
-   {shown.map(r=><tr key={r.id}><td>{businessDateTimeLabel(r.requested_at)}<small style={{display:'block'}}>{r.requester_name}</small></td><td>{r.employee_name}</td><td>{formatRupiah(Number(r.old_amount))} → {formatRupiah(Number(r.new_amount))}</td><td className="cash-correction-request-reason">{r.reason}</td><td>{labels[r.status]}{r.reviewed_at&&<small style={{display:'block'}}>{r.reviewer_name} • {businessDateTimeLabel(r.reviewed_at)} • {r.review_note}</small>}</td>{isOwner&&<td>{r.status==='pending'&&<button className="secondary-button" disabled={busy||loading} onClick={()=>{setReview(r);setDecision('');setError('')}}>Tinjau Pengajuan</button>}</td>}</tr>)}
+   {shown.map(r=><tr key={r.id} data-request-id={r.id} className={r.id===focusRequestId?'cash-request-highlight':undefined}><td>{businessDateTimeLabel(r.requested_at)}<small style={{display:'block'}}>{r.requester_name}</small></td><td>{r.employee_name}</td><td>{formatRupiah(Number(r.old_amount))} → {formatRupiah(Number(r.new_amount))}</td><td className="cash-correction-request-reason">{r.reason}</td><td>{labels[r.status]}{r.reviewed_at&&<small style={{display:'block'}}>{r.reviewer_name} • {businessDateTimeLabel(r.reviewed_at)} • {r.review_note}</small>}</td>{isOwner&&<td>{r.status==='pending'&&<button className="secondary-button" disabled={busy||loading} onClick={()=>{setReview(r);setDecision('');setError('')}}>Tinjau Pengajuan</button>}</td>}</tr>)}
    {!loading&&!shown.length&&<tr><td colSpan={isOwner?6:5}>Tidak ada pengajuan pada pilihan ini.</td></tr>}
   </tbody></table></div>}
  </section>

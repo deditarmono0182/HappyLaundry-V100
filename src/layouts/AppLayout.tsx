@@ -1,3 +1,4 @@
+import {CashAdvanceNotifications} from '../components/CashAdvanceNotifications'
 import {attendanceError,attendanceEventAction,loadAttendanceState,recordEmployeeAttendance} from '../lib/attendance'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
@@ -393,7 +394,7 @@ export function AppLayout() {
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
-          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.168 Historical Receivables</span></div>
+          <div><strong>HappyLaundry</strong><span>Enterprise V113.0.169 Receivables and Kasbon Notices</span></div>
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
@@ -479,7 +480,7 @@ export function AppLayout() {
             <h1>HappyLaundry</h1>
             <span>Sistem Operasional Laundry</span>
           </div>
-          <div className="topbar-actions"><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
+          <div className="topbar-actions"><CashAdvanceNotifications/><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
         </header>
         <div className="page-container">
           {role==='employee'&&attendanceNotice&&<div className="attendance-access-notice">{attendanceNotice}</div>}

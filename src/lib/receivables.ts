@@ -32,3 +32,7 @@ export async function loadReceivables(asOf:string|null):Promise<ReceivableRow[]>
  if(Number(data.count)!==rows.length||!Number.isFinite(Number(data.total))||Math.abs(total-Number(data.total))>.005)throw new Error('Total dan rincian piutang belum cocok. Muat ulang laporan.')
  return rows
 }
+
+export function receivablePaymentLabel(row:OrderRow){
+ return remainingReceivable(row)<=0?'Lunas':Number(row.paid_amount||0)>0?'Cicilan':'Belum Bayar'
+}

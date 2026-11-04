@@ -541,7 +541,7 @@ export function DashboardPage() {
         <div><span>Bagi Hasil Pengelola</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerFinancial.managerShare):'—'}</strong></div>
         <div className={ownerProfit>=0?'profit-positive':'profit-negative'}><span>Laba Bersih Operasional</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerProfit):'—'}</strong></div>
         <div className={ownerCashOperatingSurplus>=0?'profit-positive':'profit-negative'}><span>Surplus Kas Operasional</span><strong className="dashboard-money-value">{ownerFinancial?formatIDR(ownerCashOperatingSurplus):'—'}</strong></div>
-        <button type="button" className="owner-receivable-period" disabled={periodReceivable.total===undefined} onClick={()=>navigate(`/receivables?as_of=${piutangDate}`)}><span>Piutang per {piutangDateLabel}</span><strong className="dashboard-money-value">{periodReceivable.total===undefined?'—':formatIDR(periodReceivable.total)}</strong><small>Lihat rincian tanggal ini</small></button>
+        <button type="button" className="owner-receivable-period" disabled={periodReceivable.total===undefined} onClick={()=>navigate(`/receivables?as_of=${piutangDate}&view=historical`)}><span>Piutang per {piutangDateLabel}</span><strong className="dashboard-money-value">{periodReceivable.total===undefined?'—':formatIDR(periodReceivable.total)}</strong><small>Lihat rincian tanggal ini</small></button>
       </div>
       <div className="owner-payment-breakdown">
         <div><Banknote size={18}/><span>Tunai</span><b className="dashboard-money-value">{formatIDR(ownerCash)}</b></div>

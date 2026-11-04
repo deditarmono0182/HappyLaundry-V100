@@ -80,9 +80,15 @@ function AdditionReview({request,onClose,onDecided}:{request:Request;onClose:()=
  </div></Modal>
 }
 
-export function CashAdvanceAdditionRequests({employeeId,isOwner,onChanged}:{employeeId:string|null;isOwner:boolean;onChanged:()=>Promise<void>}){
+export function CashAdvanceAdditionRequests({employeeId,isOwner,onChanged,initialShowAll=false,focusRequestId}:{initialShowAll?:boolean;focusRequestId?:string;employeeId:string|null;isOwner:boolean;onChanged:()=>Promise<void>}){
  const [rows,setRows]=useState<Request[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[success,setSuccess]=useState('')
- const [all,setAll]=useState(false),[open,setOpen]=useState(false),[review,setReview]=useState<Request|null>(null),sequence=useRef(0)
+ const [all,setAll]=useState(initialShowAll),[open,setOpen]=useState(false),[review,setReview]=useState<Request|null>(null),sequence=useRef(0)
+ useEffect(()=>{
+  if(!loading&&focusRequestId){
+   const row=Array.from(document.querySelectorAll<HTMLElement>('[data-request-id]')).find(e=>e.dataset.requestId===focusRequestId)
+   row?.scrollIntoView?.({block:'center',inline:'nearest',behavior:'smooth'})
+  }
+ },[loading,focusRequestId])
  const load=useCallback(async()=>{
   const seq=++sequence.current;setLoading(true);setError('')
   try{
@@ -98,7 +104,7 @@ export function CashAdvanceAdditionRequests({employeeId,isOwner,onChanged}:{empl
   <div className="cash-correction-request-tools"><button className="secondary-button" disabled={loading||!!error} onClick={()=>setOpen(true)}>Ajukan Tambahan Kasbon</button><button className="secondary-button" disabled={loading} onClick={()=>void load()}>Muat Ulang Tambahan</button><label><input type="checkbox" checked={all} onChange={e=>setAll(e.target.checked)}/> Tampilkan riwayat keputusan tambahan</label></div>
   {loading&&<p role="status">Memuat pengajuan tambahan...</p>}{error&&<div role="alert" className="error-box">{error}</div>}{success&&<div role="status" className="success-box">{success}</div>}
   <div className="table-wrap"><table><thead><tr><th>Tanggal / Pengaju</th><th>Karyawan</th><th>Tambahan / Metode</th><th>Alasan</th><th>Status / Keputusan</th>{isOwner&&<th>Aksi</th>}</tr></thead><tbody>
-   {shown.map(r=><tr key={r.id}><td>{businessDateTimeLabel(r.requested_at)}<small style={{display:'block'}}>{r.requester_name}</small></td><td>{r.employee_name}</td><td>{formatRupiah(Number(r.amount))}<small style={{display:'block'}}>{methods[r.payment_method]||r.payment_method}</small></td><td className="cash-correction-request-reason">{r.reason}</td><td>{labels[r.status]}{r.reviewed_at&&<small style={{display:'block'}}>{r.reviewer_name} • {businessDateTimeLabel(r.reviewed_at)} • {r.review_note}</small>}</td>{isOwner&&<td>{r.status==='pending'&&<button className="secondary-button" disabled={loading} onClick={()=>setReview(r)}>Tinjau Tambahan Kasbon</button>}</td>}</tr>)}
+   {shown.map(r=><tr key={r.id} data-request-id={r.id} className={r.id===focusRequestId?'cash-request-highlight':undefined}><td>{businessDateTimeLabel(r.requested_at)}<small style={{display:'block'}}>{r.requester_name}</small></td><td>{r.employee_name}</td><td>{formatRupiah(Number(r.amount))}<small style={{display:'block'}}>{methods[r.payment_method]||r.payment_method}</small></td><td className="cash-correction-request-reason">{r.reason}</td><td>{labels[r.status]}{r.reviewed_at&&<small style={{display:'block'}}>{r.reviewer_name} • {businessDateTimeLabel(r.reviewed_at)} • {r.review_note}</small>}</td>{isOwner&&<td>{r.status==='pending'&&<button className="secondary-button" disabled={loading} onClick={()=>setReview(r)}>Tinjau Tambahan Kasbon</button>}</td>}</tr>)}
    {!loading&&!shown.length&&<tr><td colSpan={isOwner?6:5}>Tidak ada pengajuan tambahan pada pilihan ini.</td></tr>}
   </tbody></table></div>
   {open&&<CashAdvanceAdditionRequestModal initial={{...empty,employee_id:employeeId||''}} onClose={()=>setOpen(false)} onSent={async()=>{setSuccess('Pengajuan terkirim ke Owner. Saldo kasbon dan Kas Harian belum berubah.');await load()}}/>}
