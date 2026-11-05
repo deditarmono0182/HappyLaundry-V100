@@ -84,7 +84,7 @@ async function fetchFinancialSummaryLegacy(from:string,to:string):Promise<Financ
   const firstMonth=`${from.slice(0,7)}-01`
   const lastMonth=`${to.slice(0,7)}-01`
 
-  const [o,p,e,a,ps,adj,shr,com,it,sv,res,managerMonths]=await Promise.all([
+  const [o,p,e,a,ps,adj,shr,com,it,sv,res,managerMonths,users]=await Promise.all([
     supabase.from('v100_orders_view')
       .select('id,total,paid_amount,status,created_at')
       .gte('created_at',fromISO).lte('created_at',toISO),
@@ -109,10 +109,13 @@ async function fetchFinancialSummaryLegacy(from:string,to:string):Promise<Financ
     supabase.from('v100_services').select('id,category'),
     supabase.from('v113095_reserve_settings')
       .select('reserve_type,method,monthly_amount,revenue_percent,is_active'),
-    managerSharesForRange(from,to)
+    managerSharesForRange(from,to),
+    to>='2026-11-01'
+      ? supabase.from('v109_users').select('id,is_active')
+      : Promise.resolve({data:[],error:null})
   ])
 
-  const error=o.error||p.error||e.error||a.error||ps.error||adj.error||shr.error||com.error||it.error||sv.error||res.error
+  const error=o.error||p.error||e.error||a.error||ps.error||adj.error||shr.error||com.error||it.error||sv.error||res.error||users.error
   if(error)throw error
 
   const orders=(o.data as OrderRow[])||[]
@@ -120,6 +123,7 @@ async function fetchFinancialSummaryLegacy(from:string,to:string):Promise<Financ
   const expenses=(e.data as ExpenseRow[])||[]
   const attendance=(a.data as AttendanceRow[])||[]
   const settings=(ps.data as PayrollSetting[])||[]
+  const activeEmployees=new Set(((users.data as {id:string;is_active:boolean}[])||[]).filter(u=>u.is_active).map(u=>u.id))
   const adjustments=(adj.data as PayrollAdjustment[])||[]
   const shares=(shr.data as EmployeeShare[])||[]
   const commissions=(com.data as CommissionRow[])||[]
@@ -153,6 +157,7 @@ async function fetchFinancialSummaryLegacy(from:string,to:string):Promise<Financ
     const [year,month]=monthKey.split('-').map(Number)
     const totalDays=daysInMonth(year,month)
     for(const setting of settings){
+      if(monthKey>='2026-11'&&!activeEmployees.has(setting.employee_id))continue
       allowance+=Number(setting.monthly_allowance||0)*(selectedDays/totalDays)
     }
     for(const row of adjustments.filter(x=>x.payroll_month.startsWith(monthKey))){

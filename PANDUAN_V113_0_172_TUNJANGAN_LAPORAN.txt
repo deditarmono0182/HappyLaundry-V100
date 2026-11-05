@@ -1,0 +1,27 @@
+HappyLaundry V113.0.172 — Tunjangan laporan hanya karyawan aktif
+
+1. Setelah SQL091 sukses, jalankan SQL_092_TUNJANGAN_LAPORAN_KARYAWAN_AKTIF.sql.
+2. Ekstrak ZIP V172, salin ke repository, Commit lalu Push. Tunggu build sukses.
+3. Muat ulang laporan. Cache laporan lama dapat bertahan sekitar 30 detik;
+   tutup/buka laporan atau muat ulang halaman untuk mengambil hasil baru.
+
+Mulai November 2026, tunjangan pada laporan dihitung hanya untuk karyawan aktif.
+Tetap proporsional: tunjangan bulanan x jumlah hari dipilih / jumlah hari bulan.
+Contoh total tunjangan aktif Rp200.000, periode 1–6 November (30 hari): Rp40.000.
+Jika sebelumnya Rp42.000 karena tunjangan nonaktif Rp10.000 ikut dihitung,
+koreksinya Rp2.000. Biaya karyawan turun Rp2.000; laba dan surplus kas laporan
+naik Rp2.000. Ini koreksi laporan, bukan transaksi uang masuk/keluar baru.
+
+Perhitungan penggajian sebulan tetap memakai tunjangan aktif sebulan penuh,
+bukan Rp40.000. Jadi perbedaan laporan sebagian bulan vs gaji bulanan tetap wajar.
+Periode Oktober dan sebelumnya mempertahankan rumus laporan lama. Laporan yang
+melintasi Oktober–November hanya mengoreksi bagian November dan setelahnya.
+
+Tidak mengubah pembayaran gaji, kasbon, data absensi, tunjangan tersimpan,
+komisi, persentase pengelola, atau aturan order lunas SQL091. Cadangan tetap.
+Hanya tunjangan dan angka total laporan yang merupakan turunannya yang berubah.
+Status aktif mengikuti status karyawan saat laporan dibuka, sama seperti daftar
+gaji aktif; ini bukan riwayat tanggal masuk/nonaktif karyawan.
+
+Pemeriksaan: SQL lokal PostgreSQL/PGlite dan build aplikasi. Tidak diterapkan
+langsung ke database atau hosting produksi oleh asisten.
