@@ -19,9 +19,9 @@ export function ManagerShareSettings({month,employees,report,onSaved}:{month:str
  }
  return <section className="panel manager-share-settings">
   <div className="section-title"><b>Bagi Hasil Pengelola — {month}</b></div>
-  <p>Nilai order masuk − operasional − gaji dan komisi karyawan. Tanpa cadangan; bagian pengelola tidak mengurangi dasar hitungnya sendiri. Piutang termasuk nilai order. Hak mengikuti data yang sudah disimpan. Simpan Bonus terlebih dahulu jika diubah. Koreksi data atau persentase mengubah hak bulan ini; pembayaran lama tetap tercatat.</p>
+  <p>{report.revenue_basis==='fully_paid_orders'?'Nilai order yang lunas pada bulan ini − operasional − gaji dan komisi karyawan. DP dan piutang belum dihitung. Order sebelum November 2026 tetap memakai perhitungan lama dan tidak dihitung ulang.':'Nilai order masuk − operasional − gaji dan komisi karyawan. Aturan periode lama: piutang termasuk nilai order.'} Tanpa cadangan; bagian pengelola tidak mengurangi dasar hitungnya sendiri. Hak mengikuti data yang sudah disimpan. Simpan Bonus terlebih dahulu jika diubah. Koreksi data atau persentase mengubah hak bulan ini; pembayaran lama tetap tercatat.</p>
   <div className="manager-share-metrics">
-   <span>Order masuk <b>{formatRupiah(Number(report.revenue))}</b></span>
+   <span>{report.revenue_basis==='fully_paid_orders'?'Order lunas bulan ini':'Order masuk'} <b>{formatRupiah(Number(report.revenue))}</b></span>
    <span>Operasional <b>{formatRupiah(Number(report.operating))}</b></span>
    <span>Gaji &amp; komisi <b>{formatRupiah(Number(report.employee_cost))}</b></span>
    <span>Dasar laba sebelum pengelola <b>{formatRupiah(Number(report.profit_base))}</b></span>

@@ -1,6 +1,6 @@
 import {supabase} from './supabase'
 export type ManagerShareRow={employee_id:string;full_name:string;percent:number;amount:number;updated_at:string}
-export type ManagerReport={payroll_month:string;revenue:number;operating:number;employee_cost:number;profit_base:number;rows:ManagerShareRow[]}
+export type ManagerReport={payroll_month:string;revenue:number;operating:number;employee_cost:number;profit_base:number;revenue_basis?:'fully_paid_orders';rows:ManagerShareRow[]}
 export async function loadManagerReport(month:string):Promise<ManagerReport>{
  const {data,error}=await supabase.rpc('v113151_manager_report',{p_month:`${month.slice(0,7)}-01`})
  if(error)throw new Error(`Bagi hasil pengelola gagal dimuat: ${error.message}. Pastikan SQL 080 sudah dijalankan.`)

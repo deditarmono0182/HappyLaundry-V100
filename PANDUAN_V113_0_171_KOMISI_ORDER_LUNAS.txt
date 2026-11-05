@@ -1,0 +1,81 @@
+HappyLaundry V113.0.171 — Komisi dan bagi hasil pengelola dari order lunas
+
+PEMASANGAN
+1. Jika sudah memakai V170 dan SQL 078/087/090 sudah terpasang, jalankan hanya
+   SQL_091_KOMISI_ORDER_LUNAS_MULAI_NOVEMBER.sql di Supabase SQL Editor.
+2. SQL harus SUCCESS terlebih dahulu. Jika muncul pesan periode sudah memiliki
+   pembayaran gaji/potongan kasbon, proses dibatalkan seluruhnya. Jangan menghapus
+   transaksi untuk melewati pengaman; kirim pesan tersebut agar periode mulai
+   dapat ditentukan sesuai data sebenarnya. Jangan pasang ZIP sebelum SQL sukses.
+3. Ekstrak ZIP, salin file ke folder repository HappyLaundry, Commit lalu Push
+   seperti biasa. Tunggu build Netlify berhasil lalu muat ulang aplikasi.
+4. Tidak perlu menjalankan SQL lama lagi. Menjalankan 077/078 setelah 091 akan
+   mengganti kembali view komisi dengan aturan lama.
+
+ATURAN MULAI 1 NOVEMBER 2026, PUKUL 00.00 WIB
+- Komisi produksi (yang mengerjakan) dan kurir hanya masuk perhitungan bila
+  paid_amount >= total order dan total > 0. Tidak bergantung label status lunas.
+- Belum bayar dan DP belum masuk. Order batal tidak masuk pada aturan baru.
+- Order November yang lunas Desember masuk komisi Desember.
+- Tarif, penerima, dan pembagian tim tetap mengikuti data komisi per order.
+- Pelunasan baru dicatat saat total terbayar mencapai tagihan. Status cucian
+  boleh masih diterima/proses; tidak harus selesai agar komisi dapat masuk.
+
+PERLINDUNGAN OKTOBER DAN BULAN SEBELUMNYA
+- Rincian komisi sebelum batas mulai disalin sekali sebagai arsip tetap.
+  Nominal, persentase, karyawan, dan tanggal perhitungannya dipertahankan.
+- Pelunasan order lama tidak memindahkan atau menghitung ulang komisi yang sudah
+  masuk arsip tersebut, meskipun pelanggan baru membayar di bulan berikutnya.
+- Pengaman berlaku per order dan jenis komisi, sehingga mengganti penerima/tim
+  pada sumber order lama tidak menciptakan komisi tambahan untuk hak yang sama.
+- Arsip periode lama tidak berubah melalui koreksi sumber order. Bila perlu
+  koreksi hak historis, diperlukan proses koreksi terpisah yang dapat diaudit.
+- Pembayaran gaji lama, potongan kasbon, saldo pinjaman dan pembayaran pelanggan
+  tidak diubah oleh pemasangan ini. Tidak ada pembayaran otomatis.
+
+PENGECEKAN SETELAH PASANG
+1. Bandingkan total komisi Oktober sebelum/sesudah: harus sama.
+2. Buka November: order belum bayar/DP belum masuk komisi.
+3. Pelunasan yang benar akan memasukkan komisi ke bulan pelunasan, satu kali
+   untuk masing-masing penerima yang berhak.
+4. Owner, akun karyawan, rincian gaji dan ekspor mengambil ledger komisi yang sama.
+5. Hasil SELECT di akhir SQL menunjukkan total per bulan dan jenis komisi.
+
+DATA LAMA DAN KOREKSI TRANSAKSI
+- Untuk order baru yang sudah lunas sebelum SQL dipasang, tanggal pelunasan
+  ditentukan dari akumulasi riwayat pembayaran terhadap total order saat ini.
+- Jika tidak ada bukti tanggal pelunasan yang mencukupi, tanggal pemasangan
+  dipakai, bukan tanggal lampau yang ditebak. Periksa kasus pembayaran yang
+  diinput di luar aplikasi atau riwayatnya tidak lengkap.
+- Pada aturan baru, refund/perubahan total/pembatalan dapat mengubah kelayakan
+  komisi. Periksa dampak gaji sebelum mengoreksi order yang komisinya sudah dibayar.
+- Menjalankan ulang SQL091 tidak menyalin ulang arsip atau mengganti batas mulai.
+
+BAGI HASIL PENGELOLA
+Mulai November 2026:
+dasar laba = nilai order yang lunas pada bulan pelunasan - biaya operasional
+bulan tersebut - hak gaji dan komisi karyawan bulan tersebut.
+Bagian pengelola = persentase yang diatur untuk nama/bulan tersebut x dasar
+laba positif. Bila dasar laba nol/minus, bagian pengelola nol. Cadangan tidak
+dikurangi; bagian pengelola tidak mengurangi dasar hitungnya sendiri.
+DP dan order yang belum lunas belum masuk dasar pengelola. Order sebelum
+November tetap dihitung dengan rumus periode lama dan tidak dimasukkan lagi
+ke dasar pengelola November/berikutnya saat pelanggan melunasi.
+Contoh order November Rp100.000, DP November Rp50.000 dan lunas Desember:
+nilai Rp100.000 masuk dasar order lunas Desember, bukan Rp50.000 di kedua bulan.
+Ini dasar nilai ORDER LUNAS, bukan penjumlahan semua kas masuk bulan tersebut.
+Perbedaan waktu DP, biaya dan saldo kas awal tetap perlu dilihat di laporan kas.
+Laporan omzet/laba rugi umum tetap menunjukkan order masuk; kartu dasar pengelola
+secara jelas berlabel Order lunas bulan ini untuk periode aturan baru.
+Rumus asli sebelum November dipertahankan; pemasangan tidak mengubah persentase
+pengelola atau pembayaran lama. Nilai Oktober tetap memakai komisi Oktober yang
+diarsipkan. Gaji kehadiran, tunjangan, bonus dan bagi hasil kategori tidak diubah.
+
+VALIDASI
+SQL diuji dengan PostgreSQL lokal (PGlite): batas WIB, komisi Oktober tetap,
+pelunasan lintas bulan, DP, pembayaran lebih, order batal/nol, kedua jenis komisi,
+pengaman pembayaran gaji/potongan, rollback, idempotensi dan hak akses.
+Dasar pengelola diuji dengan fungsi asli SQL087: Oktober dan hak 40% tetap,
+November/Desember hanya memakai order lunas, potongan biaya tepat sekali,
+dan pelunasan order Oktober tidak membagikan nilai order yang sama dua kali.
+Build aplikasi diperiksa. Belum diterapkan ke database/Netlify produksi Anda.
