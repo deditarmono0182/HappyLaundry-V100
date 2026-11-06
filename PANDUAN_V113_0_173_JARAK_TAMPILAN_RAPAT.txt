@@ -1,0 +1,11 @@
+HappyLaundry V113.0.173 — Jarak Tampilan Rapat
+
+Berlaku pada seluruh halaman aplikasi dan menu samping, di laptop maupun HP.
+Jarak antarbaris, judul, kartu, panel, tabel dan formulir dirapatkan.
+Ukuran huruf dan angka tetap; pilihan Comfort, Compact, Ultra Compact tetap tersedia.
+
+Pemasangan: ekstrak ZIP, salin isinya ke folder repository HappyLaundry, lalu Commit dan Push seperti pembaruan sebelumnya. Tunggu deployment selesai dan muat ulang aplikasi.
+Tidak perlu menjalankan SQL baru untuk versi 173.
+Perhitungan keuangan, penggajian, hak akses, login/GPS, dan tata letak cetak tidak diubah pada pembaruan ini.
+
+Verifikasi: build produksi berhasil; pemeriksaan browser membandingkan jarak sebelum/sesudah serta tampilan HP Keuangan, Order, dan Penggajian menggunakan data contoh.

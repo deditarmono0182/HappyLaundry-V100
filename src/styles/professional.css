@@ -245,3 +245,51 @@ html[data-ui="professional"] .topbar-branding :is(h1,span){max-width:100%;overfl
  html[data-ui="professional"] .topbar .pwa-button span{display:none}
  html[data-ui="professional"] .topbar .pwa-button{width:44px;min-width:44px;padding:10px!important;justify-content:center}
 }
+
+/* V173: tighter vertical rhythm on every application screen; type sizes stay unchanged.
+   Screen only: receipt/PDF print layouts and all financial rules are untouched. */
+@media screen {
+ html[data-ui="professional"] {--hl-pro-pad:12px;--hl-pro-row:8px;--hl-stack-gap:10px;--hl-nav-height:38px}
+ html[data-ui="professional"][data-density="comfort"] {--hl-pro-pad:16px;--hl-pro-row:10px;--hl-stack-gap:12px;--hl-nav-height:42px}
+ html[data-ui="professional"][data-density="ultra"] {--hl-pro-pad:10px;--hl-pro-row:6px;--hl-stack-gap:8px;--hl-nav-height:36px}
+ html[data-ui="professional"] body .app-shell .main-content *,
+ html[data-ui="professional"] body .app-shell .sidebar *,
+ html[data-ui="professional"] body .modal-backdrop * {line-height:1.4!important}
+ html[data-ui="professional"] body .app-shell .main-content :is(h2,h3,h4) {line-height:1.3!important;margin-top:0!important;margin-bottom:6px!important}
+ html[data-ui="professional"] body .app-shell .main-content p {margin-top:4px!important;margin-bottom:8px!important}
+ html[data-ui="professional"] body .app-shell .main-content .page-heading {gap:12px!important;padding-bottom:12px!important;margin-bottom:14px!important}
+ html[data-ui="professional"] body .app-shell .main-content .page-heading h2 {margin:2px 0 4px!important}
+ html[data-ui="professional"] body .app-shell .main-content .page-heading p {margin:0!important;line-height:1.4!important}
+ html[data-ui="professional"] body .app-shell :is(.panel,.pl-card,.cashier-section) {margin-bottom:var(--hl-stack-gap)!important}
+ html[data-ui="professional"] body .app-shell :is(.panel-heading,.section-title) {gap:8px!important;margin-bottom:8px!important}
+ html[data-ui="professional"] body .app-shell :is(.stats-grid,.finance-live-kpis,.payroll-stats,.receivable-stats,.cash-report-stats) {gap:10px!important;margin-top:10px!important;margin-bottom:10px!important}
+ html[data-ui="professional"] body .app-shell .stat-card {min-height:90px!important;padding:10px 12px!important;gap:10px!important}
+ html[data-ui="professional"] body .app-shell .stat-card>div:last-child {gap:2px!important}
+ html[data-ui="professional"] body .app-shell .stat-card :is(span,strong,small) {margin:0!important;line-height:1.3!important}
+ html[data-ui="professional"] body .app-shell .main-content .regular-report-page[data-typography="regular"] .stat-card :is(span,strong,small) {line-height:1.3!important}
+ html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(td,th) {line-height:1.4!important}
+ html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) th {padding-top:8px!important;padding-bottom:8px!important}
+ html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) :is(.error-box,.warning-box,.info-box,.success-box) {line-height:1.4!important;padding-top:10px!important;padding-bottom:10px!important}
+ html[data-ui="professional"] body .app-shell .finance-kpi-content {row-gap:2px!important}
+ html[data-ui="professional"] body .app-shell :is(.manager-share-metrics,.cash-correction-request-summary) {gap:8px!important;margin-top:8px!important;margin-bottom:8px!important}
+ html[data-ui="professional"] body .app-shell :is(.form-grid,.filter-grid,.filter-bar,.toolbar) {row-gap:8px!important}
+ html[data-ui="professional"] body :is(.app-shell,.modal-backdrop) label {row-gap:4px!important}
+ html[data-ui="professional"] body .modal-backdrop :is(.modal-header,.modal-form,.form-actions) {padding-top:12px!important;padding-bottom:12px!important}
+ html[data-ui="professional"] body .modal-backdrop .modal-form {row-gap:10px!important}
+ html[data-ui="professional"] body .app-shell .dashboard-display-customizer {gap:8px!important;padding:12px!important;min-height:0!important}
+ html[data-ui="professional"] body .app-shell .dashboard-density-options {gap:6px!important}
+ html[data-ui="professional"] body .app-shell .dashboard-density-options button {padding:6px 10px!important;row-gap:0!important;min-height:44px!important}
+ html[data-ui="professional"] body .app-shell .dashboard-display-title>div:last-child {gap:2px!important}
+ html[data-ui="professional"] body .app-shell .dashboard-attention-center {padding:10px 12px!important;margin-bottom:10px!important;gap:8px!important}
+ html[data-ui="professional"] body .app-shell .sidebar {padding-top:12px!important;padding-bottom:12px!important}
+ html[data-ui="professional"] body .app-shell .sidebar .brand {padding-bottom:10px!important;margin-bottom:6px!important}
+ html[data-ui="professional"] body .app-shell .sidebar nav {gap:2px!important;padding-bottom:6px!important}
+ html[data-ui="professional"] body .app-shell .sidebar nav a {min-height:var(--hl-nav-height)!important;height:auto!important;padding:6px 10px!important}
+ html[data-ui="professional"] body .app-shell .sidebar-footer {padding-top:10px!important;gap:8px!important}
+ html[data-ui="professional"] body .app-shell .sidebar .account {gap:2px!important}
+}
+@media screen and (max-width:700px) {
+ html[data-ui="professional"] body .app-shell .stat-card {min-height:76px!important;padding:10px 12px!important}
+ html[data-ui="professional"] body .app-shell .sidebar nav a {min-height:40px!important}
+ html[data-ui="professional"] body .app-shell .main-content .page-heading {gap:10px!important;padding-bottom:10px!important;margin-bottom:12px!important}
+}
