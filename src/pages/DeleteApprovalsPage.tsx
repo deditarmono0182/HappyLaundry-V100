@@ -1,3 +1,4 @@
+import {useSearchParams} from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import { CheckCircle2, Clock3, FileWarning, RefreshCw, ShoppingBag, Trash2, XCircle } from 'lucide-react'
 import { PageHeader } from '../components/PageHeader'
@@ -33,6 +34,8 @@ const removeReturnedFiles=async(result:any)=>{
 
 export function DeleteApprovalsPage(){
   const {profile}=useAuth()
+  const [searchParams]=useSearchParams()
+  const selectedRequest=searchParams.get('request_id')
   const [rows,setRows]=useState<DeleteRequest[]>([])
   const [loading,setLoading]=useState(true)
   const [busyId,setBusyId]=useState<string|null>(null)
@@ -122,9 +125,9 @@ export function DeleteApprovalsPage(){
       {!loading&&rows.length===0&&<div className="delete-approval-empty"><CheckCircle2 size={30}/><b>Tidak ada permintaan hapus.</b></div>}
 
       <div className="delete-approval-list">
-        {rows.map(row=>{
+        {[...rows].sort((a,b)=>Number(b.id===selectedRequest)-Number(a.id===selectedRequest)).map(row=>{
           const snap=row.snapshot||{}
-          return <article className="delete-approval-card" key={row.id}>
+          return <article className="delete-approval-card" key={row.id} style={row.id===selectedRequest?{outline:'2px solid #176ed0',outlineOffset:2}:undefined}>
             <div className={`delete-approval-icon ${row.entity_type}`}>
               {row.entity_type==='order'?<ShoppingBag size={20}/>:<Trash2 size={20}/>}
             </div>

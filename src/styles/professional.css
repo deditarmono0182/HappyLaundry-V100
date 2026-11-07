@@ -293,3 +293,17 @@ html[data-ui="professional"] .topbar-branding :is(h1,span){max-width:100%;overfl
  html[data-ui="professional"] body .app-shell .sidebar nav a {min-height:40px!important}
  html[data-ui="professional"] body .app-shell .main-content .page-heading {gap:10px!important;padding-bottom:10px!important;margin-bottom:12px!important}
 }
+
+/* V174: separate request controls, including narrow phone headers. */
+html[data-ui="professional"] body .app-shell .request-notice-button{width:auto;min-width:44px;padding:6px 9px;gap:5px;height:42px;font:inherit}
+html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12px;font-weight:400;white-space:nowrap}
+@media(max-width:700px){
+ html[data-ui="professional"] body .app-shell .topbar{flex-wrap:wrap;row-gap:8px}
+ html[data-ui="professional"] body .app-shell .topbar-actions{flex-wrap:wrap;justify-content:flex-end;max-width:100%;gap:6px}
+ html[data-ui="professional"] body .app-shell .topbar-actions .cash-notice-bell{min-width:40px}
+}
+
+.notification-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.notice-kind{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cash-notice-item.notice-unread{background:#eaf4ff;border-color:#8cbfec}
+.cash-notice-error{position:absolute;left:-4px;top:-4px;background:#a92d40;color:white;border-radius:10px;padding:0 5px;font-size:12px}

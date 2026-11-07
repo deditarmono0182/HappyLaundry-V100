@@ -1,0 +1,11 @@
+HappyLaundry V113.0.175 — Satu Lonceng Pemberitahuan
+
+Satu ikon lonceng dengan total pemberitahuan belum dibaca. Klik untuk melihat tambahan kasbon, koreksi kasbon dan permintaan penghapusan yang diurutkan dari terbaru, dengan jenis, nama, waktu dan status. Klik item membuka permintaan terkait. Permintaan penghapusan hanya terlihat oleh Owner. Hak akses lama tetap berlaku.
+
+Klik item atau Tandai dibaca mengurangi angka lonceng, bukan menyetujui permintaan. Catatan sudah dibaca disimpan per akun di browser/perangkat ini; perangkat lain bisa memiliki angka berbeda. Permintaan pending tetap terlihat walaupun sudah dibaca.
+
+Pengaturan bunyi berada di dalam daftar lonceng. Tekan ikon suara sekali untuk mengaktifkan nada selama sesi aplikasi terbuka. Bukan push saat aplikasi ditutup. Browser HP dapat menangguhkan audio di latar belakang; bila perlu aktifkan lagi. Pembaruan diperiksa setiap 30 detik dan saat kembali ke aplikasi.
+
+Ekstrak ZIP ke repository, Commit dan Push, tunggu deployment selesai, muat ulang dan pastikan versi V113.0.175. Tidak perlu SQL baru bila SQL 089 sudah terpasang.
+
+Validasi: build produksi dan pengujian komponen dengan data contoh: satu lonceng, jumlah gabungan, tiga jenis, urutan terbaru, tautan penghapusan, dibaca per item/semua. Audio HP fisik belum diuji.

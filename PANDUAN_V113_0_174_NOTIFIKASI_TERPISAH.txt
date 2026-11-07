@@ -1,0 +1,9 @@
+HappyLaundry V113.0.174 — Pemberitahuan terpisah
+
+Tambahan Kasbon, Koreksi Kasbon dan Permintaan Penghapusan memiliki tombol serta jumlah masing-masing di header. Klik tombol untuk membuka jenis permintaan terkait. Penghapusan tetap khusus Owner; akses kasbon tetap mengikuti akses keuangan.
+
+Tekan ikon suara untuk mengaktifkan bunyi (terdengar contoh nada). Bunyi aktif selama sesi aplikasi terbuka, bukan push saat aplikasi ditutup. Browser bisa menangguhkan audio ketika aplikasi masuk latar belakang; tekan ikon suara lagi bila diperlukan. Kasbon diperiksa setiap 30 detik dan saat aplikasi difokuskan. Daftar lama saat pertama masuk tidak dibunyikan ulang.
+
+Ekstrak isi ZIP ke repository, Commit dan Push, tunggu deployment selesai. Pastikan menu menampilkan V113.0.174. Tidak ada SQL baru; notifikasi kasbon memerlukan SQL 089 yang sudah tersedia sebelumnya.
+
+Validasi: build produksi berhasil. Perangkat printer dan audio HP fisik belum diuji.
