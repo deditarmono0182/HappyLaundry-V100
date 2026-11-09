@@ -307,13 +307,3 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
 .notice-kind{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cash-notice-item.notice-unread{background:#eaf4ff;border-color:#8cbfec}
 .cash-notice-error{position:absolute;left:-4px;top:-4px;background:#a92d40;color:white;border-radius:10px;padding:0 5px;font-size:12px}
-
-/* V113.0.176: iPhone/iPad Safari memperbesar halaman otomatis saat kolom isian berfont <16px.
-   Hanya aktif di iOS dan layar kecil; Android dan desktop tidak berubah. */
-@supports (-webkit-touch-callout:none){
-  @media(max-width:820px){
-    input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]),
-    select,
-    textarea{font-size:16px!important}
-  }
-}
