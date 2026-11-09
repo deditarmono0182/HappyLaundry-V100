@@ -6,6 +6,7 @@ import {
 import { PageHeader } from '../components/PageHeader'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
+import { businessDateKey } from '../lib/businessTime'
 
 interface SafetySnapshot {
   id:number
@@ -179,7 +180,7 @@ export function BackupPage(){
     const url=URL.createObjectURL(blob)
     const anchor=document.createElement('a')
     anchor.href=url
-    anchor.download=`happylaundry-backup-${new Date().toISOString().slice(0,10)}.json`
+    anchor.download=`happylaundry-backup-${businessDateKey()}.json`
     anchor.click();URL.revokeObjectURL(url)
     setSuccess('Backup berhasil diunduh. Simpan file di Google Drive atau flashdisk.')
     setBusy(false)

@@ -36,6 +36,7 @@ import {zeroCommissionWarnings,confirmZeroCommission,type CommissionRate} from '
 import { ownerDeleteDirect, removeDeleteFiles, requestDelete } from '../lib/deleteApproval'
 import type { Customer, Service } from '../types/master'
 import type { OrderItemDraft, OrderRow, OrderStatus } from '../types/order'
+import { businessDateKey } from '../lib/businessTime'
 
 const emptyOrder = {
   customer_id: '',
@@ -734,7 +735,7 @@ export function OrdersPage() {
 
   const orderExport=(exportRows:OrderRow[],label:string,exportItems?:Map<string,OrderServiceItem[]>)=>({
     title:'Data Order Laundry',
-    filename:`order-laundry-${new Date().toISOString().slice(0,10)}-${label.toLowerCase().replace(/\s+/g,'-')}`,
+    filename:`order-laundry-${businessDateKey()}-${label.toLowerCase().replace(/\s+/g,'-')}`,
     subtitle:`${label} • ${new Date().toLocaleString('id-ID')}`,
     headers:[
       'No. Order','Pelanggan','Telepon','Layanan',

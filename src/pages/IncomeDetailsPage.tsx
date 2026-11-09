@@ -6,6 +6,7 @@ import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
 import { supabase } from '../lib/supabase'
+import { businessDateKey, businessMonthStartKey } from '../lib/businessTime'
 
 interface PaymentRow{
   id:string
@@ -28,11 +29,8 @@ export function IncomeDetailsPage(){
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [orders,setOrders]=useState<OrderRowLite[]>([])
   const [query,setQuery]=useState('')
-  const [from,setFrom]=useState(()=>{
-    const d=new Date()
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`
-  })
-  const [to,setTo]=useState(()=>new Date().toISOString().slice(0,10))
+  const [from,setFrom]=useState(()=>businessMonthStartKey())
+  const [to,setTo]=useState(()=>businessDateKey())
   const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
 

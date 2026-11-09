@@ -1,4 +1,4 @@
-const CACHE_NAME='happylaundry-v113-0-76';
+const CACHE_NAME='happylaundry-v113-0-176';
 const APP_SHELL=['/','/index.html','/manifest.webmanifest','/favicon.png','/icon-192.png','/icon-512.png','/logo-happylaundry.jpg'];
 
 self.addEventListener('install',event=>{
@@ -28,7 +28,7 @@ self.addEventListener('fetch',event=>{
           }
           return response;
         })
-        .catch(()=>request.mode==='navigate'?caches.match('/index.html'):caches.match(request))
+        .catch(()=>(request.mode==='navigate'?caches.match('/index.html'):caches.match(request)).then(hit=>hit||Response.error()))
     );
     return;
   }
@@ -40,6 +40,6 @@ self.addEventListener('fetch',event=>{
         caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));
       }
       return response;
-    }))
+    }).catch(()=>Response.error()))
   );
 });
