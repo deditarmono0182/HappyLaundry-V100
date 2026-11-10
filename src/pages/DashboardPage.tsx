@@ -478,11 +478,12 @@ export function DashboardPage() {
           :'Tidak ada masalah operasional yang terdeteksi saat ini'}</small>
       </span>
       <span className="dashboard-attention-summary">
+        <span><WalletCards size={13}/> Piutang <b>{attention.unpaidRows.length}</b></span>
         <span><AlertTriangle size={13}/> Terlambat <b>{attention.overdueRows.length}</b></span>
         <span><UserRoundX size={13}/> Penugasan <b>{attention.missingWorkerRows.length+attention.missingCourierRows.length}</b></span>
         <span><Clock3 size={13}/> Siap lama <b>{attention.readyLongRows.length}</b></span>
       </span>
-      <span className="dashboard-attention-total">{attention.issueCount>99?'99+':attention.issueCount}</span>
+      <span className="dashboard-attention-total" title="Total peringatan: piutang, terlambat, siap lama, penugasan, tanpa tenggat, dan persetujuan hapus">{attention.issueCount>99?'99+':attention.issueCount}</span>
     </button>}
 
     <section className="panel dashboard-display-customizer">
