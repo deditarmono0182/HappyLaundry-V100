@@ -61,6 +61,7 @@ export function DashboardPage() {
   const [progressEvents,setProgressEvents]=useState<DashboardProgressEvent[]>([])
   const [assignments,setAssignments]=useState<DashboardAssignment[]>([])
   const [attentionOpen,setAttentionOpen]=useState(false)
+  const [displayOpen,setDisplayOpen]=useState(false)
   const [message,setMessage]=useState('')
   const [pendingDeletes,setPendingDeletes]=useState(0)
   const [revenuePeriod,setRevenuePeriod]=useState<DashboardPeriod>('7d')
@@ -478,15 +479,25 @@ export function DashboardPage() {
           :'Tidak ada masalah operasional yang terdeteksi saat ini'}</small>
       </span>
       <span className="dashboard-attention-summary">
-        <span><WalletCards size={13}/> Piutang <b>{attention.unpaidRows.length}</b></span>
-        <span><AlertTriangle size={13}/> Terlambat <b>{attention.overdueRows.length}</b></span>
-        <span><UserRoundX size={13}/> Penugasan <b>{attention.missingWorkerRows.length+attention.missingCourierRows.length}</b></span>
-        <span><Clock3 size={13}/> Siap lama <b>{attention.readyLongRows.length}</b></span>
+        <span className="att-debt"><WalletCards size={13}/> Piutang <b>{attention.unpaidRows.length}</b></span>
+        <span className="att-late"><AlertTriangle size={13}/> Terlambat <b>{attention.overdueRows.length}</b></span>
+        <span className="att-assign"><UserRoundX size={13}/> Penugasan <b>{attention.missingWorkerRows.length+attention.missingCourierRows.length}</b></span>
+        <span className="att-ready"><Clock3 size={13}/> Siap lama <b>{attention.readyLongRows.length}</b></span>
       </span>
       <span className="dashboard-attention-total" title="Total peringatan: piutang, terlambat, siap lama, penugasan, tanpa tenggat, dan persetujuan hapus">{attention.issueCount>99?'99+':attention.issueCount}</span>
     </button>}
 
-    <section className="panel dashboard-display-customizer">
+    {!displayOpen&&<section className="panel dashboard-display-customizer is-collapsed">
+      <div className="dashboard-display-title">
+        <div className="dashboard-display-icon"><MonitorCog size={20}/></div>
+        <div>
+          <b>Tampilan Aplikasi: {density==='comfort'?'Comfort':density==='ultra'?'Ultra Compact':'Compact'}</b>
+        </div>
+      </div>
+      <button type="button" className="dashboard-display-toggle" aria-expanded={false} onClick={()=>setDisplayOpen(true)}>Ubah</button>
+    </section>}
+
+    {displayOpen&&<section className="panel dashboard-display-customizer">
       <div className="dashboard-display-title">
         <div className="dashboard-display-icon"><MonitorCog size={20}/></div>
         <div>
@@ -506,7 +517,8 @@ export function DashboardPage() {
         </button>
       </div>
       <small className="dashboard-display-device-note">Pengaturan tersimpan di perangkat/browser ini dan tidak mengubah tampilan pengguna lain.</small>
-    </section>
+      <button type="button" className="dashboard-display-toggle is-close" aria-expanded={true} onClick={()=>setDisplayOpen(false)}>Sembunyikan</button>
+    </section>}
     <section className="stats-grid dashboard-stats">
       <StatCard label="Omzet / Barang Masuk Hari Ini" value={formatIDR(omzet)} caption={`Kas masuk ${formatIDR(cashIn)}`} icon={Banknote}/>
       <StatCard label="Order Hari Ini" value={String(today.length)} caption="Order masuk hari ini" icon={ShoppingBag}/>

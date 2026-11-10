@@ -307,3 +307,18 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
 .notice-kind{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cash-notice-item.notice-unread{background:#eaf4ff;border-color:#8cbfec}
 .cash-notice-error{position:absolute;left:-4px;top:-4px;background:#a92d40;color:white;border-radius:10px;padding:0 5px;font-size:12px}
+
+/* V113.0.176: Dashboard - panel Tampilan ringkas + chip peringatan berwarna per kategori */
+.dashboard-display-toggle{min-height:44px;padding:0 16px;border:1px solid #b7d5df;border-radius:12px;background:#fff;color:#0f4c8a;font:inherit;font-weight:700;cursor:pointer}
+.dashboard-display-toggle:hover{background:#eef6fc}
+.dashboard-display-toggle.is-close{grid-column:1/-1;justify-self:end}
+.dashboard-display-customizer.is-collapsed{align-items:center}
+.dashboard-attention-center .dashboard-attention-summary>span.att-debt{background:#fde2e4;border-color:#f4cfd3;color:#a11d2b}
+.dashboard-attention-center .dashboard-attention-summary>span.att-late{background:#fdebd0;border-color:#f3d9a8;color:#8a4a00}
+.dashboard-attention-center .dashboard-attention-summary>span.att-ready{background:#def5e8;border-color:#c9ead6;color:#12633a}
+.dashboard-attention-center .dashboard-attention-summary>span.att-assign{background:#e9eef1;border-color:#d5dee3;color:#35505c}
+.dashboard-attention-center .dashboard-attention-summary>span.att-debt b,
+.dashboard-attention-center .dashboard-attention-summary>span.att-late b,
+.dashboard-attention-center .dashboard-attention-summary>span.att-ready b,
+.dashboard-attention-center .dashboard-attention-summary>span.att-assign b{color:inherit}
+
