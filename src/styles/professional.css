@@ -443,7 +443,6 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
 @media(max-width:700px){
   html[data-ui="professional"] body .app-shell .page-heading-right:has(.production-tools){
     flex-direction:column;align-items:stretch;width:100%}
-  html[data-ui="professional"] body .app-shell .page-heading-right:has(.production-tools) .page-back-button{display:none}
   html[data-ui="professional"] body .app-shell .page-heading-action:has(.production-tools){width:100%}
   html[data-ui="professional"] body .app-shell .production-tools{
     display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important;width:100%}
@@ -461,5 +460,13 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
   html[data-ui="professional"] body .app-shell .production-tabs button{flex:1 1 auto;padding:0 8px;gap:4px}
   html[data-ui="professional"] body .app-shell .production-tabs button span{padding:1px 6px}
   html[data-ui="professional"] body .app-shell .production-cards{padding:0!important;margin:0!important}
+}
+
+/* V113.0.182: tombol kembali di pojok kanan atas judul (HP/tablet, semua halaman) */
+@media(max-width:900px){
+  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back{position:relative}
+  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back .page-heading-copy{padding-right:56px}
+  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back .page-back-button{
+    position:absolute!important;top:0;right:0;margin:0!important;z-index:2}
 }
 
