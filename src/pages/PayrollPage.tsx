@@ -186,6 +186,7 @@ export function PayrollPage(){
   const[detailEmployee,setDetailEmployee]=useState<Employee|null>(null)
   const[expandedPayroll,setExpandedPayroll]=useState<Record<string,boolean>>({})
   const[actionEmployee,setActionEmployee]=useState<Employee|null>(null)
+  const[selectedCashAdvanceId,setSelectedCashAdvanceId]=useState<string|null>(null)
   const payrollOpenedRef=useRef<string|null>(null)
   const togglePayrollRow=(id:string)=>{
     const opening=!expandedPayroll[id]
@@ -1040,6 +1041,7 @@ export function PayrollPage(){
       const row=payrollRows.find(item=>item.employee.id===detailEmployee.id)
       const details=row?.commissionDetails||[]
       const cashHistory=cashAdvances.filter(item=>item.employee_id===detailEmployee.id)
+      const selectedKas=cashHistory.find((item:typeof cashHistory[number])=>item.id===selectedCashAdvanceId&&!item.cancelled_at)
       return <Modal title={`Detail Gaji & Komisi — ${detailEmployee.full_name}`} onClose={()=>setDetailEmployee(null)}>
         <div className="payroll-detail-summary">
           <div><span>Uang Kehadiran ({row?.presentDays||0} hari)</span><b>{formatRupiah(row?.attendancePay||0)}</b></div>
@@ -1059,48 +1061,31 @@ export function PayrollPage(){
           <div><span>Sudah Dibayar</span><b>{formatRupiah(row?.paidAmount||0)}</b></div>
           <div><span>Sisa Gaji</span><b>{formatRupiah(row?.outstanding||0)}</b></div>
         </div>
-        <div className="payroll-detail-head">
-          <b>Sumber Komisi dari Order</b>
-          <small>Gunakan rincian ini untuk pengecekan jika ada komplain pekerjaan atau komisi karyawan.</small>
-        </div>
-        <div className="table-wrap payroll-commission-detail-wrap">
-          <table className="payroll-commission-detail pl-list pl-list-komisi">
-            <thead><tr><th>Order</th><th>Peran</th><th>Nilai Order</th><th>%</th><th>Komisi</th><th>Tanggal Hak</th></tr></thead>
-            <tbody>
-              {details.map((item,index)=><tr key={`${item.order_id}-${item.commission_type}-${index}`}>
-                <td><b>{item.order_no}</b></td>
-                <td data-label="Peran">{item.commission_type==='production'?'Produksi':'Kurir'}</td>
-                <td data-label="Nilai order">{formatRupiah(Number(item.base_amount||0))}</td>
-                <td data-label="Persen">{Number(item.percent||0).toFixed(2)}%</td>
-                <td><b>{formatRupiah(Number(item.amount||0))}</b></td>
-                <td data-label="Tanggal hak">{new Date(item.earned_at).toLocaleString('id-ID')}</td>
-              </tr>)}
-              {details.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada komisi order pada periode ini.</td></tr>}
-            </tbody>
-          </table>
-        </div>
         <div className="payroll-detail-head payroll-payment-history-head">
           <b>Riwayat Kas Bon</b>
           <small>Kas bon yang belum habis dipotong akan tersimpan sebagai saldo untuk periode berikutnya.</small>
         </div>
         <div className="table-wrap payroll-payment-history-wrap">
           <table className="payroll-commission-detail pl-list pl-list-kasbon">
-            <thead><tr><th>Tanggal</th><th>Nominal</th><th>Sisa</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Tanggal</th><th>Nominal</th><th>Sisa</th><th>Status</th><th>Keterangan</th></tr></thead>
             <tbody>
-              {cashHistory.map(item=><tr key={item.id} className={item.cancelled_at?'cash-advance-cancelled':''}>
-                <td data-label="Tanggal">{new Date(item.issued_at).toLocaleString('id-ID')}</td>
+              {cashHistory.map(item=><tr key={item.id} className={`${item.cancelled_at?'cash-advance-cancelled':'pl-selectable'} ${selectedCashAdvanceId===item.id&&!item.cancelled_at?'is-selected':''}`} tabIndex={item.cancelled_at?undefined:0} aria-selected={item.cancelled_at?undefined:selectedCashAdvanceId===item.id} onClick={()=>{if(!item.cancelled_at)setSelectedCashAdvanceId(item.id)}} onKeyDown={(e:{key:string;preventDefault:()=>void})=>{if(!item.cancelled_at&&(e.key==='Enter'||e.key===' ')){e.preventDefault();setSelectedCashAdvanceId(item.id)}}}>
+                <td data-label="Tanggal">{!item.cancelled_at&&<span className="pl-radio" aria-hidden="true"/>}{new Date(item.issued_at).toLocaleString('id-ID')}</td>
                 <td data-label="Nominal"><b>{formatRupiah(Number(item.amount||0))}</b></td>
                 <td data-label="Sisa">{item.cancelled_at?'-':formatRupiah(Number(item.remaining_amount||0))}</td>
                 <td data-label="Status"><span className={`cash-advance-status ${item.cancelled_at?'cancelled':'active'}`}>{item.cancelled_at?'Dibatalkan':'Aktif'}</span></td>
                 <td data-label="Keterangan" className="pl-note-cell">{item.cancelled_at?`Batal: ${item.cancel_reason||'-'}`:(item.note||'-')}</td>
-                <td>{!item.cancelled_at&&<div className="cash-advance-history-actions">
-                  <button className="finance-row-action" onClick={()=>openCorrectCashAdvance(item)}><Pencil size={14}/>Koreksi</button>
-                  <button className="finance-row-action danger-soft" onClick={()=>{setCancelCashAdvance(item);setCancelCashAdvanceReason('')}}><Trash2 size={14}/>Batalkan</button>
-                </div>}</td>
               </tr>)}
-              {cashHistory.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada kas bon.</td></tr>}
+              {cashHistory.length===0&&<tr><td colSpan={5} className="table-empty">Belum ada kas bon.</td></tr>}
             </tbody>
           </table>
+        </div>
+        <div className="cash-advance-action-bar" role="group" aria-label="Aksi kasbon terpilih">
+          <span className="cash-advance-action-info">{selectedKas?<>Dipilih: <b>{new Date(selectedKas.issued_at).toLocaleString('id-ID')}</b> • {formatRupiah(Number(selectedKas.amount||0))}</>:'Pilih salah satu kasbon di atas untuk dikoreksi atau dibatalkan.'}</span>
+          <span className="cash-advance-action-buttons">
+            <button type="button" className="finance-row-action" disabled={!selectedKas} onClick={()=>selectedKas&&openCorrectCashAdvance(selectedKas)}><Pencil size={14}/>Koreksi</button>
+            <button type="button" className="finance-row-action danger-soft" disabled={!selectedKas} onClick={()=>{if(selectedKas){setCancelCashAdvance(selectedKas);setCancelCashAdvanceReason('')}}}><Trash2 size={14}/>Batalkan</button>
+          </span>
         </div>
         <div className="payroll-detail-head payroll-payment-history-head">
           <b>Riwayat Pembayaran Gaji</b>
@@ -1121,6 +1106,26 @@ export function PayrollPage(){
           </table>
         </div>
         <PayrollPaymentCancellation employee={detailEmployee} month={month} payments={row?.paymentHistory||[]} isOwner={isOwner} onChanged={load}/>
+        <div className="payroll-detail-head">
+          <b>Sumber Komisi dari Order</b>
+          <small>Gunakan rincian ini untuk pengecekan jika ada komplain pekerjaan atau komisi karyawan.</small>
+        </div>
+        <div className="table-wrap payroll-commission-detail-wrap">
+          <table className="payroll-commission-detail pl-list pl-list-komisi">
+            <thead><tr><th>Order</th><th>Peran</th><th>Nilai Order</th><th>%</th><th>Komisi</th><th>Tanggal Hak</th></tr></thead>
+            <tbody>
+              {details.map((item,index)=><tr key={`${item.order_id}-${item.commission_type}-${index}`}>
+                <td><b>{item.order_no}</b></td>
+                <td data-label="Peran">{item.commission_type==='production'?'Produksi':'Kurir'}</td>
+                <td data-label="Nilai order">{formatRupiah(Number(item.base_amount||0))}</td>
+                <td data-label="Persen">{Number(item.percent||0).toFixed(2)}%</td>
+                <td><b>{formatRupiah(Number(item.amount||0))}</b></td>
+                <td data-label="Tanggal hak">{new Date(item.earned_at).toLocaleString('id-ID')}</td>
+              </tr>)}
+              {details.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada komisi order pada periode ini.</td></tr>}
+            </tbody>
+          </table>
+        </div>
         <div className="modal-actions">
           <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee,true)}><ReceiptText size={16}/>Potongan Kasbon</button>
           {(row?.outstanding||0)>0&&<button className="primary-button" onClick={()=>{setDetailEmployee(null);openPayrollPayment(detailEmployee)}}><HandCoins size={16}/>Catat Pembayaran</button>}
