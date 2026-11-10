@@ -497,3 +497,12 @@ html[data-ui="professional"] body .app-shell .owner-payment-breakdown>div>b{
   html[data-ui="professional"] body .app-shell .owner-business-kpis>button>strong{font-size:18px!important}
 }
 
+/* V113.0.184: angka kartu atas Dashboard disamakan dengan kartu Owner (20px) */
+@media(min-width:601px){
+  html[data-ui="professional"] body .app-shell .main-content .dashboard-stats .stat-card strong,
+  html[data-ui="professional"] body .app-shell .main-content .dashboard-stats .stat-card .dashboard-money-value{
+    font-size:20px!important;font-weight:700!important;line-height:1.2!important}
+  html[data-ui="professional"] body .app-shell .main-content .dashboard-stats .stat-card span{
+    font-size:14px!important;font-weight:500!important}
+}
+
