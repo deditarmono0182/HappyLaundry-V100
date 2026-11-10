@@ -8,10 +8,10 @@ import {loadManagerReport,type ManagerReport} from '../lib/managerShare'
 import {buildPayrollExport} from '../lib/payrollExport'
 import {CashAdvanceWarning} from '../components/CashAdvanceWarning'
 import {cashAdvanceBlocked,useCashAdvanceLimit} from '../lib/cashAdvanceLimit'
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  CalendarCheck2, CheckCircle2, FileSpreadsheet, FileText, Gift,
-  HandCoins, Pencil, Plus, ReceiptText, Save, Search, Settings2, Trash2, UsersRound, WalletCards
+  CalendarCheck2, CheckCircle2, ChevronDown, ChevronUp, FileSpreadsheet, FileText, Gift,
+  HandCoins, MoreHorizontal, Pencil, Plus, ReceiptText, Save, Search, Settings2, Trash2, UsersRound, WalletCards
 } from 'lucide-react'
 import { Modal } from '../components/Modal'
 import {AttendanceHistoryModal} from '../components/AttendanceHistoryModal'
@@ -184,6 +184,8 @@ export function PayrollPage(){
   const[busy,setBusy]=useState(false)
   const[settingsEmployee,setSettingsEmployee]=useState<Employee|null>(null)
   const[detailEmployee,setDetailEmployee]=useState<Employee|null>(null)
+  const[expandedPayroll,setExpandedPayroll]=useState<Record<string,boolean>>({})
+  const[actionEmployee,setActionEmployee]=useState<Employee|null>(null)
   const[attendanceHistoryEmployee,setAttendanceHistoryEmployee]=useState<Employee|null>(null)
   const[paymentEmployee,setPaymentEmployee]=useState<Employee|null>(null)
   const[cashAdvanceEmployee,setCashAdvanceEmployee]=useState<Employee|null>(null)
@@ -928,58 +930,76 @@ export function PayrollPage(){
         </div>
         <div className="info-box">Komisi kurir periode ini: <b>{courierUniqueOrderCount} nota unik</b> • <b>{activeCourierEntries.length} hak komisi kurir aktif</b>. Satu nota tim dapat memiliki beberapa penerima. Nota tanpa pembayaran lunas atau bukti antar tetap dihitung setelah kurir ditetapkan.</div>
         <div className="table-wrap payroll-list-scroll">
-          <table className="payroll-table">
+          <table className="payroll-table payroll-table-compact">
             <thead><tr>
-              <th>Karyawan</th><th>Hadir</th><th>Tarif/Hari</th><th>Uang Hadir</th>
-              <th>Tunjangan</th><th>Bonus</th><th>Bagi Hasil Kategori</th><th>Komisi Order</th><th>Bagi Hasil Pengelola</th><th>Gaji Kotor</th><th>Kas Bon</th><th>Saldo Setelah Kasbon (Simulasi)</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
+              <th>Karyawan</th><th>Hadir</th><th>Gaji Kotor</th><th>Kas Bon</th><th>Dibayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
             </tr></thead>
             <tbody>
-              {filteredPayroll.map(r=><tr key={r.employee.id}>
-                <td><b>{r.employee.full_name}</b><small>{r.employee.login_id}</small></td>
-                <td><b>{r.presentDays}</b><small>Izin {r.permissionDays} • Sakit {r.sickDays} • Alpha {r.absentDays}</small></td>
-                <td>{formatRupiah(r.attendanceRate)}</td>
-                <td><b>{formatRupiah(r.attendancePay)}</b></td>
-                <td>{formatRupiah(r.allowance)}</td>
-                <td><input className="payroll-bonus-input" type="number" min="0" value={bonusDraft[r.employee.id]??String(r.bonus)} onChange={e=>setBonusDraft({...bonusDraft,[r.employee.id]:e.target.value})}/></td>
-                <td>
-                  <b>{formatRupiah(r.revenueShare)}</b>
-                  {r.shareDetails.length
-                    ? <div className="payroll-share-lines">
-                        {r.shareDetails.map(item=><small key={item.category}>
-                          {item.category}: {item.percent.toFixed(2)}% × {formatRupiah(item.baseRevenue)} = {formatRupiah(item.amount)}
-                        </small>)}
+              {filteredPayroll.map(r=>{
+                const isOpen=!!expandedPayroll[r.employee.id]
+                return <Fragment key={r.employee.id}>
+                <tr className={`payroll-main-row ${isOpen?'is-open':''}`}>
+                  <td className="pr-name"><b>{r.employee.full_name}</b><small>{r.employee.login_id}</small></td>
+                  <td className="pr-hadir"><b>{r.presentDays} hari</b><small>I{r.permissionDays} · S{r.sickDays} · A{r.absentDays}</small></td>
+                  <td className="pr-gross"><span className="pr-label">Gaji kotor</span><b>{formatRupiah(r.grossTotal)}</b>
+                    <button type="button" className="payroll-expand-button" aria-expanded={isOpen} onClick={()=>setExpandedPayroll({...expandedPayroll,[r.employee.id]:!isOpen})}>{isOpen?'Sembunyikan':'Rincian'}{isOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button></td>
+                  <td className="pr-kas"><span className="pr-label">Kas bon</span><b>Sisa {formatRupiah(r.cashAdvanceOutstanding)}</b><small>Potongan periode ini: − {formatRupiah(r.cashAdvanceApplied)}</small><small className={r.payrollBalance<0?'payroll-negative':''}>Saldo setelah kasbon: {formatRupiah(r.payrollBalance)}</small></td>
+                  <td className="pr-paid"><span className="pr-label">Dibayar</span><b>{formatRupiah(r.paidAmount)}</b></td>
+                  <td className="pr-sisa"><span className="pr-label">Sisa dibayar</span><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
+                  <td className="pr-status"><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
+                  <td className="pr-actions">
+                    <div className="payroll-row-actions payroll-row-actions-compact">
+                      <button type="button" className="payroll-expand-toggle" aria-expanded={isOpen} onClick={()=>setExpandedPayroll({...expandedPayroll,[r.employee.id]:!isOpen})}>{isOpen?'Sembunyikan':'Rincian'}{isOpen?<ChevronUp size={15}/>:<ChevronDown size={15}/>}</button>
+                      {r.outstanding>0
+                        ? <button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>
+                        : <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>}
+                      <button type="button" className="finance-row-action payroll-more-button" aria-label={`Aksi lain untuk ${r.employee.full_name}`} title="Aksi lain" onClick={()=>setActionEmployee(r.employee)}><MoreHorizontal size={18}/></button>
+                    </div>
+                  </td>
+                </tr>
+                {isOpen&&<tr className="payroll-detail-row">
+                  <td colSpan={8}>
+                    <div className="payroll-detail-grid">
+                      <div><span>Tarif / hari</span><b>{formatRupiah(r.attendanceRate)}</b></div>
+                      <div><span>Uang hadir</span><b>{formatRupiah(r.attendancePay)}</b></div>
+                      <div><span>Tunjangan</span><b>{formatRupiah(r.allowance)}</b></div>
+                      <div><span>Bonus</span><input className="payroll-bonus-input" type="number" min="0" value={bonusDraft[r.employee.id]??String(r.bonus)} onChange={e=>setBonusDraft({...bonusDraft,[r.employee.id]:e.target.value})}/></div>
+                      <div>
+                        <span>Bagi hasil kategori</span><b>{formatRupiah(r.revenueShare)}</b>
+                        {r.shareDetails.length
+                          ? <div className="payroll-share-lines">
+                              {r.shareDetails.map(item=><small key={item.category}>
+                                {item.category}: {item.percent.toFixed(2)}% × {formatRupiah(item.baseRevenue)} = {formatRupiah(item.amount)}
+                              </small>)}
+                            </div>
+                          : <small>Belum ada kategori bagi hasil</small>}
                       </div>
-                    : <small>Belum ada kategori bagi hasil</small>}
-                </td>
-                <td>
-                  <b>{formatRupiah(r.orderCommission)}</b>
-                  <div className="payroll-share-lines">
-                    <small>Produksi: {formatRupiah(r.productionCommission)}</small>
-                    <small>Kurir: {formatRupiah(r.courierCommission)}</small>
-                    <small>{r.courierOrderCount} nota kurir • {r.commissionOrderCount} nota komisi total</small>
-                  </div>
-                </td>
-                <td><b>{formatRupiah(r.managerShare)}</b><small>{r.managerPercent}% × {formatRupiah(Math.max(0,r.managerBase))}</small></td>
-                <td><b>{formatRupiah(r.grossTotal)}</b></td>
-                <td><b className="payroll-deduction">Potongan: − {formatRupiah(r.cashAdvanceApplied)}</b><small>Sisa kasbon: {formatRupiah(r.cashAdvanceOutstanding)}</small></td>
-                <td><b className={`payroll-total ${r.payrollBalance<0?'negative':''}`}>{formatRupiah(r.payrollBalance)}</b></td>
-                <td><b>{formatRupiah(r.paidAmount)}</b></td>
-                <td><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
-                <td><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span>{r.payrollBalance<0&&<small className="payroll-negative">Simulasi saldo setelah seluruh kasbon: minus</small>}</td>
-                <td>
-                  <div className="payroll-row-actions">
-                    <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>
-                    <button className="finance-row-action cash-advance-button" onClick={()=>openCashAdvance(r.employee)}><HandCoins size={15}/>Kas Bon</button>
-                    {r.outstanding>0&&<button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>}
-                    <button className="finance-row-action" onClick={()=>openDeductionCorrection(r.employee,true)}><ReceiptText size={15}/>Potongan Kasbon</button>
-                    <button className="finance-row-action" onClick={()=>openSettings(r.employee)}><Settings2 size={15}/>Atur</button>
-                  </div>
-                </td>
-              </tr>)}
-              {filteredPayroll.length===0&&<tr><td colSpan={16} className="table-empty">Belum ada karyawan aktif.</td></tr>}
+                      <div>
+                        <span>Komisi order</span><b>{formatRupiah(r.orderCommission)}</b>
+                        <div className="payroll-share-lines">
+                          <small>Produksi: {formatRupiah(r.productionCommission)}</small>
+                          <small>Kurir: {formatRupiah(r.courierCommission)}</small>
+                          <small>{r.courierOrderCount} nota kurir • {r.commissionOrderCount} nota komisi total</small>
+                        </div>
+                      </div>
+                      <div><span>Bagi hasil pengelola</span><b>{formatRupiah(r.managerShare)}</b><small>{r.managerPercent}% × {formatRupiah(Math.max(0,r.managerBase))}</small></div>
+                    </div>
+                  </td>
+                </tr>}
+                </Fragment>
+              })}
+              {filteredPayroll.length===0&&<tr><td colSpan={8} className="table-empty">Belum ada karyawan aktif.</td></tr>}
             </tbody>
           </table>
         </div>
+        {actionEmployee&&<Modal title={`Aksi — ${actionEmployee.full_name}`} onClose={()=>setActionEmployee(null)}>
+          <div className="payroll-action-menu">
+            <button type="button" className="finance-row-action" onClick={()=>{const e=actionEmployee;setActionEmployee(null);setDetailEmployee(e)}}><ReceiptText size={16}/>Detail</button>
+            <button type="button" className="finance-row-action cash-advance-button" onClick={()=>{const e=actionEmployee;setActionEmployee(null);openCashAdvance(e)}}><HandCoins size={16}/>Kas Bon</button>
+            <button type="button" className="finance-row-action" onClick={()=>{const e=actionEmployee;setActionEmployee(null);openDeductionCorrection(e,true)}}><ReceiptText size={16}/>Potongan Kasbon</button>
+            <button type="button" className="finance-row-action" onClick={()=>{const e=actionEmployee;setActionEmployee(null);openSettings(e)}}><Settings2 size={16}/>Atur</button>
+          </div>
+        </Modal>}
       </section>
       </>}
     </>}

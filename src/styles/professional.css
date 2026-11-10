@@ -506,3 +506,55 @@ html[data-ui="professional"] body .app-shell .owner-payment-breakdown>div>b{
     font-size:14px!important;font-weight:500!important}
 }
 
+/* V113.0.185: Daftar Gaji - satu baris per karyawan, rincian dilipat, kartu di HP */
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact{min-width:0!important;width:100%;font-size:13px!important;table-layout:auto}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact th{font-size:11.5px!important;letter-spacing:.03em;padding:10px 12px!important}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact td{padding:12px!important;vertical-align:middle;font-size:13px!important}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact td small{display:block;font-size:11.5px!important;color:#6b8592;margin-top:2px;white-space:normal}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact td b{font-size:13.5px!important}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-name b{white-space:nowrap}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-hadir{white-space:nowrap}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-gross b,html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-sisa b{font-size:15px!important;font-weight:700}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-label{display:none}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-negative{color:#b91c1c!important;font-weight:600}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-expand-button{display:inline-flex;align-items:center;gap:2px;margin-top:2px;padding:0;border:0;background:transparent;color:#1565a8;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-expand-toggle{display:none}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-row-actions-compact{display:flex;flex-wrap:nowrap;gap:8px;justify-content:flex-end;align-items:center;min-width:0!important}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-row-actions-compact .finance-row-action{white-space:nowrap;min-height:36px;font-size:13px!important;padding:0 14px!important}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-more-button{width:36px;padding:0!important;display:inline-flex;align-items:center;justify-content:center}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-row>td{background:#f6fafc;padding:14px 18px!important}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-grid>div>span{display:block;font-size:12px;color:#6b8592;margin-bottom:2px}
+html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-grid .payroll-bonus-input{width:120px;height:34px}
+html[data-ui="professional"] body .app-shell .payroll-action-menu{display:grid;gap:10px}
+html[data-ui="professional"] body .app-shell .payroll-action-menu .finance-row-action{min-height:46px;justify-content:flex-start;gap:10px;font-size:15px!important;padding:0 16px!important}
+
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll{max-height:none!important;min-height:0!important;border:0!important;overflow:visible!important}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact, html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact tbody{display:block;width:100%}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact thead{display:none}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact tr.payroll-main-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;margin:0 0 12px;border:1px solid #cfe3f7;border-radius:16px;background:#fff}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact tr.payroll-main-row>td{display:block;padding:0!important;border:0!important;min-width:0}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-name{grid-column:1/-1;grid-row:1}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-name b{font-size:16px!important}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-hadir{grid-column:1;grid-row:2;white-space:normal}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-status{grid-column:2;grid-row:2;text-align:right}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-gross,html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-sisa{padding:10px 12px!important;border-radius:12px}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-gross{grid-column:1;grid-row:3;background:#eef6fd}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-sisa{grid-column:2;grid-row:3;background:#f2f8f4}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-gross b,html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-sisa b{font-size:18px!important}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-label{display:block;font-size:12px;color:#4f6b78;font-weight:500}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-kas{grid-column:1/-1;grid-row:4}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-kas .pr-label,html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-paid .pr-label{display:inline;margin-right:6px}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-paid{grid-column:1/-1;grid-row:5}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-actions{grid-column:1/-1;grid-row:6}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-expand-button{display:none}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-expand-toggle{display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1;min-height:44px;border:1px solid #cfe0ea;border-radius:12px;background:#fff;color:#1565a8;font:inherit;font-size:13px;font-weight:700}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-row-actions-compact{display:flex;gap:8px;width:100%}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-row-actions-compact .finance-row-action{flex:1.2;min-height:44px;justify-content:center}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-more-button{flex:none!important;width:44px}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact tr.payroll-detail-row{display:block;margin:-6px 0 12px;border:1px solid #dbe8ef;border-radius:12px;background:#f6fafc}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact tr.payroll-detail-row>td{display:block;padding:12px!important;background:transparent}
+  html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-grid{grid-template-columns:1fr 1fr}
+}
+
