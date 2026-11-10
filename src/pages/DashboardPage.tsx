@@ -455,7 +455,7 @@ export function DashboardPage() {
 
   return <div className="owner-dashboard-page regular-report-page" data-typography="regular">
     <PageHeader eyebrow="OWNER DASHBOARD" title="Ringkasan Operasional" description="Pantau omzet, keuangan, pembayaran, order, proses cucian, dan piutang." hideBack
-      action={isOwner?<button type="button" className="secondary-button" disabled={financialLoading||!ownerFinancial||periodReceivable.total===undefined} onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:undefined}
+      action={<span className="dashboard-header-actions"><button type="button" className="secondary-button dashboard-display-chip" aria-expanded={displayOpen} onClick={()=>setDisplayOpen((open:boolean)=>!open)}><MonitorCog size={18}/> Tampilan: {density==='comfort'?'Comfort':density==='ultra'?'Ultra Compact':'Compact'}</button>{isOwner?<button type="button" className="secondary-button" disabled={financialLoading||!ownerFinancial||periodReceivable.total===undefined} onClick={exportOwnerReport}><FileSpreadsheet size={18}/> Export Laporan Owner</button>:null}</span>}
     />
     {message&&<div className="error-box inline-message">{message}</div>}
 
@@ -486,16 +486,6 @@ export function DashboardPage() {
       </span>
       <span className="dashboard-attention-total" title="Total peringatan: piutang, terlambat, siap lama, penugasan, tanpa tenggat, dan persetujuan hapus">{attention.issueCount>99?'99+':attention.issueCount}</span>
     </button>}
-
-    {!displayOpen&&<section className="panel dashboard-display-customizer is-collapsed">
-      <div className="dashboard-display-title">
-        <div className="dashboard-display-icon"><MonitorCog size={20}/></div>
-        <div>
-          <b>Tampilan Aplikasi: {density==='comfort'?'Comfort':density==='ultra'?'Ultra Compact':'Compact'}</b>
-        </div>
-      </div>
-      <button type="button" className="dashboard-display-toggle" aria-expanded={false} onClick={()=>setDisplayOpen(true)}>Ubah</button>
-    </section>}
 
     {displayOpen&&<section className="panel dashboard-display-customizer">
       <div className="dashboard-display-title">

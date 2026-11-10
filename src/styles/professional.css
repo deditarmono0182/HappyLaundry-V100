@@ -322,3 +322,46 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
 .dashboard-attention-center .dashboard-attention-summary>span.att-ready b,
 .dashboard-attention-center .dashboard-attention-summary>span.att-assign b{color:inherit}
 
+/* V113.0.177: Dashboard di HP (<=600px) - kartu 2 kolom, banner peringatan lebih rapi */
+@media(max-width:600px){
+  html[data-ui="professional"] body .app-shell .stats-grid.dashboard-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin:12px 0!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats>:first-child{grid-column:1/-1}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .dashboard-click-stat{width:100%;min-width:0}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .dashboard-click-stat .stat-card{height:100%}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card{
+    flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;
+    min-height:0!important;padding:12px!important;gap:6px!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card>div:last-child{width:100%;gap:2px}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-icon{
+    width:32px!important;height:32px!important;min-width:32px!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-icon svg{width:18px;height:18px}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card span{
+    font-size:13px!important;line-height:1.3!important;font-weight:600!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card strong{
+    font-size:20px!important;line-height:1.25!important;font-weight:700!important;text-align:left!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card .dashboard-money-value{
+    font-size:17px!important;font-weight:700!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card small{
+    font-size:11px!important;line-height:1.3!important}
+
+  /* angka total peringatan di kanan atas banner, bukan di baris sendiri */
+  html[data-ui="professional"] body .app-shell .dashboard-attention-center .dashboard-attention-total{
+    grid-column:3;grid-row:1;align-self:center}
+  html[data-ui="professional"] body .app-shell .dashboard-attention-center .dashboard-attention-summary{grid-row:2}
+
+  /* panel Tampilan yang ringkas: tombol Ubah di kanan, tidak selebar layar */
+  html[data-ui="professional"] body .app-shell .dashboard-display-customizer.is-collapsed{
+    grid-template-columns:minmax(0,1fr) auto}
+}
+
+/* V113.0.178: Dashboard laptop - tombol Tampilan di header, angka kartu lebih tegas */
+.dashboard-header-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;align-items:center}
+@media(min-width:601px){
+  html[data-ui="professional"]:not([data-density="ultra"]) body .app-shell .dashboard-stats .stat-card strong{
+    font-size:24px!important;font-weight:700!important;line-height:1.25!important}
+  html[data-ui="professional"]:not([data-density="ultra"]) body .app-shell .dashboard-stats .stat-card .dashboard-money-value{
+    font-size:22px!important;font-weight:700!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card span{font-weight:600!important}
+}
+
