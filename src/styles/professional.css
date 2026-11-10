@@ -462,11 +462,15 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
   html[data-ui="professional"] body .app-shell .production-cards{padding:0!important;margin:0!important}
 }
 
-/* V113.0.182: tombol kembali di pojok kanan atas judul (HP/tablet, semua halaman) */
+/* V113.0.182: tombol kembali di pojok kanan atas judul (HP/tablet, semua halaman) - grid */
 @media(max-width:900px){
-  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back{position:relative}
-  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back .page-heading-copy{padding-right:56px}
+  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back{
+    display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;column-gap:12px!important;row-gap:14px!important;align-items:start!important}
+  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back>.page-heading-right{display:contents!important}
+  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back>.page-heading-copy{
+    grid-column:1!important;grid-row:1!important;min-width:0}
   html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back .page-back-button{
-    position:absolute!important;top:0;right:0;margin:0!important;z-index:2}
+    position:static!important;grid-column:2!important;grid-row:1!important;align-self:start;justify-self:end;margin:0!important}
+  html[data-ui="professional"] body .app-shell .main-content .page-heading.page-heading-with-back .page-heading-action{
+    grid-column:1/-1!important;grid-row:2!important;width:100%!important;min-width:0}
 }
-
