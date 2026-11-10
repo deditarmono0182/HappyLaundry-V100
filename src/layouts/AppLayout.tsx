@@ -436,7 +436,7 @@ export function AppLayout() {
         {bottomItems.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end={to==='/'}>
             <Icon size={22}/>
-            <span>{label}</span>
+            <span>{to==='/'?'Beranda':label}</span>
           </NavLink>
         ))}
         <button type="button" onClick={() => setOpen(true)} aria-label="Buka menu lengkap">

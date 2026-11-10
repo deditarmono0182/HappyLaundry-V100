@@ -66,6 +66,12 @@ export function ProductionPage(){
   const[scanOpen,setScanOpen]=useState(false)
   const scannerRef=useRef<Html5Qrcode|null>(null)
   const highlightedRef=useRef<string|null>(null)
+  const[activeTab,setActiveTab]=useState<OrderStatus>('received')
+
+  useEffect(()=>{
+    if(!scanOrder)return
+    setActiveTab(!detailedMode&&processingStatuses.includes(scanOrder.status)?'washing':scanOrder.status)
+  },[scanOrder,detailedMode])
 
   const[settings,setSettings]=useState({
     business_name:'HappyLaundry Babakan',
@@ -149,6 +155,13 @@ export function ProductionPage(){
     return hours>0?`${hours}j ${minutes}m`:`${minutes}m`
   }
 
+  const overdueLabel=(row:OrderRow)=>{
+    const ms=Math.max(0,Date.now()-new Date(row.due_at as string).getTime())
+    const days=Math.floor(ms/(24*60*60*1000))
+    if(days>=1)return `${days} hari`
+    return `${Math.max(1,Math.floor(ms/(60*60*1000)))} jam`
+  }
+
   const filtered=useMemo(()=>{
     const q=query.toLowerCase().trim()
     const searched=q
@@ -193,6 +206,7 @@ export function ProductionPage(){
   }
 
   const boardColumns=detailedMode?detailedColumns:quickColumns
+  const currentTab:OrderStatus=boardColumns.includes(activeTab)?activeTab:boardColumns[0]
 
   const rowsForBoardColumn=(status:OrderStatus)=>{
     if(!detailedMode&&status==='washing')return filtered.filter(r=>processingStatuses.includes(r.status))
@@ -452,12 +466,26 @@ export function ProductionPage(){
       </button>
     </section>}
 
+    <div className="production-tabs" role="tablist" aria-label="Status produksi">
+      {boardColumns.map(s=><button
+        key={s}
+        type="button"
+        role="tab"
+        aria-selected={currentTab===s}
+        className={currentTab===s?'active':''}
+        onClick={()=>setActiveTab(s)}
+      >
+        {!detailedMode&&s==='washing'?'Diproses':statusLabels[s]}
+        <span>{rowsForBoardColumn(s).length}</span>
+      </button>)}
+    </div>
+
     <div className={`production-board ${detailedMode?'production-board-detail':'production-board-quick'}`}>
       {boardColumns.map(s=>{
         const list=rowsForBoardColumn(s)
         const columnLabel=!detailedMode&&s==='washing'?'Diproses':statusLabels[s]
 
-        return <section className={`production-column production-${s}`} key={s}>
+        return <section className={`production-column production-${s} ${currentTab===s?'is-tab-active':''}`} key={s}>
           <header>
             <div>
               <span className={`status-dot status-${s}`}/>
@@ -482,9 +510,9 @@ export function ProductionPage(){
                 </span>
               </div>
 
-              <small>WA: {r.customer_phone||'-'}</small>
+              <small className="production-card-wa">WA: {r.customer_phone||'-'}</small>
 
-              {r.due_at&&<small className={isOverdue(r)?'overdue-text':''}>
+              {r.due_at&&<small className={`production-due-line ${isOverdue(r)?'overdue-text':''}`}>
                 {isOverdue(r)?'⚠ Terlambat: ':'Estimasi: '}
                 {new Date(r.due_at).toLocaleString('id-ID')}
               </small>}
@@ -497,9 +525,16 @@ export function ProductionPage(){
                 Update terakhir: {r.progress_last_by_name}{r.progress_last_at?` • ${new Date(r.progress_last_at).toLocaleString('id-ID')}`:''}
               </small>}
 
+              {(r.due_at||isStaleProgress(r))&&<div className="production-card-chips">
+                {r.due_at&&(isOverdue(r)
+                  ?<span className="chip-late"><AlertTriangle size={13}/>Terlambat {overdueLabel(r)}</span>
+                  :<span className="chip-due">Estimasi {new Date(r.due_at).toLocaleDateString('id-ID',{day:'numeric',month:'short'})}</span>)}
+                {isStaleProgress(r)&&<span className="chip-stale">Belum update {progressAge(r)}</span>}
+              </div>}
+
               <div className="production-card-actions">
                 <button className="whatsapp-button" onClick={()=>whatsapp(r)}>
-                  <MessageCircle size={15}/>Kirim Update WA
+                  <MessageCircle size={15}/><span className="wa-long">Kirim Update WA</span><span className="wa-short">Kirim WA</span>
                 </button>
                 <button
                   className="production-quick-action"

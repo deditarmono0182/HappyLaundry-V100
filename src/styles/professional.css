@@ -393,3 +393,49 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
   html[data-ui="professional"] body .app-shell .dashboard-stats>:first-child small{display:block!important}
 }
 
+/* V113.0.180: Produksi di HP - kolom jadi tab, kartu dipadatkan (laptop tidak berubah) */
+.production-tabs,.production-card-chips,.wa-short{display:none}
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .production-tabs{
+    display:flex;gap:6px;padding:4px;margin:0 0 12px;border:1px solid #cfe0ea;border-radius:14px;background:#fff;overflow-x:auto}
+  html[data-ui="professional"] body .app-shell .production-tabs button{
+    flex:1 0 auto;min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:#4f6b78;
+    font:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;cursor:pointer}
+  html[data-ui="professional"] body .app-shell .production-tabs button.active{background:#dcecfd;color:#0f4c8a;font-weight:700}
+  html[data-ui="professional"] body .app-shell .production-tabs button span{padding:1px 8px;border-radius:999px;background:#eef3f6;font-size:12px}
+  html[data-ui="professional"] body .app-shell .production-tabs button.active span{background:#fff}
+
+  html[data-ui="professional"] body .app-shell .production-board{
+    display:block!important;overflow:visible!important;grid-template-columns:none!important;gap:0!important}
+  html[data-ui="professional"] body .app-shell .production-column:not(.is-tab-active){display:none!important}
+  html[data-ui="professional"] body .app-shell .production-column{
+    width:100%!important;min-width:0!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+  html[data-ui="professional"] body .app-shell .production-column>header{display:none!important}
+  html[data-ui="professional"] body .app-shell .production-cards{display:flex;flex-direction:column;gap:12px}
+
+  html[data-ui="professional"] body .app-shell .production-card{padding:14px!important;border-radius:16px!important;gap:10px!important}
+  html[data-ui="professional"] body .app-shell .production-card-head>div:first-child{min-width:0}
+  html[data-ui="professional"] body .app-shell .production-card-head b{
+    display:block;font-size:15px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  html[data-ui="professional"] body .app-shell .production-card small{font-size:13px!important}
+  html[data-ui="professional"] body .app-shell .production-card-wa,
+  html[data-ui="professional"] body .app-shell .production-due-line,
+  html[data-ui="professional"] body .app-shell .production-stale-note,
+  html[data-ui="professional"] body .app-shell .production-last-update{display:none!important}
+
+  html[data-ui="professional"] body .app-shell .production-card-chips{display:flex;flex-wrap:wrap;gap:6px}
+  html[data-ui="professional"] body .app-shell .production-card-chips span{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
+  html[data-ui="professional"] body .app-shell .production-card-chips .chip-late{background:#fdebd0;color:#8a4a00}
+  html[data-ui="professional"] body .app-shell .production-card-chips .chip-stale{background:#ede7fb;color:#4a2fa0}
+  html[data-ui="professional"] body .app-shell .production-card-chips .chip-due{background:#e9eef1;color:#35505c}
+
+  html[data-ui="professional"] body .app-shell .production-card-actions{
+    display:grid!important;grid-template-columns:1fr 1.4fr;gap:8px!important}
+  html[data-ui="professional"] body .app-shell .production-card-actions button{
+    width:100%;min-height:44px!important;font-size:13px!important;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  html[data-ui="professional"] body .app-shell .wa-long{display:none}
+  html[data-ui="professional"] body .app-shell .wa-short{display:inline}
+  html[data-ui="professional"] body .app-shell .production-stale-banner>div>span{display:none}
+}
+
