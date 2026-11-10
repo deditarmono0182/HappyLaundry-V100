@@ -475,7 +475,7 @@ export function ProductionPage(){
         className={currentTab===s?'active':''}
         onClick={()=>setActiveTab(s)}
       >
-        {!detailedMode&&s==='washing'?'Diproses':statusLabels[s]}
+        {!detailedMode&&s==='washing'?'Diproses':s==='ready'?'Siap':statusLabels[s]}
         <span>{rowsForBoardColumn(s).length}</span>
       </button>)}
     </div>

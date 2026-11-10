@@ -439,3 +439,27 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
   html[data-ui="professional"] body .app-shell .production-stale-banner>div>span{display:none}
 }
 
+/* V113.0.181: Produksi HP - kotak alat atas, banner, tab, lebar kartu */
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .page-heading-right:has(.production-tools){
+    flex-direction:column;align-items:stretch;width:100%}
+  html[data-ui="professional"] body .app-shell .page-heading-right:has(.production-tools) .page-back-button{display:none}
+  html[data-ui="professional"] body .app-shell .page-heading-action:has(.production-tools){width:100%}
+  html[data-ui="professional"] body .app-shell .production-tools{
+    display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important;width:100%}
+  html[data-ui="professional"] body .app-shell .production-tools>*{
+    flex:none!important;width:100%!important;min-width:0!important;height:44px!important;min-height:44px!important;margin:0!important}
+  html[data-ui="professional"] body .app-shell .production-tools>select,
+  html[data-ui="professional"] body .app-shell .production-tools>.production-search{grid-column:1/-1}
+
+  html[data-ui="professional"] body .app-shell .production-stale-banner{
+    flex-wrap:nowrap!important;align-items:center!important;gap:10px!important;padding:10px 12px!important}
+  html[data-ui="professional"] body .app-shell .production-stale-banner b{font-size:13px!important}
+  html[data-ui="professional"] body .app-shell .production-stale-banner>button{
+    flex:none!important;width:auto!important;min-height:36px!important;padding:0 14px!important;white-space:nowrap}
+
+  html[data-ui="professional"] body .app-shell .production-tabs button{flex:1 1 auto;padding:0 8px;gap:4px}
+  html[data-ui="professional"] body .app-shell .production-tabs button span{padding:1px 6px}
+  html[data-ui="professional"] body .app-shell .production-cards{padding:0!important;margin:0!important}
+}
+
