@@ -186,6 +186,18 @@ export function PayrollPage(){
   const[detailEmployee,setDetailEmployee]=useState<Employee|null>(null)
   const[expandedPayroll,setExpandedPayroll]=useState<Record<string,boolean>>({})
   const[actionEmployee,setActionEmployee]=useState<Employee|null>(null)
+  const payrollOpenedRef=useRef<string|null>(null)
+  const togglePayrollRow=(id:string)=>{
+    const opening=!expandedPayroll[id]
+    payrollOpenedRef.current=opening?id:null
+    setExpandedPayroll({...expandedPayroll,[id]:opening})
+  }
+  useEffect(()=>{
+    const id=payrollOpenedRef.current
+    if(!id)return
+    payrollOpenedRef.current=null
+    window.setTimeout(()=>document.getElementById(`payroll-detail-${id}`)?.scrollIntoView({block:'nearest',behavior:'smooth'}),60)
+  },[expandedPayroll])
   const[attendanceHistoryEmployee,setAttendanceHistoryEmployee]=useState<Employee|null>(null)
   const[paymentEmployee,setPaymentEmployee]=useState<Employee|null>(null)
   const[cashAdvanceEmployee,setCashAdvanceEmployee]=useState<Employee|null>(null)
@@ -846,7 +858,7 @@ export function PayrollPage(){
       <section className="stats-grid payroll-stats">
         <StatCard icon={UsersRound} label="Karyawan Aktif" value={String(employees.length)} caption="Karyawan yang dapat diabsen"/>
         <StatCard icon={CalendarCheck2} label="Total Hadir Bulan Ini" value={String(totalPresent)} caption="Akumulasi hari hadir"/>
-        <StatCard icon={HandCoins} label="Penerimaan Pelanggan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
+        <StatCard icon={HandCoins} label="Penerimaan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
       </section>
 
       <section className="panel data-panel">
@@ -908,10 +920,10 @@ export function PayrollPage(){
       </section>
     </>:<>
       {managerError&&<div className="error-box">{managerError} Daftar dan pembayaran gaji ditahan sampai data pengelola berhasil dimuat. <button className="secondary-button" onClick={()=>void load()}>Muat Ulang</button></div>}
-      {managerReport&&<ManagerShareSettings key={month} month={month} employees={employees} report={managerReport} onSaved={load}/>}
+      {managerError&&managerReport&&<ManagerShareSettings key={month} month={month} employees={employees} report={managerReport} onSaved={load}/>}
       {!managerError&&<>
       <section className="stats-grid payroll-stats">
-        <StatCard icon={HandCoins} label="Penerimaan Pelanggan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
+        <StatCard icon={HandCoins} label="Penerimaan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
         <StatCard icon={WalletCards} label="Gaji Bersih" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
         <StatCard icon={HandCoins} label="Kas Bon Dipotong" value={formatRupiah(totalCashAdvanceApplied)} caption={`Sisa kas bon ${formatRupiah(totalCashAdvanceOutstanding)}`}/>
         <StatCard icon={Gift} label="Komisi Order" value={formatRupiah(totalOrderCommission)} caption="Produksi + kurir yang sudah menjadi hak"/>
@@ -942,14 +954,14 @@ export function PayrollPage(){
                   <td className="pr-name"><b>{r.employee.full_name}</b><small>{r.employee.login_id}</small></td>
                   <td className="pr-hadir"><b>{r.presentDays} hari</b><small>I{r.permissionDays} · S{r.sickDays} · A{r.absentDays}</small></td>
                   <td className="pr-gross"><span className="pr-label">Gaji kotor</span><b>{formatRupiah(r.grossTotal)}</b>
-                    <button type="button" className="payroll-expand-button" aria-expanded={isOpen} onClick={()=>setExpandedPayroll({...expandedPayroll,[r.employee.id]:!isOpen})}>{isOpen?'Sembunyikan':'Rincian'}{isOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button></td>
+                    <button type="button" className="payroll-expand-button" aria-expanded={isOpen} onClick={()=>togglePayrollRow(r.employee.id)}>{isOpen?'Sembunyikan':'Rincian'}{isOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button></td>
                   <td className="pr-kas"><span className="pr-label">Kas bon</span><b>Sisa {formatRupiah(r.cashAdvanceOutstanding)}</b><small>Potongan periode ini: − {formatRupiah(r.cashAdvanceApplied)}</small><small className={r.payrollBalance<0?'payroll-negative':''}>Saldo setelah kasbon: {formatRupiah(r.payrollBalance)}</small></td>
                   <td className="pr-paid"><span className="pr-label">Dibayar</span><b>{formatRupiah(r.paidAmount)}</b></td>
                   <td className="pr-sisa"><span className="pr-label">Sisa dibayar</span><b className={r.outstanding>0?'payroll-outstanding':'payroll-paid'}>{formatRupiah(r.outstanding)}</b></td>
                   <td className="pr-status"><span className={`payroll-payment-status ${r.paymentStatus}`}>{r.paymentStatus==='cashbon'?'Terpotong Kas Bon':r.paymentStatus==='nil'?'Nihil':r.paymentStatus==='paid'?'Lunas':r.paymentStatus==='partial'?'Sebagian':'Belum Dibayar'}</span></td>
                   <td className="pr-actions">
                     <div className="payroll-row-actions payroll-row-actions-compact">
-                      <button type="button" className="payroll-expand-toggle" aria-expanded={isOpen} onClick={()=>setExpandedPayroll({...expandedPayroll,[r.employee.id]:!isOpen})}>{isOpen?'Sembunyikan':'Rincian'}{isOpen?<ChevronUp size={15}/>:<ChevronDown size={15}/>}</button>
+                      <button type="button" className="payroll-expand-toggle" aria-expanded={isOpen} onClick={()=>togglePayrollRow(r.employee.id)}>{isOpen?'Sembunyikan':'Rincian'}{isOpen?<ChevronUp size={15}/>:<ChevronDown size={15}/>}</button>
                       {r.outstanding>0
                         ? <button className="finance-row-action payroll-pay-button" onClick={()=>openPayrollPayment(r.employee)}><HandCoins size={15}/>Bayar</button>
                         : <button className="finance-row-action" onClick={()=>setDetailEmployee(r.employee)}><ReceiptText size={15}/>Detail</button>}
@@ -957,7 +969,7 @@ export function PayrollPage(){
                     </div>
                   </td>
                 </tr>
-                {isOpen&&<tr className="payroll-detail-row">
+                {isOpen&&<tr className="payroll-detail-row" id={`payroll-detail-${r.employee.id}`}>
                   <td colSpan={8}>
                     <div className="payroll-detail-grid">
                       <div><span>Tarif / hari</span><b>{formatRupiah(r.attendanceRate)}</b></div>
@@ -1001,6 +1013,7 @@ export function PayrollPage(){
           </div>
         </Modal>}
       </section>
+      {managerReport&&<ManagerShareSettings key={month} month={month} employees={employees} report={managerReport} onSaved={load}/>}
       </>}
     </>}
 

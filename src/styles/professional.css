@@ -558,3 +558,25 @@ html[data-ui="professional"] body .app-shell .payroll-action-menu .finance-row-a
   html[data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-grid{grid-template-columns:1fr 1fr}
 }
 
+/* V113.0.186: menu bawah tidak menutupi jendela popup; rincian gaji tidak tertutup menu bawah */
+html:has(.modal-backdrop) .mobile-bottom-nav{display:none!important}
+html[data-ui="professional"] body .app-shell .payroll-table-compact .payroll-detail-row{scroll-margin-bottom:96px}
+
+/* V113.0.187: Bagi Hasil Pengelola dilipat, angka kunci tegas */
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-head{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;justify-content:space-between}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-summary{
+  display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:#4f6b78}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-summary b{font-size:15px;font-weight:700;color:#0f2e3d;margin-left:4px}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-negative{color:#b91c1c!important}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-toggles{display:flex;gap:8px}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-toggles .secondary-button{min-height:38px;padding:0 14px;font-size:13px}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-note{
+  margin-top:10px;padding:8px 12px;border-radius:10px;background:#fff1f2;color:#9f1239;font-size:13px;font-weight:500}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-metrics b{font-size:16px;font-weight:700;display:block;margin-top:2px}
+html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-metrics span{font-size:13px;color:#4f6b78}
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-toggles{width:100%}
+  html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-toggles .secondary-button{flex:1;min-height:44px}
+}
+

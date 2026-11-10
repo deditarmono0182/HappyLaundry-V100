@@ -5,6 +5,9 @@ import type {ManagerReport} from '../lib/managerShare'
 export function ManagerShareSettings({month,employees,report,onSaved}:{month:string;employees:{id:string;full_name:string}[];report:ManagerReport;onSaved:()=>Promise<void>}){
  const [employee,setEmployee]=useState(''),[percent,setPercent]=useState('40'),[busy,setBusy]=useState(false),[message,setMessage]=useState('')
  const pending=useRef(false)
+ const [open,setOpen]=useState(false),[showRules,setShowRules]=useState(false)
+ const profitBase=Number(report.profit_base)
+ const totalShare=report.rows.reduce((sum,r)=>sum+Number(r.amount||0),0)
  const save=async()=>{
   const value=Number(percent)
   if(!employee||!percent.trim()||!Number.isFinite(value)||value<0||value>100){setMessage('Pilih karyawan dan isi persentase 0–100.');return}
@@ -18,15 +21,27 @@ export function ManagerShareSettings({month,employees,report,onSaved}:{month:str
   finally{pending.current=false;setBusy(false)}
  }
  return <section className="panel manager-share-settings">
-  <div className="section-title"><b>Bagi Hasil Pengelola — {month}</b></div>
-  <p>{report.revenue_basis==='fully_paid_orders'?'Nilai order yang lunas pada bulan ini − operasional − gaji dan komisi karyawan. DP dan piutang belum dihitung. Order sebelum November 2026 tetap memakai perhitungan lama dan tidak dihitung ulang.':'Nilai order masuk − operasional − gaji dan komisi karyawan. Aturan periode lama: piutang termasuk nilai order.'} Tanpa cadangan; bagian pengelola tidak mengurangi dasar hitungnya sendiri. Hak mengikuti data yang sudah disimpan. Simpan Bonus terlebih dahulu jika diubah. Koreksi data atau persentase mengubah hak bulan ini; pembayaran lama tetap tercatat.</p>
+  <div className="manager-share-head">
+   <div className="section-title"><b>Bagi Hasil Pengelola — {month}</b></div>
+   <div className="manager-share-summary">
+    <span>Dasar laba <b className={profitBase<=0?'manager-share-negative':''}>{formatRupiah(profitBase)}</b></span>
+    <span>Hak bagi hasil <b>{formatRupiah(totalShare)}</b></span>
+   </div>
+   <div className="manager-share-toggles">
+    <button type="button" className="secondary-button" aria-expanded={open} onClick={()=>setOpen(!open)}>{open?'Tutup':'Atur'}</button>
+    <button type="button" className="secondary-button" aria-expanded={showRules} onClick={()=>{setShowRules(!showRules);if(!showRules)setOpen(true)}}>ⓘ Aturan</button>
+   </div>
+  </div>
+  {profitBase<=0&&<div className="manager-share-note">Dasar laba nol atau minus, jadi hak bagi hasil Rp 0.</div>}
+  {open&&<>
+  {showRules&&<p>{report.revenue_basis==='fully_paid_orders'?'Nilai order yang lunas pada bulan ini − operasional − gaji dan komisi karyawan. DP dan piutang belum dihitung. Order sebelum November 2026 tetap memakai perhitungan lama dan tidak dihitung ulang.':'Nilai order masuk − operasional − gaji dan komisi karyawan. Aturan periode lama: piutang termasuk nilai order.'} Tanpa cadangan; bagian pengelola tidak mengurangi dasar hitungnya sendiri. Hak mengikuti data yang sudah disimpan. Simpan Bonus terlebih dahulu jika diubah. Koreksi data atau persentase mengubah hak bulan ini; pembayaran lama tetap tercatat.</p>}
   <div className="manager-share-metrics">
    <span>{report.revenue_basis==='fully_paid_orders'?'Order lunas bulan ini':'Order masuk'} <b>{formatRupiah(Number(report.revenue))}</b></span>
    <span>Operasional <b>{formatRupiah(Number(report.operating))}</b></span>
    <span>Gaji &amp; komisi <b>{formatRupiah(Number(report.employee_cost))}</b></span>
    <span>Dasar laba sebelum pengelola <b>{formatRupiah(Number(report.profit_base))}</b></span>
   </div>
-  <p>Jika dasar laba nol atau minus, hak bagi hasil nol. Pengaturan hanya untuk bulan yang dipilih; bulan berikutnya perlu diatur. Gunakan 0% untuk menonaktifkan bagian pada bulan ini. Pembayaran dicatat melalui Bayar Gaji.</p>
+  {showRules&&<p>Jika dasar laba nol atau minus, hak bagi hasil nol. Pengaturan hanya untuk bulan yang dipilih; bulan berikutnya perlu diatur. Gunakan 0% untuk menonaktifkan bagian pada bulan ini. Pembayaran dicatat melalui Bayar Gaji.</p>}
   <div className="manager-share-form">
    <label>Karyawan pengelola<select aria-label="Karyawan pengelola" value={employee} disabled={busy} onChange={e=>{setEmployee(e.target.value);setPercent(String(report.rows.find(r=>r.employee_id===e.target.value)?.percent??40));setMessage('')}}>
     <option value="">Pilih nama karyawan</option>{employees.map(e=><option key={e.id} value={e.id}>{e.full_name}</option>)}
@@ -39,5 +54,6 @@ export function ManagerShareSettings({month,employees,report,onSaved}:{month:str
    {report.rows.map(r=><tr key={r.employee_id}><td>{r.full_name}</td><td>{Number(r.percent).toLocaleString('id-ID')}%</td><td>{formatRupiah(Number(r.amount))}</td></tr>)}
    {!report.rows.length&&<tr><td colSpan={3}>Belum ada pengelola untuk bulan ini.</td></tr>}
   </tbody></table></div>
+  </>}
  </section>
 }
