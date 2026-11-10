@@ -701,3 +701,35 @@ html[data-ui="professional"] body .payroll-detail-summary>div:nth-child(9),html[
   html[data-ui="professional"] body .payroll-detail-summary b{font-size:14px!important}
 }
 
+/* V113.0.192: modal Detail Gaji - riwayat sebagai baris, tanpa scroll bertingkat */
+html[data-ui="professional"] body .modal-backdrop :is(.payroll-commission-detail-wrap,.payroll-payment-history-wrap){max-height:none!important;overflow:visible!important;border:0!important;border-radius:0!important}
+html[data-ui="professional"] body .modal-backdrop .pl-list{width:100%;min-width:0!important}
+html[data-ui="professional"] body .modal-backdrop .pl-list thead{display:none}
+html[data-ui="professional"] body .modal-backdrop .pl-list,html[data-ui="professional"] body .modal-backdrop .pl-list tbody{display:block;width:100%}
+html[data-ui="professional"] body .modal-backdrop .pl-list tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;row-gap:3px;padding:11px 2px;border-bottom:1px solid #e6eff4;align-items:baseline}
+html[data-ui="professional"] body .modal-backdrop .pl-list td{display:block;padding:0!important;border:0!important;min-width:0;font-size:14px}
+html[data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Nominal"]::before,html[data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Sisa"]::before,html[data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Nilai order"]::before,html[data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Persen"]::before{content:attr(data-label)" ";color:#6b8592;font-weight:400;font-size:12px;margin-right:4px}
+html[data-ui="professional"] body .modal-backdrop .pl-list tr:has(.table-empty){display:block;border:0;padding:4px 2px}
+html[data-ui="professional"] body .modal-backdrop .pl-list .table-empty{text-align:left!important;color:#6b8592;font-size:13px;padding:0!important}
+/* kasbon: tanggal | status ; nominal | sisa ; keterangan ; aksi */
+html[data-ui="professional"] body .modal-backdrop .pl-list-kasbon td[data-label="Tanggal"]{grid-column:1;grid-row:1;font-size:13px;color:#6b8592}
+html[data-ui="professional"] body .modal-backdrop .pl-list-kasbon td[data-label="Status"]{grid-column:2;grid-row:1;justify-self:end}
+html[data-ui="professional"] body .modal-backdrop .pl-list-kasbon td[data-label="Nominal"]{grid-column:1;grid-row:2}
+html[data-ui="professional"] body .modal-backdrop .pl-list-kasbon td[data-label="Sisa"]{grid-column:2;grid-row:2;justify-self:end}
+html[data-ui="professional"] body .modal-backdrop .pl-list-kasbon td.pl-note-cell{grid-column:1/-1;grid-row:3;font-size:13px;color:#4f6b78}
+html[data-ui="professional"] body .modal-backdrop .pl-list-kasbon td:last-child:not([data-label]){grid-column:1/-1;grid-row:4}
+html[data-ui="professional"] body .modal-backdrop .pl-list .cash-advance-history-actions{display:flex!important;flex-direction:row!important;gap:8px;justify-content:flex-end;flex-wrap:nowrap}
+html[data-ui="professional"] body .modal-backdrop .pl-list .cash-advance-history-actions .finance-row-action{min-height:36px;white-space:nowrap;padding:0 12px!important;width:auto!important}
+/* pembayaran gaji */
+html[data-ui="professional"] body .modal-backdrop .pl-list-bayar td[data-label="Tanggal"]{grid-column:1;grid-row:1;font-size:13px;color:#6b8592}
+html[data-ui="professional"] body .modal-backdrop .pl-list-bayar td[data-label="Nominal"]{grid-column:2;grid-row:1;justify-self:end}
+html[data-ui="professional"] body .modal-backdrop .pl-list-bayar td[data-label="Metode"]{grid-column:1;grid-row:2}
+html[data-ui="professional"] body .modal-backdrop .pl-list-bayar td.pl-note-cell{grid-column:1/-1;grid-row:3;font-size:13px;color:#4f6b78}
+/* komisi order */
+html[data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(1){grid-column:1;grid-row:1}
+html[data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(5){grid-column:2;grid-row:1;justify-self:end}
+html[data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(3){grid-column:1;grid-row:2;font-size:13px;color:#4f6b78}
+html[data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(4){grid-column:2;grid-row:2;justify-self:end;font-size:13px;color:#4f6b78}
+html[data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(2){grid-column:1;grid-row:3;font-size:12px;color:#6b8592}
+html[data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(6){grid-column:2;grid-row:3;justify-self:end;font-size:12px;color:#6b8592}
+
