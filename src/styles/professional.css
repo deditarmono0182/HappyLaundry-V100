@@ -661,3 +661,28 @@ html[data-ui="professional"] body .app-shell .revenue-zero-toggle{margin-top:10p
   html[data-ui="professional"] body .app-shell .finance-cash-advance-table td[data-label="Total Sisa Kasbon"] b{font-size:17px}
 }
 
+/* V113.0.190: Laba Rugi - tanpa penebalan huruf; panel rata atas, ringkasan di depan */
+html[data-ui="professional"] body .app-shell .pl-grid{align-items:start!important}
+html[data-ui="professional"] body .app-shell .pl-grid>.pl-summary-card{order:-1}
+html[data-ui="professional"] body .app-shell .pl-grid>.pl-card{height:auto!important;min-height:0!important}
+html[data-ui="professional"] body .app-shell .pl-period-panel{align-items:flex-end!important}
+html[data-ui="professional"] body .app-shell .pl-quick-periods{align-items:flex-end}
+html[data-ui="professional"] body .app-shell .pl-quick-periods button{min-height:44px}
+html[data-ui="professional"] body .app-shell .pl-stats .stat-card strong{font-size:20px!important}
+html[data-ui="professional"] body .app-shell .pl-card .pl-total-row,html[data-ui="professional"] body .app-shell .pl-card .pl-reserve-grand-total{
+  border-top:1px solid #9db3bf!important;margin-top:8px!important;padding-top:12px!important;font-size:15px}
+@media(min-width:1101px){
+  html[data-ui="professional"] body .app-shell .pl-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .pl-stats{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  html[data-ui="professional"] body .app-shell .pl-stats .stat-card>div:last-child{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important}
+  html[data-ui="professional"] body .app-shell .pl-stats .stat-card strong{max-width:none!important;text-align:left!important;font-size:18px!important}
+  html[data-ui="professional"] body .app-shell .pl-stats .stat-icon{display:none!important}
+  html[data-ui="professional"] body .app-shell .pl-stats .stat-card small{display:none!important}
+  html[data-ui="professional"] body .app-shell .pl-period-panel{align-items:stretch!important}
+  html[data-ui="professional"] body .app-shell .pl-custom-period{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+  html[data-ui="professional"] body .app-shell .pl-custom-period input{width:100%!important;min-width:0;box-sizing:border-box}
+  html[data-ui="professional"] body .app-shell .pl-custom-period .primary-button{grid-column:1/-1;min-height:44px}
+}
+
