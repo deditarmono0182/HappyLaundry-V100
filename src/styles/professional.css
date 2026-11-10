@@ -365,3 +365,31 @@ html[data-ui="professional"] body .app-shell .request-notice-label{font-size:12p
   html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card span{font-weight:600!important}
 }
 
+/* V113.0.179: Dashboard HP mengikuti mockup (kartu: label + angka), navigasi bawah */
+.mobile-bottom-nav{display:none}
+@media(max-width:900px){
+  html[data-ui="professional"] body .app-shell .mobile-bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:2px;
+    padding:6px 6px calc(8px + env(safe-area-inset-bottom));
+    background:#fff;border-top:1px solid #dbe8ef;box-shadow:0 -6px 20px rgba(20,50,63,.08)}
+  html[data-ui="professional"] body .app-shell .mobile-bottom-nav>a,
+  html[data-ui="professional"] body .app-shell .mobile-bottom-nav>button{
+    flex:1 1 0;min-width:0;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    border:0;border-radius:12px;background:transparent;color:#4f6b78;font:inherit;font-size:11px;font-weight:600;
+    text-decoration:none;cursor:pointer;padding:4px}
+  html[data-ui="professional"] body .app-shell .mobile-bottom-nav span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html[data-ui="professional"] body .app-shell .mobile-bottom-nav>a.active{background:#e8f2fd;color:#0f4c8a;font-weight:700}
+  html[data-ui="professional"] body .app-shell.has-bottom-nav .main-content{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+}
+@media(max-width:600px){
+  html[data-ui="professional"] body .app-shell .dashboard-header-actions{width:100%}
+  html[data-ui="professional"] body .app-shell .dashboard-header-actions>button{flex:1 1 100%!important;white-space:nowrap}
+  html[data-ui="professional"] body .app-shell .stats-grid.dashboard-stats{align-items:stretch!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card>div:last-child{
+    display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card strong{max-width:none!important;text-align:left!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-icon{display:none!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats .stat-card small{display:none!important}
+  html[data-ui="professional"] body .app-shell .dashboard-stats>:first-child small{display:block!important}
+}
+

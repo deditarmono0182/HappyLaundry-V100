@@ -1,6 +1,6 @@
 import {CashAdvanceNotifications} from '../components/CashAdvanceNotifications'
 import {attendanceError,attendanceEventAction,loadAttendanceState,recordEmployeeAttendance} from '../lib/attendance'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ShoppingBag, Users, WashingMachine, Package, Truck, WalletCards,
   CreditCard, Settings, LogOut, Menu, X, Sparkles, Calculator, BarChart3, DatabaseBackup, QrCode, CircleDollarSign, AlertTriangle, CalendarCheck2, ScanLine, Target, ShieldAlert } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -42,6 +42,7 @@ const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; ro
 
 export function AppLayout() {
   const navigate=useNavigate()
+  const location=useLocation()
   const [open,setOpen]=useState(false)
   const [online,setOnline]=useState(navigator.onLine)
   const [pendingDeletes,setPendingDeletes]=useState(0)
@@ -389,8 +390,23 @@ export function AppLayout() {
       document.removeEventListener('focusin',handleFocus)
     }
   },[])
+  const visibleItems=items.filter(item => {
+    const ownerFinanceRoutes=new Set(['/cash','/daily-closing','/finance','/profit-target','/receivables','/reports','/profit-loss'])
+    if(isOwner&&ownerFinanceRoutes.has(item.to))return false
+    const allowed=item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)
+    if(!allowed)return false
+    if(role==='employee'&&attendanceGate?.attendance_required&&(!attendanceGate.attended_today||attendanceGate.checked_out))return item.to==='/attendance'
+    return true
+  })
+  // Navigasi bawah di HP: maksimal 4 tujuan utama yang boleh diakses peran ini + tombol Menu.
+  // Disembunyikan di Kasir karena halaman itu punya bilah total/bayar sendiri di bagian bawah.
+  const bottomItems=['/','/cashier','/orders','/production','/customers']
+    .map(to=>visibleItems.find(item=>item.to===to))
+    .filter((item):item is typeof items[number]=>Boolean(item))
+    .slice(0,4)
+  const showBottomNav=bottomItems.length>0&&location.pathname!=='/cashier'
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${showBottomNav?'has-bottom-nav':''}`}>
       <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <img src="/logo-happylaundry.jpg" alt="HappyLaundry" />
@@ -398,14 +414,7 @@ export function AppLayout() {
           <button className="icon-button drawer-close-button" onClick={() => setOpen(false)} aria-label="Tutup menu"><X size={20} /></button>
         </div>
         <nav>
-          {items.filter(item => {
-            const ownerFinanceRoutes=new Set(['/cash','/daily-closing','/finance','/profit-target','/receivables','/reports','/profit-loss'])
-            if(isOwner&&ownerFinanceRoutes.has(item.to))return false
-            const allowed=item.permission ? canAccess(profile,item.permission) : (item.roles?.includes(role)??false)
-            if(!allowed)return false
-            if(role==='employee'&&attendanceGate?.attendance_required&&(!attendanceGate.attended_today||attendanceGate.checked_out))return item.to==='/attendance'
-            return true
-          }).map(({ to, label, icon: Icon }) => (
+          {visibleItems.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} onClick={() => setOpen(false)}>
               <Icon size={19}/>
               <span>{label}</span>
@@ -422,6 +431,19 @@ export function AppLayout() {
         </div>
       </aside>
       {open && <button className="overlay" onClick={() => setOpen(false)} aria-label="Tutup menu" />}
+
+      {showBottomNav&&<nav className="mobile-bottom-nav" aria-label="Navigasi utama">
+        {bottomItems.map(({ to, label, icon: Icon }) => (
+          <NavLink key={to} to={to} end={to==='/'}>
+            <Icon size={22}/>
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <button type="button" onClick={() => setOpen(true)} aria-label="Buka menu lengkap">
+          <Menu size={22}/>
+          <span>Menu</span>
+        </button>
+      </nav>}
 
       {isOwner&&showDeleteToast&&pendingDeletes>0&&
         <div className="delete-approval-toast" role="status">
