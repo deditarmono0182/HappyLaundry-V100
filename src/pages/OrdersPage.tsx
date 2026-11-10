@@ -1463,8 +1463,8 @@ export function OrdersPage() {
             </div>
 
             <div className="form-grid-two">
-              <label>Diskon<input type="number" min="0" value={form.discount} onChange={event => setForm({...form, discount: Number(event.target.value)})}/></label>
-              <label>Pembayaran Awal<input type="number" min="0" value={form.paid_amount} onChange={event => setForm({...form, paid_amount: Number(event.target.value)})}/></label>
+              <label>Diskon<input type="number" min="0" value={form.discount||''} placeholder="0" onChange={event => setForm({...form, discount: Number(event.target.value)})}/></label>
+              <label>Pembayaran Awal<input type="number" min="0" value={form.paid_amount||''} placeholder="0" onChange={event => setForm({...form, paid_amount: Number(event.target.value)})}/></label>
               <label>Estimasi Selesai<input type="datetime-local" value={form.due_at} onChange={event => setForm({...form, due_at: event.target.value})}/></label>
               <label>Catatan<input value={form.notes} onChange={event => setForm({...form, notes: event.target.value})} placeholder="Contoh: jangan pakai pewangi kuat"/></label>
             </div>

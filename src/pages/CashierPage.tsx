@@ -780,7 +780,7 @@ export function CashierPage() {
             </label>
             <label>Nilai Diskon
               <input type="number" min="0" max={discountMode==='percent'?100:undefined}
-                value={discountValue} onChange={e=>setDiscountValue(Number(e.target.value))}/>
+                value={discountValue||''} placeholder="0" onChange={e=>setDiscountValue(Number(e.target.value))}/>
             </label>
             <label>Metode
               <select value={method} onChange={e=>setMethod(e.target.value as PayMethod)}>
@@ -796,7 +796,7 @@ export function CashierPage() {
               <div><span>Sisa Tagihan</span><b>{formatIDR(Math.max(0,total-paymentAmount))}</b></div>
             </section>
             <label>Bayar Sekarang
-              <input type="number" min="0" value={paymentAmount} onChange={e=>setPaymentAmount(Number(e.target.value))}/>
+              <input type="number" min="0" value={paymentAmount||''} placeholder="0" onChange={e=>setPaymentAmount(Number(e.target.value))}/>
             </label>
             <div className="full-field quick-pay-row">
               <span>Pembayaran cepat</span>

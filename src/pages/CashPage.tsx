@@ -139,7 +139,7 @@ export function CashPage(){
       <label>Jenis<select value={form.kind} onChange={e=>setForm({...form,kind:e.target.value as CashKind})}><option value="expense">Kas Keluar</option><option value="income">Kas Masuk</option></select></label>
       <label>Kategori<input value={form.category} onChange={e=>setForm({...form,category:e.target.value})} required/></label>
       <label>Keterangan<input value={form.description} onChange={e=>setForm({...form,description:e.target.value})} required placeholder="Contoh: beli plastik laundry"/></label>
-      <label>Nominal<input type="number" min="1" value={form.amount} onChange={e=>setForm({...form,amount:Number(e.target.value)})} required/></label>
+      <label>Nominal<input type="number" min="1" value={form.amount||''} placeholder="0" onChange={e=>setForm({...form,amount:Number(e.target.value)})} required/></label>
       <label>Metode<select value={form.method} onChange={e=>setForm({...form,method:e.target.value as PaymentMethod})}><option value="cash">Tunai</option><option value="qris">QRIS</option><option value="transfer">Transfer</option><option value="other">Lainnya</option></select></label>
       {message&&<div className="error-box">{message}</div>}
       <div className="form-actions"><button type="button" className="secondary-button" onClick={()=>setOpen(false)}>Batal</button><button className="primary-button" disabled={busy}>{busy?'Menyimpan...':'Simpan'}</button></div>

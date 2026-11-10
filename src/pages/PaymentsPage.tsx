@@ -275,7 +275,8 @@ export function PaymentsPage(){
             max={Number(selected.total)-Number(selected.paid_amount)}
             value={paymentAction==='pickup'
               ? Number(selected.total)-Number(selected.paid_amount)
-              : amount}
+              : (amount||'')}
+            placeholder="0"
             onChange={e=>setAmount(Number(e.target.value))}
             disabled={paymentAction==='pickup'}
           />

@@ -365,7 +365,7 @@ export function CustomersPage() {
 
             {memberCustomer.is_member&&<section className="member-adjust-box">
               <header><Gift size={18}/><div><b>Tambah / Kurangi Poin</b><small>Gunakan untuk bonus, hadiah, atau koreksi manual.</small></div></header>
-              <label>Perubahan Poin<input type="number" value={memberDelta} onChange={e=>setMemberDelta(Number(e.target.value))} placeholder="Contoh: 25 atau -10"/></label>
+              <label>Perubahan Poin<input type="number" value={memberDelta||''} onChange={e=>setMemberDelta(Number(e.target.value))} placeholder="Contoh: 25 atau -10"/></label>
               <label>Alasan<input value={memberNote} onChange={e=>setMemberNote(e.target.value)} placeholder="Contoh: Bonus ulang tahun"/></label>
               <button type="button" className="primary-button" disabled={memberBusy||!memberDelta} onClick={()=>void adjustPoints()}>Simpan Poin</button>
             </section>}
