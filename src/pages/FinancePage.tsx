@@ -102,6 +102,8 @@ export function FinancePage(){
   const [from,setFrom]=useState(monthStart())
   const [to,setTo]=useState(today())
   const [query,setQuery]=useState('')
+  const [openDesc,setOpenDesc]=useState<Record<string,boolean>>({})
+  const [showZeroCategories,setShowZeroCategories]=useState(false)
   const [open,setOpen]=useState(false)
   const [shareOpen,setShareOpen]=useState(false)
   const [shareDraft,setShareDraft]=useState<Record<string,string>>({})
@@ -607,7 +609,7 @@ export function FinancePage(){
       {additionNotice&&<div className="success-box" role="status">{additionNotice} Lihat statusnya melalui Pengajuan Tambahan Kasbon di halaman ini.</div>}
       {requestTab&&<FinanceCashAdvanceRequestCenter showHistory={requestParams.get('kasbon_history')==='1'} focusRequestId={requestParams.get('request_id')||undefined} key={`${requestRevision}:${requestParams.get('request_id')||''}:${requestParams.get('kasbon_history')||''}`} tab={requestTab} isOwner={isOwner} onClose={()=>{setRequestTab(null);setRequestParams(previous=>{const next=new URLSearchParams(previous);next.delete('kasbon_requests');next.delete('kasbon_history');next.delete('request_id');return next},{replace:true})}} onChanged={async()=>{await Promise.all([loadCashAdvances(),load()])}}/>}
       {cashAdvanceSummaryLoading?<p role="status">Memuat total kasbon per karyawan...</p>:cashAdvanceSummaryError?<div className="error-box">Gagal mengambil ringkasan kasbon: {cashAdvanceSummaryError}. Pastikan SQL 074 sudah dijalankan. <button type="button" className="secondary-button" onClick={()=>void loadCashAdvances()}>Coba Lagi</button></div>:<FinanceCashAdvanceSummary rows={financeCashAdvances} onSelect={id=>navigate(`/finance/cash-advances?employee=${encodeURIComponent(id)}`)}/>}
-      <div className="finance-cash-advance-footnote">Pembayaran dicatat Owner melalui Absensi & Gaji → Potongan Kasbon: potong gaji, tunai, atau transfer. Tunai/transfer tercatat di Kas Harian dan tidak menjadi omzet laundry.</div>
+      <details className="finance-kasbon-notes"><summary>ⓘ Penjelasan kasbon</summary><div className="finance-cash-advance-footnote">Pembayaran dicatat Owner melalui Absensi & Gaji → Potongan Kasbon: potong gaji, tunai, atau transfer. Tunai/transfer tercatat di Kas Harian dan tidak menjadi omzet laundry.</div></details>
     </section>
 
     <section className="panel finance-filter">
@@ -692,7 +694,7 @@ export function FinancePage(){
             </tr>
           </thead>
           <tbody>
-            {revenueSharing.rows.map(row=><tr key={row.category}>
+            {revenueSharing.rows.filter((row:{revenue:number;shareAmount:number})=>showZeroCategories||row.revenue>0||row.shareAmount>0).map(row=><tr key={row.category}>
               <td><b>{row.category}</b></td>
               <td><b>{formatRupiah(row.revenue)}</b></td>
               <td><span className="share-percent-badge"><Percent size={13}/>{row.sharePercent.toFixed(2)}%</span></td>
@@ -703,6 +705,7 @@ export function FinancePage(){
           </tbody>
         </table>
       </div>
+      {revenueSharing.rows.filter((row:{revenue:number;shareAmount:number})=>!(row.revenue>0||row.shareAmount>0)).length>0&&<button type="button" className="secondary-button revenue-zero-toggle" onClick={()=>setShowZeroCategories(!showZeroCategories)}>{showZeroCategories?'Sembunyikan kategori Rp 0':`Tampilkan ${revenueSharing.rows.filter((row:{revenue:number;shareAmount:number})=>!(row.revenue>0||row.shareAmount>0)).length} kategori Rp 0`}</button>}
     </section>
     </>}
 
@@ -717,10 +720,10 @@ export function FinancePage(){
           <thead><tr><th>Tanggal</th><th>Kategori</th><th>Grup</th><th>Keterangan</th><th>Metode</th><th>Bukti</th><th>Nominal</th><th>Aksi</th></tr></thead>
           <tbody>
             {filtered.map(row=><tr key={row.id}>
-              <td>{new Date(`${row.expense_date}T00:00:00`).toLocaleDateString('id-ID')}</td>
+              <td>{new Date(`${row.expense_date}T00:00:00`).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'})}</td>
               <td><b>{row.category_name}</b></td>
               <td>{row.group_name||'-'}</td>
-              <td>{row.description||'-'}{row.reference&&<small className="table-sub">Ref: {row.reference}</small>}</td>
+              <td className="expense-desc-cell"><span className={`expense-desc ${openDesc[row.id]?'is-open':''}`} title={row.description||''} onClick={()=>setOpenDesc({...openDesc,[row.id]:!openDesc[row.id]})}>{row.description||'-'}</span>{row.reference&&<small className="table-sub">Ref: {row.reference}</small>}</td>
               <td><span className={row.payment_method==='payroll'?'payroll-expense-badge':''}>{row.payment_method==='payroll'?'GAJI':row.payment_method.toUpperCase()}</span></td>
               <td>{'proof_path' in row&&row.proof_path
                 ? <button type="button" className="expense-proof-view" onClick={()=>void viewExpenseProof(row)}><Eye size={14}/>Lihat</button>
@@ -728,8 +731,8 @@ export function FinancePage(){
               <td><b>{formatRupiah(Number(row.amount))}</b></td>
               <td>{row.payment_method!=='payroll'
                 ? <div className="expense-row-actions">
-                    <button type="button" className="expense-edit-button" onClick={()=>openEditExpense(row as ExpenseRow)}><Pencil size={14}/><span>Edit</span></button>
-                    <button type="button" className="expense-delete-request" onClick={()=>{setDeleteExpense(row as ExpenseRow);setDeleteReason('');setDeletePhrase('');setMessage('')}}>
+                    <button type="button" className="expense-edit-button" aria-label="Edit pengeluaran" title="Edit" onClick={()=>openEditExpense(row as ExpenseRow)}><Pencil size={14}/><span>Edit</span></button>
+                    <button type="button" className="expense-delete-request" aria-label={isOwner?'Hapus pengeluaran':'Ajukan hapus pengeluaran'} title={isOwner?'Hapus':'Ajukan Hapus'} onClick={()=>{setDeleteExpense(row as ExpenseRow);setDeleteReason('');setDeletePhrase('');setMessage('')}}>
                       <Trash2 size={14}/><span className="delete-label">{isOwner?'Hapus':'Ajukan Hapus'}</span>
                     </button>
                   </div>
