@@ -580,3 +580,36 @@ html[data-ui="professional"] body .app-shell .manager-share-settings .manager-sh
   html[data-ui="professional"] body .app-shell .manager-share-settings .manager-share-toggles .secondary-button{flex:1;min-height:44px}
 }
 
+/* V113.0.188: Keuangan & Laporan - angka tegas, grid rapi, menu laporan seragam */
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-kpi-content b{font-size:20px!important;font-weight:700!important;line-height:1.2!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-kpi-content small{font-size:14px!important;font-weight:600!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-kpi-content em{font-size:13px!important;font-style:normal}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-custom-period input{height:44px!important;min-height:44px!important;font-size:15px!important;min-width:0}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-custom-period label{min-width:0;font-size:13px!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-analytics-grid{align-items:start!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-menu-heading{display:none!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-section{margin-top:22px!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-section:first-of-type{margin-top:0!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-section h2{margin:0 0 10px!important;font-size:15px!important;font-weight:700!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-menu-panel .finance-hub-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))!important;gap:12px!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-card{min-height:96px!important;align-items:center!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-copy b{display:block;font-size:15px!important}
+html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-copy small{display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px!important;line-height:1.4}
+@media(min-width:1101px){
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-live-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-live-kpis>.finance-live-kpi:last-child:nth-child(4n+3){grid-column:span 2}
+}
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-custom-period{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;flex-basis:100%;width:100%}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-custom-period input{width:100%!important;box-sizing:border-box}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-live-kpis{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-live-kpi{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px!important;padding:12px!important;min-height:0!important;text-align:left}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-live-kpi .finance-kpi-icon{display:none!important}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-kpi-content{display:flex!important;flex-direction:column!important;gap:2px!important;width:100%;min-width:0}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-kpi-content small{font-size:13px!important}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-kpi-content b{font-size:18px!important;word-break:break-word}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-kpi-content em{font-size:12px!important;line-height:1.3}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-live-kpis>.finance-live-kpi:last-child:nth-child(odd){grid-column:1/-1}
+  html[data-ui="professional"] body .app-shell .main-content .regular-report-page .finance-hub-menu-panel .finance-hub-grid{grid-template-columns:1fr!important}
+}
+

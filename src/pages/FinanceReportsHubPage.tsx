@@ -225,7 +225,7 @@ export function FinanceReportsHubPage(){
         <label><span>Dari</span><input type="date" value={from} onChange={e=>{setFrom(e.target.value);setPreset('custom')}}/></label>
         <label><span>Sampai</span><input type="date" value={to} onChange={e=>{setTo(e.target.value);setPreset('custom')}}/></label>
       </div>
-      <span className="finance-hub-current-period">{periodLabel}</span>
+      {preset==='custom'&&<span className="finance-hub-current-period">{periodLabel}</span>}
       {preset==='selected-month'&&<div className="finance-hub-month-selects">
         <label>Bulan<select aria-label="Bulan laporan keuangan" value={selectedMonth.slice(5)} onChange={e=>chooseMonth(`${selectedMonth.slice(0,4)}-${e.target.value}`)}>
           {monthNames.map((name,i)=><option key={name} value={String(i+1).padStart(2,'0')}>{name}</option>)}
