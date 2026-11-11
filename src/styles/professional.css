@@ -809,3 +809,8 @@ html[data-ui="professional"] body .app-shell .payroll-stats .stat-card{align-ite
 }
 html[data-ui="professional"] body .app-shell .payroll-stats .stat-card small{display:block}
 
+/* V113.0.197: Detail Gaji - header & tombol bawah menempel rata, tidak ada isi nyembul saat scroll */
+html[data-ui="professional"] body .modal-backdrop .modal-card:has(.payroll-detail-summary)>header{top:-15px!important;margin-top:-15px!important;padding-top:29px!important;box-shadow:0 -20px 0 #fff;z-index:6}
+html[data-ui="professional"] body .modal-backdrop .modal-card:has(.payroll-detail-summary) .payroll-detail-summary~.modal-actions{bottom:-15px!important;margin-bottom:-15px!important;padding:12px 0 15px!important;box-shadow:0 20px 0 #fff}
+html[data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions>button:last-child{grid-column:1/-1}
+
