@@ -846,3 +846,23 @@ html[data-ui="professional"] body .app-shell #additional-cash-advance-requests t
   html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(5),html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(6){grid-column:1/-1}
 }
 
+/* V113.0.199: Daftar Order tahap 2 - panel filter rapi (cari penuh, satu baris dropdown, Reset) */
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px 12px!important;align-items:end;padding:14px 16px!important}
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-search-box{grid-column:1/-1;width:100%;min-width:0!important;height:44px}
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-filter-field{display:grid;gap:4px;min-width:0;margin:0}
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-filter-field>span{font-size:12px!important;font-weight:400!important;color:#6b8592;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-filter-field input,html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-filter-field select{width:100%;min-width:0;height:40px;font-size:13.5px}
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-reset-filter,html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-toolbar-export .secondary-button{width:100%;min-height:40px;padding:0 12px!important;font-size:13.5px!important;white-space:nowrap}
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-toolbar-export{min-width:0}
+html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .record-count{grid-column:span 4;justify-self:end;background:none;padding:0;font-size:12.5px;font-weight:400;color:#6b8592;text-align:right}
+@media(max-width:1100px){
+  html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar{grid-template-columns:repeat(3,minmax(0,1fr))}
+  html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .record-count{grid-column:1/-1;justify-self:start;text-align:left}
+}
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+html[data-ui="professional"] body .app-shell .order-panel .assignment-find-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px!important;border-top:1px solid #e6eff4;font-size:13px}
+html[data-ui="professional"] body .app-shell .order-panel .assignment-find-bar>span{color:#6b8592}
+html[data-ui="professional"] body .app-shell .order-panel .assignment-find-bar>button{min-height:34px;padding:0 12px!important;border-radius:99px!important;font-size:13px!important;font-weight:400!important}
+

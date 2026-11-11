@@ -1182,7 +1182,7 @@ export function OrdersPage() {
               setAttentionFilter('all')
             }}
           >
-            Semua
+            Reset
           </button>
 
           <div className="order-toolbar-export">
@@ -1194,19 +1194,19 @@ export function OrdersPage() {
           <span className="record-count">{loading?'Mencari...':`${filtered.length} dimuat${searchStats?' dari '+searchStats.count+' hasil':''}${mayHaveMore?' • masih ada hasil lain':''}`}</span>
         </div>
 
-        <div className="assignment-find-bar" aria-label="Cari order dengan penugasan kosong">
+        {(missingAssignmentCounts.worker>0||missingAssignmentCounts.courier>0||missingAssignmentCounts.both>0||assignmentFilter!=='all')&&<div className="assignment-find-bar" aria-label="Cari order dengan penugasan kosong">
           <span>Cari yang belum diisi:</span>
-          <button type="button" className={assignmentFilter==='missing_worker'?'is-active':''} onClick={()=>setAssignmentFilter('missing_worker')}>
+          {(missingAssignmentCounts.worker>0||assignmentFilter==='missing_worker')&&<button type="button" className={assignmentFilter==='missing_worker'?'is-active':''} onClick={()=>setAssignmentFilter('missing_worker')}>
             Yang Mengerjakan <b>{missingAssignmentCounts.worker}</b>
-          </button>
-          <button type="button" className={assignmentFilter==='missing_courier'?'is-active':''} onClick={()=>setAssignmentFilter('missing_courier')}>
+          </button>}
+          {(missingAssignmentCounts.courier>0||assignmentFilter==='missing_courier')&&<button type="button" className={assignmentFilter==='missing_courier'?'is-active':''} onClick={()=>setAssignmentFilter('missing_courier')}>
             Kurir <b>{missingAssignmentCounts.courier}</b>
-          </button>
-          <button type="button" className={assignmentFilter==='missing_both'?'is-active':''} onClick={()=>setAssignmentFilter('missing_both')}>
+          </button>}
+          {(missingAssignmentCounts.both>0||assignmentFilter==='missing_both')&&<button type="button" className={assignmentFilter==='missing_both'?'is-active':''} onClick={()=>setAssignmentFilter('missing_both')}>
             Keduanya <b>{missingAssignmentCounts.both}</b>
-          </button>
+          </button>}
           {assignmentFilter!=='all'&&<button type="button" className="assignment-clear" onClick={()=>setAssignmentFilter('all')}>Tampilkan Semua</button>}
-        </div>
+        </div>}
 
         {message && <div className="error-box inline-message">{message}</div>}
 
