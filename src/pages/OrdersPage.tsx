@@ -1,8 +1,11 @@
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
+  MoreHorizontal,
   CircleDollarSign,
   Eye,
   FileSpreadsheet,
@@ -157,6 +160,8 @@ export function OrdersPage() {
   const [message, setMessage] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [detail, setDetail] = useState<OrderRow | null>(null)
+  const [expandedOrders, setExpandedOrders] = useState<Record<string,boolean>>({})
+  const [orderMenu, setOrderMenu] = useState<OrderRow | null>(null)
   const [form, setForm] = useState(emptyOrder)
   const [items, setItems] = useState<OrderItemDraft[]>([])
   const [quantityDraft, setQuantityDraft] = useState<Record<string,string>>({})
@@ -1289,7 +1294,7 @@ export function OrdersPage() {
         </div>
 
         <div className="table-wrap order-desktop-table">
-          <table className="orders-table">
+          <table className="orders-table orders-table-compact">
             <thead>
               <tr>
                 <th>Order</th>
@@ -1298,22 +1303,23 @@ export function OrdersPage() {
                 <th>Status</th>
                 <th>Pembayaran</th>
                 <th>Total</th>
-                <th>Estimasi Selesai</th>
-                <th>Pengiriman</th>
-                <th>Kasir</th>
-                <th>Dibuat</th>
                 <th className="order-actions-heading">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={11} className="table-empty">Memuat order...</td></tr>}
+              {loading && <tr><td colSpan={7} className="table-empty">Memuat order...</td></tr>}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={11} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
+                <tr><td colSpan={7} className="table-empty"><ShoppingBag size={30}/>Belum ada order.</td></tr>
               )}
-              {filtered.map(row => (
-                <tr key={row.id}>
-                  <td>
+              {filtered.map(row => {
+                const isOpen=!!expandedOrders[row.id]
+                const proofRow=deliveryProofByOrder.get(row.id)
+                return <Fragment key={row.id}>
+                <tr className={`order-main-row status-row-${row.status} ${isOrderOverdue(row)?'is-overdue':''}`}>
+                  <td className="order-no-cell">
                     <b>{row.order_no}</b>
+                    <small>{new Date(row.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit'})}</small>
+                    {isOrderOverdue(row)&&<small className="order-overdue-mini">TERLAMBAT</small>}
                     {(()=>{
                       const assignment=orderAssignmentMap.get(row.id)
                       const missingWorker=!assignment?.worker_id
@@ -1325,7 +1331,7 @@ export function OrdersPage() {
                       </div>
                     })()}
                   </td>
-                  <td><b>{row.customer_name}</b><small>{row.customer_phone}</small><small className="customer-list-address">Alamat: {customerAddressById.get(row.customer_id)||'Belum diisi'}</small></td>
+                  <td><b>{row.customer_name}</b><small>{row.customer_phone}</small></td>
                   <td className="order-service-cell">
                     {(serviceItemsByOrder.get(row.id)||[]).length
                       ? <div className="order-service-list">
@@ -1358,63 +1364,42 @@ export function OrdersPage() {
                   </td>
                   <td><span className={`badge payment-${row.payment_status}`}>{paymentLabels[row.payment_status]}</span><small>{formatRupiah(row.paid_amount)} / {formatRupiah(row.total)}</small></td>
                   <td><b>{formatRupiah(row.total)}</b></td>
-                  <td className={isOrderOverdue(row)?'order-due-cell overdue':''}>
-                    {row.due_at
-                      ? <><b>{new Date(row.due_at).toLocaleDateString('id-ID')}</b><small>{new Date(row.due_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}{isOrderOverdue(row)?' • TERLAMBAT':''}</small></>
-                      : <span className="order-no-due">Belum diatur</span>}
-                  </td>
-                  <td>
-                    {deliveryProofByOrder.get(row.id)
-                      ? <button
-                          type="button"
-                          className="delivery-proof-badge"
-                          onClick={()=>window.open(deliveryProofByOrder.get(row.id)!.photo_url,'_blank')}
-                          title="Lihat foto bukti pengiriman"
-                        >
-                          <Image size={13}/>Terkirim
-                        </button>
-                      : <button
-                          type="button"
-                          className="delivery-confirm-button"
-                          onClick={()=>openDelivery(row)}
-                          title="Konfirmasi kurir telah mengirim order"
-                        >
-                          <Truck size={13}/>Konfirmasi Kurir
-                        </button>}
-                  </td>
-                  <td><b>{row.created_by_name||row.created_by_login_id||'Data lama'}</b></td>
-                  <td className="order-created-date">{new Date(row.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit'})}</td>
-                  <td>
-                    <div className="row-actions">
-                      <button className="order-view-button" onClick={() => setDetail(row)} aria-label="Lihat Detail" title="Lihat Detail"><Eye size={16}/></button>
-                      <button
-                        className="order-reprint-button"
-                        onClick={()=>printReceipt(row)}
-                        aria-label={`Cetak ulang nota ${row.order_no}`}
-                        title="Cetak Ulang Nota"
-                      >
-                        <Printer size={15}/>
-                        <span>Cetak Ulang Nota</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="order-delete-request-button"
-                        onClick={()=>{setDeleteTarget(row);setDeleteReason('');setDeletePhrase('');setMessage('')}}
-                        title={profile?.role==='owner'?'Hapus Order':'Ajukan Hapus ke Owner'}
-                      >
-                        <Trash2 size={15}/>
-                        <span className="delete-label">{profile?.role==='owner'?'Hapus':'Ajukan Hapus'}</span>
-                      </button>
-
+                  <td className="order-actions-cell">
+                    <div className="order-row-actions">
+                      <button type="button" className="order-view-button order-detail-button" onClick={() => setDetail(row)} aria-label={`Lihat detail ${row.order_no}`}>Detail</button>
+                      <button type="button" className="order-more-button" aria-label={`Aksi lain untuk ${row.order_no}`} title="Aksi lain" onClick={()=>setOrderMenu(row)}><MoreHorizontal size={18}/></button>
                     </div>
+                    <button type="button" className="order-expand-toggle" aria-expanded={isOpen} onClick={()=>setExpandedOrders({...expandedOrders,[row.id]:!isOpen})}>{isOpen?'Sembunyikan':'Rincian'}{isOpen?<ChevronUp size={14}/>:<ChevronDown size={14}/>}</button>
                   </td>
                 </tr>
-              ))}
+                {isOpen&&<tr className="order-detail-row">
+                  <td colSpan={7}>
+                    <div className="order-detail-grid">
+                      <div><span>Estimasi selesai</span>{row.due_at
+                        ? <b className={isOrderOverdue(row)?'overdue-text':''}>{new Date(row.due_at).toLocaleDateString('id-ID')} {new Date(row.due_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}{isOrderOverdue(row)?' • TERLAMBAT':''}</b>
+                        : <b className="order-no-due">Belum diatur</b>}</div>
+                      <div><span>Pengiriman</span>{proofRow
+                        ? <button type="button" className="delivery-proof-badge" onClick={()=>window.open(proofRow.photo_url,'_blank')} title="Lihat foto bukti pengiriman"><Image size={13}/>Terkirim</button>
+                        : <button type="button" className="delivery-confirm-button" onClick={()=>openDelivery(row)} title="Konfirmasi kurir telah mengirim order"><Truck size={13}/>Konfirmasi Kurir</button>}</div>
+                      <div><span>Kasir</span><b>{row.created_by_name||row.created_by_login_id||'Data lama'}</b></div>
+                      <div><span>Dibuat</span><b>{new Date(row.created_at).toLocaleString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})}</b></div>
+                      <div className="order-detail-address"><span>Alamat</span><b>{customerAddressById.get(row.customer_id)||'Belum diisi'}</b></div>
+                    </div>
+                  </td>
+                </tr>}
+                </Fragment>
+              })}
             </tbody>
           </table>
         </div>
       </section>
+
+      {orderMenu&&<Modal title={`Aksi — ${orderMenu.order_no}`} onClose={()=>setOrderMenu(null)}>
+        <div className="order-action-menu">
+          <button type="button" className="order-reprint-button" onClick={()=>{const r=orderMenu;setOrderMenu(null);printReceipt(r)}}><Printer size={16}/>Cetak Ulang Nota</button>
+          <button type="button" className="order-delete-request-button" onClick={()=>{const r=orderMenu;setOrderMenu(null);setDeleteTarget(r);setDeleteReason('');setDeletePhrase('');setMessage('')}}><Trash2 size={16}/>{profile?.role==='owner'?'Hapus Order':'Ajukan Hapus ke Owner'}</button>
+        </div>
+      </Modal>}
 
       {modalOpen && (
         <Modal title="Order Laundry Baru" onClose={() => setModalOpen(false)}>

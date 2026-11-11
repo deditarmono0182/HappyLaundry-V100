@@ -751,3 +751,35 @@ html[data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-act
   position:sticky;bottom:0;z-index:3;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;
   margin-top:14px;padding:12px 0;background:#fff;border-top:1px solid #e6eff4}
 
+/* V113.0.194: Daftar Order laptop - 7 kolom, rincian dilipat, aksi Detail + menu */
+html[data-ui="professional"] body .app-shell .order-desktop-table{max-height:none!important;overflow:visible!important}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact{min-width:0!important;width:100%;table-layout:auto}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact th{padding:11px 14px!important;font-size:12px!important;white-space:nowrap}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact td{padding:12px 14px!important;vertical-align:middle;font-size:13.5px!important}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact td small{display:block;font-size:12px!important;color:#6b8592;margin-top:2px}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-no-cell b{white-space:nowrap;font-size:13.5px}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-overdue-mini{color:#b91c1c!important;font-weight:600}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact td .badge{white-space:nowrap}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact td:nth-child(5) small{white-space:nowrap}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact td:nth-child(6){white-space:nowrap}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.order-main-row{box-shadow:inset 3px 0 0 #cbd5e1}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.status-row-received{box-shadow:inset 3px 0 0 #1565c0}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.status-row-washing,html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.status-row-drying,html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.status-row-ironing,html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.status-row-packing{box-shadow:inset 3px 0 0 #0d9bb5}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.status-row-ready{box-shadow:inset 3px 0 0 #16a34a}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.is-overdue{box-shadow:inset 3px 0 0 #dc2626!important}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-actions-cell{text-align:right;white-space:nowrap}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-row-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-button{min-height:36px;padding:0 16px!important;width:auto!important;border:1px solid #cfe0ea;border-radius:10px;background:#fff;color:#1565a8;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-more-button{width:36px;height:36px;padding:0;border:1px solid #cfe0ea;border-radius:10px;background:#fff;color:#14323f;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-expand-toggle{display:inline-flex;align-items:center;gap:2px;margin-top:4px;padding:0;border:0;background:transparent;color:#1565a8;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.order-detail-row>td{background:#f6fafc;padding:12px 18px!important}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-grid>div>span{display:block;font-size:12px;color:#6b8592;margin-bottom:2px}
+html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-grid .order-detail-address{grid-column:span 1}
+html[data-ui="professional"] body .order-action-menu{display:grid;gap:10px}
+html[data-ui="professional"] body .order-action-menu button{width:100%!important;min-height:46px;display:flex!important;align-items:center;justify-content:flex-start!important;gap:10px;padding:0 16px!important;font-size:15px!important}
+html[data-ui="professional"] body .order-action-menu button span{display:inline!important}
+@media(max-width:1100px){
+  html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
