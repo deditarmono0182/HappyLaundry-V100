@@ -796,3 +796,16 @@ html[data-ui="professional"] body .modal-backdrop .order-detail-actions>button{w
   html[data-ui="professional"] body .modal-backdrop .order-detail-actions>button{white-space:normal;min-height:48px}
 }
 
+/* V113.0.196: Detail Gaji - Koreksi/Batalkan digabung ke tombol bawah; kartu Penggajian satu baris */
+html[data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions{
+  display:grid!important;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px!important;justify-content:stretch!important}
+html[data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions>button{width:100%!important;min-width:0;min-height:44px;margin:0!important;padding:0 10px!important;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;font-size:14px!important}
+html[data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions>button:disabled{opacity:.45;cursor:not-allowed}
+html[data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions>.modal-actions-selection{grid-column:1/-1;font-size:13px;color:#4f6b78;padding:0 2px}
+html[data-ui="professional"] body .modal-backdrop .cash-advance-hint{margin:8px 2px 4px;font-size:12.5px;color:#6b8592}
+html[data-ui="professional"] body .app-shell .payroll-stats .stat-card{align-items:center}
+@media(min-width:1200px){
+  html[data-ui="professional"] body .app-shell .payroll-stats{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
+html[data-ui="professional"] body .app-shell .payroll-stats .stat-card small{display:block}
+

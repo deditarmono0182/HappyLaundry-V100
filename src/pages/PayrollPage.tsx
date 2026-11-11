@@ -859,7 +859,7 @@ export function PayrollPage(){
       <section className="stats-grid payroll-stats">
         <StatCard icon={UsersRound} label="Karyawan Aktif" value={String(employees.length)} caption="Karyawan yang dapat diabsen"/>
         <StatCard icon={CalendarCheck2} label="Total Hadir Bulan Ini" value={String(totalPresent)} caption="Akumulasi hari hadir"/>
-        <StatCard icon={HandCoins} label="Penerimaan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
+        <StatCard icon={HandCoins} label="Penerimaan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran masuk bulan ini"/>
       </section>
 
       <section className="panel data-panel">
@@ -924,10 +924,10 @@ export function PayrollPage(){
       {managerError&&managerReport&&<ManagerShareSettings key={month} month={month} employees={employees} report={managerReport} onSaved={load}/>}
       {!managerError&&<>
       <section className="stats-grid payroll-stats">
-        <StatCard icon={HandCoins} label="Penerimaan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran pelanggan yang masuk pada bulan dipilih"/>
+        <StatCard icon={HandCoins} label="Penerimaan Bulan Ini" value={formatRupiah(monthlyRevenue)} caption="Pembayaran masuk bulan ini"/>
         <StatCard icon={WalletCards} label="Gaji Bersih" value={formatRupiah(totalPayroll)} caption={`${employees.length} karyawan aktif`}/>
         <StatCard icon={HandCoins} label="Kas Bon Dipotong" value={formatRupiah(totalCashAdvanceApplied)} caption={`Sisa kas bon ${formatRupiah(totalCashAdvanceOutstanding)}`}/>
-        <StatCard icon={Gift} label="Komisi Order" value={formatRupiah(totalOrderCommission)} caption="Produksi + kurir yang sudah menjadi hak"/>
+        <StatCard icon={Gift} label="Komisi Order" value={formatRupiah(totalOrderCommission)} caption="Produksi + kurir (hak)"/>
         <StatCard icon={CheckCircle2} label="Gaji Dibayar" value={formatRupiah(totalPaidPayroll)} caption={`Sisa ${formatRupiah(totalOutstandingPayroll)}`}/>
       </section>
 
@@ -1080,13 +1080,7 @@ export function PayrollPage(){
             </tbody>
           </table>
         </div>
-        <div className="cash-advance-action-bar" role="group" aria-label="Aksi kasbon terpilih">
-          <span className="cash-advance-action-info">{selectedKas?<>Dipilih: <b>{new Date(selectedKas.issued_at).toLocaleString('id-ID')}</b> • {formatRupiah(Number(selectedKas.amount||0))}</>:'Pilih salah satu kasbon di atas untuk dikoreksi atau dibatalkan.'}</span>
-          <span className="cash-advance-action-buttons">
-            <button type="button" className="finance-row-action" disabled={!selectedKas} onClick={()=>selectedKas&&openCorrectCashAdvance(selectedKas)}><Pencil size={14}/>Koreksi</button>
-            <button type="button" className="finance-row-action danger-soft" disabled={!selectedKas} onClick={()=>{if(selectedKas){setCancelCashAdvance(selectedKas);setCancelCashAdvanceReason('')}}}><Trash2 size={14}/>Batalkan</button>
-          </span>
-        </div>
+        <p className="cash-advance-hint">Klik salah satu kasbon di atas, lalu pakai tombol Koreksi atau Batalkan di bagian bawah.</p>
         <div className="payroll-detail-head payroll-payment-history-head">
           <b>Riwayat Pembayaran Gaji</b>
           <small>Catatan pembayaran tersimpan per periode untuk mencegah pembayaran dobel.</small>
@@ -1127,6 +1121,9 @@ export function PayrollPage(){
           </table>
         </div>
         <div className="modal-actions">
+          <div className="modal-actions-selection">{selectedKas?<>Kasbon dipilih: <b>{new Date(selectedKas.issued_at).toLocaleString('id-ID')}</b> • {formatRupiah(Number(selectedKas.amount||0))}</>:'Belum ada kasbon dipilih'}</div>
+          <button type="button" className="secondary-button" disabled={!selectedKas} onClick={()=>selectedKas&&openCorrectCashAdvance(selectedKas)}><Pencil size={16}/>Koreksi Kasbon</button>
+          <button type="button" className="secondary-button danger-soft" disabled={!selectedKas} onClick={()=>{if(selectedKas){setCancelCashAdvance(selectedKas);setCancelCashAdvanceReason('')}}}><Trash2 size={16}/>Batalkan Kasbon</button>
           <button className="secondary-button" onClick={()=>openDeductionCorrection(detailEmployee,true)}><ReceiptText size={16}/>Potongan Kasbon</button>
           {(row?.outstanding||0)>0&&<button className="primary-button" onClick={()=>{setDetailEmployee(null);openPayrollPayment(detailEmployee)}}><HandCoins size={16}/>Catat Pembayaran</button>}
           <button className="secondary-button" onClick={()=>downloadXls(commissionDetailExport(detailEmployee))}><FileSpreadsheet size={16}/>Export XLS</button>
