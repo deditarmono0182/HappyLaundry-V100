@@ -662,7 +662,7 @@ export function CashierPage() {
                       placeholder="Cari nama atau WhatsApp"
                     />
                   </label>
-                  <button type="button" className="secondary-button cashier-refresh-master" disabled={masterRefreshing} onClick={()=>void refreshMasterData(true)}>
+                  <button type="button" className="secondary-button cashier-refresh-master" aria-label="Refresh data pelanggan dan layanan" title="Refresh data" disabled={masterRefreshing} onClick={()=>void refreshMasterData(true)}>
                     <RefreshCw size={15} className={masterRefreshing?'spin':''}/>{masterRefreshing?'Memuat...':'Refresh Data'}
                   </button>
                 </div>

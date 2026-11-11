@@ -926,3 +926,36 @@ html[data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-se
 html[data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-card-head>div:first-child{min-width:0;flex:1}
 html[data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-card-head .customer-list-address{display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;line-height:1.35}
 
+/* V113.0.204: Kasir di HP - ringkas, satu layar lebih banyak isi */
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section{padding:14px!important;gap:10px!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section-title{display:flex!important;align-items:center;justify-content:space-between;gap:8px;margin:0!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section-title b{font-size:16px!important;font-weight:500!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section-title small{display:none!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section-title>button{min-height:36px!important;width:auto!important;padding:0 12px!important;font-size:13px!important;white-space:nowrap}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-master-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) 44px;gap:8px!important;align-items:center}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-master-toolbar .cashier-search{min-width:0!important;width:100%;height:44px}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-master-toolbar .cashier-refresh-master{font-size:0!important;width:44px!important;min-height:44px!important;padding:0!important;gap:0!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-master-sync{font-size:12px!important;color:#6b8592!important;line-height:1.35}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-category-tabs{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:8px!important;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-category-tabs::-webkit-scrollbar{display:none}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-category-tabs button{flex:none;min-height:36px!important;padding:0 14px!important;font-size:13.5px!important;white-space:nowrap}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-empty{min-height:0!important;padding:12px!important;font-size:13.5px}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-empty svg{display:none}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-due-after-service{display:grid;gap:6px;min-width:0}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-due-after-service input{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box;min-height:44px}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form label>small{font-size:12px!important;color:#6b8592!important;line-height:1.35}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .form-grid-two{gap:10px!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section:last-of-type .form-grid-two{grid-template-columns:1fr 1fr!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section:last-of-type .form-grid-two>.full-field{grid-column:1/-1}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section:last-of-type .quick-pay-row{order:9;display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section:last-of-type .quick-pay-row>span{grid-column:1/-1;font-size:13px}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section:last-of-type .quick-pay-row>button{min-height:40px;padding:0 6px!important;font-size:13px!important;white-space:nowrap}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-section:last-of-type label.full-field{order:10}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-total-card-inline{order:20;display:grid!important;grid-template-columns:1fr 1fr;gap:6px 14px!important;padding:14px!important}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-total-card-inline>span:first-child{grid-column:1/-1;font-size:13px!important;opacity:.85}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-total-card-inline>strong{grid-column:1/-1;font-size:24px!important;font-weight:700!important;margin-bottom:4px}
+  html[data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-total-card-inline>div{display:flex!important;justify-content:space-between;gap:8px;padding:4px 0!important;border:0!important;font-size:13px!important}
+  html[data-ui="professional"] body .app-shell .cashier-shortcuts{display:none!important}
+}
+
