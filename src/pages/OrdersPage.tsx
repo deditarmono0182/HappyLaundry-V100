@@ -1267,11 +1267,14 @@ export function OrdersPage() {
                   </div>
                 </div>
 
-                <div className="order-mobile-meta">
+                <div className="order-mobile-meta order-mobile-meta-compact">
+                  <div className="order-mobile-estimate"><span>Estimasi</span><b className={isOrderOverdue(row)?'overdue-text':''}>{row.due_at?new Date(row.due_at).toLocaleDateString('id-ID'):'Belum diatur'}</b></div>
+                  <button type="button" className="order-mobile-expand" aria-expanded={!!expandedOrders[row.id]} onClick={()=>setExpandedOrders({...expandedOrders,[row.id]:!expandedOrders[row.id]})}>{expandedOrders[row.id]?'Sembunyikan':'Rincian'}</button>
+                </div>
+                {expandedOrders[row.id]&&<div className="order-mobile-meta order-mobile-meta-extra">
                   <div><span>Kasir</span><b>{row.created_by_name||row.created_by_login_id||'Data lama'}</b></div>
                   <div><span>Dibuat</span><b>{new Date(row.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit'})}</b></div>
-                  <div><span>Estimasi</span><b className={isOrderOverdue(row)?'overdue-text':''}>{row.due_at?new Date(row.due_at).toLocaleDateString('id-ID'):'Belum diatur'}</b></div>
-                </div>
+                </div>}
 
                 <div className="order-mobile-primary-actions">
                   <button className="order-mobile-detail" onClick={()=>setDetail(row)}><Eye size={17}/>Detail</button>
