@@ -48,22 +48,27 @@ interface DashboardAssignment{
   courier_id:string|null
 }
 
+// Cache sementara di memori: saat menu Dashboard dibuka lagi, data terakhir langsung tampil
+// sementara data terbaru diambil di latar belakang.
+let dashboardCache:null|{owner:boolean;orders:OrderRow[];cash:{amount:number;direction:'in'|'out';created_at:string}[];payments:{amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[];orderItems:DashboardOrderItem[];services:DashboardService[];commissions:DashboardCommission[];assignments:DashboardAssignment[];progressEvents:DashboardProgressEvent[];pendingDeletes:number}=null
+
 export function DashboardPage() {
   const navigate=useNavigate()
   const {profile}=useAuth()
   const isOwner=profile?.role==='owner'
-  const [orders,setOrders]=useState<OrderRow[]>([])
-  const [cash,setCash]=useState<{amount:number;direction:'in'|'out';created_at:string}[]>([])
-  const [payments,setPayments]=useState<{amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[]>([])
-  const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>([])
-  const [services,setServices]=useState<DashboardService[]>([])
-  const [commissions,setCommissions]=useState<DashboardCommission[]>([])
-  const [progressEvents,setProgressEvents]=useState<DashboardProgressEvent[]>([])
-  const [assignments,setAssignments]=useState<DashboardAssignment[]>([])
+  const cached=dashboardCache&&dashboardCache.owner===(profile?.role==='owner')?dashboardCache:null
+  const [orders,setOrders]=useState<OrderRow[]>(()=>cached?.orders||[])
+  const [cash,setCash]=useState<{amount:number;direction:'in'|'out';created_at:string}[]>(()=>cached?.cash||[])
+  const [payments,setPayments]=useState<{amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[]>(()=>cached?.payments||[])
+  const [orderItems,setOrderItems]=useState<DashboardOrderItem[]>(()=>cached?.orderItems||[])
+  const [services,setServices]=useState<DashboardService[]>(()=>cached?.services||[])
+  const [commissions,setCommissions]=useState<DashboardCommission[]>(()=>cached?.commissions||[])
+  const [progressEvents,setProgressEvents]=useState<DashboardProgressEvent[]>(()=>cached?.progressEvents||[])
+  const [assignments,setAssignments]=useState<DashboardAssignment[]>(()=>cached?.assignments||[])
   const [attentionOpen,setAttentionOpen]=useState(false)
   const [displayOpen,setDisplayOpen]=useState(false)
   const [message,setMessage]=useState('')
-  const [pendingDeletes,setPendingDeletes]=useState(0)
+  const [pendingDeletes,setPendingDeletes]=useState(()=>cached?.pendingDeletes||0)
   const [revenuePeriod,setRevenuePeriod]=useState<DashboardPeriod>('7d')
   const [selectedMonth,setSelectedMonth]=useState(()=>businessMonthKey())
   const [selectedCategory,setSelectedCategory]=useState<string|null>(null)
@@ -91,6 +96,7 @@ export function DashboardPage() {
       setServices((s.data as DashboardService[])||[])
       setCommissions((commissionRes.data as DashboardCommission[])||[])
       setAssignments((assignmentRes.data as DashboardAssignment[])||[])
+      let cachedHistory:DashboardProgressEvent[]=[],cachedPending=0
       if(isOwner){
         const [{count},historyRes]=await Promise.all([
           supabase
@@ -106,10 +112,13 @@ export function DashboardPage() {
         if(historyRes.error)setMessage(historyRes.error.message)
         setPendingDeletes(count||0)
         setProgressEvents((historyRes.data as DashboardProgressEvent[])||[])
+        cachedHistory=(historyRes.data as DashboardProgressEvent[])||[]
+        cachedPending=count||0
       }else{
         setPendingDeletes(0)
         setProgressEvents([])
       }
+      dashboardCache={owner:isOwner,orders:(o.data as OrderRow[])||[],cash:c.data||[],payments:(pay.data as {amount:number;method:'cash'|'qris'|'transfer'|'other';created_at:string}[])||[],orderItems:(i.data as DashboardOrderItem[])||[],services:(s.data as DashboardService[])||[],commissions:(commissionRes.data as DashboardCommission[])||[],assignments:(assignmentRes.data as DashboardAssignment[])||[],progressEvents:cachedHistory,pendingDeletes:cachedPending}
     }
   },[isOwner])
 

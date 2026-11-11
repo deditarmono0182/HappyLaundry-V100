@@ -242,7 +242,10 @@ export function OrdersPage() {
     }finally{if(sequence===loadSequence.current)setLoading(false)}
   }, [orderLimit,serverQuery,serverDateStart,serverDateEnd,serverFilters,serverStatsKey,searchRevision])
 
+  const firstSearchRun=useRef(true)
   useEffect(()=>{
+    // Saat halaman pertama dibuka, load() di bawah sudah mengambil data; jangan menunda 300 ms lalu mengambil ulang.
+    if(firstSearchRun.current){firstSearchRun.current=false;return}
     ++loadSequence.current
     setLoading(true);setRows([])
     const timer=window.setTimeout(()=>{
