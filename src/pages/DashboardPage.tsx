@@ -582,15 +582,15 @@ export function DashboardPage() {
           </div>
         </div>
         <div className="dashboard-month-picker">
-          <label>Bulan<select aria-label="Nama bulan" value={selectedMonth.slice(5)} onChange={e=>{setSelectedMonth(`${selectedMonth.slice(0,4)}-${e.target.value}`);setRevenuePeriod('selected-month')}}>
+          {revenuePeriod==="selected-month"&&<><label>Bulan<select aria-label="Nama bulan" value={selectedMonth.slice(5)} onChange={e=>{setSelectedMonth(`${selectedMonth.slice(0,4)}-${e.target.value}`);setRevenuePeriod('selected-month')}}>
             {monthNames.map((name,index)=><option key={name} value={String(index+1).padStart(2,'0')}>{name}</option>)}
           </select></label>
           <label>Tahun<select aria-label="Tahun laporan" value={selectedMonth.slice(0,4)} onChange={e=>{setSelectedMonth(`${e.target.value}-${selectedMonth.slice(5)}`);setRevenuePeriod('selected-month')}}>
             {Array.from({length:21},(_,i)=>businessParts(businessClock).year-i).map(year=><option key={year} value={year}>{year}</option>)}
-          </select></label>
+          </select></label></>}
           <span>Periode aktif: {selectedPeriodLabel} (WIB)</span>
         </div>
-        <div className="owner-combined-chart">
+        <div className={`owner-combined-chart ${chart.length>12?"is-dense":""}`}>
           <div className="owner-chart-legend">
             <span className="legend-order-value">Omzet / Barang Masuk</span>
             <span className="legend-cash-in">Kas Masuk</span>

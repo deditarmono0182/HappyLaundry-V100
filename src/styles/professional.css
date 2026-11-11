@@ -866,3 +866,21 @@ html[data-ui="professional"] body .app-shell .order-panel .assignment-find-bar{d
 html[data-ui="professional"] body .app-shell .order-panel .assignment-find-bar>span{color:#6b8592}
 html[data-ui="professional"] body .app-shell .order-panel .assignment-find-bar>button{min-height:34px;padding:0 12px!important;border-radius:99px!important;font-size:13px!important;font-weight:400!important}
 
+/* V113.0.200: Dashboard - grafik omzet & rincian per hari rapi di laptop dan HP */
+html[data-ui="professional"] body .app-shell .dashboard-month-picker{margin:0 0 6px!important}
+html[data-ui="professional"] body .app-shell .dashboard-month-picker>span{font-size:13px!important;color:#6b8592}
+html[data-ui="professional"] body .app-shell .owner-chart-legend{font-size:12px!important;font-weight:400!important;gap:6px 16px;min-width:0!important}
+html[data-ui="professional"] body .app-shell .owner-chart-labels{display:block!important;min-width:0!important;margin-top:10px;max-height:300px;overflow:auto;border:1px solid #e6eff4;border-radius:12px;background:#fff}
+html[data-ui="professional"] body .app-shell .owner-chart-labels>div{display:grid!important;grid-template-columns:56px minmax(0,1fr) minmax(0,1fr) 70px;gap:8px;align-items:center;padding:9px 12px!important;border-radius:0!important;border-top:1px solid #eef3f6;background:#fff!important;text-align:left!important}
+html[data-ui="professional"] body .app-shell .owner-chart-labels>div:first-child{border-top:0}
+html[data-ui="professional"] body .app-shell .owner-chart-labels b{font-size:13px!important;font-weight:500!important}
+html[data-ui="professional"] body .app-shell .owner-chart-labels span{font-size:12.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-ui="professional"] body .app-shell .owner-chart-labels strong{font-size:12.5px!important;font-weight:500!important;text-align:right}
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell .owner-combined-chart:not(.is-dense){overflow:visible!important}
+  html[data-ui="professional"] body .app-shell .owner-combined-chart:not(.is-dense) svg{width:100%!important;max-width:100%!important;min-height:0}
+  html[data-ui="professional"] body .app-shell .owner-chart-labels>div{grid-template-columns:44px minmax(0,1fr) 62px;row-gap:2px}
+  html[data-ui="professional"] body .app-shell .owner-chart-labels>div>b{grid-row:1/3}
+  html[data-ui="professional"] body .app-shell .owner-chart-labels>div>strong{grid-row:1/3;grid-column:3}
+}
+
