@@ -783,3 +783,16 @@ html[data-ui="professional"] body .order-action-menu button span{display:inline!
   html[data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
+/* V113.0.195: Detail Order - kotak riwayat koreksi dan tombol aksi dirapikan */
+html[data-ui="professional"] body .modal-backdrop .order-correction-history{display:block!important;padding:12px 14px;border:1px solid #dbe8ee;border-radius:12px;background:#f6fafc}
+html[data-ui="professional"] body .modal-backdrop .order-correction-history-title{display:flex!important;align-items:baseline;justify-content:space-between;gap:12px;margin:0}
+html[data-ui="professional"] body .modal-backdrop .order-correction-history-title span{font-size:14px;color:#14323f}
+html[data-ui="professional"] body .modal-backdrop .order-correction-history-title b{font-size:13px;font-weight:500;color:#6b8592;white-space:nowrap}
+html[data-ui="professional"] body .modal-backdrop .order-correction-history-empty{margin:6px 0 0!important;font-size:13px;color:#6b8592}
+html[data-ui="professional"] body .modal-backdrop .order-detail-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important;justify-content:stretch!important;margin-top:16px;padding-top:16px;border-top:1px solid #e6eff4}
+html[data-ui="professional"] body .modal-backdrop .order-detail-actions>button{width:100%!important;min-width:0;min-height:46px;display:inline-flex!important;align-items:center;justify-content:center!important;gap:8px;margin:0!important;padding:0 12px!important;font-size:14px!important;white-space:nowrap}
+@media(max-width:520px){
+  html[data-ui="professional"] body .modal-backdrop .order-detail-actions{grid-template-columns:1fr}
+  html[data-ui="professional"] body .modal-backdrop .order-detail-actions>button{white-space:normal;min-height:48px}
+}
+
