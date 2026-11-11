@@ -884,3 +884,15 @@ html[data-ui="professional"] body .app-shell .owner-chart-labels strong{font-siz
   html[data-ui="professional"] body .app-shell .owner-chart-labels>div>strong{grid-row:1/3;grid-column:3}
 }
 
+/* V113.0.201: kartu atas Dashboard - huruf sama dengan kartu Owner, lebih pendek, tanpa keterangan */
+@media(min-width:601px){
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card{min-height:0!important;padding:12px 16px!important;gap:12px!important;align-items:center}
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card .stat-icon{width:40px!important;height:40px!important;min-width:40px;border-radius:12px}
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card .stat-icon svg{width:20px;height:20px}
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card>div:last-child{display:flex!important;flex-direction:column;gap:4px!important;min-width:0}
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card span{font-size:14px!important;font-weight:500!important;color:#475569!important;line-height:1.3!important;white-space:normal}
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card strong,html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card .dashboard-money-value{font-size:20px!important;font-weight:700!important;line-height:1.2!important;color:#0f2e3d}
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card small{display:none!important}
+  html[data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card.dashboard-overdue-stat-card.has-overdue strong{color:#b45309}
+}
+
