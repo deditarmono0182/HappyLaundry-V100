@@ -814,3 +814,35 @@ html[data-ui="professional"] body .modal-backdrop .modal-card:has(.payroll-detai
 html[data-ui="professional"] body .modal-backdrop .modal-card:has(.payroll-detail-summary) .payroll-detail-summary~.modal-actions{bottom:-15px!important;margin-bottom:-15px!important;padding:12px 0 15px!important;box-shadow:0 20px 0 #fff}
 html[data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions>button:last-child{grid-column:1/-1}
 
+/* V113.0.198: Keuangan (akses karyawan) - banner, tombol kas bon, tabel pengajuan */
+html[data-ui="professional"] body .app-shell .employee-finance-note{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px!important;border-radius:12px}
+html[data-ui="professional"] body .app-shell .employee-finance-note b{font-size:13px!important;font-weight:500!important;color:#1b5d8a}
+html[data-ui="professional"] body .app-shell .employee-finance-note span{font-size:13px!important;line-height:1.5;color:#4f6b78}
+html[data-ui="professional"] body .app-shell .finance-cash-advance-heading h3{font-size:17px!important;font-weight:500!important}
+html[data-ui="professional"] body .app-shell .finance-cash-advance-heading p{font-size:13px!important;color:#6b8592!important;margin-top:2px}
+html[data-ui="professional"] body .app-shell .finance-cash-advance-panel .cash-report-actions{display:flex!important;flex-wrap:wrap;justify-content:flex-start!important;gap:10px!important}
+html[data-ui="professional"] body .app-shell .finance-cash-advance-panel .cash-report-actions>button{min-height:40px;padding:0 14px!important;font-size:13.5px!important;white-space:nowrap}
+@media(min-width:901px){
+  html[data-ui="professional"] body .app-shell .finance-cash-advance-panel .cash-report-actions>button:last-child{display:none!important}
+}
+html[data-ui="professional"] body .app-shell #finance-cash-advance-requests>.form-actions{justify-content:flex-end;margin:0 0 6px!important}
+html[data-ui="professional"] body .app-shell #finance-cash-advance-requests>.form-actions .secondary-button{min-height:34px;padding:0 12px!important;font-size:13px!important}
+html[data-ui="professional"] body .app-shell #additional-cash-advance-requests .cash-correction-request-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+html[data-ui="professional"] body .app-shell #additional-cash-advance-requests .cash-correction-request-tools .secondary-button{min-height:38px;padding:0 14px!important;font-size:13.5px!important}
+html[data-ui="professional"] body .app-shell #additional-cash-advance-requests table{min-width:0!important;table-layout:auto}
+html[data-ui="professional"] body .app-shell #additional-cash-advance-requests th{white-space:nowrap}
+html[data-ui="professional"] body .app-shell #additional-cash-advance-requests td{font-size:13.5px!important;vertical-align:top}
+html[data-ui="professional"] body .app-shell #additional-cash-advance-requests td small{font-size:12px!important;color:#6b8592}
+@media(max-width:700px){
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests thead{display:none}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:12px;margin:0 0 10px;border:1px solid #dbe8ee;border-radius:12px;background:#fff}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td{display:block;padding:0!important;border:0!important;min-width:0}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td::before{display:block;font-size:11px;color:#6b8592;margin-bottom:1px}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(1)::before{content:"Tanggal / Pengaju"}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(2)::before{content:"Karyawan"}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(3)::before{content:"Tambahan / Metode"}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(4)::before{content:"Alasan"}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(5)::before{content:"Status / Keputusan"}
+  html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(5),html[data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td:nth-child(6){grid-column:1/-1}
+}
+
