@@ -959,3 +959,48 @@ html[data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-ca
   html[data-ui="professional"] body .app-shell .cashier-shortcuts{display:none!important}
 }
 
+/* V113.0.205: Riwayat Kehadiran - baris ramping, satu tombol Koreksi untuk tanggal terpilih */
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-info{font-size:13px!important;padding:10px 14px!important;line-height:1.45}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-tools{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-tools>label:first-child{display:grid;gap:4px;font-size:13px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-tools .checkbox-label{display:inline-flex;align-items:center;gap:8px;min-height:40px;font-size:13.5px;margin:0}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-tools .secondary-button{min-height:40px;padding:0 14px!important;font-size:13.5px!important}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-counts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-counts>div{display:flex!important;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px!important;border-radius:10px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-counts span{font-size:13px!important;color:#475569}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-counts b{font-size:18px!important;font-weight:700;color:#0f2e3d}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border:1px solid #cfe0ea;border-radius:12px;background:#f3f9fe}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-info{font-size:13.5px;color:#334e5c}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls{display:flex;gap:8px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls select{min-height:40px;min-width:120px;font-size:14px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls .secondary-button{min-height:40px;padding:0 18px!important;font-size:14px!important;background:#1565c0;color:#fff;border-color:#1565c0}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls :disabled{opacity:.45;cursor:not-allowed}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main{max-height:none!important;overflow:visible!important}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main table{width:100%;table-layout:auto}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main th{font-size:12px!important;padding:9px 12px!important;white-space:nowrap}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main td{padding:8px 12px!important;font-size:13.5px!important;vertical-align:middle}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main td small{display:block;font-size:12px!important;color:#6b8592;margin-top:1px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr{cursor:pointer}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr:hover{background:#f3f9fe}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr.is-picked{background:#e8f1fc;box-shadow:inset 3px 0 0 #1565c0}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main .attendance-pick{width:34px;padding-right:0!important}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main .pl-radio{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #9db3bf;vertical-align:-2px}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tr.is-picked .pl-radio{border-color:#1565c0;background:radial-gradient(#1565c0 0 45%,transparent 50%)}
+@media(max-width:900px){
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-counts{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-bar{flex-direction:column;align-items:stretch}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls{display:grid;grid-template-columns:1fr 1fr}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main thead{display:none}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main table,html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody{display:block}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr{display:grid;grid-template-columns:28px 1fr auto;gap:2px 8px;align-items:center;padding:10px 12px;margin-bottom:8px;border:1px solid #dbe8ef;border-radius:12px;background:#fff}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr.is-picked{background:#e8f1fc;border-color:#1565c0;box-shadow:none}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td{display:block;padding:0!important;border:0!important}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(4)::before{content:"Masuk ";color:#6b8592;font-size:12px}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(5)::before{content:"Pulang ";color:#6b8592;font-size:12px}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(4),html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(5){grid-column:2;font-size:13px!important}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(6){grid-column:2/-1}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(3){grid-column:3;grid-row:1}
+}
+

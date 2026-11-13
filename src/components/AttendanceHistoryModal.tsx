@@ -16,9 +16,9 @@ export function AttendanceHistoryModal({employee,initialMonth,onClose,onCorrect}
  const [audit,setAudit]=useState<AttendanceAudit[]>([])
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[auditError,setAuditError]=useState('')
  const [onlyMissing,setOnlyMissing]=useState(false),[revision,setRevision]=useState(0)
- const [selected,setSelected]=useState<Record<string,HistoryAttendanceStatus>>({})
+ const [pickedDate,setPickedDate]=useState<string|null>(null),[pickStatus,setPickStatus]=useState<HistoryAttendanceStatus>('present')
  useEffect(()=>{
-  let active=true;setLoading(true);setError('');setAuditError('');setRecords([]);setAudit([]);setSelected({})
+  let active=true;setLoading(true);setError('');setAuditError('');setRecords([]);setAudit([]);setPickedDate(null)
   void(async()=>{
    const [daily,history]=await Promise.allSettled([loadAttendanceMonth(employee.id,month),loadAttendanceAudit(employee.id,month)])
    if(!active)return
@@ -41,7 +41,7 @@ export function AttendanceHistoryModal({employee,initialMonth,onClose,onCorrect}
  })
  return <Modal title={`Riwayat Kehadiran — ${employee.full_name}`} onClose={onClose} className="attendance-history-modal">
   <div className="modal-form">
-   <div className="info-box">Cari tanggal yang terlewat, cocokkan dengan bukti kerja atau keterangan karyawan, lalu koreksi statusnya. Belum Absen juga dapat berarti libur atau belum bekerja. Tanggal mendatang tidak ditandai sebagai absen.</div>
+   <div className="info-box attendance-history-info">Pilih tanggal yang terlewat, lalu koreksi statusnya. Belum Absen bisa berarti libur atau belum bekerja; tanggal mendatang tidak ditandai absen.</div>
    <div className="attendance-history-tools">
     <label>Bulan Riwayat<input type="month" value={month} max={businessMonthKey()} onChange={e=>{if(e.target.value)setMonth(e.target.value)}}/></label>
     <label className="checkbox-label"><input type="checkbox" checked={onlyMissing} onChange={e=>setOnlyMissing(e.target.checked)}/>Hanya Belum Absen</label>
@@ -51,13 +51,21 @@ export function AttendanceHistoryModal({employee,initialMonth,onClose,onCorrect}
    </div>
    {loading?<div className="info-box">Memuat riwayat kehadiran...</div>:error?<div className="error-box">{error}. Coba Muat Ulang; tanggal yang belum dimuat tidak dianggap Belum Absen.</div>:<>
     <div className="attendance-history-counts">{(['present','permission','sick','absent','missing'] as const).map(key=><div key={key}><span>{key==='missing'?'Belum Absen':labels[key]}</span><b>{counts[key]}</b></div>)}</div>
-    <div className="table-wrap attendance-history-scroll"><table>
-     <thead><tr><th>Tanggal (WIB)</th><th>Status</th><th>Masuk</th><th>Pulang</th><th>Sumber / Catatan</th><th>Koreksi Owner</th></tr></thead>
-     <tbody>{visible.map(({date,record})=><tr key={date} data-attendance-date={date}>
-      <td>{dateLabel(date)}</td><td><span className={`attendance-badge attendance-${record?.status||'none'}`}>{record?labels[record.status]:'Belum Absen'}</span></td>
+    <div className="attendance-correct-bar" role="group" aria-label="Koreksi kehadiran tanggal terpilih">
+     <span className="attendance-correct-info">{pickedDate?<>Tanggal dipilih: <b>{dateLabel(pickedDate)}</b></>:'Pilih salah satu tanggal di bawah untuk dikoreksi.'}</span>
+     <span className="attendance-correct-controls">
+      <select aria-label="Status koreksi" disabled={!pickedDate} value={pickStatus} onChange={e=>setPickStatus(e.target.value as HistoryAttendanceStatus)}>{Object.entries(labels).map(([value,label])=><option value={value} key={value}>{label}</option>)}</select>
+      <button type="button" className="secondary-button" disabled={!pickedDate} onClick={()=>pickedDate&&onCorrect(pickedDate,pickStatus)}>Koreksi</button>
+     </span>
+    </div>
+    <div className="table-wrap attendance-history-scroll attendance-history-main"><table>
+     <thead><tr><th aria-label="Pilih"></th><th>Tanggal (WIB)</th><th>Status</th><th>Masuk</th><th>Pulang</th><th>Sumber / Catatan</th></tr></thead>
+     <tbody>{visible.map(({date,record})=><tr key={date} data-attendance-date={date} className={pickedDate===date?'is-picked':''} tabIndex={0} role="radio" aria-checked={pickedDate===date}
+      onClick={()=>{setPickedDate(date);setPickStatus(record?.status||'present')}}
+      onKeyDown={(e:{key:string;preventDefault:()=>void})=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setPickedDate(date);setPickStatus(record?.status||'present')}}}>
+      <td className="attendance-pick"><span className="pl-radio" aria-hidden="true"/></td><td>{dateLabel(date)}</td><td><span className={`attendance-badge attendance-${record?.status||'none'}`}>{record?labels[record.status]:'Belum Absen'}</span></td>
       <td>{record?.attendance_source==='owner_override'?'-':timeLabel(record?.check_in_at)}</td><td>{record?.attendance_source==='owner_override'?'-':timeLabel(record?.check_out_at)}</td>
       <td className="attendance-history-note">{historySource(record?.attendance_source)}{record?.attendance_source==='owner_override'&&<small>Jam kerja tidak ditentukan dari waktu koreksi.</small>}<small>{record?.override_reason||record?.note||'-'}</small></td>
-      <td><div className="row-actions"><select aria-label={`Status koreksi ${date}`} value={selected[date]||record?.status||'present'} onChange={e=>setSelected({...selected,[date]:e.target.value as HistoryAttendanceStatus})}>{Object.entries(labels).map(([value,label])=><option value={value} key={value}>{label}</option>)}</select><button type="button" className="secondary-button" onClick={()=>onCorrect(date,selected[date]||record?.status||'present')}>Koreksi</button></div></td>
      </tr>)}{visible.length===0&&<tr><td colSpan={6} className="table-empty">{onlyMissing?'Tidak ada tanggal tanpa catatan pada periode ini.':'Belum ada tanggal yang sudah berjalan pada bulan ini.'}</td></tr>}</tbody>
     </table></div>
    </>}
