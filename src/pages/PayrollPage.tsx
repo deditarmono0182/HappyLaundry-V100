@@ -216,7 +216,7 @@ export function PayrollPage(){
   })
   const[shareDraft,setShareDraft]=useState<Array<{category:string;share_percent:string}>>([])
   const[bonusDraft,setBonusDraft]=useState<Record<string,string>>({})
-  const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus;date:string}|null>(null)
+  const[overrideTarget,setOverrideTarget]=useState<{employee:Employee;status:AttendanceStatus;date:string;dates?:string[]}|null>(null)
   const[overrideReason,setOverrideReason]=useState('')
   const attendanceOverridePending=useRef(false)
   const loanSavePending=useRef(false)
@@ -467,23 +467,31 @@ export function PayrollPage(){
     setSuccess('')
 
     try{
-    const{data,error}=await supabase.rpc('v111_owner_override_attendance',{
-      p_employee_id:overrideTarget.employee.id,
-      p_attendance_date:overrideTarget.date,
-      p_status:overrideTarget.status,
-      p_reason:reason
-    })
-
-    if(error){
-      setMessage(error.message)
-      setBusy(false)
-      return
+    const targetDates=overrideTarget.dates&&overrideTarget.dates.length?overrideTarget.dates:[overrideTarget.date]
+    let savedCount=0,lastMessage=''
+    for(let index=0;index<targetDates.length;index++){
+      const date=targetDates[index]
+      const{data,error}=await supabase.rpc('v111_owner_override_attendance',{
+        p_employee_id:overrideTarget.employee.id,
+        p_attendance_date:date,
+        p_status:overrideTarget.status,
+        p_reason:reason
+      })
+      if(error){
+        const remaining=targetDates.slice(index)
+        setMessage(savedCount>0?`${savedCount} tanggal berhasil disimpan. Gagal pada ${date}: ${error.message}. Tanggal yang tersisa masih terpilih, silakan coba lagi.`:error.message)
+        if(savedCount>0){setOverrideTarget((current:{employee:Employee;status:AttendanceStatus;date:string;dates?:string[]}|null)=>current?{...current,date:remaining[0],dates:remaining}:current);await load()}
+        setBusy(false)
+        return
+      }
+      savedCount++
+      const result=(Array.isArray(data)?data[0]:data) as {message?:string}|null
+      lastMessage=result?.message||''
     }
-
-    const result=(Array.isArray(data)?data[0]:data) as {message?:string}|null
     setOverrideTarget(null)
     setOverrideReason('')
-    setSuccess(result?.message||`${overrideTarget.employee.full_name}: ${statusLabels[overrideTarget.status]} berhasil disimpan.`)
+    const statusText:string=statusLabels[overrideTarget.status as AttendanceStatus]
+    setSuccess(targetDates.length>1?`${overrideTarget.employee.full_name}: ${statusText} berhasil disimpan untuk ${targetDates.length} tanggal.`:(lastMessage||`${overrideTarget.employee.full_name}: ${statusText} berhasil disimpan.`))
     await load()
     }catch(error){setMessage(error instanceof Error?error.message:'Koreksi absensi gagal disimpan. Coba lagi.')}
     finally{attendanceOverridePending.current=false;setBusy(false)}
@@ -1031,9 +1039,11 @@ export function PayrollPage(){
     {attendanceHistoryEmployee&&!overrideTarget&&<AttendanceHistoryModal
       employee={attendanceHistoryEmployee} initialMonth={month}
       onClose={()=>setAttendanceHistoryEmployee(null)}
-      onCorrect={(date,status)=>{
-        setMonth(date.slice(0,7));setAttendanceDate(date)
-        setAttendanceStatus(attendanceHistoryEmployee,status,date)
+      onCorrect={(dates:string[],status:AttendanceStatus)=>{
+        const sorted=[...dates].sort()
+        setMonth(sorted[0].slice(0,7));setAttendanceDate(sorted[0])
+        setAttendanceStatus(attendanceHistoryEmployee,status,sorted[0])
+        setOverrideTarget((current:{employee:Employee;status:AttendanceStatus;date:string;dates?:string[]}|null)=>current?{...current,dates:sorted}:current)
       }}
     />}
 
@@ -1262,7 +1272,9 @@ export function PayrollPage(){
           <CalendarCheck2 size={22}/>
           <div>
             <b>Status: {statusLabels[overrideTarget.status]}</b>
-            <span>{new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(`${overrideTarget.date}T12:00:00+07:00`))}</span>
+            <span>{overrideTarget.dates&&overrideTarget.dates.length>1
+              ?`${overrideTarget.dates.length} tanggal: ${overrideTarget.dates.map((d:string)=>new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,day:'numeric',month:'short'}).format(new Date(`${d}T12:00:00+07:00`))).join(', ')}`
+              :new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(`${overrideTarget.date}T12:00:00+07:00`))}</span>
           </div>
         </div>
 

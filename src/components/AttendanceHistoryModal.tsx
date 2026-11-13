@@ -9,16 +9,16 @@ const dateLabel=(date:string)=>new Intl.DateTimeFormat('id-ID',{timeZone:BUSINES
 const timeLabel=(value:string|null|undefined)=>value?new Intl.DateTimeFormat('id-ID',{timeZone:BUSINESS_TIME_ZONE,hour:'2-digit',minute:'2-digit'}).format(new Date(value)):'-'
 export function AttendanceHistoryModal({employee,initialMonth,onClose,onCorrect}:{
  employee:{id:string;full_name:string;login_id:string};initialMonth:string;onClose:()=>void;
- onCorrect:(date:string,status:HistoryAttendanceStatus)=>void
+ onCorrect:(dates:string[],status:HistoryAttendanceStatus)=>void
 }){
  const [month,setMonth]=useState(initialMonth)
  const [records,setRecords]=useState<HistoryAttendance[]>([])
  const [audit,setAudit]=useState<AttendanceAudit[]>([])
  const [loading,setLoading]=useState(true),[error,setError]=useState(''),[auditError,setAuditError]=useState('')
  const [onlyMissing,setOnlyMissing]=useState(false),[revision,setRevision]=useState(0)
- const [pickedDate,setPickedDate]=useState<string|null>(null),[pickStatus,setPickStatus]=useState<HistoryAttendanceStatus>('present')
+ const [pickedDates,setPickedDates]=useState<string[]>([]),[pickStatus,setPickStatus]=useState<HistoryAttendanceStatus>('present')
  useEffect(()=>{
-  let active=true;setLoading(true);setError('');setAuditError('');setRecords([]);setAudit([]);setPickedDate(null)
+  let active=true;setLoading(true);setError('');setAuditError('');setRecords([]);setAudit([]);setPickedDates([])
   void(async()=>{
    const [daily,history]=await Promise.allSettled([loadAttendanceMonth(employee.id,month),loadAttendanceAudit(employee.id,month)])
    if(!active)return
@@ -33,6 +33,11 @@ export function AttendanceHistoryModal({employee,initialMonth,onClose,onCorrect}
  const counts={present:0,permission:0,sick:0,absent:0,missing:0}
  for(const day of days){if(day.record)counts[day.record.status]++;else counts.missing++}
  const canUse=!loading&&!error&&!!month
+ const togglePick=(date:string,status?:HistoryAttendanceStatus)=>setPickedDates((current:string[])=>{
+  if(current.includes(date))return current.filter((item:string)=>item!==date)
+  if(current.length===0)setPickStatus(status||'present')
+  return [...current,date]
+ })
  const options=()=>({title:`Riwayat Kehadiran — ${employee.full_name}`,filename:`riwayat-hadir-${employee.login_id}-${month}`,
   subtitle:`Periode ${month} • Waktu WIB • Belum Absen berarti belum ada catatan; bukan bukti tidak bekerja.`,
   headers:['Tanggal','Status','Masuk (WIB)','Pulang (WIB)','Sumber','Alasan / Catatan'],
@@ -41,7 +46,7 @@ export function AttendanceHistoryModal({employee,initialMonth,onClose,onCorrect}
  })
  return <Modal title={`Riwayat Kehadiran — ${employee.full_name}`} onClose={onClose} className="attendance-history-modal">
   <div className="modal-form">
-   <div className="info-box attendance-history-info">Pilih tanggal yang terlewat, lalu koreksi statusnya. Belum Absen bisa berarti libur atau belum bekerja; tanggal mendatang tidak ditandai absen.</div>
+   <div className="info-box attendance-history-info">Pilih satu atau beberapa tanggal yang terlewat, lalu koreksi statusnya sekaligus. Belum Absen bisa berarti libur atau belum bekerja; tanggal mendatang tidak ditandai absen.</div>
    <div className="attendance-history-tools">
     <label>Bulan Riwayat<input type="month" value={month} max={businessMonthKey()} onChange={e=>{if(e.target.value)setMonth(e.target.value)}}/></label>
     <label className="checkbox-label"><input type="checkbox" checked={onlyMissing} onChange={e=>setOnlyMissing(e.target.checked)}/>Hanya Belum Absen</label>
@@ -52,18 +57,20 @@ export function AttendanceHistoryModal({employee,initialMonth,onClose,onCorrect}
    {loading?<div className="info-box">Memuat riwayat kehadiran...</div>:error?<div className="error-box">{error}. Coba Muat Ulang; tanggal yang belum dimuat tidak dianggap Belum Absen.</div>:<>
     <div className="attendance-history-counts">{(['present','permission','sick','absent','missing'] as const).map(key=><div key={key}><span>{key==='missing'?'Belum Absen':labels[key]}</span><b>{counts[key]}</b></div>)}</div>
     <div className="attendance-correct-bar" role="group" aria-label="Koreksi kehadiran tanggal terpilih">
-     <span className="attendance-correct-info">{pickedDate?<>Tanggal dipilih: <b>{dateLabel(pickedDate)}</b></>:'Pilih salah satu tanggal di bawah untuk dikoreksi.'}</span>
+     <span className="attendance-correct-info">{pickedDates.length?<>Dipilih <b>{pickedDates.length} tanggal</b>{pickedDates.length<=4&&<>: {[...pickedDates].sort().map(d=>dateLabel(d)).join('; ')}</>}</>:'Klik satu atau beberapa tanggal di bawah untuk dikoreksi sekaligus.'}</span>
      <span className="attendance-correct-controls">
-      <select aria-label="Status koreksi" disabled={!pickedDate} value={pickStatus} onChange={e=>setPickStatus(e.target.value as HistoryAttendanceStatus)}>{Object.entries(labels).map(([value,label])=><option value={value} key={value}>{label}</option>)}</select>
-      <button type="button" className="secondary-button" disabled={!pickedDate} onClick={()=>pickedDate&&onCorrect(pickedDate,pickStatus)}>Koreksi</button>
+      <button type="button" className="secondary-button attendance-select-missing" onClick={()=>setPickedDates(days.filter((day:{date:string;record?:unknown})=>!day.record).map((day:{date:string})=>day.date))} disabled={!days.some((day:{date:string;record?:unknown})=>!day.record)}>Pilih semua Belum Absen</button>
+      <button type="button" className="secondary-button" onClick={()=>setPickedDates([])} disabled={!pickedDates.length}>Kosongkan</button>
+      <select aria-label="Status koreksi" disabled={!pickedDates.length} value={pickStatus} onChange={e=>setPickStatus(e.target.value as HistoryAttendanceStatus)}>{Object.entries(labels).map(([value,label])=><option value={value} key={value}>{label}</option>)}</select>
+      <button type="button" className="secondary-button attendance-apply" disabled={!pickedDates.length} onClick={()=>onCorrect(pickedDates,pickStatus)}>Koreksi{pickedDates.length>1?` (${pickedDates.length})`:''}</button>
      </span>
     </div>
     <div className="table-wrap attendance-history-scroll attendance-history-main"><table>
      <thead><tr><th aria-label="Pilih"></th><th>Tanggal (WIB)</th><th>Status</th><th>Masuk</th><th>Pulang</th><th>Sumber / Catatan</th></tr></thead>
-     <tbody>{visible.map(({date,record})=><tr key={date} data-attendance-date={date} className={pickedDate===date?'is-picked':''} tabIndex={0} role="radio" aria-checked={pickedDate===date}
-      onClick={()=>{setPickedDate(date);setPickStatus(record?.status||'present')}}
-      onKeyDown={(e:{key:string;preventDefault:()=>void})=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setPickedDate(date);setPickStatus(record?.status||'present')}}}>
-      <td className="attendance-pick"><span className="pl-radio" aria-hidden="true"/></td><td>{dateLabel(date)}</td><td><span className={`attendance-badge attendance-${record?.status||'none'}`}>{record?labels[record.status]:'Belum Absen'}</span></td>
+     <tbody>{visible.map(({date,record})=><tr key={date} data-attendance-date={date} className={pickedDates.includes(date)?'is-picked':''} tabIndex={0} role="checkbox" aria-checked={pickedDates.includes(date)}
+      onClick={()=>togglePick(date,record?.status)}
+      onKeyDown={(e:{key:string;preventDefault:()=>void})=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePick(date,record?.status)}}}>
+      <td className="attendance-pick"><span className="pl-check" aria-hidden="true"/></td><td>{dateLabel(date)}</td><td><span className={`attendance-badge attendance-${record?.status||'none'}`}>{record?labels[record.status]:'Belum Absen'}</span></td>
       <td>{record?.attendance_source==='owner_override'?'-':timeLabel(record?.check_in_at)}</td><td>{record?.attendance_source==='owner_override'?'-':timeLabel(record?.check_out_at)}</td>
       <td className="attendance-history-note">{historySource(record?.attendance_source)}{record?.attendance_source==='owner_override'&&<small>Jam kerja tidak ditentukan dari waktu koreksi.</small>}<small>{record?.override_reason||record?.note||'-'}</small></td>
      </tr>)}{visible.length===0&&<tr><td colSpan={6} className="table-empty">{onlyMissing?'Tidak ada tanggal tanpa catatan pada periode ini.':'Belum ada tanggal yang sudah berjalan pada bulan ini.'}</td></tr>}</tbody>

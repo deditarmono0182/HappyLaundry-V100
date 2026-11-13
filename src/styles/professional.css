@@ -1004,3 +1004,14 @@ html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .att
   html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(3){grid-column:3;grid-row:1}
 }
 
+/* V113.0.206: Riwayat Kehadiran - pilih banyak tanggal, koreksi sekaligus */
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main .pl-check{display:inline-block;width:16px;height:16px;border-radius:4px;border:2px solid #9db3bf;vertical-align:-3px;position:relative;background:#fff}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tr.is-picked .pl-check{background:#1565c0;border-color:#1565c0}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tr.is-picked .pl-check::after{content:"";position:absolute;left:3px;top:0;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls{flex-wrap:wrap;align-items:center}
+html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls .attendance-select-missing,html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls .secondary-button:not(.attendance-apply){background:#fff;color:#1565a8;border-color:#cfe0ea}
+@media(max-width:700px){
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls{grid-template-columns:1fr 1fr}
+  html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls .attendance-select-missing{grid-column:1/-1}
+}
+
