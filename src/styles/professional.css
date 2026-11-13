@@ -1015,3 +1015,13 @@ html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .att
   html[data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls .attendance-select-missing{grid-column:1/-1}
 }
 
+/* V113.0.207: jendela (modal) selalu di tengah layar.
+   Animasi masuk panel memakai fill-mode "both" sehingga transform tetap menempel setelah selesai;
+   transform menjadikan panel sebagai acuan posisi "fixed", jadi modal di dalam panel panjang muncul jauh di bawah. */
+html[data-ui="professional"] .page-header,
+html[data-ui="professional"] .stats-grid,
+html[data-ui="professional"] .cashier-form,
+html[data-ui="professional"] .cashier-summary,
+html[data-ui="professional"] .dashboard-grid,
+html[data-ui="professional"] .data-panel{animation-fill-mode:backwards!important}
+
