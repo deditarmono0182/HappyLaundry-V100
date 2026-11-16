@@ -1,0 +1,1286 @@
+/* GENERATED: tema gelap otomatis dari global.css + regularReports.css + professional.css. Jangan diedit manual; jalankan ulang pembuatnya setelah CSS berubah. */
+html[data-theme="dark"] body{background:#182721!important;color:#c5e5e8!important;background:radial-gradient(circle at 90% -10%, rgba(18, 184, 124, .08), transparent 34%),
+    linear-gradient(180deg, #142921 0%, #172b22 100%)!important;background:#0c1e30!important;background:radial-gradient(circle at 90% 0%,rgba(28,70,111,0.08),transparent 28%),
+    linear-gradient(180deg,#0c1e30 0%,#0d2133 100%)!important}
+html[data-theme="dark"] .brand img{background:#161b22!important}
+html[data-theme="dark"] .sidebar nav a.active{background:#161b22!important;color:#b9e8d7!important;background:#161b22!important;color:#8cb0d9!important}
+html[data-theme="dark"] .signout-button{background:rgba(22,27,34,0.133)!important;background:rgba(22,27,34,0.1)!important;border-color:rgba(22,27,34,0.18)!important}
+html[data-theme="dark"] .topbar{background:#161b22!important;border-bottom:1px solid #2e403b!important;background:rgba(22,27,34,0.96)!important;border-bottom:1px solid #1b3345!important;background:rgba(22,27,34,0.96)!important;background:#161b22!important;border-bottom:1px solid #2e403b!important;background:#161b22!important;border-bottom:1px solid #2e403b!important}
+html[data-theme="dark"] .eyebrow{color:#aae3cf!important}
+html[data-theme="dark"] .status-chip{background:#172e23!important;color:#b9e8d7!important;background:#0d2233!important;color:#96bddc!important;border-color:#193a54!important}
+html[data-theme="dark"] .stat-card,html[data-theme="dark"] .panel{background:#161b22!important;border:1px solid #2e403b!important}
+html[data-theme="dark"] .stat-card span,html[data-theme="dark"] .stat-card small{color:#a8b6b8!important;color:#a5b4b8!important}
+html[data-theme="dark"] .stat-icon{background:#172e23!important;color:#aae3cf!important;background:linear-gradient(145deg, #143628, #122f23)!important;background:#0d2235!important}
+html[data-theme="dark"] .empty-state{color:#a8b6b8!important}
+html[data-theme="dark"] .system-list>div{border-bottom:1px solid #23302c!important}
+html[data-theme="dark"] .success{color:#aae3cf!important}
+html[data-theme="dark"] .login-page{background:linear-gradient(135deg,#152f24,#15271e)!important;background:radial-gradient(circle at top right,rgba(29,77,117,0.18),transparent 34%),
+    linear-gradient(135deg,#0c2030,#0d2234)!important}
+html[data-theme="dark"] .login-card{background:#161b22!important;border:1px solid #2e403b!important;border:1px solid #1a384d!important}
+html[data-theme="dark"] .login-card input{border:1px solid #3e5851!important}
+html[data-theme="dark"] .warning-box{background:#392f0e!important;background:#382d0e!important;border:1px solid #7c6021!important}
+html[data-theme="dark"] .error-box{background:#320d0d!important;background:#320d0f!important;border:1px solid #551e25!important}
+html[data-theme="dark"] .secondary-button{background:#161b22!important;background:linear-gradient(180deg, #161b22, #17261f)!important;border-color:#466b5d!important;background:#161b22!important;color:#8cb0d9!important;border-color:#234962!important;background:#161b22!important;border-color:#2b4450!important;color:#afcddb!important}
+html[data-theme="dark"] .search-box{border:1px solid #39514b!important;background:#161b22!important;border-color:#213d51!important}
+html[data-theme="dark"] .record-count{background:#1a2922!important;color:#b8d0cc!important;background:#0d2234!important;color:#96bddc!important;border-color:#1d3f57!important}
+html[data-theme="dark"] th{background:#17261f!important;color:#a8b6b8!important}
+html[data-theme="dark"] td{border-top:1px solid #23302c!important;color:#b7c8ca!important}
+html[data-theme="dark"] .row-actions button{background:#161b22!important}
+html[data-theme="dark"] .row-actions .danger-icon{color:#cf8c8c!important}
+html[data-theme="dark"] .success-badge{background:#143223!important;color:#b0e5d2!important;background:#163622!important;color:#a9e2c4!important}
+html[data-theme="dark"] .muted-badge{background:#202725!important;color:#9aa9bf!important;background:#1a252b!important;color:#a6b2b7!important}
+html[data-theme="dark"] .modal-card{background:#161b22!important}
+html[data-theme="dark"] .modal-form label{color:#bad0d2!important}
+html[data-theme="dark"] .modal-form input,html[data-theme="dark"] .modal-form textarea,html[data-theme="dark"] .modal-form select{border:1px solid #3e5851!important;background:#161b22!important}
+html[data-theme="dark"] .status-received{background:#0d1b35!important;color:#92a9d1!important}
+html[data-theme="dark"] .status-washing{background:#0e2d37!important;color:#a6d4e1!important}
+html[data-theme="dark"] .status-drying{background:#3b300f!important;color:#e3d4ab!important}
+html[data-theme="dark"] .status-ironing{background:#1c0d35!important;color:#ab96c9!important}
+html[data-theme="dark"] .status-packing{background:#38250e!important;color:#debd9d!important}
+html[data-theme="dark"] .status-ready{background:#133422!important;color:#b0e5d2!important}
+html[data-theme="dark"] .status-completed{background:#1f2a25!important;color:#b7c6c1!important}
+html[data-theme="dark"] .status-cancelled{background:#350d0d!important;color:#d29494!important}
+html[data-theme="dark"] .payment-unpaid{background:#350d0d!important;color:#d29494!important}
+html[data-theme="dark"] .payment-partial{background:#3c300f!important;color:#e4d4ad!important}
+html[data-theme="dark"] .payment-paid{background:#133422!important;color:#b0e5d2!important}
+html[data-theme="dark"] .mini-empty{border:1px dashed #3b504a!important;color:#a2aeae!important}
+html[data-theme="dark"] .order-item-row{border:1px solid #2a3d38!important;background:#16251d!important}
+html[data-theme="dark"] .item-subtotal span{color:#a4b1b1!important}
+html[data-theme="dark"] .remove-item-button{border:1px solid #532323!important;background:#310c0c!important;color:#d29090!important}
+html[data-theme="dark"] .order-total-box{background:#192821!important;background:linear-gradient(135deg,#0d2433,#0d2336)!important}
+html[data-theme="dark"] .order-total-box .grand-total{border-top:1px solid #30453d!important}
+html[data-theme="dark"] .order-detail>div:not(.form-actions){border-bottom:1px solid #23302c!important}
+html[data-theme="dark"] .order-detail span{color:#a5b1b3!important}
+html[data-theme="dark"] .production-column{background:#1a2b23!important;border:1px solid #2e443c!important}
+html[data-theme="dark"] .production-column>header{border-bottom:1px solid #2e443c!important;color:#c1dbd7!important}
+html[data-theme="dark"] .production-column>header span{background:#161b22!important}
+html[data-theme="dark"] .production-card{background:#161b22!important;border:1px solid #2e403b!important}
+html[data-theme="dark"] .production-card small{color:#a2aeaf!important;color:#afc3bf!important}
+html[data-theme="dark"] .cash-income{background:#133422!important;color:#b0e5d2!important}
+html[data-theme="dark"] .cash-expense{background:#350d0d!important;color:#d29494!important}
+html[data-theme="dark"] .money-in{color:#b0e5d2!important}
+html[data-theme="dark"] .money-out{color:#d38d8d!important}
+html[data-theme="dark"] .payment-summary{background:#192821!important}
+html[data-theme="dark"] .payment-summary span{color:#a3afb0!important}
+html[data-theme="dark"] .cashier-section{border:1px solid #2d3f39!important;background:#16251d!important;border:1px solid #2e473d!important;background:linear-gradient(180deg, rgba(22,27,34,0.98), rgba(21,39,30,0.98))!important;background:radial-gradient(circle at 100% 0%, rgba(19, 184, 124, .045), transparent 36%),
+    linear-gradient(180deg, #161b22, #102a22)!important}
+html[data-theme="dark"] .cashier-section-title small{color:#a2aeaf!important;color:#a6b3b1!important}
+html[data-theme="dark"] .wide-select{border:1px solid #3b514b!important;background:#161b22!important}
+html[data-theme="dark"] .cashier-empty{border:1px dashed #405952!important;background:linear-gradient(180deg, #102a22, #172920)!important}
+html[data-theme="dark"] .cashier-item select,html[data-theme="dark"] .cashier-item input{border:1px solid #3b514b!important;background:#161b22!important}
+html[data-theme="dark"] .cashier-item button{border:1px solid #552323!important;background:#310c0c!important;color:#d39292!important}
+html[data-theme="dark"] .cashier-total-card>div{border-top:1px solid rgba(22,27,34,0.17)!important}
+html[data-theme="dark"] .cashier-change{background:rgba(22,27,34,0.13)!important;background:rgba(22,27,34,0.18)!important;border:1px solid rgba(22,27,34,0.22)!important}
+html[data-theme="dark"] .cashier-today header{border-bottom:1px solid #273631!important}
+html[data-theme="dark"] .cashier-today header span{background:#173024!important;color:#ade4d1!important}
+html[data-theme="dark"] .cashier-today>div{border-bottom:1px solid #23302c!important}
+html[data-theme="dark"] .success-box{background:#153121!important;color:#ade4d1!important;border:1px solid #2f5b43!important}
+html[data-theme="dark"] .settings-card>header{border-bottom:1px solid #273631!important}
+html[data-theme="dark"] .settings-card>header svg{color:#aae3cf!important}
+html[data-theme="dark"] .settings-card>header small{color:#a3aeaf!important}
+html[data-theme="dark"] .settings-card input,html[data-theme="dark"] .settings-card textarea{border:1px solid #3f5851!important}
+html[data-theme="dark"] .settings-link{color:#aae3cf!important}
+html[data-theme="dark"] .cashier-success-panel{border:1px solid #305a44!important;background:#122f21!important;border:1px solid #3c765a!important;background:linear-gradient(135deg, #123223 0%, #102d1c 100%)!important;background:radial-gradient(circle at 100% 0%, rgba(19, 184, 124, .10), transparent 35%),
+    linear-gradient(135deg, #123324, #0e2d1a)!important}
+html[data-theme="dark"] .bar-column>span{color:#a5b1b2!important}
+html[data-theme="dark"] .bar-track{background:#1b2923!important}
+html[data-theme="dark"] .bar-column>b{color:#b4c3c4!important}
+html[data-theme="dark"] .status-summary>div{border-bottom:1px solid #23302c!important}
+html[data-theme="dark"] .status-dot.status-received{background:#2a4471!important}
+html[data-theme="dark"] .status-dot.status-ironing{background:#483166!important}
+html[data-theme="dark"] .status-dot.status-packing{background:#7c4d21!important}
+html[data-theme="dark"] .production-received{background:#0c1732!important}
+html[data-theme="dark"] .production-washing{background:#0d2833!important}
+html[data-theme="dark"] .production-drying{background:#352b0d!important}
+html[data-theme="dark"] .production-ironing{background:#1d0c32!important}
+html[data-theme="dark"] .production-packing{background:#34220d!important}
+html[data-theme="dark"] .production-ready{background:#152e21!important}
+html[data-theme="dark"] .report-filter input{border:1px solid #415953!important;border:1px solid #405d53!important;background:#161b22!important;color:#c6e8e3!important}
+html[data-theme="dark"] .quick-periods button,html[data-theme="dark"] .report-actions button{border:1px solid #3c514c!important;background:#161b22!important;color:#b9dbd6!important}
+html[data-theme="dark"] .payment-report>div{border:1px solid #2a3d38!important;background:#172621!important}
+html[data-theme="dark"] .payment-report span,html[data-theme="dark"] .payment-report small{color:#a5b2b4!important}
+html[data-theme="dark"] .ranking-list>div{border-bottom:1px solid #23302c!important;border-bottom:1px solid #263832!important}
+html[data-theme="dark"] .ranking-list .rank{background:#172e23!important;color:#b1e5d3!important}
+html[data-theme="dark"] .ranking-list small{color:#a3aeaf!important}
+html[data-theme="dark"] .quick-pay-row{border:1px dashed #405952!important;background:#16281d!important;border:1px solid #385349!important;background:linear-gradient(135deg, #152c22, #15271e)!important;background:linear-gradient(135deg, #142f23, #13291e)!important}
+html[data-theme="dark"] .quick-pay-row>span{color:#bad0ce!important}
+html[data-theme="dark"] .quick-pay-row button{background:#161b22!important;color:#ade4d1!important;background:#161b22!important}
+html[data-theme="dark"] .quick-pay-row button:hover{background:#153123!important}
+html[data-theme="dark"] .cashier-pro-features header{color:#ade4d1!important}
+html[data-theme="dark"] .cashier-pro-features p{color:#a4b1b0!important}
+html[data-theme="dark"] .cashier-pro-features ul{color:#bad0ce!important}
+html[data-theme="dark"] .cashier-section-title{border-bottom:1px solid #273731!important}
+html[data-theme="dark"] .cashier-section-title b{color:#c7ece7!important}
+html[data-theme="dark"] .cashier-form label{color:#c7e4e1!important}
+html[data-theme="dark"] .cashier-form input,html[data-theme="dark"] .cashier-form select,html[data-theme="dark"] .cashier-form textarea,html[data-theme="dark"] .wide-select,html[data-theme="dark"] .cashier-item input,html[data-theme="dark"] .cashier-item select{border:1px solid #435d54!important;background:#161b22!important;color:#c8e8e4!important}
+html[data-theme="dark"] .cashier-search{background:#161b22!important}
+html[data-theme="dark"] .cashier-item{border:1px solid #2e423c!important;background:#161b22!important;background:linear-gradient(180deg, #161b22, #102a22)!important}
+html[data-theme="dark"] .cashier-item > b{color:#c7ece7!important}
+html[data-theme="dark"] .cashier-item button:hover{background:#360e0e!important}
+html[data-theme="dark"] .cashier-total-card{background:radial-gradient(circle at 95% 0%, rgba(22,27,34,0.16), transparent 33%),
+    linear-gradient(145deg, #087a54 0%, #0aae74 100%)!important;background:radial-gradient(circle at 100% 0%, rgba(22,27,34,0.2), transparent 32%),
+    linear-gradient(145deg, #087654 0%, #0aae74 58%, #15b97e 100%)!important}
+html[data-theme="dark"] .cashier-actions{border:1px solid #2e473d!important;background:rgba(22,27,34,0.94)!important;background:rgba(22,27,34,0.91)!important}
+html[data-theme="dark"] .cashier-actions .primary-button *,html[data-theme="dark"] .cashier-actions button[type="submit"] *{stroke:#161b22!important}
+html[data-theme="dark"]{--hl-mint-100:#152f24!important;--hl-mint-50:#122b21!important;--hl-border:#2e483d!important;--hl-text:#c7e8e3!important;--hl-muted:#a3b1af!important;--hl-text-strong:#c6e8e3!important;--hl-text-normal:#bcd5d1!important;--hl-text-muted:#afc2be!important;--hl-text-soft:#a8b8b5!important;--blue-500:#1d4d75!important;--blue-400:#1a4568!important;--blue-300:#163a57!important;--blue-200:#122f47!important;--blue-100:#0e2638!important;--blue-050:#0c1e30!important;--blue-border:#17364c!important;--hl-text-strong:#b8d2e7!important;--hl-text-normal:#abc2d4!important;--hl-text-muted:#a0b1be!important;--hl-text-main:#c1dce4!important;--hl-text-body:#b4c9cf!important;--hl-text-muted:#a5b4b8!important}
+html[data-theme="dark"] .sidebar,html[data-theme="dark"] .app-sidebar{background:radial-gradient(circle at 10% 0%, rgba(22,27,34,0.1), transparent 27%),
+    linear-gradient(180deg, #0a8a61 0%, #05704f 52%, #045b43 100%)!important}
+html[data-theme="dark"] .sidebar nav a:hover,html[data-theme="dark"] .app-sidebar nav a:hover,html[data-theme="dark"] .sidebar-link:hover{background:rgba(22,27,34,0.13)!important}
+html[data-theme="dark"] .sidebar nav a.active,html[data-theme="dark"] .app-sidebar nav a.active,html[data-theme="dark"] .sidebar-link.active{color:#bce9dc!important;background:linear-gradient(135deg, #161b22, #142f23)!important}
+html[data-theme="dark"] .sidebar-footer,html[data-theme="dark"] .app-sidebar-footer{border-top:1px solid rgba(22,27,34,0.13)!important}
+html[data-theme="dark"] .topbar,html[data-theme="dark"] .app-topbar{background:rgba(22,27,34,0.88)!important}
+html[data-theme="dark"] .online-badge{background:linear-gradient(135deg, #113421, #0c3015)!important;color:#b1e5d3!important;border:1px solid #2d5d44!important}
+html[data-theme="dark"] .page-header h1{color:#c7ece7!important;color:#b8d2e7!important}
+html[data-theme="dark"] .panel,html[data-theme="dark"] .stat-card,html[data-theme="dark"] .data-panel,html[data-theme="dark"] .cashier-section,html[data-theme="dark"] .cashier-pro-features,html[data-theme="dark"] .cashier-today{border:1px solid rgba(81,123,109,0.45)!important}
+html[data-theme="dark"] .panel,html[data-theme="dark"] .data-panel{background:linear-gradient(180deg, rgba(22,27,34,0.98), rgba(20,39,33,0.98))!important}
+html[data-theme="dark"] .panel-heading h3{color:#c7ece7!important}
+html[data-theme="dark"] .stat-card{background:radial-gradient(circle at 100% 0%, rgba(13, 166, 111, .11), transparent 34%),
+    linear-gradient(145deg, #161b22, #15271e)!important;background:linear-gradient(145deg,#161b22,#0c1e30)!important}
+html[data-theme="dark"] .stat-card strong{color:#c7ece7!important;color:#c7ece7!important;color:#adcae4!important;color:#c0dee7!important}
+html[data-theme="dark"] .cashier-form{background:linear-gradient(180deg, rgba(22,27,34,0.99), rgba(19,41,30,0.99))!important}
+html[data-theme="dark"] .cashier-form input,html[data-theme="dark"] .cashier-form select,html[data-theme="dark"] .cashier-form textarea,html[data-theme="dark"] .wide-select,html[data-theme="dark"] .search-box,html[data-theme="dark"] .cashier-item input,html[data-theme="dark"] .cashier-item select{border-color:#415f54!important;background:linear-gradient(180deg, #161b22, #12281d)!important}
+html[data-theme="dark"] .cashier-form input:hover,html[data-theme="dark"] .cashier-form select:hover,html[data-theme="dark"] .wide-select:hover{border-color:#5a917f!important}
+html[data-theme="dark"] .cashier-section:nth-of-type(3){background:radial-gradient(circle at 100% 0%, rgba(13, 166, 111, .08), transparent 32%),
+    linear-gradient(145deg, #161b22, #15291f)!important;border:1px solid #365146!important;background:linear-gradient(145deg, rgba(22,27,34,0.99), rgba(21,41,31,0.99))!important;background:linear-gradient(135deg,#32250c,#382a0e)!important}
+html[data-theme="dark"] .cashier-item:hover{border-color:#4a7665!important}
+html[data-theme="dark"] .cashier-total-card::before{background:rgba(22,27,34,0.08)!important}
+html[data-theme="dark"] .cashier-total-card > div{border-color:rgba(22,27,34,0.17)!important}
+html[data-theme="dark"] .secondary-button:hover{background:#152d22!important;background:#0d2133!important;border-color:#2d6790!important}
+html[data-theme="dark"] .cashier-today > div:hover{background:#152b20!important}
+html[data-theme="dark"] .cashier-today > div > span > b{color:#c7ece7!important}
+html[data-theme="dark"] table thead th{background:linear-gradient(180deg, #172920, #192b23)!important;color:#b2c7c4!important}
+html[data-theme="dark"] table tbody tr:hover{background:#15291f!important}
+html[data-theme="dark"] *::-webkit-scrollbar-track{background:#182c24!important}
+html[data-theme="dark"] *::-webkit-scrollbar-thumb{background:linear-gradient(#34594c, #4fae8c)!important}
+html[data-theme="dark"] .brand{border-bottom:1px solid rgba(22,27,34,0.12)!important;border-bottom-color:rgba(22,27,34,0.16)!important}
+html[data-theme="dark"] .cashier-shortcuts header{border-bottom:1px solid #263832!important}
+html[data-theme="dark"] .cashier-shortcuts header span{background:#153122!important;color:#b1e5d4!important}
+html[data-theme="dark"] .cashier-shortcuts > div{color:#b2c6c3!important}
+html[data-theme="dark"] .cashier-shortcuts kbd{border:1px solid #3d594f!important;background:#161b22!important;color:#bbe8dc!important}
+html[data-theme="dark"] .saving-card{background:#161b22!important;color:#c7ece7!important}
+html[data-theme="dark"] .saving-card small{color:#a4b0ae!important}
+html[data-theme="dark"] .saving-spinner{border:4px solid #264438!important}
+html[data-theme="dark"] .production-tools select{border:1px solid #3f5a50!important;background:#161b22!important;color:#c3e4df!important}
+html[data-theme="dark"] .production-overdue{background:linear-gradient(180deg, #32250c, #161b22)!important}
+html[data-theme="dark"] .overdue-text{color:#dcb696!important}
+html[data-theme="dark"] .status-chip.offline{background:#39290e!important;color:#e0c2a1!important;border-color:#886327!important;background:#331c0d!important;color:#dbb593!important;border-color:#694221!important}
+html[data-theme="dark"] .route-loading,html[data-theme="dark"] .app-loading{background:#122b21!important;color:#bde9df!important}
+html[data-theme="dark"] .route-loading span{border:3px solid #2c4e40!important}
+html[data-theme="dark"] .backup-card>svg{color:#aae3cf!important}
+html[data-theme="dark"] .backup-card p{color:#a4b1af!important}
+html[data-theme="dark"] .backup-safety ul{color:#b0c2be!important}
+html[data-theme="dark"] .production-live-note{background:#153123!important;color:#b0e5d4!important}
+html[data-theme="dark"] .inventory-toolbar select{border:1px solid #405d53!important;background:#161b22!important;color:#c3e4df!important}
+html[data-theme="dark"] .inventory-row-low{background:#32260d!important}
+html[data-theme="dark"] .inventory-row-empty{background:#33110d!important}
+html[data-theme="dark"] .warning-badge{background:#403310!important;color:#e1cda5!important}
+html[data-theme="dark"] .danger-badge{background:#38150e!important;color:#d2948a!important;background:#33110d!important;color:#d08d87!important;border-color:#5a2822!important}
+html[data-theme="dark"] .inventory-history-row{border-bottom:1px solid #263832!important}
+html[data-theme="dark"] .inventory-history-row strong{color:#c6e8e3!important}
+html[data-theme="dark"] .inventory-move-in{background:#133525!important;color:#b0e5d2!important}
+html[data-theme="dark"] .inventory-move-out{background:#37150e!important;color:#ce9187!important}
+html[data-theme="dark"] .inventory-move-adjustment{background:#0d1c35!important;color:#87a3cb!important}
+html[data-theme="dark"] .report-filter label{color:#c4e5e0!important}
+html[data-theme="dark"] .report-bar-row>span{color:#abbab7!important}
+html[data-theme="dark"] .report-bar-row>div{background:#1e2d25!important}
+html[data-theme="dark"] .report-bar-row b{color:#c6e8e3!important}
+html[data-theme="dark"] .rank-no{background:#153123!important;color:#b0e5d4!important}
+html[data-theme="dark"] .ranking-list strong{color:#c6e8e3!important}
+html[data-theme="dark"] .revenue-period-tabs button{border:1px solid #415f54!important;background:#161b22!important;color:#b2c7c3!important}
+html[data-theme="dark"] .revenue-period-tabs button:hover{background:#142d23!important;border-color:#578a77!important}
+html[data-theme="dark"] .qr-camera-head p,html[data-theme="dark"] .qr-manual-card p{color:#a4b1af!important}
+html[data-theme="dark"] .qr-camera-box{border:1px dashed #496e60!important;background:linear-gradient(145deg,#172c24,#172621)!important;background:linear-gradient(145deg,#0d2133,#0c1d2e)!important;border-color:#2e546e!important}
+html[data-theme="dark"] .qr-camera-placeholder svg{color:#a2e0cc!important}
+html[data-theme="dark"] .qr-camera-placeholder b{color:#c4e4df!important}
+html[data-theme="dark"] .qr-info-box,html[data-theme="dark"] .qr-browser-note{background:#382d0e!important;color:#e2cea8!important}
+html[data-theme="dark"] .qr-browser-note{background:#0d2233!important;color:#a5bdd3!important}
+html[data-theme="dark"] .qr-help{background:#182a23!important;border:1px solid #335044!important;background:#0d2133!important;border-color:#1d3f57!important}
+html[data-theme="dark"] .qr-help code{color:#b0e5d5!important}
+html[data-theme="dark"] .qr-help small{color:#a2afad!important}
+html[data-theme="dark"] .qr-order-result{border:1px solid #3d6756!important}
+html[data-theme="dark"] .qr-order-title{border-bottom:1px solid #273b34!important}
+html[data-theme="dark"] .qr-order-title>div:first-child>span{color:#aae3cf!important}
+html[data-theme="dark"] .qr-order-title p{color:#a2afad!important}
+html[data-theme="dark"] .qr-order-summary>div{background:#172922!important;border:1px solid #2a3d36!important}
+html[data-theme="dark"] .qr-order-summary span{color:#a4b1af!important}
+html[data-theme="dark"] .qr-order-summary b{color:#c6e8e2!important}
+html[data-theme="dark"] .qr-order-summary .has-balance{background:#35260d!important;border-color:#7b5b22!important}
+html[data-theme="dark"] .qr-order-summary .has-balance b{color:#dfc29e!important}
+html[data-theme="dark"] .qr-center-actions button{border:1px solid #45685b!important;background:#161b22!important;color:#c4e4df!important}
+html[data-theme="dark"] .qr-center-actions button:hover{background:#142d23!important}
+html[data-theme="dark"] .qr-center-actions .qr-action-paid{background:#153323!important;color:#b1e5d3!important;border-color:#345f4d!important}
+html[data-theme="dark"] .qr-help b{color:#b0e5d5!important}
+html[data-theme="dark"] .density-options button{border:1px solid #3d584e!important;background:#161b22!important;color:#c1dcd8!important}
+html[data-theme="dark"] .density-options button.active{background:#152f24!important;background:#0d2234!important}
+html[data-theme="dark"] .density-options button.active b{color:#b0e5d5!important;color:#8cb0d9!important}
+html[data-theme="dark"] .stat-card > div > span,html[data-theme="dark"] .stat-card .stat-label,html[data-theme="dark"] .stat-card span:first-of-type{color:#b9d3cf!important}
+html[data-theme="dark"] .stat-card small,html[data-theme="dark"] .stat-card .caption,html[data-theme="dark"] .stat-card .stat-caption{color:#adc0bd!important}
+html[data-theme="dark"] .page-header .eyebrow{color:#b0e5d5!important}
+html[data-theme="dark"] .page-header p,html[data-theme="dark"] .page-heading p{color:#afc2be!important}
+html[data-theme="dark"] .panel-heading p,html[data-theme="dark"] .panel p,html[data-theme="dark"] .data-panel p{color:#acbeba!important}
+html[data-theme="dark"] table th{color:#b8cfcb!important;background:#11212e!important;color:#a7bdcd!important;border-bottom-color:#1d3648!important}
+html[data-theme="dark"] table td{color:#c2dcd8!important;border-bottom-color:#1a2e3b!important}
+html[data-theme="dark"] table td b,html[data-theme="dark"] table td strong{color:#c5ebe6!important}
+html[data-theme="dark"] table td small,html[data-theme="dark"] .table-sub{color:#aabab7!important}
+html[data-theme="dark"] label{color:#c0dbd8!important}
+html[data-theme="dark"] label small,html[data-theme="dark"] .form-help,html[data-theme="dark"] .form-hint{color:#aabdb9!important}
+html[data-theme="dark"] .topbar .eyebrow{color:#acbeba!important}
+html[data-theme="dark"] .bar-column > span{color:#b8d1cd!important}
+html[data-theme="dark"] .bar-column > b{color:#c0dad6!important}
+html[data-theme="dark"] .status-summary span{color:#b9d1cd!important}
+html[data-theme="dark"] .status-summary b{color:#c5ece6!important}
+html[data-theme="dark"] .cashier-section-title small,html[data-theme="dark"] .cashier-pro-features p,html[data-theme="dark"] .cashier-today p{color:#acbeba!important}
+html[data-theme="dark"] .report-bar-row>span,html[data-theme="dark"] .ranking-list small{color:#afc3c0!important}
+html[data-theme="dark"] .report-bar-row b,html[data-theme="dark"] .ranking-list strong{color:#c6e8e2!important}
+html[data-theme="dark"] .inventory-history-row small{color:#acbfbb!important}
+html[data-theme="dark"] .settings-card header small,html[data-theme="dark"] .density-options button span{color:#acbeba!important}
+html[data-theme="dark"] .settings-card header b{color:#c6e8e2!important}
+html[data-theme="dark"] .qr-camera-head p,html[data-theme="dark"] .qr-manual-card p,html[data-theme="dark"] .qr-help small{color:#acbeba!important}
+html[data-theme="dark"] .muted,html[data-theme="dark"] .text-muted,html[data-theme="dark"] .subtle,html[data-theme="dark"] .caption,html[data-theme="dark"] .description{color:#aabbb8!important}
+html[data-theme="dark"] .service-category-badge{background:#182e24!important;color:#b0e5d5!important;border:1px solid #2f5242!important}
+html[data-theme="dark"] .cashier-category-tabs button{border:1px solid #415e54!important;background:#161b22!important;color:#b4cac6!important;border-color:#29495e!important;color:#a4bbc9!important}
+html[data-theme="dark"] .finance-filter>div{color:#adc0bd!important}
+html[data-theme="dark"] .finance-category-list>div{border-bottom:1px solid #273a32!important}
+html[data-theme="dark"] .finance-category-list>div>span{background:#153123!important;color:#b0e5d5!important}
+html[data-theme="dark"] .finance-category-list small{color:#acbeba!important}
+html[data-theme="dark"] .finance-click-stat:hover .stat-card,html[data-theme="dark"] .dashboard-click-stat:hover .stat-card{border-color:#977937!important;border-color:#326b92!important}
+html[data-theme="dark"] .receivable-amount{color:#dcba96!important;color:#dbbc94!important}
+html[data-theme="dark"] .receivable-pay{background:#152f24!important;color:#b0e5d5!important;border-color:#355f4e!important}
+html[data-theme="dark"] .receivable-wa{background:#15311e!important;color:#a8e2c2!important;border-color:#305e40!important}
+html[data-theme="dark"] .category-revenue-row{border-bottom:1px solid #273a32!important}
+html[data-theme="dark"] .category-rank{background:#172f25!important;color:#b0e5d5!important;background:#0e2638!important;color:#83add6!important}
+html[data-theme="dark"] .category-revenue-name b{color:#c6e8e2!important}
+html[data-theme="dark"] .category-progress{background:#1e2d25!important;background:#142634!important}
+html[data-theme="dark"] .category-revenue-row strong{color:#c3ebe5!important}
+html[data-theme="dark"] .category-percent{background:#152f24!important;color:#b0e5d5!important;background:#0d2234!important;color:#8cb0d9!important}
+html[data-theme="dark"] .finance-income-click:hover .stat-card{border-color:#488a6f!important}
+html[data-theme="dark"] .finance-expense-click:hover .stat-card{border-color:#793c2e!important}
+html[data-theme="dark"] .income-amount{color:#b0e5d5!important;color:#b0e5d5!important}
+html[data-theme="dark"] .expense-amount{color:#cb978e!important}
+html[data-theme="dark"] .finance-row-action{border:1px solid #3d5d51!important;background:#161b22!important;color:#c0e4df!important;border-color:#264a63!important;color:#96bddc!important}
+html[data-theme="dark"] .finance-row-action:hover{background:#152d24!important;background:#0d2133!important}
+html[data-theme="dark"] .employee-auth-note{background:#0d2333!important;border-color:#234156!important}
+html[data-theme="dark"] .employee-auth-note>svg{color:#93b5d0!important}
+html[data-theme="dark"] .employee-auth-note b{color:#b0c9da!important}
+html[data-theme="dark"] .employee-auth-note span{color:#a3b6c1!important}
+html[data-theme="dark"] .permission-dot.on{background:#143324!important;color:#b0e5d5!important}
+html[data-theme="dark"] .permission-dot.off{background:#1f2523!important}
+html[data-theme="dark"] .employee-form-head{background:#182a23!important}
+html[data-theme="dark"] .employee-form-head span{color:#acbdb9!important}
+html[data-theme="dark"] .employee-permission-box{border:1px solid #374f46!important;background:#102a22!important}
+html[data-theme="dark"] .employee-permission-box small{color:#aabab7!important}
+html[data-theme="dark"] .permission-check{border:1px solid #2f453c!important;background:#161b22!important}
+html[data-theme="dark"] .permission-check span{color:#c0d9d5!important}
+html[data-theme="dark"] .employee-auth-ready{background:#152e21!important;border-color:#325a48!important;background:#152e21!important;border-color:#355f4d!important;background:#0d2133!important;border-color:#1d3f57!important}
+html[data-theme="dark"] .employee-auth-ready>svg{color:#b0e5d5!important}
+html[data-theme="dark"] .employee-auth-ready b{color:#bbe8e0!important;color:#bbe8df!important;color:#96bddc!important}
+html[data-theme="dark"] .employee-password-box{border:1px solid #374f46!important;background:#15271e!important}
+html[data-theme="dark"] .employee-password-title{color:#bfe4de!important}
+html[data-theme="dark"] .employee-password-title small{color:#aabab7!important}
+html[data-theme="dark"] .password-field button{color:#adbfbb!important}
+html[data-theme="dark"] .employee-login-result{border-color:#427661!important;background:linear-gradient(145deg,#132d21,#161b22)!important}
+html[data-theme="dark"] .employee-login-result-head>div:first-child b{color:#bbe8e0!important}
+html[data-theme="dark"] .employee-login-result-head>div:first-child span{color:#abbdb9!important}
+html[data-theme="dark"] .employee-login-credentials>div{border:1px solid #324b41!important;background:#161b22!important}
+html[data-theme="dark"] .employee-login-credentials span{color:#aab9b5!important}
+html[data-theme="dark"] .employee-login-credentials b{color:#c6e8e2!important}
+html[data-theme="dark"] .login-card-v108 p{color:#afc2be!important}
+html[data-theme="dark"] .login-owner-note{border-top:1px solid #2b3f38!important;color:#a8b7b4!important}
+html[data-theme="dark"] .employee-login-id{background:#172f25!important;color:#b0e5d5!important;background:#163024!important;color:#b0e5d5!important}
+html[data-theme="dark"] .login-card-v109 p{color:#afc2be!important}
+html[data-theme="dark"] .permission-mini-list span{background:#172e23!important;color:#b0e5d5!important}
+html[data-theme="dark"] .audit-tabs button{border:1px solid #3d584e!important;background:#161b22!important;color:#b8d3cf!important;border-color:#29495e!important;color:#a4c0d0!important}
+html[data-theme="dark"] body,html[data-theme="dark"] .app-shell,html[data-theme="dark"] .main-content{background:#0c1e30!important}
+html[data-theme="dark"] .sidebar nav a:hover{background:rgba(22,27,34,0.12)!important;border-color:rgba(22,27,34,0.12)!important}
+html[data-theme="dark"] .signout-button:hover{background:rgba(22,27,34,0.18)!important}
+html[data-theme="dark"] .page-header p{color:#9fafbd!important}
+html[data-theme="dark"] .panel,html[data-theme="dark"] .data-panel,html[data-theme="dark"] .stat-card,html[data-theme="dark"] .settings-card,html[data-theme="dark"] .report-card,html[data-theme="dark"] .backup-card,html[data-theme="dark"] .qr-camera-card,html[data-theme="dark"] .qr-manual-card,html[data-theme="dark"] .qr-order-result{border-color:#17364c!important}
+html[data-theme="dark"] input:focus,html[data-theme="dark"] select:focus,html[data-theme="dark"] textarea:focus{border-color:#2f7dbc!important}
+html[data-theme="dark"] .stat-card span:first-of-type,html[data-theme="dark"] .stat-card .stat-label{color:#a0b6c9!important}
+html[data-theme="dark"] .bar-chart{background:linear-gradient(180deg,#0c1d2e,#0c1f31)!important}
+html[data-theme="dark"] .bar-fill,html[data-theme="dark"] .chart-bar,html[data-theme="dark"] .category-progress i{background:linear-gradient(180deg,#1d4d75,#1565c0)!important}
+html[data-theme="dark"] .badge{border-color:#223c4f!important}
+html[data-theme="dark"] .success-badge,html[data-theme="dark"] .status-ready,html[data-theme="dark"] .payment-paid{background:#153121!important;color:#b1e5d3!important;border-color:#2e5a42!important}
+html[data-theme="dark"] .cashier-section,html[data-theme="dark"] .cashier-total-card,html[data-theme="dark"] .cashier-pro-features,html[data-theme="dark"] .cashier-today,html[data-theme="dark"] .cashier-shortcuts{border-color:#17364c!important}
+html[data-theme="dark"] .qr-target i{border-color:#2f7dbc!important}
+html[data-theme="dark"] .qr-help b,html[data-theme="dark"] .qr-help code{color:#8cb0d9!important}
+html[data-theme="dark"] .status-received,html[data-theme="dark"] .production-column[data-status="received"]>header{color:#83add6!important}
+html[data-theme="dark"] .status-washing,html[data-theme="dark"] .production-column[data-status="washing"]>header{color:#8dbed9!important}
+html[data-theme="dark"] .status-drying,html[data-theme="dark"] .production-column[data-status="drying"]>header{color:#d6c085!important}
+html[data-theme="dark"] .status-ironing,html[data-theme="dark"] .production-column[data-status="ironing"]>header{color:#b68fc6!important}
+html[data-theme="dark"] .status-packing,html[data-theme="dark"] .production-column[data-status="packing"]>header{color:#d5a782!important}
+html[data-theme="dark"] .status-ready,html[data-theme="dark"] .production-column[data-status="ready"]>header{color:#a5e1cb!important}
+html[data-theme="dark"] .permission-dot.on,html[data-theme="dark"] .permission-mini-list span,html[data-theme="dark"] .employee-login-id{background:#0d2234!important;color:#8cb0d9!important}
+html[data-theme="dark"] .login-card h1{color:#b2cde5!important}
+html[data-theme="dark"] a{color:#8cb0d9!important}
+html[data-theme="dark"] ::selection{background:#163a57!important;color:#bcd2e9!important}
+html[data-theme="dark"] .revenue-grid-line{stroke:#193246!important}
+html[data-theme="dark"] .revenue-chart-labels b{color:#a7c1d3!important}
+html[data-theme="dark"] .revenue-chart-labels span{color:#9cacb8!important}
+html[data-theme="dark"] .order-overdue-card .stat-icon{background:#35260d!important;color:#d8b589!important}
+html[data-theme="dark"] .order-overdue-card.has-overdue{border-color:#8e6724!important;background:linear-gradient(145deg,#161b22,#32230c)!important}
+html[data-theme="dark"] .order-overdue-card.has-overdue strong{color:#dcbc96!important}
+html[data-theme="dark"] .order-due-cell>b{color:#aec9dd!important}
+html[data-theme="dark"] .order-due-cell.overdue{background:#33240d!important}
+html[data-theme="dark"] .order-due-cell.overdue>b,html[data-theme="dark"] .order-due-cell.overdue small{color:#ddbc98!important}
+html[data-theme="dark"] .order-detail-overdue{color:#ddbc98!important}
+html[data-theme="dark"] .revenue-share-panel{border-color:#1e3a50!important;background:linear-gradient(145deg,#161b22,#0c1b2f)!important}
+html[data-theme="dark"] .revenue-share-heading{border-bottom:1px solid #1b3241!important}
+html[data-theme="dark"] .revenue-share-heading h3{color:#b1cce5!important}
+html[data-theme="dark"] .revenue-share-heading p{color:#9cacb7!important}
+html[data-theme="dark"] .revenue-share-summary>div{border:1px solid #1c3648!important;background:#161b22!important}
+html[data-theme="dark"] .revenue-share-summary span{color:#9faeba!important}
+html[data-theme="dark"] .revenue-share-summary strong{color:#b1cce5!important}
+html[data-theme="dark"] .revenue-share-summary .share-total{border-color:#27577b!important;background:#0d2133!important}
+html[data-theme="dark"] .revenue-share-summary .share-total strong{color:#8cb0d9!important}
+html[data-theme="dark"] .revenue-share-table{border:1px solid #1e3342!important}
+html[data-theme="dark"] .share-percent-badge{background:#0d2234!important;color:#8cb0d9!important}
+html[data-theme="dark"] .share-amount{color:#8cb0d9!important}
+html[data-theme="dark"] .share-settings-note{border:1px solid #1d3a50!important;background:#0c2132!important}
+html[data-theme="dark"] .share-settings-note b{color:#a9cae2!important}
+html[data-theme="dark"] .share-settings-list{border:1px solid #1f3544!important}
+html[data-theme="dark"] .share-settings-list>label{border-bottom:1px solid #1d2e3b!important}
+html[data-theme="dark"] .share-settings-list b{color:#aec8dc!important}
+html[data-theme="dark"] .share-percent-input>span{color:#97b7cd!important}
+html[data-theme="dark"] .qr-info-box{border:1px solid #213b4f!important;background:#0c2030!important;color:#a8c1d2!important}
+html[data-theme="dark"] .reset-data-panel{border-color:#5a2922!important;background:linear-gradient(145deg,#161b22,#2f0c0c)!important}
+html[data-theme="dark"] .reset-data-heading{border-bottom:1px solid #422121!important}
+html[data-theme="dark"] .reset-danger-icon{background:#33110d!important;color:#cc8c86!important}
+html[data-theme="dark"] .reset-data-heading h2{color:#d4b7b4!important}
+html[data-theme="dark"] .reset-data-heading p{color:#b9acaa!important}
+html[data-theme="dark"] .reset-data-heading .eyebrow{color:#cb8c86!important}
+html[data-theme="dark"] .reset-data-options>button{border:1px solid #45322e!important;background:#161b22!important;color:#cbb2ae!important}
+html[data-theme="dark"] .reset-data-options>button:hover:not(:disabled){border-color:#77352c!important;background:#30130c!important}
+html[data-theme="dark"] .reset-data-options small{color:#b2a7a5!important}
+html[data-theme="dark"] .reset-data-options .reset-all-button{border-color:#74352d!important;background:#32120c!important}
+html[data-theme="dark"] .reset-data-options .reset-all-button b{color:#d6948f!important}
+html[data-theme="dark"] .reset-owner-note{background:#36260d!important;color:#e0c8a1!important}
+html[data-theme="dark"] .reset-confirm-warning{border:1px solid #582923!important;background:#31120c!important;color:#cda8a3!important}
+html[data-theme="dark"] .reset-confirm-warning.critical{background:#33110d!important;border-color:#75332b!important}
+html[data-theme="dark"] .reset-confirm-warning>svg{color:#cc8983!important}
+html[data-theme="dark"] .reset-backup-reminder{border:1px solid #20384a!important;background:#0f212f!important;color:#a3bac9!important}
+html[data-theme="dark"] .reset-confirm-code{background:#33110d!important;color:#d1918b!important}
+html[data-theme="dark"] .backup-version-badge{border:1px solid #204660!important;background:#0d2333!important;color:#a1c4d8!important}
+html[data-theme="dark"] .backup-version-badge b{color:#8cb0d9!important}
+html[data-theme="dark"] .reset-running-status{border:1px solid #204660!important;background:#0d2333!important;color:#a2c4da!important}
+html[data-theme="dark"] .reset-diagnostic-panel{border-color:#22465e!important;background:#0c202f!important}
+html[data-theme="dark"] .reset-diagnostic-panel>div:first-child b{color:#abcce3!important}
+html[data-theme="dark"] .reset-diagnostic-panel>div:first-child span{color:#9ba9b5!important}
+html[data-theme="dark"] .reset-diagnostic-values span{border:1px solid #1d384b!important;background:#161b22!important;color:#a0b1be!important}
+html[data-theme="dark"] .reset-diagnostic-values b{color:#8cb0d9!important}
+html[data-theme="dark"] .direct-reset-box{border:1px solid #692d24!important;background:#30100c!important}
+html[data-theme="dark"] .direct-reset-box>div:first-child>svg{color:#cd8a84!important}
+html[data-theme="dark"] .direct-reset-box b{color:#d0a5a0!important}
+html[data-theme="dark"] .direct-reset-box small{color:#b4a8a6!important}
+html[data-theme="dark"] .direct-reset-box label strong{color:#d28f8a!important}
+html[data-theme="dark"] .direct-reset-message{border:1px solid #315a43!important;background:#142f1f!important;color:#b0e3cc!important}
+html[data-theme="dark"] .direct-reset-message.error{border-color:#5f2a23!important;background:#33110d!important;color:#d19691!important}
+html[data-theme="dark"] .reset-data-options>button.selected{border-color:#aa4b41!important;background:#33110d!important}
+html[data-theme="dark"] .reset-inline-confirm{border:1px solid #602a23!important;background:#30100c!important}
+html[data-theme="dark"] .reset-inline-confirm.critical{border-color:#994238!important;background:#32120d!important}
+html[data-theme="dark"] .reset-inline-info>svg{color:#cc8983!important}
+html[data-theme="dark"] .reset-inline-info b{color:#cfa39f!important}
+html[data-theme="dark"] .reset-inline-info span{color:#bcb0af!important}
+html[data-theme="dark"] .reset-inline-info small{color:#b4a19f!important}
+html[data-theme="dark"] .reset-inline-confirm label strong{background:#37140e!important;color:#d08f89!important}
+html[data-theme="dark"] .receipt-live-preview{background:#112331!important}
+html[data-theme="dark"] .receipt-preview-head b{color:#accce3!important}
+html[data-theme="dark"] .receipt-paper{background:#161b22!important;color:#dee3ea!important}
+html[data-theme="dark"] .receipt-paper>small{color:#b0bccd!important}
+html[data-theme="dark"] .receipt-cut-line{color:#99a8be!important}
+html[data-theme="dark"] .receipt-template-premium h2{color:#9abfdd!important}
+@media (min-width:1051px){
+html[data-theme="dark"] .cashier-form::-webkit-scrollbar-track{background:#112331!important}
+html[data-theme="dark"] .cashier-form::-webkit-scrollbar-thumb{background:#203c4f!important}
+html[data-theme="dark"] .cashier-summary::-webkit-scrollbar-thumb{background:#1c3545!important}
+}
+html[data-theme="dark"] .dashboard-display-customizer{border-color:#1e3a50!important;background:linear-gradient(135deg,#161b22,#0c2030)!important}
+html[data-theme="dark"] .dashboard-display-icon{background:#0d2336!important;color:#83add6!important}
+html[data-theme="dark"] .dashboard-display-title b{color:#accce3!important}
+html[data-theme="dark"] .dashboard-density-options button{border:1px solid #2a4350!important;background:#161b22!important;color:#a7c1d3!important}
+html[data-theme="dark"] .dashboard-density-options button.active{background:#0d2234!important;color:#8cb0d9!important}
+@media (min-width:1051px){
+html[data-theme="dark"] .cashier-summary-scroll::-webkit-scrollbar-thumb{background:#1c3545!important}
+}
+html[data-theme="dark"] .payroll-tabs button{border:1px solid #264053!important;background:#161b22!important;color:#a6c1cf!important}
+html[data-theme="dark"] .payroll-tabs button.active{background:#0d2234!important;color:#8cb0d9!important}
+html[data-theme="dark"] .payroll-toolbar>label:not(.search-box){color:#a5b9c6!important}
+html[data-theme="dark"] .payroll-toolbar input{border:1px solid #2b4353!important}
+html[data-theme="dark"] .attendance-date-title,html[data-theme="dark"] .payroll-table-head{border-bottom:1px solid #1f323e!important}
+html[data-theme="dark"] .attendance-date-title b,html[data-theme="dark"] .payroll-table-head b{color:#accce3!important}
+html[data-theme="dark"] .attendance-none{background:#1b242a!important}
+html[data-theme="dark"] .attendance-present{background:#143323!important;color:#b0e5d2!important}
+html[data-theme="dark"] .attendance-permission{background:#0d1f35!important;color:#98b6d7!important}
+html[data-theme="dark"] .attendance-sick{background:#3b2e0f!important;color:#e3d4ab!important}
+html[data-theme="dark"] .attendance-absent{background:#350d0d!important;color:#d19692!important}
+html[data-theme="dark"] .attendance-actions button{border:1px solid #293b46!important;background:#161b22!important}
+html[data-theme="dark"] .attendance-actions .attendance-present.active{background:#143323!important;border-color:#4c916d!important;color:#b0e5d2!important}
+html[data-theme="dark"] .attendance-actions .attendance-permission.active{background:#0d1f35!important;border-color:#335c87!important;color:#98b6d7!important}
+html[data-theme="dark"] .attendance-actions .attendance-sick.active{background:#3b2e0f!important;border-color:#a08635!important;color:#e3d4ab!important}
+html[data-theme="dark"] .attendance-actions .attendance-absent.active{background:#350d0d!important;border-color:#73332d!important;color:#d19692!important}
+html[data-theme="dark"] .payroll-formula{border-color:#203c4f!important;background:#0c1e30!important}
+html[data-theme="dark"] .payroll-formula svg{color:#82b1d5!important}
+html[data-theme="dark"] .payroll-formula b{color:#aacbe3!important}
+html[data-theme="dark"] .payroll-bonus-input{border:1px solid #2c4453!important}
+html[data-theme="dark"] .payroll-total{color:#8cb0d9!important}
+html[data-theme="dark"] .payroll-setting-note{border:1px solid #213c4f!important;background:#0c1e30!important}
+html[data-theme="dark"] .payroll-setting-note svg{color:#82b1d5!important}
+html[data-theme="dark"] .payroll-live-example{border:1px solid #223643!important;background:#10222a!important}
+html[data-theme="dark"] .payroll-live-example b{color:#aacbe3!important}
+html[data-theme="dark"] .payroll-setting-note + label select,html[data-theme="dark"] .modal-form select{border:1px solid #2f4a5a!important;background:#161b22!important;color:#b2d1e4!important}
+html[data-theme="dark"] .multi-share-section{border:1px solid #243d4e!important;background:#0c202f!important}
+html[data-theme="dark"] .multi-share-heading b{color:#accde3!important}
+html[data-theme="dark"] .multi-share-row{border:1px solid #213543!important;background:#161b22!important}
+html[data-theme="dark"] .multi-share-result{border:1px solid #21323d!important;background:#10222a!important}
+html[data-theme="dark"] .multi-share-result b{color:#aacbe3!important}
+html[data-theme="dark"] .multi-share-remove{border-color:#5f2a23!important}
+html[data-theme="dark"] .multi-share-total{background:#0d2234!important;color:#aacbe3!important}
+html[data-theme="dark"] .attendance-auto-info{border-color:#315a45!important;background:#132d1e!important}
+html[data-theme="dark"] .attendance-auto-info svg{color:#a0dfc6!important}
+html[data-theme="dark"] .attendance-auto-info b{color:#b1e5d1!important}
+html[data-theme="dark"] .attendance-auto-info span{color:#a8b9b1!important}
+html[data-theme="dark"] .attendance-auto-note{color:#a6e1cc!important}
+html[data-theme="dark"] .attendance-owner-note{color:#92badb!important}
+html[data-theme="dark"] .attendance-override-card{border:1px solid #234154!important;background:#0c2031!important}
+html[data-theme="dark"] .attendance-override-card svg{color:#83add6!important}
+html[data-theme="dark"] .attendance-override-card b{color:#abcce3!important}
+html[data-theme="dark"] .attendance-override-info{border:1px solid #315a43!important;background:#132d1d!important;color:#accec0!important}
+html[data-theme="dark"] .attendance-config-card>header,html[data-theme="dark"] .attendance-qr-owner-card>header{border-bottom:1px solid #1f3441!important}
+html[data-theme="dark"] .attendance-config-card header b,html[data-theme="dark"] .attendance-qr-owner-card header b{color:#abcce3!important}
+html[data-theme="dark"] .attendance-config-card label{color:#a5bbc9!important}
+html[data-theme="dark"] .attendance-config-card input,html[data-theme="dark"] .attendance-config-card select{border:1px solid #2b4454!important;background:#161b22!important;color:#b7d1e4!important}
+html[data-theme="dark"] .attendance-config-divider{background:#1b2932!important}
+html[data-theme="dark"] .attendance-qr-meta span{border:1px solid #233946!important;background:#12212b!important}
+html[data-theme="dark"] .attendance-qr-meta b{color:#a7c9e2!important}
+html[data-theme="dark"] .attendance-owner-qr{border:1px solid #273844!important;background:#161b22!important}
+html[data-theme="dark"] .attendance-owner-qr-empty{border:1px dashed #304b5d!important}
+html[data-theme="dark"] .attendance-qr-warning{border:1px solid #2f5441!important;background:#132d1e!important;color:#aac6b8!important}
+html[data-theme="dark"] .attendance-qr-warning svg{color:#9fdfc5!important}
+html[data-theme="dark"] .attendance-scan-icon{background:#0d2335!important;color:#88b4d7!important}
+html[data-theme="dark"] .attendance-scan-heading h2{color:#accde3!important}
+html[data-theme="dark"] .attendance-scan-placeholder{border:2px dashed #274557!important;background:#0c202f!important}
+html[data-theme="dark"] .attendance-scan-placeholder b{color:#abcde3!important}
+html[data-theme="dark"] .attendance-verification-card h3{border-bottom:1px solid #23333e!important;color:#accde3!important}
+html[data-theme="dark"] .attendance-verification-card>div>svg{color:#82b2d5!important}
+html[data-theme="dark"] .attendance-verification-card b{color:#a9c2d3!important}
+html[data-theme="dark"] .attendance-success-card{border-color:#3f755b!important;background:linear-gradient(135deg,#132d20,#161b22)!important}
+html[data-theme="dark"] .attendance-success-icon{background:#163523!important;color:#a5e1c7!important}
+html[data-theme="dark"] .attendance-success-card>div:nth-child(2)>span{color:#a5e1c9!important}
+html[data-theme="dark"] .attendance-success-card h2{color:#bee3d6!important}
+html[data-theme="dark"] .attendance-success-card p{color:#a5b5ae!important}
+html[data-theme="dark"] .attendance-success-distance span,html[data-theme="dark"] .attendance-success-distance small{color:#a1afa8!important}
+html[data-theme="dark"] .attendance-success-distance b{color:#aae3cc!important}
+html[data-theme="dark"] .attendance-qr-gps-note{color:#a5e1ce!important}
+html[data-theme="dark"] .page-back-button{border:1px solid #284252!important;background:#161b22!important;color:#93bddb!important;background:#161b22!important;color:#97c0dc!important;border:1px solid #274254!important}
+html[data-theme="dark"] .page-back-button:hover{border-color:#376d92!important;background:#0d2233!important;color:#9ec3df!important;background:#0d2233!important;border-color:#3b759d!important;color:#a1c5e0!important}
+html[data-theme="dark"] .receipt-logo-preview-box{border:1px dashed #2f4b5d!important;background:#0c202f!important}
+html[data-theme="dark"] .danger-logo-button{color:#cf908c!important;border-color:#60322d!important}
+html[data-theme="dark"] .logo-position-current{color:#83add6!important}
+html[data-theme="dark"] .production-tools>select{border:1px solid #2c4453!important;background:#161b22!important;color:#a8c2d3!important}
+html[data-theme="dark"] .production-scan-result{border:2px solid #32749e!important;background:linear-gradient(135deg,#0d2433,#161b22)!important}
+html[data-theme="dark"] .production-scan-result-icon{background:#0e2638!important;color:#8bb8d8!important}
+html[data-theme="dark"] .production-scan-result-main>span{color:#89b8d8!important}
+html[data-theme="dark"] .production-scan-result-main h3{color:#abcce3!important}
+html[data-theme="dark"] .production-scan-status{border:1px solid #213b4d!important;background:#161b22!important}
+html[data-theme="dark"] .production-scan-status b{color:#a7cbe2!important}
+html[data-theme="dark"] .production-scan-clear{border:1px solid #243a48!important;background:#161b22!important;color:#a1b0ba!important}
+html[data-theme="dark"] .production-card-scanned::before{background:#0e2638!important;color:#96c0dc!important}
+html[data-theme="dark"] .production-scanner-modal{background:#161b22!important}
+html[data-theme="dark"] .production-scanner-modal>header{border-bottom:1px solid #21323d!important}
+html[data-theme="dark"] .production-scanner-modal>header svg{color:#85b5d6!important}
+html[data-theme="dark"] .production-scanner-modal>header b{color:#aacce3!important}
+html[data-theme="dark"] .production-scanner-wait{border:1px dashed #2c4351!important}
+html[data-theme="dark"] .production-scanner-help{border:1px solid #1e3f54!important;background:#0c2231!important;color:#9eafba!important}
+html[data-theme="dark"] .production-scanner-help svg{color:#83b3d6!important}
+html[data-theme="dark"] .flex-number-input{caret-color:#83add6!important}
+html[data-theme="dark"] .order-service-chip{border:1px solid #243e4e!important;background:#0c2031!important}
+html[data-theme="dark"] .order-service-chip b{color:#abcde3!important}
+html[data-theme="dark"] .order-filter-field select,html[data-theme="dark"] .order-filter-field input[type="date"]{border:1px solid #294552!important;background:#161b22!important;color:#a8c9df!important}
+html[data-theme="dark"] .top-customer-row{border:1px solid #213543!important;background:#161b22!important}
+html[data-theme="dark"] .top-customer-row:hover{border-color:#2e6385!important;background:#0c1e30!important}
+html[data-theme="dark"] .top-customer-rank{background:#0f2432!important;color:#91beda!important}
+html[data-theme="dark"] .top-customer-rank.rank-1{background:#3e3310!important;color:#dfcb9f!important}
+html[data-theme="dark"] .top-customer-info b{color:#accde3!important}
+html[data-theme="dark"] .top-customer-stat strong{color:#accde3!important}
+html[data-theme="dark"] .customer-best-card{background:linear-gradient(135deg,#362b0d,#161b22)!important;border-color:#70612a!important}
+html[data-theme="dark"] .customer-best-icon{background:#453911!important;color:#decb9c!important}
+html[data-theme="dark"] .customer-best-card>div:nth-child(2)>span{color:#dcc998!important}
+html[data-theme="dark"] .customer-best-card h3{color:#e4d8b6!important}
+html[data-theme="dark"] .customer-best-card p{color:#c9bfa3!important}
+html[data-theme="dark"] .customer-best-average span{color:#c2baa2!important}
+html[data-theme="dark"] .customer-best-average b{color:#e4d5ad!important}
+html[data-theme="dark"] .customer-value-card b{color:#abcce3!important}
+html[data-theme="dark"] .customer-segment-toolbar>div:first-child b{color:#accde3!important}
+html[data-theme="dark"] .customer-segment-tabs button{border:1px solid #294552!important;background:#161b22!important;color:#a6c0cf!important}
+html[data-theme="dark"] .customer-top-label{color:#dfcea0!important}
+html[data-theme="dark"] .payment-action-card{border:2px solid #263a45!important;background:#161b22!important;color:#aac4d3!important}
+html[data-theme="dark"] .payment-action-card b{color:#abcde3!important}
+html[data-theme="dark"] .payment-action-card.active{background:#0d2233!important}
+html[data-theme="dark"] .payment-action-card.pickup>svg{color:#a2e0ca!important}
+html[data-theme="dark"] .payment-action-card.pickup.active{background:#142f23!important}
+html[data-theme="dark"] .payment-full-note{color:#a8e2d0!important}
+html[data-theme="dark"] .payment-pickup-warning{border:1px solid #315a47!important;background:#142d21!important;color:#b0cac0!important}
+html[data-theme="dark"] .payment-pickup-warning>svg{color:#a1e0c9!important}
+html[data-theme="dark"] .payment-pickup-warning b{color:#b1e3d3!important}
+html[data-theme="dark"] .delivery-confirm-button{border:1px solid #264b62!important;background:#0d2133!important;color:#99c3dd!important}
+html[data-theme="dark"] .delivery-proof-badge{border:1px solid #335f4b!important;background:#152e21!important;color:#a9e2cd!important}
+html[data-theme="dark"] .delivery-order-summary{border:1px solid #253842!important;background:#12212b!important}
+html[data-theme="dark"] .delivery-order-summary b{color:#accde3!important}
+html[data-theme="dark"] .delivery-photo-upload{border:2px dashed #30576e!important;background:#0c2231!important;color:#99c3dd!important}
+html[data-theme="dark"] .delivery-photo-preview{border:1px solid #243b49!important;background:#12212b!important}
+html[data-theme="dark"] .delivery-confirm-info{border:1px solid #315a47!important;background:#142d21!important}
+html[data-theme="dark"] .delivery-confirm-info svg{color:#a2e0ca!important}
+html[data-theme="dark"] .delivery-confirm-info b{color:#b1e3d3!important}
+html[data-theme="dark"] .delivery-confirm-info small{color:#a5b7b0!important}
+html[data-theme="dark"] .order-detail-delivery-proof img{border:1px solid #283d48!important}
+html[data-theme="dark"] .order-detail-delivery-proof b{color:#a7e2cd!important}
+html[data-theme="dark"] .owner-qris-preview{border:1px solid #243c47!important;background:#161b22!important}
+html[data-theme="dark"] .owner-qris-empty{border:2px dashed #2c4453!important}
+html[data-theme="dark"] .online-upload-button{border:1px solid #2f576e!important;background:#0d2333!important;color:#99c3dd!important}
+html[data-theme="dark"] .owner-bank-card{border:1px solid #263a44!important;background:#10222a!important}
+html[data-theme="dark"] .danger-button{border:1px solid #5f2a23!important;background:#31120c!important;color:#ce9b94!important}
+html[data-theme="dark"] .online-proof-title{border-bottom:1px solid #26353a!important}
+html[data-theme="dark"] .online-proof-title>span{background:#3b2f0f!important;color:#e1d1a5!important}
+html[data-theme="dark"] .online-proof-card{border:1px solid #263a43!important;background:#10222a!important}
+html[data-theme="dark"] .online-proof-main>svg{color:#89bbd8!important}
+html[data-theme="dark"] .online-proof-main strong{color:#aee4d3!important}
+html[data-theme="dark"] .proof-reject{color:#cd9992!important;border-color:#5b2b23!important}
+html[data-theme="dark"] .loyalty-settings-card>header{border-bottom:1px solid #20313d!important}
+html[data-theme="dark"] .loyalty-settings-card input{border:1px solid #2a4656!important}
+html[data-theme="dark"] .loyalty-hero-card{background:linear-gradient(135deg,#0c1f32,#352a0d)!important;border-color:#213d55!important}
+html[data-theme="dark"] .loyalty-hero-icon{background:#413710!important;color:#deca9c!important}
+html[data-theme="dark"] .loyalty-hero-card h2{color:#abcce3!important}
+html[data-theme="dark"] .loyalty-hero-card p{color:#9fadb4!important}
+html[data-theme="dark"] .loyalty-enable{border:1px solid #29495e!important;background:#161b22!important}
+html[data-theme="dark"] .loyalty-example-card{background:#152c1f!important}
+html[data-theme="dark"] .loyalty-example-card svg{color:#a3e0cb!important}
+html[data-theme="dark"] .loyalty-example-card span{color:#a1b0a9!important}
+html[data-theme="dark"] .loyalty-example-card b{color:#b1e3d3!important}
+html[data-theme="dark"] .loyalty-example-card small{color:#a1b0a9!important}
+html[data-theme="dark"] .customer-member-chip{border:1px solid #847129!important;background:#38300e!important;color:#e1cfa4!important}
+html[data-theme="dark"] .customer-member-chip small{color:#c4baa0!important}
+html[data-theme="dark"] .customer-member-add{border:1px solid #294454!important;background:#0e2331!important;color:#99c5dd!important}
+html[data-theme="dark"] .member-card-preview{border:1px solid #2b3a42!important;background:linear-gradient(135deg,#191f26,#161b22)!important;color:#aebdc5!important}
+html[data-theme="dark"] .member-card-preview.active{border-color:#89742b!important;background:linear-gradient(135deg,#123f65,#1b70a6 58%,#725d1c)!important}
+html[data-theme="dark"] .member-adjust-box{border:1px solid #263942!important;background:#132329!important}
+html[data-theme="dark"] .member-adjust-box input{border:1px solid #2d434f!important}
+html[data-theme="dark"] .member-history>div{border-bottom:1px solid #222c31!important}
+html[data-theme="dark"] .member-history strong.plus{color:#a6e1cc!important}
+html[data-theme="dark"] .member-history strong.minus{color:#c7928c!important}
+html[data-theme="dark"] .v113-owner-only{color:#e3d1ab!important}
+html[data-theme="dark"] .v113-owner-only svg{color:#d7bf87!important}
+html[data-theme="dark"] .v113-kpi.featured{border-color:#386b56!important;background:linear-gradient(145deg,#161b22,#122e22)!important}
+html[data-theme="dark"] .v113-kpi-icon.revenue{background:#153126!important;color:#ace3d1!important}
+html[data-theme="dark"] .v113-kpi-icon.expense{background:#33130d!important}
+html[data-theme="dark"] .v113-kpi-icon.profit{background:#0d2435!important;color:#93c0db!important}
+html[data-theme="dark"] .v113-kpi-icon.receivable{background:#382f0e!important;color:#deca9c!important}
+html[data-theme="dark"] .v113-kpi strong{color:#b9d4e5!important}
+html[data-theme="dark"] .v113-kpi small.positive{color:#a7e2ce!important}
+html[data-theme="dark"] .v113-kpi small.negative{color:#c8908a!important}
+html[data-theme="dark"] .v113-target-card>header b{color:#accde3!important}
+html[data-theme="dark"] .v113-target-card>header>strong{color:#abe3d0!important}
+html[data-theme="dark"] .v113-progress{background:#1b282e!important}
+html[data-theme="dark"] .v113-progress i{background:linear-gradient(90deg,#1e88e5,#1d4d75)!important}
+html[data-theme="dark"] .v113-progress.orders i{background:linear-gradient(90deg,#3f3167,#2e1e5d)!important}
+html[data-theme="dark"] .v113-target-values b{color:#b9d4e5!important}
+html[data-theme="dark"] .v113-target-card>footer{border-top:1px solid #213037!important;color:#a0adb4!important}
+html[data-theme="dark"] .v113-section-head{border-bottom:1px solid #22333b!important}
+html[data-theme="dark"] .v113-section-head b{color:#adcee3!important}
+html[data-theme="dark"] .v113-bar-area{border-bottom:1px solid #27363e!important}
+html[data-theme="dark"] .v113-bar-area i.revenue{background:#1d4d75!important}
+html[data-theme="dark"] .v113-month-column>b{color:#a9b8bf!important}
+html[data-theme="dark"] .v113-chart-legend i.revenue{background:#1d4d75!important}
+html[data-theme="dark"] .v113-health-list>div{border-bottom:1px solid #222f35!important}
+html[data-theme="dark"] .v113-health-list b{color:#b0d0e4!important}
+html[data-theme="dark"] .v113-ranking-list>div{border-bottom:1px solid #222f35!important}
+html[data-theme="dark"] .v113-rank{background:#0d2434!important;color:#90beda!important}
+html[data-theme="dark"] .v113-ranking-list b{color:#b3ccdb!important}
+html[data-theme="dark"] .v113-ranking-list strong{color:#ace3d2!important}
+html[data-theme="dark"] .v113-ranking-list.expense-list strong{color:#c88f89!important}
+html[data-theme="dark"] .v113-target-explanation{border:1px solid #24404e!important;background:#0c2031!important;color:#a1b2bc!important}
+html[data-theme="dark"] .qr-camera-requesting{color:#99c0d8!important}
+html[data-theme="dark"] .qr-camera-status.success{border:1px solid #345c49!important;background:#152e21!important;color:#ace3d0!important}
+html[data-theme="dark"] .v113-clickable-kpi:hover,html[data-theme="dark"] .v113-clickable-kpi:focus{border-color:#255670!important}
+html[data-theme="dark"] .v113-detail-summary{border:1px solid #243d48!important;background:#11232c!important}
+html[data-theme="dark"] .v113-detail-summary b{color:#adcee4!important}
+html[data-theme="dark"] .v113-profit-detail-hero{border:1px solid #335947!important;background:linear-gradient(145deg,#122b1d,#152e21)!important}
+html[data-theme="dark"] .v113-profit-detail-hero svg{color:#a8e2ce!important}
+html[data-theme="dark"] .v113-profit-detail-hero span{color:#a3b3ac!important}
+html[data-theme="dark"] .v113-profit-detail-hero strong{color:#aee4d2!important}
+html[data-theme="dark"] .v113-profit-equation{border:1px solid #243c47!important;background:#10222a!important}
+html[data-theme="dark"] .v113-profit-equation>div{border-bottom:1px dashed #2a3a41!important}
+html[data-theme="dark"] .v113-profit-equation b{color:#afd0e4!important}
+html[data-theme="dark"] .v113-profit-equation>strong{color:#abe3d1!important}
+html[data-theme="dark"] .v113-profit-equation.expense>strong{color:#c7938c!important}
+html[data-theme="dark"] .v113-detail-modal h4{color:#accde3!important}
+html[data-theme="dark"] .v113-detail-note{background:#0d2133!important;color:#a1b3be!important}
+html[data-theme="dark"] .payroll-expense-badge{border:1px solid #213755!important;background:#0d1c33!important;color:#98b3d0!important}
+html[data-theme="dark"] .employee-finance-note{border:1px solid #214155!important;background:#0e2431!important;color:#aac5d3!important}
+html[data-theme="dark"] .employee-finance-note b{color:#9cc8de!important}
+html[data-theme="dark"] .expense-proof-label{color:#b0c7d1!important}
+html[data-theme="dark"] .expense-proof-upload{border:2px dashed #315468!important;background:#0c2031!important;color:#9ac5dd!important}
+html[data-theme="dark"] .expense-proof-selected{border:1px solid #273d48!important;background:#161b22!important}
+html[data-theme="dark"] .expense-proof-selected>svg{color:#93bad1!important}
+html[data-theme="dark"] .expense-proof-selected button{border:1px solid #5c2d27!important;background:#31120c!important;color:#cb9a93!important}
+html[data-theme="dark"] .expense-proof-view{border:1px solid #2a4e60!important;background:#0d2733!important;color:#9dc8de!important}
+html[data-theme="dark"] .order-delete-request-button,html[data-theme="dark"] .expense-delete-request{border:1px solid #5c2a23!important;background:#31120c!important;color:#cc9992!important}
+html[data-theme="dark"] .delete-request-warning{border:1px solid #5f2c23!important;background:#31120c!important;color:#cea59f!important}
+html[data-theme="dark"] .delete-expense-summary{background:#152329!important;border:1px solid #273940!important}
+html[data-theme="dark"] .delete-expense-summary b{color:#cc9992!important}
+html[data-theme="dark"] .delete-approval-head{border-bottom:1px solid #26363b!important}
+html[data-theme="dark"] .delete-approval-head b{color:#accde3!important}
+html[data-theme="dark"] .delete-approval-head>span{background:#33150d!important;color:#cd9b94!important}
+html[data-theme="dark"] .delete-approval-card{border:1px solid #273940!important;background:#10222a!important}
+html[data-theme="dark"] .delete-approval-icon.order{background:#0d2133!important;color:#91beda!important}
+html[data-theme="dark"] .delete-approval-icon.expense{background:#33140d!important;color:#c8938c!important}
+html[data-theme="dark"] .delete-approval-title>b{color:#b0d1e3!important}
+html[data-theme="dark"] .delete-approval-title>span{background:#18262c!important;color:#a0aeb6!important}
+html[data-theme="dark"] .delete-approval-info p{color:#aab9c1!important}
+html[data-theme="dark"] .delete-snapshot{background:#16242a!important}
+html[data-theme="dark"] .delete-snapshot b{color:#b3cddb!important}
+html[data-theme="dark"] .delete-reject{color:#d6bca0!important}
+html[data-theme="dark"] .delete-approval-empty{color:#9faeb5!important}
+html[data-theme="dark"] .delete-approval-nav-badge{background:#761d1d!important}
+html[data-theme="dark"] .delete-approval-toast{border:1px solid #6c2e23!important;background:#161b22!important;color:#b6cad3!important}
+html[data-theme="dark"] .delete-approval-toast-icon{background:#33130d!important}
+html[data-theme="dark"] .delete-approval-toast b{color:#d3a49f!important}
+html[data-theme="dark"] .delete-toast-close{background:#1c2325!important;color:#a1acb1!important}
+html[data-theme="dark"] .dashboard-delete-approval-alert{border:1px solid #672d23!important;background:linear-gradient(100deg,#32150c,#161b22)!important;color:#b3c6ce!important}
+html[data-theme="dark"] .dashboard-delete-alert-icon{background:#38150e!important;color:#ce8d87!important}
+html[data-theme="dark"] .dashboard-delete-alert-copy b{color:#d4a5a0!important}
+html[data-theme="dark"] .dashboard-delete-alert-action{color:#d09a94!important}
+html[data-theme="dark"] .qr-camera-selector{border:1px solid #243e4e!important;background:#0c202f!important}
+html[data-theme="dark"] .qr-camera-selector label>span{color:#b1c9d3!important}
+html[data-theme="dark"] .qr-camera-selector select{border:1px solid #2d4d5f!important;background:#161b22!important;color:#b8d1db!important}
+html[data-theme="dark"] .qr-camera-diagnostics{border:1px solid #2b3b42!important;background:#132329!important}
+html[data-theme="dark"] .qr-camera-diagnostics summary{color:#acc0c9!important}
+html[data-theme="dark"] .qr-camera-diagnostics code{color:#a1aeb5!important;background:#161b22!important;border:1px solid #233035!important}
+html[data-theme="dark"] .main-content table th{color:#abbbc0!important}
+html[data-theme="dark"] .main-content table td{color:#b4c9cf!important}
+html[data-theme="dark"] .main-content table td b,html[data-theme="dark"] .main-content table td strong{color:#c1dce4!important}
+html[data-theme="dark"] .main-content table td small{color:#a2afb2!important}
+html[data-theme="dark"] .panel-heading p,html[data-theme="dark"] .page-header p,html[data-theme="dark"] .page-heading p{color:#a5b4b8!important}
+html[data-theme="dark"] .login-card p,html[data-theme="dark"] .login-card small{color:#a5b4b8!important}
+html[data-theme="dark"] .main-content .row-actions .icon-button,html[data-theme="dark"] .main-content .order-view-button,html[data-theme="dark"] .main-content button[aria-label*="Lihat"],html[data-theme="dark"] .main-content button[title*="Lihat"]{border:1px solid #2c424c!important;background:#161b22!important;color:#afc9d3!important}
+html[data-theme="dark"] .main-content .order-delete-request-button,html[data-theme="dark"] .main-content .expense-delete-request{border:1px solid #672b23!important;background:#33110d!important;color:#d0928d!important}
+html[data-theme="dark"] .main-content .order-delete-request-button:hover,html[data-theme="dark"] .main-content .expense-delete-request:hover{background:#37140e!important;border-color:#863f36!important;color:#d89b96!important}
+html[data-theme="dark"] .orders-table td small{color:#a5b3b8!important}
+html[data-theme="dark"] .orders-table .order-delete-request-button{border:1px solid #672b23!important;background:#31120c!important;color:#d0928d!important;color:#d0928d!important;border:1px solid #672b23!important;background:#31120c!important}
+html[data-theme="dark"] .orders-table .order-view-button{border:1px solid #2d3f47!important;background:#161b22!important;color:#afc9d3!important}
+html[data-theme="dark"] .employee-attendance-rule-box{border:1px solid #2b424c!important;background:#11232c!important}
+html[data-theme="dark"] .employee-attendance-rule-box>header{color:#a9cada!important}
+html[data-theme="dark"] .attendance-required-badge{background:#182f23!important;color:#afe3d1!important;border:1px solid #2f5441!important}
+html[data-theme="dark"] .attendance-exempt-badge{background:#0d1c33!important;color:#9cb9d7!important;border:1px solid #213b54!important}
+html[data-theme="dark"] .attendance-access-notice{border:1px solid #93732d!important;background:#35290d!important;color:#decba9!important}
+html[data-theme="dark"] .attendance-exempt-card{color:#adc8d3!important}
+html[data-theme="dark"] .attendance-exempt-card span{color:#a3b2b8!important}
+html[data-theme="dark"] .closing-recap-card>header,html[data-theme="dark"] .closing-form-card>header{color:#accbd8!important}
+html[data-theme="dark"] .closing-recap-row{border-bottom:1px solid #243136!important}
+html[data-theme="dark"] .closing-recap-row.closing-expected{border:1px solid #2f5260!important;background:#11292e!important}
+html[data-theme="dark"] .closing-recap-row.closing-expected strong{color:#a7ccdb!important}
+html[data-theme="dark"] .closing-difference{border:1px solid #2a3b41!important}
+html[data-theme="dark"] .closing-difference.is-match{background:#142e20!important;color:#b1dbca!important}
+html[data-theme="dark"] .closing-difference.is-different{background:#33220d!important;color:#ddc2a0!important}
+html[data-theme="dark"] .closing-locked-note{background:#172429!important;color:#abbac0!important}
+html[data-theme="dark"] .proof-production-note{background:#192429!important;color:#a7b3b8!important}
+html[data-theme="dark"] .cash-period-buttons button{border:1px solid #2e4652!important;background:#161b22!important;color:#adc8d3!important}
+html[data-theme="dark"] .cash-period-dates label{color:#abbac0!important}
+html[data-theme="dark"] .owner-business-kpis>div{border:1px solid #263941!important;background:#132329!important}
+html[data-theme="dark"] .owner-business-kpis span,html[data-theme="dark"] .owner-payment-breakdown span{color:#a3afb4!important}
+html[data-theme="dark"] .owner-business-kpis strong{color:#b7d0db!important}
+html[data-theme="dark"] .owner-business-kpis .profit-positive{background:#142d21!important;border-color:#2c533f!important}
+html[data-theme="dark"] .owner-business-kpis .profit-positive strong{color:#addcca!important}
+html[data-theme="dark"] .owner-business-kpis .profit-negative{background:#310f0c!important;border-color:#512722!important}
+html[data-theme="dark"] .owner-business-kpis .profit-negative strong{color:#c99b96!important}
+html[data-theme="dark"] .owner-payment-breakdown>div{background:#16242a!important;color:#a8c8d6!important}
+html[data-theme="dark"] .owner-payment-breakdown b{color:#b7ced8!important}
+html[data-theme="dark"] .safety-snapshot-heading p{color:#a4b1b6!important}
+html[data-theme="dark"] .safety-snapshot-warning{background:#152d22!important;color:#b0d4c6!important}
+html[data-theme="dark"] .restore-confirm-box{border:1px solid #5b2d26!important;background:#31130c!important}
+html[data-theme="dark"] .restore-confirm-title{color:#caa19c!important}
+html[data-theme="dark"] .restore-confirm-title span{color:#b4aba9!important}
+html[data-theme="dark"] .restore-confirm-box p{color:#bdb5b3!important}
+html[data-theme="dark"] .restore-confirm-box label strong{background:#38160e!important;color:#cd958f!important}
+html[data-theme="dark"] .production-lock-panel{border:1px solid #3d5e4f!important;background:#15291f!important}
+html[data-theme="dark"] .production-lock-icon{background:#193126!important;color:#acdbc9!important}
+html[data-theme="dark"] .production-lock-copy h2{color:#bee4db!important}
+html[data-theme="dark"] .production-lock-copy p{color:#acb8b4!important}
+html[data-theme="dark"] .production-lock-copy small{color:#97a6bd!important}
+html[data-theme="dark"] .production-lock-status{background:#172f23!important;color:#afd5c8!important}
+html[data-theme="dark"] .partial-reset-all-locked{border:1px solid #3a4649!important;background:#1c2326!important;color:#a3aaae!important}
+html[data-theme="dark"] .reset-snapshot-note{background:#172d23!important;color:#afd6c7!important}
+html[data-theme="dark"] .payroll-detail-summary>div{border:1px solid #263942!important;background:#12212b!important}
+html[data-theme="dark"] .payroll-detail-summary span{color:#a4b1b7!important}
+html[data-theme="dark"] .payroll-detail-summary b{color:#bddae5!important}
+html[data-theme="dark"] .payroll-detail-head small{color:#a2aeb3!important}
+html[data-theme="dark"] .payroll-commission-detail-wrap{border:1px solid #25373d!important}
+html[data-theme="dark"] .payroll-commission-detail th{background:#192823!important}
+html[data-theme="dark"] .payroll-payment-status.unpaid{background:#320c0f!important;color:#d98ea1!important;border:1px solid #52141c!important}
+html[data-theme="dark"] .payroll-payment-status.partial{background:#33220d!important;color:#daa58f!important;border:1px solid #6b461b!important}
+html[data-theme="dark"] .payroll-payment-status.paid{background:#0d3422!important;color:#b1e5d6!important;border:1px solid #1f734c!important}
+html[data-theme="dark"] .payroll-payment-status.nil{background:#17212a!important;color:#a1aab6!important;border:1px solid #34404e!important}
+html[data-theme="dark"] .payroll-outstanding{color:#dcb496!important}
+html[data-theme="dark"] .payroll-paid{color:#b1e5d6!important}
+html[data-theme="dark"] .payroll-pay-button{border-color:#1f734c!important;background:#0d3422!important;color:#b1e5d6!important}
+html[data-theme="dark"] .payroll-payment-card>div{border:1px solid #243a45!important;background:#12212b!important}
+html[data-theme="dark"] .payroll-payment-card span{color:#9facb4!important}
+html[data-theme="dark"] .payroll-payment-card b{color:#b9d4e5!important}
+html[data-theme="dark"] .daily-order-alert-summary>div{border:1px solid #2e3f3a!important;background:#182521!important}
+html[data-theme="dark"] .daily-order-alert-summary span{color:#a7b4b5!important}
+html[data-theme="dark"] .daily-order-alert-summary b{color:#bcd8dc!important}
+html[data-theme="dark"] .daily-order-alert-summary>div.danger{background:#320c0c!important;border-color:#532222!important}
+html[data-theme="dark"] .daily-order-alert-summary>div.danger b{color:#d18c8c!important}
+html[data-theme="dark"] .daily-order-alert-summary>div.warning{background:#362a0d!important;border-color:#715d25!important}
+html[data-theme="dark"] .daily-order-alert-summary>div.warning b{color:#e0c9a1!important}
+html[data-theme="dark"] .daily-order-alert-summary>div.info{background:#0d2233!important;border-color:#233f54!important}
+html[data-theme="dark"] .daily-order-alert-summary>div.info b{color:#99c0da!important}
+html[data-theme="dark"] .daily-order-alert-note{background:#1b2523!important;color:#aab7b8!important}
+html[data-theme="dark"] .daily-order-alert-list{border:1px solid #2b3a36!important}
+html[data-theme="dark"] .daily-order-alert-list article{border-bottom:1px solid #252f2d!important;background:#161b22!important}
+html[data-theme="dark"] .daily-order-alert-list b{color:#bcd8dc!important}
+html[data-theme="dark"] .daily-order-alert-list span{color:#aebec1!important}
+html[data-theme="dark"] .daily-order-alert-more,html[data-theme="dark"] .daily-order-alert-empty{color:#a7b4b6!important;background:#1a2421!important}
+html[data-theme="dark"] .order-correction-history{border:1px solid var(--border,#2b3940)!important;background:#152327!important}
+html[data-theme="dark"] .order-correction-history-title span{color:#c0dbe8!important}
+html[data-theme="dark"] .order-correction-history-title b{color:#a8b6be!important}
+html[data-theme="dark"] .order-correction-history-empty{color:#a2adb2!important}
+html[data-theme="dark"] .order-correction-history-item{background:#161b22!important;border:1px solid #27343a!important}
+html[data-theme="dark"] .order-correction-history-item span{color:#a4b1b7!important}
+html[data-theme="dark"] .order-correction-history-item b{color:#c0dbe8!important}
+html[data-theme="dark"] .order-correction-history-meta{border-bottom:1px dashed #2d393f!important}
+html[data-theme="dark"] .app-fallback-error{background:#151e27!important}
+html[data-theme="dark"] .app-fallback-error>div{background:#161b22!important;border:1px solid #242e3b!important}
+html[data-theme="dark"] .app-fallback-error p{color:#b3bbc6!important}
+html[data-theme="dark"] .app-fallback-error small{color:#a1aab6!important}
+html[data-theme="dark"] .cashier-service-select{border:1px solid #29495e!important;background:#161b22!important;color:#bad4e4!important}
+html[data-theme="dark"] .cashier-service-select small{color:#9baab5!important}
+html[data-theme="dark"] .cashier-service-select:hover{background:#0c2230!important;border-color:#306d97!important}
+html[data-theme="dark"] .service-picker-modal>header{background:#161b22!important}
+html[data-theme="dark"] .service-picker-toolbar{background:#161b22!important}
+html[data-theme="dark"] .service-picker-search{border:1px solid #29495e!important;background:#161b22!important;color:#9babb6!important}
+html[data-theme="dark"] .service-picker-search input{color:#bad4e4!important}
+html[data-theme="dark"] .service-picker-option{border:1px solid #1d384a!important;background:#161b22!important}
+html[data-theme="dark"] .service-picker-option:hover,html[data-theme="dark"] .service-picker-option:focus{background:#0c2132!important;border-color:#2f6b94!important}
+html[data-theme="dark"] .service-picker-option b{color:#b9d5e5!important}
+html[data-theme="dark"] .service-picker-option strong{color:#93bddb!important}
+html[data-theme="dark"] .service-picker-empty{border:1px dashed #2c4453!important}
+html[data-theme="dark"] .cashier-due-after-service{color:#bad0d2!important}
+html[data-theme="dark"] .cashier-due-after-service input{border:1px solid #3e5851!important;background:#161b22!important}
+html[data-theme="dark"] .production-mode-toggle.is-quick{border-color:#3d7861!important;background:#10311f!important;color:#ade4cd!important}
+html[data-theme="dark"] .production-stale-banner{border:1px solid #723f24!important;background:#331f0d!important;color:#e0b5a1!important}
+html[data-theme="dark"] .production-stale-banner span{color:#c3aca1!important}
+html[data-theme="dark"] .production-stale-note{background:#351d0d!important;color:#dcab96!important}
+html[data-theme="dark"] .production-last-update{color:#a5b2b3!important}
+@media(max-width:700px){
+html[data-theme="dark"] .order-mobile-card{border:1px solid #273c46!important;background:#161b22!important}
+html[data-theme="dark"] .order-mobile-card.is-overdue{border-color:#714323!important;background:linear-gradient(180deg,#301e0c,#161b22)!important}
+html[data-theme="dark"] .order-mobile-card-head{border-bottom:1px solid #213036!important}
+html[data-theme="dark"] .order-mobile-card-head strong{color:#b7d5e7!important}
+html[data-theme="dark"] .order-mobile-card-head span:not(.badge){color:#bcd6e4!important}
+html[data-theme="dark"] .order-mobile-card-head small{color:#9fabb1!important}
+html[data-theme="dark"] .order-mobile-service{background:#12242b!important}
+html[data-theme="dark"] .order-mobile-service>b{color:#bcd6e4!important}
+html[data-theme="dark"] .order-mobile-money>div{border:1px solid #26363c!important}
+html[data-theme="dark"] .order-mobile-money strong{color:#bbd7e5!important}
+html[data-theme="dark"] .order-mobile-meta b{color:#b6d0db!important}
+html[data-theme="dark"] .order-mobile-meta .overdue-text{color:#dbb292!important}
+html[data-theme="dark"] .order-mobile-detail{background:#0d2133!important;color:#92b8db!important;border:1px solid #204a6c!important}
+html[data-theme="dark"] .order-mobile-empty{border:1px dashed #2f444e!important;background:#132329!important}
+}
+html[data-theme="dark"] .owner-chart-legend{color:#a8b9c2!important}
+html[data-theme="dark"] .legend-net::before{background:#376439!important}
+html[data-theme="dark"] .owner-bar-order-value{fill:#83add6!important}
+html[data-theme="dark"] .owner-bar-cash-in{fill:#92d8d1!important}
+html[data-theme="dark"] .owner-order-count-text{fill:#ddc198!important}
+html[data-theme="dark"] .owner-chart-labels>div{background:#12212b!important}
+html[data-theme="dark"] .owner-chart-labels b{color:#a7c1d3!important}
+html[data-theme="dark"] .owner-chart-labels span{color:#a0aeb7!important}
+html[data-theme="dark"] .owner-chart-labels strong{color:#ddc198!important}
+html[data-theme="dark"] .payroll-deduction{color:#dcb496!important}
+html[data-theme="dark"] .cash-advance-button{border-color:#a27929!important;color:#e1c8a5!important;background:#32260d!important}
+html[data-theme="dark"] .my-payroll-toolbar label{color:#a7c1d3!important}
+html[data-theme="dark"] .my-payroll-grid>div{border:1px solid #233942!important;background:#10222a!important}
+html[data-theme="dark"] .my-payroll-grid span{color:#a0adb3!important}
+html[data-theme="dark"] .my-payroll-grid b{color:#bad5e6!important}
+html[data-theme="dark"] .my-payroll-grid .emphasis{background:#172c28!important;border-color:#2c5249!important}
+html[data-theme="dark"] .my-payroll-grid .deduction{background:#33240d!important;border-color:#73551e!important}
+html[data-theme="dark"] .my-payroll-grid .deduction b{color:#dcb496!important}
+html[data-theme="dark"] .info-box{background:#0d2233!important;border:1px solid #1a3b51!important;color:#a7c1d3!important}
+html[data-theme="dark"] .payroll-total.negative,html[data-theme="dark"] .payroll-negative,html[data-theme="dark"] .my-payroll-grid .negative b{color:#d58282!important}
+html[data-theme="dark"] .payroll-payment-status.debt{background:#320c0f!important;color:#da9590!important;border:1px solid #541515!important}
+html[data-theme="dark"] .cash-advance-status.active{background:#0d3422!important;color:#b1e5d6!important;border:1px solid #1f734c!important}
+html[data-theme="dark"] .cash-advance-status.cancelled{background:#17212a!important;color:#a1aab6!important;border:1px solid #34404e!important}
+html[data-theme="dark"] .danger-soft{background:#300c0c!important;border-color:#541515!important;color:#da9590!important}
+html[data-theme="dark"] .category-revenue-button:hover{background:#0c1e30!important}
+html[data-theme="dark"] .category-detail-summary>div{background:#182521!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-revenue-row.category-revenue-button{border:1px solid #2b3f38!important;background:#161b22!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-revenue-row.category-revenue-button:hover{background:#152723!important;border-color:#3c5f53!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-rank{background:#0d2235!important;color:#8cb5d9!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-revenue-name b{color:#c6e9e4!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-revenue-name small{background:#0d1e32!important;color:#8eb4d9!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-progress{background:#1a272f!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-revenue-row strong{color:#c3ebe5!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-percent{background:#0d1f35!important;color:#93b8db!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-card-row{border:1px solid #213543!important;background:#161b22!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-card-row:hover{border-color:#2e6385!important;background:#0c1e30!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-card-rank{background:#0f2432!important;color:#91beda!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-card-rank.rank-1{background:#3e3310!important;color:#dfcb9f!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-card-info b{color:#accde3!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-card-stat strong{color:#accde3!important}
+html[data-theme="dark"] .dashboard-category-revenue .category-card-percent strong{background:#0d1f35!important;color:#93b8db!important}
+@media(max-width:850px){
+html[data-theme="dark"] .dashboard-category-revenue .category-card-stat{border-top:1px solid #1d2b32!important}
+}
+html[data-theme="dark"] .dashboard-overdue-card{border:1px solid var(--border-color,#1f3446)!important;background:var(--card-bg,#161b22)!important}
+html[data-theme="dark"] .dashboard-overdue-card.has-overdue{border-color:#9d6d27!important;background:#32230c!important}
+html[data-theme="dark"] .dashboard-overdue-card span{color:#abbcc7!important}
+html[data-theme="dark"] .dashboard-overdue-card strong{color:#bddbe7!important}
+html[data-theme="dark"] .dashboard-overdue-card small{color:#a1b0b8!important}
+html[data-theme="dark"] .dashboard-stats .dashboard-overdue-shortcut.has-overdue .stat-card{border-color:#9d6d27!important;background:#32230c!important}
+html[data-theme="dark"] .dashboard-stats .dashboard-overdue-shortcut.has-overdue .stat-icon{background:#3b2b0f!important;color:#ddbb98!important}
+html[data-theme="dark"] .dashboard-stats .dashboard-overdue-shortcut.has-overdue .stat-card strong{color:#ddbb98!important}
+html[data-theme="dark"] .dashboard-stats > .dashboard-overdue-stat-card.has-overdue{border-color:#9d6d27!important;background:#32230c!important}
+html[data-theme="dark"] .dashboard-stats > .dashboard-overdue-stat-card.has-overdue .stat-icon{background:#3b2b0f!important;color:#ddbb98!important}
+html[data-theme="dark"] .dashboard-stats > .dashboard-overdue-stat-card.has-overdue strong{color:#ddbb98!important}
+@media(min-width:701px){
+html[data-theme="dark"] .orders-table thead th{background:#192b25!important}
+}
+html[data-theme="dark"] .assignment-find-bar{border:1px solid #273e36!important;background:#152723!important}
+html[data-theme="dark"] .assignment-find-bar>span{color:#abb9c1!important}
+html[data-theme="dark"] .assignment-find-bar button{border:1px solid #2f433e!important;background:#161b22!important;color:#bad1da!important}
+html[data-theme="dark"] .assignment-find-bar button b{background:#1b2a24!important}
+html[data-theme="dark"] .assignment-find-bar button.is-active{border-color:#b67a30!important;background:#34240d!important;color:#e1c6a4!important}
+html[data-theme="dark"] .assignment-find-bar .assignment-clear{color:#b0cad3!important}
+html[data-theme="dark"] .order-assignment-mini-warning span,html[data-theme="dark"] .order-assignment-warning span{background:#382a0e!important;border:1px solid #956c25!important;color:#e1c8a5!important}
+html[data-theme="dark"] .pl-quick-periods button{border:1px solid #2f433e!important;background:#161b22!important;color:#b0cad3!important}
+html[data-theme="dark"] .pl-quick-periods button.is-active{background:#182d26!important;border-color:#4a8475!important;color:#b1e5da!important}
+html[data-theme="dark"] .pl-custom-period label{color:#a5b2b8!important}
+html[data-theme="dark"] .pl-row{border-bottom:1px solid #23302c!important}
+html[data-theme="dark"] .pl-row span{color:#b3c4cc!important}
+html[data-theme="dark"] .pl-row b{color:#c1dbe4!important}
+html[data-theme="dark"] .pl-info-row b{color:#a6b8bf!important}
+html[data-theme="dark"] .pl-total-row{border-top:1px solid #2c423b!important}
+html[data-theme="dark"] .pl-summary-card{background:linear-gradient(180deg,#102a22,#15291f)!important}
+html[data-theme="dark"] .pl-grand-total{border:1px solid #355f53!important;background:#172e27!important}
+html[data-theme="dark"] .pl-grand-total span,html[data-theme="dark"] .pl-grand-total b{color:#b4e6dc!important}
+html[data-theme="dark"] .pl-margin{border-top:1px dashed #374d46!important}
+html[data-theme="dark"] .pl-margin span{color:#a5b2b8!important}
+html[data-theme="dark"] .pl-margin strong{color:#c1dbe4!important}
+html[data-theme="dark"] .pl-note{border:1px solid #2d3f39!important;background:#152723!important;color:#a5b2b8!important}
+html[data-theme="dark"] .pl-detail-list>div{border-bottom:1px solid #23302c!important}
+html[data-theme="dark"] .pl-detail-list>div span{color:#b0c1c7!important}
+html[data-theme="dark"] .pl-detail-list>div b{color:#c1dbe4!important}
+html[data-theme="dark"] .pl-calc-list .is-total{border-top:2px solid #334c45!important}
+html[data-theme="dark"] .pl-detail-note{background:#35270d!important;color:#e0c6a2!important}
+html[data-theme="dark"] .pl-reserve-total{border-top:1px dashed #31423d!important;color:#decca8!important}
+html[data-theme="dark"] .pl-reserve-total b{color:#dec79d!important}
+html[data-theme="dark"] .pl-final-total{border:1px solid #3c6055!important;background:#182a23!important}
+html[data-theme="dark"] .pl-final-total span,html[data-theme="dark"] .pl-final-total b{color:#b6e6de!important}
+html[data-theme="dark"] .pl-reserve-intro{color:#a5b1b7!important}
+html[data-theme="dark"] .pl-reserve-setting{border:1px solid #2a3d38!important;background:#102a22!important}
+html[data-theme="dark"] .pl-reserve-toggle b{color:#b8d3dc!important}
+html[data-theme="dark"] .pl-reserve-fields label{color:#a4b0b5!important}
+html[data-theme="dark"] .pl-reserve-breakdown-card{background:linear-gradient(180deg,#2f250c,#32250c)!important;border-color:#635022!important}
+html[data-theme="dark"] .pl-reserve-breakdown-card .panel-heading h3{color:#e2d1ae!important}
+html[data-theme="dark"] .pl-reserve-breakdown-card .pl-row b{color:#e0cba3!important}
+html[data-theme="dark"] .pl-reserve-grand-total{border-top:2px solid #78622a!important}
+html[data-theme="dark"] .pl-reserve-grand-total span,html[data-theme="dark"] .pl-reserve-grand-total b{color:#e2d1ae!important}
+html[data-theme="dark"] .commission-team-toggle{border:1px solid #334a43!important;background:#172623!important;color:#b7dad1!important}
+html[data-theme="dark"] .commission-team-picker{border:1px solid #2d3f39!important;background:#102a22!important}
+html[data-theme="dark"] .commission-team-picker>b{color:#b9d2d9!important}
+html[data-theme="dark"] .commission-team-picker>label{background:#161b22!important}
+html[data-theme="dark"] .commission-team-picker>label:hover{background:#192922!important}
+html[data-theme="dark"] .commission-team-picker label>span{color:#b3ccd3!important}
+html[data-theme="dark"] .dashboard-attention-center{border:1px solid #2c423b!important;background:#152723!important}
+html[data-theme="dark"] .dashboard-attention-center.has-issues{border-color:#7b5f25!important;background:#32260d!important}
+html[data-theme="dark"] .dashboard-attention-center.is-clear{border-color:#2f4e43!important;background:#15291f!important}
+html[data-theme="dark"] .dashboard-attention-icon{background:#1a2b25!important;color:#b1d6ce!important}
+html[data-theme="dark"] .dashboard-attention-center.has-issues .dashboard-attention-icon{background:#3c2d0f!important;color:#ddc29a!important}
+html[data-theme="dark"] .dashboard-attention-copy b{color:#b9d4dc!important}
+html[data-theme="dark"] .dashboard-attention-summary>span{border:1px solid #2a3732!important;background:#161b22!important;color:#a6b2b8!important}
+html[data-theme="dark"] .dashboard-attention-summary b{color:#b9d1d9!important}
+html[data-theme="dark"] .attention-modal-summary>div{border:1px solid #2a3d38!important;background:#152723!important}
+html[data-theme="dark"] .attention-modal-summary span{color:#a2aeb4!important}
+html[data-theme="dark"] .attention-modal-summary b{color:#b9d4dc!important}
+html[data-theme="dark"] .attention-issue-list>button{border:1px solid #2a3935!important;background:#161b22!important}
+html[data-theme="dark"] .attention-issue-list>button.has-count{border-color:#785e28!important;background:#32230c!important}
+html[data-theme="dark"] .attention-issue-icon{background:#1a2a24!important;color:#b3d7cf!important}
+html[data-theme="dark"] .attention-issue-list .has-count .attention-issue-icon{background:#3b2b0f!important;color:#dec49d!important}
+html[data-theme="dark"] .attention-issue-list button>span:nth-child(2)>b{color:#b7ced6!important}
+html[data-theme="dark"] .attention-issue-list button>strong{background:#1b2925!important;color:#b3cad1!important}
+html[data-theme="dark"] .attention-issue-list .has-count>strong{background:#6e4f1b!important}
+html[data-theme="dark"] .order-extra-charge-line{border:1px solid #6f5724!important;background:#32260d!important}
+html[data-theme="dark"] .order-extra-charge-line>span>b{color:#e3d0ab!important}
+html[data-theme="dark"] .order-extra-charge-line small{color:#b7afa0!important}
+html[data-theme="dark"] .order-extra-charge-line>b{color:#e3d0ab!important}
+html[data-theme="dark"] .order-extra-charge-button{border-color:#977a2f!important;background:#32260d!important;color:#e1cca5!important}
+html[data-theme="dark"] .payroll-list-fixed-head{background:#161b22!important}
+html[data-theme="dark"] .payroll-list-scroll{border:1px solid #27353b!important}
+html[data-theme="dark"] .payroll-list-scroll .payroll-table thead th{background:#192823!important}
+html[data-theme="dark"] .finance-hub-intro{border:1px solid #243b45!important;background:#11232c!important}
+html[data-theme="dark"] .finance-hub-intro b{color:#b8dae4!important}
+html[data-theme="dark"] .finance-hub-intro span{color:#a2afb4!important}
+html[data-theme="dark"] .finance-hub-section h2{color:#b8dae4!important}
+html[data-theme="dark"] .finance-hub-card{border:1px solid #273c45!important;background:#161b22!important}
+html[data-theme="dark"] .finance-hub-card:hover{border-color:#2a5a7a!important}
+html[data-theme="dark"] .finance-hub-icon{background:#0d2434!important;color:#83add6!important}
+html[data-theme="dark"] .finance-hub-copy b{color:#b8dae4!important}
+html[data-theme="dark"] .finance-hub-arrow{color:#82b2d5!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(1){background:linear-gradient(135deg,#0d2534,#0e2938)!important;border-color:#163e57!important;background:linear-gradient(135deg,#0d2435,#0e2539)!important;border-color:#193e5b!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(2){background:linear-gradient(135deg,#0d2834,#0e2736)!important;border-color:#193f54!important;background:linear-gradient(135deg,#0d2233,#0e2438)!important;border-color:#1c3951!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(3){background:linear-gradient(135deg,#0d1e32,#0d2035)!important;border-color:#17324c!important;background:linear-gradient(135deg,#190d34,#1d0e39)!important;border-color:#2a1554!important}
+html[data-theme="dark"] .dashboard-stats>.dashboard-overdue-stat-card{background:linear-gradient(135deg,#35240d,#39260e)!important;border-color:#7e581f!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(5){background:linear-gradient(135deg,#113127,#153429)!important;border-color:#285243!important;background:linear-gradient(135deg,#14301d,#173524)!important;border-color:#2d533a!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(6){background:linear-gradient(135deg,#12321e,#153621)!important;border-color:#2a563a!important;background:linear-gradient(135deg,#15312e,#1a3533)!important;border-color:#305551!important}
+html[data-theme="dark"] .dashboard-stats>.dashboard-click-stat .stat-card{background:linear-gradient(135deg,#35290d,#403310)!important;border-color:#765b1e!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(8){background:linear-gradient(135deg,#160d34,#1c0e39)!important;border-color:#2a1556!important;background:linear-gradient(135deg,#0d2735,#0f2a39)!important;border-color:#1f4456!important}
+html[data-theme="dark"] .owner-business-kpis>div:nth-child(1){background:linear-gradient(135deg,#0d2333,#0e2638)!important}
+html[data-theme="dark"] .owner-business-kpis>div:nth-child(2){background:linear-gradient(135deg,#11311e,#143621)!important}
+html[data-theme="dark"] .owner-business-kpis>div:nth-child(3){background:linear-gradient(135deg,#320d0d,#370e0e)!important}
+html[data-theme="dark"] .owner-business-kpis>div:nth-child(4){background:linear-gradient(135deg,#180d33,#1b0e39)!important}
+html[data-theme="dark"] .owner-business-kpis>div:nth-child(5){background:linear-gradient(135deg,#123220,#163623)!important}
+html[data-theme="dark"] .owner-business-kpis>div:nth-child(6){background:linear-gradient(135deg,#362b0d,#413310)!important}
+html[data-theme="dark"] .finance-live-kpi{background:#161b22!important}
+html[data-theme="dark"] .finance-live-kpi small{color:#adc0c7!important}
+html[data-theme="dark"] .finance-live-kpi b{color:#bdd9e5!important}
+html[data-theme="dark"] .finance-kpi-icon{background:rgba(22,27,34,0.72)!important}
+html[data-theme="dark"] .finance-live-kpi.tone-blue{background:linear-gradient(135deg,#0d2636,#0f293b)!important;border-color:#163e5a!important}
+html[data-theme="dark"] .tone-blue .finance-kpi-icon{color:#83add6!important}
+html[data-theme="dark"] .finance-live-kpi.tone-green{background:linear-gradient(135deg,#12331f,#163823)!important;border-color:#2a573b!important}
+html[data-theme="dark"] .tone-green .finance-kpi-icon{color:#93dbb2!important}
+html[data-theme="dark"] .finance-live-kpi.tone-red{background:linear-gradient(135deg,#320d0d,#380e0e)!important;border-color:#571616!important}
+html[data-theme="dark"] .finance-live-kpi.tone-purple{background:linear-gradient(135deg,#190d34,#1d0f3b)!important;border-color:#291555!important}
+html[data-theme="dark"] .finance-live-kpi.tone-amber{background:linear-gradient(135deg,#382d0e,#453611)!important;border-color:#856721!important}
+html[data-theme="dark"] .tone-amber .finance-kpi-icon{color:#d8bb8a!important}
+html[data-theme="dark"] .finance-main-chart-card,html[data-theme="dark"] .finance-status-card,html[data-theme="dark"] .finance-payment-status-card,html[data-theme="dark"] .finance-payment-method-card{border-color:#223642!important}
+html[data-theme="dark"] .finance-analytics-heading h3{color:#bcdae7!important}
+html[data-theme="dark"] .finance-analytics-heading button{color:#88b3d7!important}
+html[data-theme="dark"] .finance-period-pill{border:1px solid #233e50!important;background:#0d2133!important}
+html[data-theme="dark"] .finance-chart-legend{color:#a8b7be!important}
+html[data-theme="dark"] .legend-omzet:before{background:#1e4d78!important}
+html[data-theme="dark"] .legend-orders:before{background:#39246f!important}
+html[data-theme="dark"] .finance-grid-line{stroke:#22363f!important}
+html[data-theme="dark"] .finance-bar-cash{fill:#81d0b7!important}
+html[data-theme="dark"] .finance-order-line{stroke:#5c3ab3!important}
+html[data-theme="dark"] .finance-order-point{stroke:#161b22!important}
+html[data-theme="dark"] .finance-chart-labels b{color:#acbcc3!important}
+html[data-theme="dark"] .finance-status-icon{background:#0d2234!important}
+html[data-theme="dark"] .finance-status-copy>b{color:#b4c9d0!important}
+html[data-theme="dark"] .finance-status-copy>span{background:#1a252b!important}
+html[data-theme="dark"] .finance-status-copy i{background:#1d4d74!important}
+html[data-theme="dark"] .finance-status-row>strong{color:#bad3dc!important}
+html[data-theme="dark"] .finance-status-row.status-washing .finance-status-icon{background:#0d2336!important;color:#85b2d6!important}
+html[data-theme="dark"] .finance-status-row.status-drying .finance-status-icon{background:#392b0e!important;color:#d7bb87!important}
+html[data-theme="dark"] .finance-status-row.status-ironing .finance-status-icon{background:#180d35!important}
+html[data-theme="dark"] .finance-status-row.status-ironing i{background:#321f65!important}
+html[data-theme="dark"] .finance-status-row.status-packing .finance-status-icon{background:#350d14!important}
+html[data-theme="dark"] .finance-status-row.status-packing i{background:#6c1b27!important}
+html[data-theme="dark"] .finance-status-row.status-ready .finance-status-icon{background:#392d0e!important;color:#d8be8b!important}
+html[data-theme="dark"] .finance-status-row.status-completed .finance-status-icon{background:#14331f!important;color:#93dbb2!important}
+html[data-theme="dark"] .finance-payment-status b{color:#b4c9d0!important}
+html[data-theme="dark"] .finance-payment-status>span{background:#1a252b!important}
+html[data-theme="dark"] .payment-unpaid i{background:#6a1b22!important}
+html[data-theme="dark"] .payment-partial strong{color:#d8bd8b!important}
+html[data-theme="dark"] .payment-partial i{background:#7c5b1f!important}
+html[data-theme="dark"] .payment-paid strong{color:#99ddb6!important}
+html[data-theme="dark"] .finance-method-icon{background:#15311f!important;color:#92dab1!important}
+html[data-theme="dark"] .finance-method-row:nth-child(2) .finance-method-icon{background:#190d36!important}
+html[data-theme="dark"] .finance-method-row:nth-child(3) .finance-method-icon{background:#0d2336!important;color:#84b1d5!important}
+html[data-theme="dark"] .finance-method-row b{color:#b6cad1!important}
+html[data-theme="dark"] .finance-method-row small{color:#9eabb1!important}
+html[data-theme="dark"] .finance-method-bar{background:#1a252b!important}
+html[data-theme="dark"] .finance-method-bar i{background:#1d4c6f!important}
+html[data-theme="dark"] .finance-hub-menu-panel{border:1px solid #223642!important;background:rgba(22,27,34,0.94)!important}
+html[data-theme="dark"] .finance-hub-menu-heading h3{color:#bcdae7!important}
+html[data-theme="dark"] .hub-tone-blue{background:linear-gradient(135deg,#0d2434,#0e2639)!important}
+html[data-theme="dark"] .hub-tone-blue .finance-hub-icon{color:#81aed5!important}
+html[data-theme="dark"] .hub-tone-green{background:linear-gradient(135deg,#14301d,#173523)!important}
+html[data-theme="dark"] .hub-tone-green .finance-hub-icon{color:#92dab1!important}
+html[data-theme="dark"] .hub-tone-cyan{background:linear-gradient(135deg,#103034,#163739)!important}
+html[data-theme="dark"] .hub-tone-cyan .finance-hub-icon{color:#98d6dd!important}
+html[data-theme="dark"] .hub-tone-slate{background:linear-gradient(135deg,#17242b,#1a282f)!important}
+html[data-theme="dark"] .hub-tone-slate .finance-hub-icon{color:#a1b5be!important}
+html[data-theme="dark"] .hub-tone-amber{background:linear-gradient(135deg,#36290d,#403010)!important}
+html[data-theme="dark"] .hub-tone-amber .finance-hub-icon{color:#d8bb89!important}
+html[data-theme="dark"] .hub-tone-teal{background:linear-gradient(135deg,#113531,#183835)!important}
+html[data-theme="dark"] .hub-tone-teal .finance-hub-icon{color:#9cded5!important}
+html[data-theme="dark"] .hub-tone-purple{background:linear-gradient(135deg,#180d33,#1b0e39)!important}
+html[data-theme="dark"] .hub-tone-pink{background:linear-gradient(135deg,#320d19,#380e1d)!important}
+html[data-theme="dark"] .hub-tone-red{background:linear-gradient(135deg,#320d0d,#380e0e)!important}
+html[data-theme="dark"] .hub-tone-violet{background:linear-gradient(135deg,#190d34,#1c0f3b)!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(1) .stat-icon{background:#0f263c!important;color:#83add6!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(2) .stat-icon{background:#0f263b!important;color:#7eaad4!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(3) .stat-icon{background:#1c0f3b!important}
+html[data-theme="dark"] .dashboard-overdue-stat-card{background:linear-gradient(135deg,#37280e,#443211)!important;border-color:#9a7427!important}
+html[data-theme="dark"] .dashboard-overdue-stat-card .stat-icon{background:#493712!important;color:#d8ba8b!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(5) .stat-icon{background:#1a3725!important;color:#98ddb5!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(6) .stat-icon{background:#1e3733!important;color:#9dded6!important}
+html[data-theme="dark"] .dashboard-stats>.dashboard-click-stat>.stat-card{background:linear-gradient(135deg,#320d12,#380e13)!important;border-color:#561e26!important}
+html[data-theme="dark"] .dashboard-stats>.dashboard-click-stat .stat-icon{background:#3b0f16!important}
+html[data-theme="dark"] .dashboard-stats>.stat-card:nth-child(8) .stat-icon{background:#132e3c!important;color:#8fc3d8!important}
+html[data-theme="dark"] .cashier-section+.cashier-section{border-top-color:#22333b!important}
+html[data-theme="dark"] .cashier-section:nth-of-type(1){background:linear-gradient(135deg,#0c1e30,#0d2133)!important}
+html[data-theme="dark"] .cashier-section:nth-of-type(2){background:linear-gradient(135deg,#0c301e,#152e21)!important}
+html[data-theme="dark"] .cashier-section:nth-of-type(4){background:linear-gradient(135deg,#1c0c31,#1c0d36)!important}
+html[data-theme="dark"] thead th{background:#172a2c!important;color:#aec2c9!important}
+html[data-theme="dark"] tbody tr:nth-child(even){background:#0c1d2e!important}
+html[data-theme="dark"] tbody tr:hover{background:#0c1e32!important}
+html[data-theme="dark"] .compact-stats .stat-card:nth-child(1),html[data-theme="dark"] .finance-detail-stats .stat-card:nth-child(1),html[data-theme="dark"] .payroll-stats .stat-card:nth-child(1),html[data-theme="dark"] .receivable-stats .stat-card:nth-child(1),html[data-theme="dark"] .customer-analytics-stats .stat-card:nth-child(1){background:linear-gradient(135deg,#0d2434,#0e2639)!important;border-color:#1a3f59!important}
+html[data-theme="dark"] .compact-stats .stat-card:nth-child(2),html[data-theme="dark"] .finance-detail-stats .stat-card:nth-child(2),html[data-theme="dark"] .payroll-stats .stat-card:nth-child(2),html[data-theme="dark"] .receivable-stats .stat-card:nth-child(2),html[data-theme="dark"] .customer-analytics-stats .stat-card:nth-child(2){background:linear-gradient(135deg,#14301d,#173523)!important;border-color:#2b5239!important}
+html[data-theme="dark"] .compact-stats .stat-card:nth-child(3),html[data-theme="dark"] .finance-detail-stats .stat-card:nth-child(3),html[data-theme="dark"] .payroll-stats .stat-card:nth-child(3),html[data-theme="dark"] .receivable-stats .stat-card:nth-child(3),html[data-theme="dark"] .customer-analytics-stats .stat-card:nth-child(3){background:linear-gradient(135deg,#37290e,#423111)!important;border-color:#7a6025!important}
+html[data-theme="dark"] .compact-stats .stat-card:nth-child(4),html[data-theme="dark"] .finance-detail-stats .stat-card:nth-child(4),html[data-theme="dark"] .payroll-stats .stat-card:nth-child(4),html[data-theme="dark"] .receivable-stats .stat-card:nth-child(4),html[data-theme="dark"] .customer-analytics-stats .stat-card:nth-child(4){background:linear-gradient(135deg,#190d34,#1d0f3b)!important;border-color:#281554!important}
+html[data-theme="dark"] .compact-stats .stat-icon,html[data-theme="dark"] .finance-detail-stats .stat-icon,html[data-theme="dark"] .payroll-stats .stat-icon,html[data-theme="dark"] .receivable-stats .stat-icon{background:rgba(22,27,34,0.72)!important}
+html[data-theme="dark"] .pl-card:nth-child(1){background:linear-gradient(135deg,#0d2535,#0e273a)!important}
+html[data-theme="dark"] .pl-card:nth-child(2){background:linear-gradient(135deg,#320d0d,#380e0e)!important}
+html[data-theme="dark"] .pl-card:nth-child(3){background:linear-gradient(135deg,#170d34,#1b0f3b)!important}
+html[data-theme="dark"] .pl-card:nth-child(4){background:linear-gradient(135deg,#12321d,#173622)!important}
+html[data-theme="dark"] .pl-card:nth-child(5){background:linear-gradient(135deg,#36280e,#412f10)!important}
+html[data-theme="dark"] .production-cards>:nth-child(6n+1){background:linear-gradient(180deg,#0d2133,#0c1b2f)!important;border-color:#1c3951!important}
+html[data-theme="dark"] .production-cards>:nth-child(6n+2){background:linear-gradient(180deg,#0d2c35,#0c2730)!important;border-color:#1e4c58!important}
+html[data-theme="dark"] .production-cards>:nth-child(6n+3){background:linear-gradient(180deg,#362a0e,#30260c)!important;border-color:#785e23!important}
+html[data-theme="dark"] .production-cards>:nth-child(6n+4){background:linear-gradient(180deg,#1a0d33,#180c2f)!important;border-color:#2a1556!important}
+html[data-theme="dark"] .production-cards>:nth-child(6n+5){background:linear-gradient(180deg,#351b0d,#30190c)!important;border-color:#5e3521!important}
+html[data-theme="dark"] .production-cards>:nth-child(6n){background:linear-gradient(180deg,#14301b,#122b17)!important;border-color:#2d5037!important}
+html[data-theme="dark"] .customer-value-card:nth-child(3n+1),html[data-theme="dark"] .settings-card:nth-child(3n+1),html[data-theme="dark"] .report-card:nth-child(3n+1){background:linear-gradient(135deg,#0d2333,#0e2437)!important}
+html[data-theme="dark"] .customer-value-card:nth-child(3n+2),html[data-theme="dark"] .settings-card:nth-child(3n+2),html[data-theme="dark"] .report-card:nth-child(3n+2){background:linear-gradient(135deg,#142f1c,#173220)!important}
+html[data-theme="dark"] .customer-value-card:nth-child(3n),html[data-theme="dark"] .settings-card:nth-child(3n),html[data-theme="dark"] .report-card:nth-child(3n){background:linear-gradient(135deg,#35280d,#3f2f10)!important}
+html[data-theme="dark"] h1,html[data-theme="dark"] h2,html[data-theme="dark"] h3,html[data-theme="dark"] h4{color:#bddae5!important}
+html[data-theme="dark"] .finance-hub-period-panel{background:linear-gradient(135deg,#0c1d2e,#0e2432)!important;background:#161b22!important}
+html[data-theme="dark"] .finance-hub-period-left>b{color:#afc7d0!important}
+html[data-theme="dark"] .finance-hub-quick-periods button{border:1px solid #2b414e!important;background:#161b22!important;color:#afc6d0!important}
+html[data-theme="dark"] .finance-hub-custom-period label{color:#acbec4!important}
+html[data-theme="dark"] .finance-hub-custom-period input{border:1px solid #2b414e!important;background:#161b22!important;color:#b7d1db!important}
+html[data-theme="dark"] .finance-hub-current-period{background:#0d2235!important;color:#91bad8!important}
+html[data-theme="dark"] .finance-income-list-toolbar,html[data-theme="dark"] .finance-expense-list-toolbar{background:#161b22!important}
+html[data-theme="dark"] .finance-income-list-scroll,html[data-theme="dark"] .finance-expense-list-scroll{border:1px solid #27353b!important}
+html[data-theme="dark"] .finance-income-list-table thead th,html[data-theme="dark"] .finance-expense-list-table thead th{background:#172a2c!important}
+html[data-theme="dark"] .finance-live-kpi.tone-cyan{background:linear-gradient(135deg,#103135,#153538)!important;border-color:#275257!important}
+html[data-theme="dark"] .finance-live-kpi.tone-cyan .finance-kpi-icon{color:#97d6dc!important}
+html[data-theme="dark"] .drawer-menu-button{border:1px solid #213747!important;background:#0e2131!important;color:#8cb4d9!important}
+html[data-theme="dark"] .drawer-menu-button:hover{background:#102534!important}
+html[data-theme="dark"] .drawer-close-button{border:1px solid rgba(22,27,34,0.2)!important;background:rgba(22,27,34,0.1)!important}
+html[data-theme="dark"] .drawer-close-button:hover{background:rgba(22,27,34,0.18)!important}
+html[data-theme="dark"] .page-heading{background:rgba(12,32,49,0.97)!important;border-bottom:1px solid #223845!important}
+html[data-theme="dark"] .finance-hub-period-title{color:#afc8d3!important}
+html[data-theme="dark"] .topbar-branding h1{color:#b8d7e4!important;color:#b8d7e4!important}
+html[data-theme="dark"] .pl-accounting-note{background:#11232e!important;color:#a4b2b8!important}
+html[data-theme="dark"] .pl-cash-position-card{border-color:#2d4c3e!important}
+html[data-theme="dark"] .pl-cash-surplus-row{background:#152d20!important;border-top:1px solid #2a493a!important}
+html[data-theme="dark"] .pl-cash-surplus-row span{color:#b9d3c9!important}
+html[data-theme="dark"] .pl-cash-surplus-row b{color:#b0e5d2!important}
+html[data-theme="dark"] .pl-summary-divider{background:#1c2a31!important}
+html[data-theme="dark"] .finance-cash-advance-summary>div{border:1px solid #2e403b!important;background:#152723!important}
+html[data-theme="dark"] .finance-cash-advance-table{border:1px solid #2a3b36!important}
+html[data-theme="dark"] .finance-cash-advance-footnote{background:#13232d!important;color:#a4b2b8!important}
+html[data-theme="dark"] .expense-edit-button{border:1px solid #3e6c5c!important;background:#122e24!important;color:#b1e5d6!important}
+html[data-theme="dark"] .expense-edit-button:hover{background:#163227!important}
+html[data-theme="dark"] .expense-edit-note{border:1px solid #2c4c3f!important;background:#142a21!important}
+html[data-theme="dark"] .expense-edit-note span{color:#aab8b4!important}
+html[data-theme="dark"] .attendance-gps-summary>div{border:1px solid #2c433a!important;background:#17261f!important}
+html[data-theme="dark"] .attendance-gps-summary span{color:#aab8b4!important}
+html[data-theme="dark"] .cash-report-toolbar input:not([type=checkbox]){border:1px solid #3a4e48!important}
+html[data-theme="dark"] .cash-report-stats>div{border:1px solid #2f443b!important}
+html[data-theme="dark"] .cash-report-stats span,html[data-theme="dark"] .cash-report-note{color:#aab8b4!important}
+html[data-theme="dark"] .cash-advance-employee-link{color:#9cc5de!important}
+html[data-theme="dark"] .cash-advance-employee-link:hover{color:#adcee4!important}
+html[data-theme="dark"] .cash-advance-limit{border:1px solid #2f443b!important}
+html[data-theme="dark"] .cash-advance-over{color:#da9590!important}
+html[data-theme="dark"] .attendance-history-counts>div{border:1px solid #263942!important}
+html[data-theme="dark"] .attendance-history-scroll thead th{background:#182c28!important}
+html[data-theme="dark"] .my-payroll-simulation{border:1px solid #2e4042!important}
+html[data-theme="dark"] .dashboard-month-picker select{border:1px solid #355660!important;background:#161b22!important;color:#b9d9e2!important}
+html[data-theme="dark"] .dashboard-month-picker>span{color:#a5b7bc!important}
+html[data-theme="dark"] body .main-content .regular-report-page .finance-kpi-content small{color:#b6d1dc!important}
+html[data-theme="dark"] body .main-content .regular-report-page .finance-kpi-content em{color:#a1afb8!important}
+html[data-theme="dark"] body .main-content .regular-report-page .finance-hub-quick-periods button{border:1px solid #163757!important;background:#0d2033!important;color:#98bddd!important}
+html[data-theme="dark"] body .main-content .regular-report-page .finance-hub-custom-period input,html[data-theme="dark"] body .main-content .regular-report-page .finance-hub-month-selects select{border:1px solid #163757!important;background:#161b22!important;color:#b6d1dc!important}
+html[data-theme="dark"] body .main-content .regular-report-page .finance-hub-current-period{background:#0d2234!important;color:#91bada!important}
+html[data-theme="dark"] .cash-correction-request-summary>div{border:1px solid #263844!important}
+html[data-theme="dark"][data-ui="professional"]{--hl-pro-bg:#141e2a!important;--hl-pro-surface:#161b22!important;--hl-pro-text:#c0d0de!important;--hl-pro-muted:#a2acb8!important;--hl-pro-border:#253241!important;--hl-pro-soft:#0d1c33!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .topbar{background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .status-chip{background:#172d23!important;color:#ace3cd!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .sidebar nav a.active{background:#0d1f35!important;color:#94b6db!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .main-content .page-heading .eyebrow{color:#98c1d8!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .main-content .page-back-button{background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) .secondary-button{background:#161b22!important;color:#a6c4da!important;border:1px solid #2c3e51!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) .secondary-button:hover:not(:disabled){background:#0e1e32!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) .search-box{border:1px solid #2e3f51!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) th{background:#14212d!important;color:#a7b4c1!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) td{border-color:#1e2a38!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) tbody tr:hover{background:#0c1930!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) .error-box{border:1px solid #582228!important;color:#d5939b!important;background:#310c0f!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.app-shell,.modal-backdrop) .warning-box{border:1px solid #765d25!important;color:#e1cda6!important;background:#33270d!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .modal-card{border:1px solid #243543!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .modal-card>header{background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body :is(.modal-backdrop,.app-shell) .icon-button{background:#151f2c!important;color:#afc3d3!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .form-actions{border-top:1px solid #1e2a38!important}
+html[data-theme="dark"][data-ui="professional"] body .login-page .login-card{background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell :is(.revenue-period-tabs,.cashier-category-tabs,.payroll-tabs) button{border:1px solid #25374a!important;color:#a6c4da!important;background:#161b22!important}
+html[data-theme="dark"] .receivable-period-controls :is(input,select){border:1px solid #293f4d!important;background:#161b22!important}
+html[data-theme="dark"] .receivable-period-note{color:#a2b2b7!important}
+html[data-theme="dark"] .owner-receivable-period{border:1px solid #253e4a!important;background:#0f232e!important}
+html[data-theme="dark"] .owner-receivable-period small{color:#a2b2b7!important}
+html[data-theme="dark"] .badge.receivable-payment-unpaid{background:#320d0f!important;color:#d4919b!important}
+html[data-theme="dark"] .badge.receivable-payment-partial{background:#3a2d0f!important;color:#e0caa3!important}
+html[data-theme="dark"] .cash-notice-bell{border:1px solid #273f50!important;background:#161b22!important;color:#9fc6df!important}
+html[data-theme="dark"] .cash-notice-item{border:1px solid #243a4d!important;background:#0c1c30!important;color:#bbd3dc!important}
+html[data-theme="dark"] .cash-notice-item small{color:#a2b1b7!important}
+html[data-theme="dark"] .cash-request-highlight td{background:#0d2236!important}
+html[data-theme="dark"] .cash-notice-item.notice-unread{background:#0d2034!important;border-color:#295b88!important}
+html[data-theme="dark"] .dashboard-display-toggle{border:1px solid #355660!important;background:#161b22!important;color:#a5c3e1!important}
+html[data-theme="dark"] .dashboard-display-toggle:hover{background:#0f2332!important}
+html[data-theme="dark"] .dashboard-attention-center .dashboard-attention-summary>span.att-debt{background:#380e11!important;border-color:#501d22!important;color:#dc969d!important}
+html[data-theme="dark"] .dashboard-attention-center .dashboard-attention-summary>span.att-late{background:#3f2c10!important;border-color:#72551f!important;color:#e3c9ab!important}
+html[data-theme="dark"] .dashboard-attention-center .dashboard-attention-summary>span.att-ready{background:#173524!important;border-color:#295239!important;color:#b4e6cd!important}
+html[data-theme="dark"] .dashboard-attention-center .dashboard-attention-summary>span.att-assign{background:#1e262a!important;border-color:#333e44!important;color:#bacad1!important}
+@media(max-width:900px){
+html[data-theme="dark"][data-ui="professional"] body .app-shell .mobile-bottom-nav{background:#161b22!important;border-top:1px solid #253842!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .mobile-bottom-nav>a,html[data-theme="dark"][data-ui="professional"] body .app-shell .mobile-bottom-nav>button{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .mobile-bottom-nav>a.active{background:#0d2136!important;color:#a5c3e1!important}
+}
+@media(max-width:700px){
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-tabs{border:1px solid #2a404c!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-tabs button{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-tabs button.active{background:#0f243a!important;color:#a5c3e1!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-tabs button span{background:#1a242a!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-tabs button.active span{background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-card-chips .chip-late{background:#3f2c10!important;color:#e3c9ab!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-card-chips .chip-stale{background:#1b1035!important;color:#a496d3!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .production-card-chips .chip-due{background:#1e262a!important;color:#bacad1!important}
+}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-business-kpis>div>span,html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-business-kpis>button>span{color:#b3bbc6!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-business-kpis>div>strong,html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-business-kpis>button>strong{color:#c7deea!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-business-kpis>div.profit-positive>strong{color:#a7e2bd!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-business-kpis>div.profit-negative>strong{color:#d98c8c!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-business-kpis>button>small{color:#b3bbc6!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-payment-breakdown>div>span{color:#b3bbc6!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-payment-breakdown>div>b{color:#c7deea!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact td small{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-negative{color:#d98c8c!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-expand-button{color:#96bcdc!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-row>td{background:#13232a!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-detail-grid>div>span{color:#9dabb2!important}
+@media(max-width:700px){
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact tr.payroll-main-row{border:1px solid #193552!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-gross{background:#0d2233!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-sisa{background:#19281e!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .pr-label{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact .payroll-expand-toggle{border:1px solid #2a404c!important;background:#161b22!important;color:#96bcdc!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .payroll-list-scroll .payroll-table-compact tr.payroll-detail-row{border:1px solid #253842!important;background:#13232a!important}
+}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .manager-share-settings .manager-share-summary{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .manager-share-settings .manager-share-summary b{color:#c7deea!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .manager-share-settings .manager-share-negative{color:#d98c8c!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .manager-share-settings .manager-share-note{background:#320c0f!important;color:#de9bae!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .manager-share-settings .manager-share-metrics span{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-kasbon-notes{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-kasbon-notes>summary{color:#96bcdc!important}
+@media(max-width:700px){
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-grid .data-panel .table-wrap tr{border-bottom:1px solid #20323c!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-grid .data-panel .table-wrap td:nth-child(1){color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-grid .data-panel .table-wrap td:nth-child(3){color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-cash-advance-table tr{border:1px solid #193552!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-cash-advance-table td::before{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-cash-advance-table td[data-label="Total Sisa Kasbon"]{background:#19281e!important}
+}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .pl-card .pl-total-row,html[data-theme="dark"][data-ui="professional"] body .app-shell .pl-card .pl-reserve-grand-total{border-top:1px solid #556a75!important}
+html[data-theme="dark"][data-ui="professional"] body .payroll-detail-summary{border:1px solid #263942!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .payroll-detail-summary>div{border-bottom:1px solid #1f3039!important}
+html[data-theme="dark"][data-ui="professional"] body .payroll-detail-summary span{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .payroll-detail-summary b{color:#c7deea!important}
+html[data-theme="dark"][data-ui="professional"] body .payroll-detail-summary small{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .payroll-detail-summary>div:nth-child(9),html[data-theme="dark"][data-ui="professional"] body .payroll-detail-summary>div:nth-child(13){border-top:1px solid #556a75!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list tr{border-bottom:1px solid #1f3039!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Nominal"]::before,html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Sisa"]::before,html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Nilai order"]::before,html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list td[data-label="Persen"]::before{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list .table-empty{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-kasbon td[data-label="Tanggal"]{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-kasbon td.pl-note-cell{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-bayar td[data-label="Tanggal"]{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-bayar td.pl-note-cell{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(3){color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(4){color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(2){color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-komisi td:nth-child(6){color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-kasbon tr.pl-selectable:hover{background:#0e2330!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-kasbon tr.is-selected{background:#0d2136!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .pl-list-kasbon .pl-radio{border:2px solid #556a75!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .cash-advance-action-bar{border:1px solid #193552!important;background:#13232a!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .cash-advance-action-info{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions{background:#161b22!important;border-top:1px solid #1f3039!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact td small{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-overdue-mini{color:#d98c8c!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-button{border:1px solid #2a404c!important;background:#161b22!important;color:#96bcdc!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-more-button{border:1px solid #2a404c!important;background:#161b22!important;color:#c7dde6!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-expand-toggle{color:#96bcdc!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact tr.order-detail-row>td{background:#13232a!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-desktop-table .orders-table-compact .order-detail-grid>div>span{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .order-correction-history{border:1px solid #263942!important;background:#13232a!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .order-correction-history-title span{color:#c7dde6!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .order-correction-history-title b{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .order-correction-history-empty{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .order-detail-actions{border-top:1px solid #1f3039!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-card .payroll-detail-summary~.modal-actions>.modal-actions-selection{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .cash-advance-hint{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .employee-finance-note b{color:#a0c6df!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .employee-finance-note span{color:#abbbc2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .finance-cash-advance-heading p{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell #additional-cash-advance-requests td small{color:#9dabb2!important}
+@media(max-width:700px){
+html[data-theme="dark"][data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody tr{border:1px solid #263942!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell #additional-cash-advance-requests tbody td::before{color:#9dabb2!important}
+}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .order-filter-field>span{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-panel .order-filter-toolbar .record-count{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-panel .assignment-find-bar{border-top:1px solid #1f3039!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-panel .assignment-find-bar>span{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .dashboard-month-picker>span{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-chart-labels{border:1px solid #1f3039!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .owner-chart-labels>div{border-top:1px solid #1f2a31!important;background:#161b22!important}
+@media(min-width:601px){
+html[data-theme="dark"][data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card span{color:#b3bbc6!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card strong,html[data-theme="dark"][data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card .dashboard-money-value{color:#c7deea!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .main-content section.dashboard-stats article.stat-card.dashboard-overdue-stat-card.has-overdue strong{color:#dcb496!important}
+}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-card-head span{color:#c4d6df!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-card-head small{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-service>b{color:#bacad2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-money{border-top:1px solid #1f3039!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-money strong{color:#c7deea!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-money small{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-meta span{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .order-mobile-card .order-mobile-expand{color:#96bcdc!important}
+@media(max-width:700px){
+html[data-theme="dark"][data-ui="professional"] body .app-shell .cashier-layout .cashier-form .cashier-master-sync{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .app-shell .cashier-layout .cashier-form label>small{color:#9dabb2!important}
+}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-counts span{color:#b3bbc6!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-counts b{color:#c7deea!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-bar{border:1px solid #2a404c!important;background:#0c2132!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-info{color:#bacad2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main td small{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr:hover{background:#0c2132!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr.is-picked{background:#0e2035!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main .pl-radio{border:2px solid #556a75!important}
+@media(max-width:700px){
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr{border:1px solid #253842!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody tr.is-picked{background:#0e2035!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(4)::before{color:#9dabb2!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tbody td:nth-child(5)::before{color:#9dabb2!important}
+}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main .pl-check{border:2px solid #556a75!important;background:#161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-history-main tr.is-picked .pl-check::after{border:solid #161b22!important}
+html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls .attendance-select-missing,html[data-theme="dark"][data-ui="professional"] body .modal-backdrop .attendance-history-modal .attendance-correct-controls .secondary-button:not(.attendance-apply){background:#161b22!important;color:#96bcdc!important;border-color:#2a404c!important}
+
+/* ===== Dasar tema gelap (tulisan tangan; menang atas hasil generator) ===== */
+html[data-theme="dark"]{color-scheme:dark;--hl-pro-bg:#0f1722;--hl-pro-surface:#172131;--hl-pro-text:#e6edf6;--hl-pro-muted:#93a4ba;--hl-pro-border:#2a3a52;--hl-pro-soft:#1d2a3d;--text:#e6edf6;--muted:#93a4ba;--border:#2a3a52;--hl-text:#e6edf6;--hl-muted:#93a4ba;--hl-border:#2a3a52}
+html[data-theme="dark"] body,html[data-theme="dark"] body .app-shell,html[data-theme="dark"] body .main-content{background:#0f1722!important;color:#e6edf6!important}
+html[data-theme="dark"] body .topbar,html[data-theme="dark"] body .sidebar,html[data-theme="dark"] body .bottom-nav,html[data-theme="dark"] body .mobile-bottom-nav{background:#131c2b!important;border-color:#2a3a52!important;color:#e6edf6!important}
+html[data-theme="dark"] body .data-panel,html[data-theme="dark"] body .stat-card,html[data-theme="dark"] body .modal-card,html[data-theme="dark"] body .production-card,html[data-theme="dark"] body .production-column,html[data-theme="dark"] body .cashier-form,html[data-theme="dark"] body .cashier-summary{background:#172131!important;border-color:#2a3a52!important;color:#e6edf6!important}
+html[data-theme="dark"] body input,html[data-theme="dark"] body select,html[data-theme="dark"] body textarea{background:#101a28!important;color:#e6edf6!important;border-color:#2f4260!important}
+html[data-theme="dark"] body input::placeholder,html[data-theme="dark"] body textarea::placeholder{color:#6f829c!important}
+html[data-theme="dark"] body table th{background:#1d2a3d!important;color:#aebdd1!important;border-color:#2a3a52!important}
+html[data-theme="dark"] body table td{border-color:#2a3a52!important;color:#e6edf6!important}
+html[data-theme="dark"] body .secondary-button,html[data-theme="dark"] body .icon-button{background:#1d2a3d!important;color:#e6edf6!important;border-color:#2f4260!important}
+html[data-theme="dark"] body h1,html[data-theme="dark"] body h2,html[data-theme="dark"] body h3,html[data-theme="dark"] body h4,html[data-theme="dark"] body strong{color:#f1f5fb!important}
+html[data-theme="dark"] body .modal-backdrop{background:rgba(3,8,15,.72)!important}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center}

@@ -7,8 +7,11 @@ import{AppErrorBoundary}from'./components/AppErrorBoundary'
 import'./styles/global.css'
 import'./styles/regularReports.css'
 import'./styles/professional.css'
+import'./styles/dark.css'
+import{applyTheme,getThemeMode}from'./lib/theme'
 
 document.documentElement.dataset.ui='professional'
+applyTheme(getThemeMode())
 
 const savedDensity=localStorage.getItem('happylaundry-density')||'compact'
 document.documentElement.dataset.density=savedDensity

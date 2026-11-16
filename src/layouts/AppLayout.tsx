@@ -8,6 +8,7 @@ import { useAuth } from '../lib/auth'
 import { canAccess, type PermissionKey } from '../lib/permissions'
 import { PWAInstallButton } from '../components/PWAInstallButton'
 import { Modal } from '../components/Modal'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { formatIDR } from '../lib/format'
 import type { OrderRow } from '../types/order'
 import { supabase } from '../lib/supabase'
@@ -502,7 +503,7 @@ export function AppLayout() {
             <h1>HappyLaundry</h1>
             <span>Sistem Operasional Laundry</span>
           </div>
-          <div className="topbar-actions"><CashAdvanceNotifications/><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
+          <div className="topbar-actions"><ThemeToggle/><CashAdvanceNotifications/><PWAInstallButton/><div className={`status-chip ${online?'':'offline'}`}>● {online?'Online':'Offline'}</div></div>
         </header>
         <div className="page-container">
           {role==='employee'&&attendanceNotice&&<div className="attendance-access-notice">{attendanceNotice}</div>}
