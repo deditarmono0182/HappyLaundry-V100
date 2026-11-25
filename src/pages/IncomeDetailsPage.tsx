@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CreditCard, Eye, FileSpreadsheet, FileText, Search, TrendingUp, WalletCards } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { StatCard } from '../components/StatCard'
 import { formatRupiah } from '../lib/format'
 import { downloadXls, printPdf } from '../lib/exportData'
+import {readDashboardPages} from '../lib/dashboardPages'
+import {addBusinessDays,businessDateKey,businessMonthKey,businessDateTimeLabel} from '../lib/businessTime'
 import { supabase } from '../lib/supabase'
-import { businessDateKey, businessMonthStartKey } from '../lib/businessTime'
 
 interface PaymentRow{
   id:string
@@ -22,6 +23,7 @@ interface OrderRowLite{
   customer_name:string
   total:number
   paid_amount:number
+  created_at:string
 }
 
 export function IncomeDetailsPage(){
@@ -29,49 +31,59 @@ export function IncomeDetailsPage(){
   const [payments,setPayments]=useState<PaymentRow[]>([])
   const [orders,setOrders]=useState<OrderRowLite[]>([])
   const [query,setQuery]=useState('')
-  const [from,setFrom]=useState(()=>businessMonthStartKey())
+  const [from,setFrom]=useState(()=>businessMonthKey()+'-01')
   const [to,setTo]=useState(()=>businessDateKey())
+  const [origin,setOrigin]=useState('all')
   const [loading,setLoading]=useState(true)
   const [message,setMessage]=useState('')
+  const sequence=useRef(0)
 
   const load=useCallback(async()=>{
-    setLoading(true);setMessage('')
-    const [p,o]=await Promise.all([
-      supabase.from('v100_payments')
+    const seq=++sequence.current
+    setLoading(true);setMessage('');setPayments([]);setOrders([])
+    try{
+      if(!from||!to||from>to)throw new Error('Pilih rentang tanggal pembayaran yang benar.')
+      const p=await readDashboardPages(()=>supabase.from('v100_payments')
         .select('id,order_id,amount,method,created_at')
-        .gte('created_at',`${from}T00:00:00`)
-        .lte('created_at',`${to}T23:59:59.999`)
-        .order('created_at',{ascending:false}),
-      supabase.from('v100_orders_view')
-        .select('id,order_no,customer_name,total,paid_amount')
-    ])
-    const error=p.error||o.error
-    if(error)setMessage(error.message)
-    else{
-      setPayments((p.data as PaymentRow[])||[])
-      setOrders((o.data as OrderRowLite[])||[])
-    }
-    setLoading(false)
+        .gte('created_at',from+'T00:00:00+07:00')
+        .lt('created_at',addBusinessDays(to,1)+'T00:00:00+07:00')
+        .order('created_at',{ascending:false}).order('id',{ascending:false}))
+      if(p.error)throw new Error(p.error.message)
+      const rows=(p.data||[]) as PaymentRow[]
+      const ids=Array.from(new Set(rows.map(p=>p.order_id))),all:OrderRowLite[]=[]
+      for(let i=0;i<ids.length;i+=100){
+        const o=await readDashboardPages(()=>supabase.from('v100_orders_view')
+          .select('id,order_no,customer_name,total,paid_amount,created_at').in('id',ids.slice(i,i+100)).order('id',{ascending:true}))
+        if(o.error)throw new Error(o.error.message)
+        all.push(...(o.data||[]) as OrderRowLite[])
+      }
+      if(rows.some(p=>!all.some(o=>o.id===p.order_id)))throw new Error('Data nota belum lengkap. Muat ulang untuk menghitung total yang benar.')
+      if(seq===sequence.current){setPayments(rows);setOrders(all)}
+    }catch(e){if(seq===sequence.current)setMessage(e instanceof Error?e.message:String(e))}
+    finally{if(seq===sequence.current)setLoading(false)}
   },[from,to])
 
-  useEffect(()=>{void load()},[load])
+  useEffect(()=>{void load();return()=>{++sequence.current}},[load])
 
   const orderMap=useMemo(()=>new Map(orders.map(o=>[o.id,o])),[orders])
 
   const filtered=useMemo(()=>{
     const key=query.toLowerCase().trim()
-    if(!key)return payments
     return payments.filter(p=>{
       const o=orderMap.get(p.order_id)
+      const month=o?businessMonthKey(o.created_at):''
+      if(origin==='old'&&(!month||month>=from.slice(0,7)))return false
+      if(origin==='period'&&month!==from.slice(0,7))return false
       return `${o?.order_no||''} ${o?.customer_name||''} ${p.method||''}`.toLowerCase().includes(key)
     })
-  },[payments,query,orderMap])
+  },[payments,query,orderMap,origin,from])
 
   const exportRows=useMemo(()=>filtered.map(p=>{
     const o=orderMap.get(p.order_id)
     return[
-      new Date(p.created_at).toLocaleString('id-ID'),
+      businessDateTimeLabel(p.created_at),
       o?.order_no||'-',
+      o?businessDateTimeLabel(o.created_at):'-',
       o?.customer_name||'-',
       (p.method||'lainnya').toUpperCase(),
       Number(p.amount||0)
@@ -81,8 +93,8 @@ export function IncomeDetailsPage(){
   const exportOptions=()=>({
     title:'Daftar Pemasukan',
     filename:`pemasukan-${from}-${to}`,
-    subtitle:`Periode ${from} s/d ${to}`,
-    headers:['Tanggal','Order','Pelanggan','Metode','Nominal'],
+    subtitle:`Pembayaran ${from} s/d ${to} • ${origin==='old'?'Nota bulan sebelumnya':origin==='period'?'Nota bulan '+from.slice(0,7):'Semua nota'}`,
+    headers:['Tanggal Bayar (WIB)','Order','Tanggal Nota (WIB)','Pelanggan','Metode','Nominal'],
     rows:exportRows,
     summary:[
       ['Jumlah Pembayaran',filtered.length],
@@ -90,8 +102,8 @@ export function IncomeDetailsPage(){
     ] as Array<[string,string|number]>
   })
 
-  const total=payments.reduce((sum,p)=>sum+Number(p.amount||0),0)
-  const avg=payments.length?total/payments.length:0
+  const total=filtered.reduce((sum,p)=>sum+Number(p.amount||0),0)
+  const avg=filtered.length?total/filtered.length:0
 
   return <>
     <PageHeader
@@ -99,21 +111,24 @@ export function IncomeDetailsPage(){
       title="Daftar Pemasukan"
       description="Daftar pembayaran order yang benar-benar sudah diterima."
       action={<div className="export-actions">
-        <button className="secondary-button" onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>XLS</button>
-        <button className="secondary-button" onClick={()=>printPdf(exportOptions())}><FileText size={16}/>PDF</button>
+        <button className="secondary-button" disabled={loading||!!message} onClick={()=>downloadXls(exportOptions())}><FileSpreadsheet size={16}/>XLS</button>
+        <button className="secondary-button" disabled={loading||!!message} onClick={()=>printPdf(exportOptions())}><FileText size={16}/>PDF</button>
       </div>}
     />
 
     <section className="panel finance-filter">
       <label>Dari<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label>
       <label>Sampai<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label>
-      <div><span>Periode daftar pemasukan</span></div>
+      <label>Bulan penerimaan<input type="month" value={from.slice(0,7)} onChange={e=>{if(e.target.value){const [y,m]=e.target.value.split('-').map(Number);setFrom(e.target.value+'-01');setTo(businessDateKey(new Date(Date.UTC(y,m,0,5))))}}}/></label>
+      <label>Asal nota<select value={origin} onChange={e=>setOrigin(e.target.value)}><option value="all">Semua nota</option><option value="old">Nota bulan sebelumnya</option><option value="period">Nota bulan penerimaan</option></select></label>
+      <button className="secondary-button" onClick={()=>void load()} disabled={loading}>Muat Ulang</button>
+      <p>Uang diterima pada {from} s/d {to} (WIB). Nota bulan sebelumnya berarti nota dibuat sebelum {from.slice(0,7)}. Termasuk pembayaran sebagian jika ada; nominal dihitung dari uang yang diterima, bukan total harga nota.</p>
     </section>
 
     <section className="stats-grid finance-detail-stats">
-      <StatCard icon={TrendingUp} label="Total Pemasukan" value={formatRupiah(total)} caption={`${payments.length} pembayaran`}/>
-      <StatCard icon={CreditCard} label="Jumlah Pembayaran" value={String(payments.length)} caption="Transaksi pembayaran"/>
-      <StatCard icon={WalletCards} label="Rata-rata Pembayaran" value={formatRupiah(avg)} caption="Rata-rata pembayaran masuk"/>
+      <StatCard icon={TrendingUp} label={origin==='old'?'Kas Masuk Nota Lama':'Total Pemasukan'} value={loading||message?'—':formatRupiah(total)} caption={`${filtered.length} pembayaran sesuai filter`}/>
+      <StatCard icon={CreditCard} label="Jumlah Pembayaran" value={loading||message?'—':String(filtered.length)} caption="Transaksi pembayaran"/>
+      <StatCard icon={WalletCards} label="Rata-rata Pembayaran" value={loading||message?'—':formatRupiah(avg)} caption="Rata-rata pembayaran masuk"/>
     </section>
 
     <section className="panel data-panel finance-income-list-panel">
@@ -124,15 +139,15 @@ export function IncomeDetailsPage(){
       {message&&<div className="error-box inline-message">{message}</div>}
       <div className="table-wrap finance-income-list-scroll">
         <table className="finance-income-list-table">
-          <thead><tr><th>Tanggal</th><th>Order</th><th>Pelanggan</th><th>Metode</th><th>Nominal</th><th>Aksi</th></tr></thead>
+          <thead><tr><th>Tanggal</th><th>Order / Tanggal Nota</th><th>Pelanggan</th><th>Metode</th><th>Nominal</th><th>Aksi</th></tr></thead>
           <tbody>
             {loading&&<tr><td colSpan={6} className="table-empty">Memuat pemasukan...</td></tr>}
             {!loading&&filtered.length===0&&<tr><td colSpan={6} className="table-empty">Belum ada pemasukan di periode ini.</td></tr>}
             {filtered.map(p=>{
               const o=orderMap.get(p.order_id)
               return <tr key={p.id}>
-                <td>{new Date(p.created_at).toLocaleString('id-ID')}</td>
-                <td><b>{o?.order_no||'-'}</b></td>
+                <td>{businessDateTimeLabel(p.created_at)}</td>
+                <td><b>{o?.order_no||'-'}</b><br/><small>{o?businessDateTimeLabel(o.created_at):'-'}</small></td>
                 <td>{o?.customer_name||'-'}</td>
                 <td><span className="badge">{(p.method||'lainnya').toUpperCase()}</span></td>
                 <td><b className="income-amount">{formatRupiah(Number(p.amount))}</b></td>
